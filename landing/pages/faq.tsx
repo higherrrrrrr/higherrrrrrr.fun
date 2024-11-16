@@ -58,7 +58,6 @@ const FAQ: NextPage = () => {
     return (
         <div className="terminal-wrapper">
             <Head>
-                <title>FAQ</title>
                 <meta name="description" content="Frequently Asked Questions" />
             </Head>
 

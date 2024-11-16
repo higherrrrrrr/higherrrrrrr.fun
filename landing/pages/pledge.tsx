@@ -7,7 +7,6 @@ const Pledge: NextPage = () => {
     return (
         <div className="terminal-wrapper">
             <Head>
-                <title>Pledge</title>
                 <meta name="description" content="Pledge your allegiance" />
             </Head>
 
@@ -30,7 +29,7 @@ const Pledge: NextPage = () => {
 
                 <footer className="fixed bottom-0 left-0 right-0 p-4 flex justify-center gap-8">
                     <Link
-                        href="https://twitter.com/higherrrrrrfun"
+                        href="https://twitter.com/higherrrrrrrfun"
                         target="_blank"
                         className="text-green-500 hover:text-green-400 text-sm"
                     >

@@ -32,7 +32,7 @@ const Home: NextPage = () => {
     return (
         <div className="terminal-wrapper">
             <Head>
-                <title>We're going higherrrrrrr</title>
+                <title>Higherrrrrrr</title>
                 <meta name="description" content="A new type of asset that unlocks new forms of onchain expression." />
             </Head>
 
