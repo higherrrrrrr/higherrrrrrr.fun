@@ -21,9 +21,6 @@ const base: Chain = {
         default: { http: ['https://mainnet.base.org'] },
         public: { http: ['https://mainnet.base.org'] },
     },
-    blockExplorers: {
-        default: { name: 'BaseScan', url: 'https://basescan.org' },
-    },
 };
 
 const config = createConfig({

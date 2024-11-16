@@ -23,6 +23,8 @@ export function PledgeContent() {
     const { disconnect } = useDisconnect();
     const { data: signMessageData, error: signError, signMessage } = useSignMessage();
 
+    const isMobile = typeof window !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     useEffect(() => {
         if (signMessageData) {
             const handleSignature = async () => {
@@ -104,13 +106,47 @@ Pledge: https://higherrrrrrr.fun`;
                             <span className="terminal-cursor">▊</span>
                         </h1>
                     </div>
-                    <button
-                        onClick={handleConnect}
-                        disabled={isLoading}
-                        className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50"
-                    >
-                        {isLoading ? 'Connecting...' : 'Connect Wallet to Pledge'}
-                    </button>
+                    <div className="flex flex-col items-center space-y-4">
+                        <button
+                            onClick={handleConnect}
+                            disabled={isLoading}
+                            className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50"
+                        >
+                            {isLoading ? 'Connecting...' : 'Connect Wallet to Pledge'}
+                        </button>
+
+                        {isMobile && (
+                            <div className="flex flex-col items-center space-y-2">
+                                <p className="text-sm opacity-60">Open in wallet:</p>
+                                <div className="flex gap-4">
+                                    <a
+                                        href={`https://metamask.app.link/dapp/higherrrrrrr.fun/pledge`}
+                                        className="text-sm text-green-500 hover:text-green-400 underline"
+                                    >
+                                        MetaMask
+                                    </a>
+                                    <a
+                                        href={`https://go.cb-w.com/dapp?cb_url=https://higherrrrrrr.fun/pledge`}
+                                        className="text-sm text-green-500 hover:text-green-400 underline"
+                                    >
+                                        Coinbase Wallet
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+
+                        <p className="text-sm opacity-60">
+                            Don't have a wallet?{' '}
+                            <a
+                                href="https://www.coinbase.com/wallet"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-green-500 hover:text-green-400 underline"
+                            >
+                                Download Coinbase Wallet
+                            </a>
+                        </p>
+                    </div>
                 </>
             )}
 
