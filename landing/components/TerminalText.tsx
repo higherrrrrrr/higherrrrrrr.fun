@@ -23,7 +23,7 @@ const TerminalText: React.FC<TerminalTextProps> = ({
     const [currentCharIndex, setCurrentCharIndex] = useState(0);
     const [pauseState, setPauseState] = useState({ isPaused: false, duration: 0 });
     const [showLoading, setShowLoading] = useState(true);
-
+    const terminalRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Parse and handle pause tags in the text
@@ -60,6 +60,16 @@ const TerminalText: React.FC<TerminalTextProps> = ({
         }
 
         return segments;
+    }, []);
+
+    const scrollToBottom = useCallback(() => {
+        if (terminalRef.current && window.innerWidth <= 768) { // Only scroll on mobile
+            const scrollHeight = terminalRef.current.scrollHeight;
+            window.scrollTo({
+                top: scrollHeight,
+                behavior: 'smooth'
+            });
+        }
     }, []);
 
     useEffect(() => {
@@ -114,6 +124,7 @@ const TerminalText: React.FC<TerminalTextProps> = ({
                 setCurrentMessageIndex((prev) => prev + 1);
                 setCurrentCharIndex(0);
                 setDisplayText((prev) => prev + '\n\n');
+                scrollToBottom();
             }, currentMessage.pauseAfter || 1000);
 
             return () => {
@@ -124,7 +135,11 @@ const TerminalText: React.FC<TerminalTextProps> = ({
         } else {
             typingTimeoutRef.current = setTimeout(() => {
                 // Output the character at currentCharIndex
-                setDisplayText((prevDisplayText) => prevDisplayText + cleanText[currentCharIndex]);
+                setDisplayText((prevDisplayText) => {
+                    const newText = prevDisplayText + cleanText[currentCharIndex];
+                    setTimeout(scrollToBottom, 0);
+                    return newText;
+                });
 
                 // Increment currentCharIndex
                 setCurrentCharIndex((prevIndex) => {
@@ -154,11 +169,12 @@ const TerminalText: React.FC<TerminalTextProps> = ({
         showLoading,
         processText,
         pauseState.isPaused,
+        scrollToBottom,
     ]);
 
     if (showLoading) {
         return (
-            <div className="terminal">
+            <div className="terminal" ref={terminalRef}>
                 <pre className="terminal-text">
                     Loading...
                     <span className="terminal-cursor" />
@@ -191,7 +207,7 @@ const TerminalText: React.FC<TerminalTextProps> = ({
     };
 
     return (
-        <div className="terminal">
+        <div className="terminal" ref={terminalRef}>
             <pre className="terminal-text">
                 {messages[currentMessageIndex]?.html ? createMarkup() : displayText}
                 <span className="terminal-cursor" />

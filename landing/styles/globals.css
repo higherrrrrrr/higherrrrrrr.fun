@@ -81,6 +81,7 @@ footer a:hover {
     transition: all 0.2s ease;
 }
 
+
 .faq-item h2 {
     @apply text-2xl mb-2;
 }
