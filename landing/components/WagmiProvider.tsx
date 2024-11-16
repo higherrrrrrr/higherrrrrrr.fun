@@ -1,11 +1,10 @@
-// pages/_app.tsx
+// components/WagmiProvider.tsx
 'use client'
 
 import { WagmiConfig, createConfig, Chain } from 'wagmi';
 import { createPublicClient, http } from 'viem';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { injected } from 'wagmi/connectors';
-import '../styles/globals.css';
 
 // Define Base chain
 const base: Chain = {
@@ -21,17 +20,12 @@ const base: Chain = {
         default: { http: ['https://mainnet.base.org'] },
         public: { http: ['https://mainnet.base.org'] },
     },
-    blockExplorers: {
-        default: { name: 'BaseScan', url: 'https://basescan.org' },
-    },
 };
 
 const config = createConfig({
     chains: [base],
     connectors: [
-        injected({
-            shimDisconnect: true,
-        })
+        injected()
     ],
     client: createPublicClient({
         chain: base,
@@ -41,14 +35,12 @@ const config = createConfig({
 
 const queryClient = new QueryClient();
 
-function MyApp({ Component, pageProps }) {
+export function WagmiProvider({ children }: { children: React.ReactNode }) {
     return (
         <WagmiConfig config={config}>
             <QueryClientProvider client={queryClient}>
-                <Component {...pageProps} />
+                {children}
             </QueryClientProvider>
         </WagmiConfig>
     );
 }
-
-export default MyApp;

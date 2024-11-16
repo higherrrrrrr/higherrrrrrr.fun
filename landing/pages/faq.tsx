@@ -12,7 +12,7 @@ const FAQ: NextPage = () => {
     const faqs: FAQItem[] = [
         {
             question: "What is higherrrrrr?",
-            answer: "We are not a company, token, or blockchain. Higherrrrrrr is a religion for the faithful, who believe in the power of memes."
+            answer: "We are not a company, token, or blockchain. Higherrrrrrr is a religion for the faithful, a cult for those who believe in the power of memes."
         },
         {
             question: "Who is behind higherrrrrrr?",
@@ -28,7 +28,7 @@ const FAQ: NextPage = () => {
         },
         {
             question: "Why are you building this?",
-            answer: "Mostly for fun."
+            answer: "For fun."
         },
         {
             question: "I'm a VC, can I invest?",
@@ -41,6 +41,14 @@ const FAQ: NextPage = () => {
         {
             question: "What's up with the name?",
             answer: "It's because we're going much much higherrrrrrr"
+        },
+        {
+            question: "Aren't you a tourist?",
+            answer: "Total. Fucking. Tourist."
+        },
+        {
+            question: "Are you hiring?",
+            answer: "Weirdos, degens, and hot girls can feel free to DM @carlcortright to join our marketing team. No fancy degrees. You will be rewarded for your loyalty"
         },
         {
             question: "Is there a token or airdrop?",

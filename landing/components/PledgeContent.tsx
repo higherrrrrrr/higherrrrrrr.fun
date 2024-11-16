@@ -1,0 +1,124 @@
+// components/PledgeContent.tsx
+'use client'
+
+import { useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi';
+import { recoverMessageAddress } from 'viem';
+
+const PLEDGE_MESSAGE = `I am one of the faithful, a disciple of the cult of memes
+
+We are going much, much higherrrrrr.
+
+A new meta for memes. If you believe, pledge your allegiance.`;
+
+export function PledgeContent() {
+    const recoveredAddress = useRef<string>();
+    const { address, isConnected } = useAccount();
+    const { connect, connectors, error: connectError, isLoading, pendingConnector } = useConnect({
+        onSuccess() {
+            signMessage({ message: PLEDGE_MESSAGE });
+        },
+    });
+    const { disconnect } = useDisconnect();
+    const { data: signMessageData, error: signError, signMessage } = useSignMessage();
+
+    useEffect(() => {
+        if (signMessageData) {
+            const handleSignature = async () => {
+                const recovered = await recoverMessageAddress({
+                    message: PLEDGE_MESSAGE,
+                    signature: signMessageData,
+                });
+                recoveredAddress.current = recovered;
+
+                const tweet1 = `I am one of the faithful, a disciple of the cult of memes
+
+We are going much, much higherrrrrr
+
+Signature: ${signMessageData}
+
+Pledge: https://higherrrrrrr.fun`;
+
+                // Encode and open tweet
+                const encodedTweet1 = encodeURIComponent(tweet1);
+                window.location.href = `https://twitter.com/intent/tweet?text=${encodedTweet1}`;
+            };
+
+            handleSignature();
+        }
+    }, [signMessageData]);
+
+    const handleConnect = async () => {
+        try {
+            const connector = connectors[0];
+            if (connector) {
+                await connect({ connector });
+            }
+        } catch (err) {
+            console.error('Connection error:', err);
+        }
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] space-y-8">
+            {isConnected ? (
+                <>
+                    <div className="flex flex-col items-center space-y-8">
+                        <div className="text-center space-y-4">
+                            <h1 className="text-2xl md:text-3xl terminal-text">
+                                Your wallet is connected
+                                <span className="terminal-cursor">▊</span>
+                            </h1>
+                            <p className="text-lg opacity-80">Click below to sign the pledge and share it</p>
+                            <div className="mt-4">↓</div>
+                        </div>
+
+                        <button
+                            onClick={() => signMessage({ message: PLEDGE_MESSAGE })}
+                            className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors"
+                        >
+                            Sign & Share Pledge
+                        </button>
+
+                        <div className="flex flex-col items-center space-y-2 mt-8">
+                            {address && (
+                                <p className="text-sm opacity-60">
+                                    Connected: {address.slice(0, 6)}...{address.slice(-4)}
+                                </p>
+                            )}
+                            <button
+                                onClick={() => disconnect()}
+                                className="text-sm opacity-60 hover:opacity-100"
+                            >
+                                Disconnect
+                            </button>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="text-center space-y-6 max-w-2xl">
+                        <h1 className="text-2xl md:text-3xl mb-4 terminal-text">
+                            Sign and tweet to pledge
+                            <span className="terminal-cursor">▊</span>
+                        </h1>
+                    </div>
+                    <button
+                        onClick={handleConnect}
+                        disabled={isLoading}
+                        className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50"
+                    >
+                        {isLoading ? 'Connecting...' : 'Connect Wallet to Pledge'}
+                    </button>
+                </>
+            )}
+
+            {(connectError || signError) && (
+                <p className="text-red-500 text-sm">
+                    {connectError?.message || signError?.message}
+                </p>
+            )}
+        </div>
+    );
+}
