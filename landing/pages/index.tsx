@@ -19,7 +19,7 @@ const Home: NextPage = () => {
             pauseAfter: 2000
         },
         {
-            text: "Higherrrrrrr.fun is a platform for a new type of asset.<pause 1> Not tokens.<pause 1> Not NFTs.<pause 1> A new meta that unlocks new forms of onchain expression.",
+            text: "Higherrrrrrr.fun is an exchange for a new type of asset.<pause 1> Not tokens.<pause 1> Not NFTs.<pause 1> A new meta that unlocks new forms of onchain expression.",
             pauseAfter: 3000
         },
         {
@@ -32,7 +32,7 @@ const Home: NextPage = () => {
     return (
         <div className="terminal-wrapper">
             <Head>
-                <title>Higherrrrrrr</title>
+                <title>higherrrrrrr.fun</title>
                 <meta name="description" content="A new type of asset that unlocks new forms of onchain expression." />
             </Head>
 
@@ -42,7 +42,7 @@ const Home: NextPage = () => {
 
             <footer className="fixed bottom-0 left-0 right-0 p-4 flex justify-center gap-8 bg-black">
                 <Link
-                    href="https://twitter.com/higherrrrrrfun"
+                    href="https://twitter.com/higherrrrrrrfun"
                     target="_blank"
                     className="text-green-500 hover:text-green-400 text-sm"
                 >

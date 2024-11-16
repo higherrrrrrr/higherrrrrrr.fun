@@ -66,11 +66,6 @@
     text-shadow: 0 0 2px rgba(74, 222, 128, 0.4);
 }
 
-.terminal-text a:hover, footer a:hover {
-    text-shadow: 0 0 4px rgba(74, 222, 128, 0.6),
-    0 0 8px rgba(74, 222, 128, 0.4);
-}
-
 /* Footer styles */
 footer a {
     opacity: 0.8;
@@ -84,11 +79,6 @@ footer a:hover {
 .faq-item {
     @apply mb-8;
     transition: all 0.2s ease;
-}
-
-.faq-item:hover {
-    text-shadow: 0 0 4px rgba(74, 222, 128, 0.6),
-    0 0 8px rgba(74, 222, 128, 0.4);
 }
 
 .faq-item h2 {

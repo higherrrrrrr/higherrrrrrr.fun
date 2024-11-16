@@ -22,7 +22,7 @@ const FAQ: NextPage = () => {
                     <Link href="https://twitter.com/carlcortright" target="_blank" className="text-green-500 hover:text-green-400 underline">
                         @carlcortright
                     </Link>
-                    {" "}and a bunch of OG crypto friends
+                    {" "}and a bunch of OG crypto and coinbase friends
                 </>
             )
         },
@@ -48,8 +48,9 @@ const FAQ: NextPage = () => {
                 <>
                     The faithful are welcome to{" "}
                     <Link href="/pledge" className="text-green-500 hover:text-green-400 underline">
-                        pledge their allegiance
+                        pledge their allegiance.
                     </Link>
+                    {" "}Our disciples will be rewarded.
                 </>
             )
         }
@@ -58,6 +59,7 @@ const FAQ: NextPage = () => {
     return (
         <div className="terminal-wrapper">
             <Head>
+                <title>higherrrrrrr.fun</title>
                 <meta name="description" content="Frequently Asked Questions" />
             </Head>
 
@@ -83,7 +85,7 @@ const FAQ: NextPage = () => {
 
                 <footer className="fixed bottom-0 left-0 right-0 p-4 flex justify-center gap-8 bg-black">
                     <Link
-                        href="https://twitter.com/higherrrrrrfun"
+                        href="https://twitter.com/higherrrrrrrfun"
                         target="_blank"
                         className="text-green-500 hover:text-green-400 text-sm"
                     >

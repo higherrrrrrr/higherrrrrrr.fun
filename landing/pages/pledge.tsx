@@ -7,6 +7,7 @@ const Pledge: NextPage = () => {
     return (
         <div className="terminal-wrapper">
             <Head>
+                <title>higherrrrrrr.fun</title>
                 <meta name="description" content="Pledge your allegiance" />
             </Head>
 
