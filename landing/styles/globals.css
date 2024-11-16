@@ -1,0 +1,94 @@
+/* styles/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global font override */
+* {
+    font-family: monospace !important;
+}
+
+/* Terminal styles */
+.terminal {
+    @apply text-green-500 p-4 w-full max-w-4xl mx-auto text-xl md:text-2xl lg:text-3xl;
+}
+
+.terminal-wrapper {
+    @apply min-h-screen bg-black flex items-center justify-center p-2;
+    background-color: #000000;
+    background-image: radial-gradient(rgba(0, 30, 0, 0.4) 2px, transparent 0);
+    background-size: 32px 32px;
+    background-position: -16px -16px;
+}
+
+.terminal-container {
+    @apply w-full;
+}
+
+.terminal-text {
+    @apply whitespace-pre-wrap;
+    text-shadow: 0 0 5px rgba(51, 255, 51, 0.3);
+    line-height: 1.6;
+}
+
+.terminal-cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.2em;
+    background-color: #4ade80;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+    margin-left: 4px; /* Increased from 2px */
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.terminal-text a {
+    text-decoration: underline;
+    transition: all 0.2s ease;
+}
+
+.terminal-text a:hover {
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5);
+}
+
+footer a {
+    opacity: 0.7;
+    transition: all 0.2s ease;
+}
+
+footer a:hover {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5);
+}
+
+/* Add to your globals.css */
+.faq-item {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.faq-item:hover {
+    text-shadow: 0 0 5px rgba(51, 255, 51, 0.3);
+}
+
+.faq-item h2 {
+    font-weight: normal;
+}
+
+.faq-item p {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.faq-item p::before {
+    content: ">";
+    position: absolute;
+    left: -1rem;
+    opacity: 0.5;
+}
