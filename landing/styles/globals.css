@@ -1,5 +1,5 @@
 /* styles/globals.css */
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Mono&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,12 +7,20 @@
 
 /* Global font override */
 * {
-    font-family: monospace !important;
+    font-family: 'Pixelify Mono', monospace !important;
+}
+
+/* Common text glow effect */
+.text-glow {
+    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4),
+    0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 /* Terminal styles */
 .terminal {
-    @apply text-green-500 p-4 w-full max-w-4xl mx-auto text-xl md:text-2xl lg:text-3xl;
+    @apply text-green-500 p-4 w-full max-w-4xl mx-auto text-lg md:text-xl lg:text-2xl;
+    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4),
+    0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 .terminal-wrapper {
@@ -24,13 +32,14 @@
 }
 
 .terminal-container {
-    @apply w-full;
+    @apply w-full relative;
 }
 
 .terminal-text {
     @apply whitespace-pre-wrap;
-    text-shadow: 0 0 5px rgba(51, 255, 51, 0.3);
     line-height: 1.6;
+    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4),
+    0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 .terminal-cursor {
@@ -40,7 +49,8 @@
     background-color: #4ade80;
     animation: blink 1s step-end infinite;
     vertical-align: text-bottom;
-    margin-left: 4px; /* Increased from 2px */
+    margin-left: 4px;
+    filter: drop-shadow(0 0 2px rgba(74, 222, 128, 0.4));
 }
 
 @keyframes blink {
@@ -48,47 +58,51 @@
     50% { opacity: 1; }
 }
 
-.terminal-text a {
+/* Link styles */
+.terminal-text a, footer a {
+    @apply text-green-500;
     text-decoration: underline;
     transition: all 0.2s ease;
+    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4);
 }
 
-.terminal-text a:hover {
-    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5);
+.terminal-text a:hover, footer a:hover {
+    text-shadow: 0 0 4px rgba(74, 222, 128, 0.6),
+    0 0 8px rgba(74, 222, 128, 0.4);
 }
 
+/* Footer styles */
 footer a {
-    opacity: 0.7;
-    transition: all 0.2s ease;
+    opacity: 0.8;
 }
 
 footer a:hover {
     opacity: 1;
-    text-shadow: 0 0 8px rgba(51, 255, 51, 0.5);
 }
 
-/* Add to your globals.css */
+/* FAQ styles */
 .faq-item {
-    position: relative;
+    @apply mb-8;
     transition: all 0.2s ease;
 }
 
 .faq-item:hover {
-    text-shadow: 0 0 5px rgba(51, 255, 51, 0.3);
+    text-shadow: 0 0 4px rgba(74, 222, 128, 0.6),
+    0 0 8px rgba(74, 222, 128, 0.4);
 }
 
 .faq-item h2 {
-    font-weight: normal;
+    @apply text-2xl mb-2;
 }
 
 .faq-item p {
+    @apply text-xl opacity-90 ml-6;
     position: relative;
-    padding-left: 1rem;
 }
 
 .faq-item p::before {
     content: ">";
     position: absolute;
     left: -1rem;
-    opacity: 0.5;
+    opacity: 0.7;
 }
