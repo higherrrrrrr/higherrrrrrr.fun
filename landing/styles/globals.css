@@ -77,24 +77,23 @@ footer a:hover {
 
 /* FAQ styles */
 .faq-item {
-    @apply mb-8;
+    @apply mb-6 md:mb-8;
     transition: all 0.2s ease;
 }
 
-
 .faq-item h2 {
-    @apply text-2xl mb-2;
+    @apply text-lg md:text-2xl mb-2;
 }
 
 .faq-item p {
-    @apply text-xl opacity-90 ml-6;
+    @apply text-base md:text-xl opacity-90 ml-4 md:ml-6;
     position: relative;
 }
 
 .faq-item p::before {
     content: ">";
     position: absolute;
-    left: -1rem;
+    left: -0.75rem;
     opacity: 0.7;
 }
 
