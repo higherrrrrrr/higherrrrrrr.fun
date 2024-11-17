@@ -67,7 +67,6 @@ const TerminalText: React.FC<TerminalTextProps> = ({
             const scrollHeight = terminalRef.current.scrollHeight;
             window.scrollTo({
                 top: scrollHeight,
-                behavior: 'smooth'
             });
         }
     }, []);
