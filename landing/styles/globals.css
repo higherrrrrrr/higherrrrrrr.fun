@@ -17,13 +17,17 @@ body {
 
 /* Common text glow effect */
 .text-glow {
-  text-shadow: 0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2);
+  text-shadow:
+    0 0 2px rgba(74, 222, 128, 0.4),
+    0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 /* Terminal styles */
 .terminal {
   @apply text-green-500 p-4 w-full max-w-4xl mx-auto text-lg md:text-xl lg:text-2xl;
-  text-shadow: 0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2);
+  text-shadow:
+    0 0 2px rgba(74, 222, 128, 0.4),
+    0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 .terminal-wrapper {
@@ -41,7 +45,9 @@ body {
 .terminal-text {
   @apply whitespace-pre-wrap;
   line-height: 1.6;
-  text-shadow: 0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2);
+  text-shadow:
+    0 0 2px rgba(74, 222, 128, 0.4),
+    0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 .terminal-cursor {
