@@ -1,3 +1,6 @@
 [submodule "dynamic-meme/lib/forge-std"]
 	path = dynamic-meme/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "dynamic-meme/lib/openzeppelin-contracts-upgradeable"]
+	path = dynamic-meme/lib/openzeppelin-contracts-upgradeable
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
