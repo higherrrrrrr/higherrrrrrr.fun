@@ -49,6 +49,13 @@ const Home: NextPage = () => {
                     Twitter
                 </Link>
                 <Link
+                    href="https://discord.gg/RKrFDw8jRW"
+                    target="_blank"
+                    className="text-green-500 hover:text-green-400 text-sm"
+                >
+                    Discord
+                </Link>
+                <Link
                     href="/faq"
                     className="text-green-500 hover:text-green-400 text-sm"
                 >
