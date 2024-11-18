@@ -143,7 +143,9 @@ export default function Tokens() {
         </div>
 
         <div className="flex gap-x-4">
-          <Button>+ New Coin</Button>
+          <Link href="/new-token">
+            <Button>+ New Coin</Button>
+          </Link>
 
           <ConnectWalletButton />
         </div>
