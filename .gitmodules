@@ -4,3 +4,6 @@
 [submodule "dynamic-meme/lib/openzeppelin-contracts-upgradeable"]
 	path = dynamic-meme/lib/openzeppelin-contracts-upgradeable
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+[submodule "dynamic-meme/lib/openzeppelin-contracts"]
+	path = dynamic-meme/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
