@@ -1,3 +1,5 @@
+import { Button } from "@/components/Button";
+import { TypeAndDelete } from "@/components/TypeAndDelete";
 import {
   differenceInDays,
   differenceInMonths,
@@ -135,9 +137,16 @@ export default function Tokens() {
   return (
     <div className="bg-black min-h-screen w-full text-white font-mono flex flex-col">
       <div className="flex justify-between p-6 items-center">
-        <div className="text-xl font-bold">higherrrrrrr</div>
+        <div className="text-xl font-bold">
+          highe
+          <TypeAndDelete text="rrrrrrrrrrrrrrr" />
+        </div>
 
-        <ConnectWalletButton />
+        <div className="flex gap-x-4">
+          <Button>+ New Coin</Button>
+
+          <ConnectWalletButton />
+        </div>
       </div>
 
       <div className="px-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8">

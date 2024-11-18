@@ -1,23 +1,14 @@
-import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
-import * as React from "react";
-import {
-  Connector,
-  useAccount,
-  useConnect,
-  useDisconnect,
-  useEnsAvatar,
-  useEnsName,
-} from "wagmi";
+import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
+import { Button } from "./Button";
 
 export function ConnectWalletButton() {
   const { connectors, connect, error } = useConnect();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
-  const { data: ensAvatar } = useEnsAvatar({ name: ensName! });
 
-  console.log(error);
   if (address) {
     return (
       <Menu>
@@ -35,7 +26,7 @@ export function ConnectWalletButton() {
           className="bg-black border border-green-600 flex-col p-2 grid grid-cols-[auto_1fr] mt-2 min-w-[200px]"
         >
           <MenuItem>
-            <button
+            <Button
               onClick={() => {
                 disconnect();
                 location.reload();
@@ -43,7 +34,7 @@ export function ConnectWalletButton() {
               className="text-left gap-x-1 grid grid-cols-subgrid col-span-full items-center px-2 hover:bg-green-800 [data-focus]:bg-green-600 text-white"
             >
               Disconnect
-            </button>
+            </Button>
           </MenuItem>
         </MenuItems>
       </Menu>
@@ -52,9 +43,7 @@ export function ConnectWalletButton() {
 
   return (
     <Menu>
-      <MenuButton className="py-2 min-w-[200px] border border-green-600">
-        Connect Wallet
-      </MenuButton>
+      <MenuButton as={Button}>Connect Wallet</MenuButton>
       <MenuItems
         as={motion.div}
         initial={{ opacity: 0, y: 4 }}
@@ -65,7 +54,7 @@ export function ConnectWalletButton() {
       >
         {connectors.map((connector) => (
           <MenuItem key={connector.uid}>
-            <button
+            <Button
               onClick={() => connector.connect()}
               className="text-left gap-x-1 grid grid-cols-subgrid col-span-full items-center px-2 hover:bg-green-800 [data-focus]:bg-green-600"
             >
@@ -81,7 +70,7 @@ export function ConnectWalletButton() {
               <div className="text-white whitespace-nowrap p-2">
                 {connector.name}
               </div>
-            </button>
+            </Button>
           </MenuItem>
         ))}
       </MenuItems>
