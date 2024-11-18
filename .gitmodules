@@ -1,0 +1,3 @@
+[submodule "dynamic-meme/lib/forge-std"]
+	path = dynamic-meme/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
