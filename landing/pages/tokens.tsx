@@ -139,7 +139,9 @@ export default function Tokens() {
       <div className="flex justify-between p-6 items-center">
         <div className="text-xl font-bold">
           highe
-          <TypeAndDelete text="rrrrrrrrrrrrrrr" />
+          <span className="text-green-600">
+            <TypeAndDelete words={["rrrrrrrrrrrrrrr"]} />
+          </span>
         </div>
 
         <div className="flex gap-x-4">

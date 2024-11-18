@@ -1,3 +1,4 @@
+import { TypeAndDelete } from "@/components/TypeAndDelete";
 import { useState } from "react";
 
 export default function NewToken() {
@@ -17,7 +18,8 @@ export default function NewToken() {
     <div className="min-h-screen bg-black p-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-green-500 font-mono text-3xl mb-8">
-          create a new coin
+          create a new{" "}
+          <TypeAndDelete words={["coin", "moment", "generation", "ticker"]} />
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -34,7 +36,9 @@ export default function NewToken() {
 
           {/* Ticker Input */}
           <div>
-            <label className="block font-mono text-gray-400 mb-2">ticker</label>
+            <label className="block font-mono text-gray-400 mb-2">
+              ticker(s)
+            </label>
             <input
               type="text"
               value={formData.ticker}

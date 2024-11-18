@@ -1,46 +1,54 @@
-import { interval } from "date-fns";
 import { useEffect, useState } from "react";
 
-export function TypeAndDelete({ text }: { text: string }) {
+type Props = {
+  words: string[];
+};
+
+const timeBetweenChars = 200;
+
+export function TypeAndDelete({ words }: Props) {
+  const [count, setCount] = useState(0);
+  const [wordIndex, setWordIndex] = useState(0);
   const [charCount, setCharCount] = useState(1);
 
+  let word = words[wordIndex];
+  let textToShow = word.slice(0, charCount);
+
   useEffect(() => {
-    let hasLooped = false;
-    let timeoutDuration = 200;
     let timeoutId: NodeJS.Timeout;
-    let direction = 1;
-
-    function go() {
-      setCharCount((count) => {
-        if (count === text.length) {
-          direction = -1;
-        }
-
-        if (count === 1) {
-          if (hasLooped) {
-            timeoutDuration = 1000;
-          }
-
-          direction = 1;
-          hasLooped = true;
-        }
-
-        return count + direction;
+    function sleep(ms: number) {
+      return new Promise((resolve) => {
+        timeoutId = setTimeout(resolve, ms);
       });
+    }
 
-      timeoutId = setTimeout(() => {
-        go();
-      }, timeoutDuration);
+    async function go() {
+      for (let i = 1; i < word.length; i++) {
+        await sleep(timeBetweenChars);
+        setCharCount(i + 1);
+      }
+
+      for (let i = word.length; i > 1; i--) {
+        await sleep(timeBetweenChars);
+        setCharCount(i - 1);
+      }
+
+      // need this to trigger the useEffect even if the word hasn't changed
+      setCount((count) => count + 1);
+
+      setWordIndex((index) => (index + 1) % words.length);
     }
 
     go();
 
-    return () => clearTimeout(timeoutId);
-  }, [text.length]);
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [word, count]);
 
   return (
-    <span className="text-green-600">
-      {text.slice(0, charCount)}
+    <span>
+      {textToShow}
       <span className="text-white">|</span>
     </span>
   );
