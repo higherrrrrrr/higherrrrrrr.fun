@@ -1,51 +1,32 @@
 // pages/_app.tsx
-'use client'
+"use client";
 
-import { WagmiConfig, createConfig, Chain } from 'wagmi';
-import { createPublicClient, http } from 'viem';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { injected } from 'wagmi/connectors';
-import '../styles/globals.css';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { http } from "viem";
+import { createConfig, WagmiProvider } from "wagmi";
 
-// Define Base chain
-const base: Chain = {
-    id: 8453,
-    name: 'Base',
-    network: 'base',
-    nativeCurrency: {
-        decimals: 18,
-        name: 'Ethereum',
-        symbol: 'ETH',
-    },
-    rpcUrls: {
-        default: { http: ['https://mainnet.base.org'] },
-        public: { http: ['https://mainnet.base.org'] },
-    },
-};
+import "../styles/globals.css";
+
+import { base } from "wagmi/chains";
 
 const config = createConfig({
-    chains: [base],
-    connectors: [
-        injected({
-            shimDisconnect: true,
-        })
-    ],
-    client: createPublicClient({
-        chain: base,
-        transport: http('https://mainnet.base.org')
-    }),
+  chains: [base],
+  transports: {
+    [base.id]: http(),
+  },
+  ssr: true,
 });
 
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }) {
-    return (
-        <WagmiConfig config={config}>
-            <QueryClientProvider client={queryClient}>
-                <Component {...pageProps} />
-            </QueryClientProvider>
-        </WagmiConfig>
-    );
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <Component {...pageProps} />
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
 }
 
 export default MyApp;

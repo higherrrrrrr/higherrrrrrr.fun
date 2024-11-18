@@ -1,125 +1,155 @@
 /* styles/globals.css */
-@import url('https://fonts.googleapis.com/css2?family=Pixelify+Mono&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Pixelify+Mono&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  background: black;
+}
+
 /* Global font override */
 * {
-    font-family: 'Pixelify Mono', monospace !important;
+  font-family: "Pixelify Mono", monospace !important;
 }
 
 /* Common text glow effect */
 .text-glow {
-    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4),
-    0 0 4px rgba(74, 222, 128, 0.2);
+  text-shadow: 0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 /* Terminal styles */
 .terminal {
-    @apply text-green-500 p-4 w-full max-w-4xl mx-auto text-lg md:text-xl lg:text-2xl;
-    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4),
-    0 0 4px rgba(74, 222, 128, 0.2);
+  @apply text-green-500 p-4 w-full max-w-4xl mx-auto text-lg md:text-xl lg:text-2xl;
+  text-shadow: 0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 .terminal-wrapper {
-    @apply min-h-screen bg-black flex items-center justify-center p-2;
-    background-color: #000000;
-    background-image: radial-gradient(rgba(0, 30, 0, 0.4) 2px, transparent 0);
-    background-size: 32px 32px;
-    background-position: -16px -16px;
+  @apply min-h-screen bg-black flex items-center justify-center p-2;
+  background-color: #000000;
+  background-image: radial-gradient(rgba(0, 30, 0, 0.4) 2px, transparent 0);
+  background-size: 32px 32px;
+  background-position: -16px -16px;
 }
 
 .terminal-container {
-    @apply w-full relative;
+  @apply w-full relative;
 }
 
 .terminal-text {
-    @apply whitespace-pre-wrap;
-    line-height: 1.6;
-    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4),
-    0 0 4px rgba(74, 222, 128, 0.2);
+  @apply whitespace-pre-wrap;
+  line-height: 1.6;
+  text-shadow: 0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2);
 }
 
 .terminal-cursor {
-    display: inline-block;
-    width: 0.6em;
-    height: 1.2em;
-    background-color: #4ade80;
-    animation: blink 1s step-end infinite;
-    vertical-align: text-bottom;
-    margin-left: 4px;
-    filter: drop-shadow(0 0 2px rgba(74, 222, 128, 0.4));
+  display: inline-block;
+  width: 0.6em;
+  height: 1.2em;
+  background-color: #4ade80;
+  animation: blink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 4px;
+  filter: drop-shadow(0 0 2px rgba(74, 222, 128, 0.4));
 }
 
 @keyframes blink {
-    0%, 100% { opacity: 0; }
-    50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* Link styles */
-.terminal-text a, footer a {
-    @apply text-green-500;
-    text-decoration: underline;
-    transition: all 0.2s ease;
-    text-shadow: 0 0 2px rgba(74, 222, 128, 0.4);
+.terminal-text a,
+footer a {
+  @apply text-green-500;
+  text-decoration: underline;
+  transition: all 0.2s ease;
+  text-shadow: 0 0 2px rgba(74, 222, 128, 0.4);
 }
 
 /* Footer styles */
 footer a {
-    opacity: 0.8;
+  opacity: 0.8;
 }
 
 footer a:hover {
-    opacity: 1;
+  opacity: 1;
 }
 
 /* FAQ styles */
 .faq-item {
-    @apply mb-6 md:mb-8;
-    transition: all 0.2s ease;
+  @apply mb-6 md:mb-8;
+  transition: all 0.2s ease;
 }
 
 .faq-item h2 {
-    @apply text-lg md:text-2xl mb-2;
+  @apply text-lg md:text-2xl mb-2;
 }
 
 .faq-item p {
-    @apply text-base md:text-xl opacity-90 ml-4 md:ml-6;
-    position: relative;
+  @apply text-base md:text-xl opacity-90 ml-4 md:ml-6;
+  position: relative;
 }
 
 .faq-item p::before {
-    content: ">";
-    position: absolute;
-    left: -0.75rem;
-    opacity: 0.7;
+  content: ">";
+  position: absolute;
+  left: -0.75rem;
+  opacity: 0.7;
 }
 
 @keyframes pulse-subtle {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 @keyframes bounce-subtle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(4px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
 }
 
 @keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-pulse-subtle {
-    animation: pulse-subtle 2s infinite;
+  animation: pulse-subtle 2s infinite;
 }
 
 .animate-bounce-subtle {
-    animation: bounce-subtle 1.5s infinite;
+  animation: bounce-subtle 1.5s infinite;
 }
 
 .animate-fade-in {
-    animation: fade-in 0.5s ease-out forwards;
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme("colors.green.600") black;
 }
