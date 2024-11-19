@@ -53,6 +53,12 @@ const Theology: NextPage = () => {
                 >
                     FAQ
                 </Link>
+                <Link
+                    href="/theology"
+                    className="text-green-500 hover:text-green-400 text-sm"
+                >
+                    Theology
+                </Link>
             </footer>
         </div>
     );
