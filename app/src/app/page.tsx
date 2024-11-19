@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/Button";
-import { ConnectWalletButton } from "@/components/ConnectWalletButton";
 import { ShrinkToFit } from "@/components/ShrinkToFit";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
 import {
@@ -9,7 +7,6 @@ import {
   differenceInMonths,
   differenceInYears,
 } from "date-fns";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -189,7 +186,7 @@ function Listing({ listing }: { listing: Listing }) {
       key={listing.currentTicker}
       // TODO THIS WILL BE A UNIQUE ID EVENTUALLY
       href={`/tokens/${listing.currentTicker}`}
-      className="bg-black border border-green-600 flex overflow-hidden"
+      className="bg-black border border-green-600 flex overflow-hidden transition-transform hover:scale-[1.02]"
     >
       <div
         className="aspect-square h-[175px] bg-cover bg-center"
