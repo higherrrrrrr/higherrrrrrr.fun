@@ -12,7 +12,11 @@ type TickerForPriceLevel = {
 export default function NewToken() {
   const [description, setDescription] = useState("");
   const [initialPriceTicker, setInitialPriceTicker] = useState("");
-  const [priceLevels, setPriceLevels] = useState<TickerForPriceLevel[]>([]);
+  const [priceLevels, setPriceLevels] = useState<TickerForPriceLevel[]>([
+    { ticker: "", greaterThan: "" },
+    { ticker: "", greaterThan: "" },
+    { ticker: "", greaterThan: "" },
+  ]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
