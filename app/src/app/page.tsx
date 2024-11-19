@@ -201,14 +201,17 @@ function Listing({ listing }: { listing: Listing }) {
       <div className="pt-2 flex flex-col gap-y-2 flex-grow overflow-hidden">
         <div className=" px-3 flex flex-col">
           <div className="flex justify-between items-center">
-            <div className="flex font-bold overflow-visible flex-grow items-center">
-              <span className="text-green-500">$</span>
-              {isHovered ? (
+            {isHovered ? (
+              <div className="flex font-bold overflow-visible flex-grow items-center">
+                <span className="text-green-500">$</span>
                 <TypeAndDelete words={listing.tickers} timeBetweenChars={50} />
-              ) : (
-                listing.currentTicker
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="flex font-bold overflow-hidden flex-grow items-center">
+                <span className="text-green-500">$</span>
+                <ShrinkToFit>{listing.currentTicker}</ShrinkToFit>
+              </div>
+            )}
 
             <div className="text-xs flex-shrink-0" title={listing.createdAt}>
               {formatCompactDistance(new Date(), new Date(listing.createdAt))}
