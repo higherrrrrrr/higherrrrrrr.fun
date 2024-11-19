@@ -39,6 +39,7 @@ contract DynamicMemeFactory {
         positionManager = _positionManager;
         swapRouter = _swapRouter;
 
+        // Deploy implementation with immutable values
         implementation = address(new DynamicMeme(
             _protocolFeeRecipient,
             _protocolRewards,
@@ -57,17 +58,19 @@ contract DynamicMemeFactory {
         address platformReferrer,
         MemeLevel[] calldata levels
     ) external returns (address) {
+        // Create initialization data
         bytes memory initData = abi.encodeWithSelector(
             DynamicMeme.initialize.selector,
-            msg.sender, // tokenCreator
-            platformReferrer,
-            bondingCurve,
-            tokenURI,
-            symbol,
-            memeType,
-            levels
+            msg.sender,           // tokenCreator
+            platformReferrer,     // platformReferrer
+            bondingCurve,        // bondingCurve
+            tokenURI,            // tokenURI
+            symbol,              // symbol
+            memeType,            // memeType
+            levels              // initialLevels
         );
 
+        // Deploy proxy with initialization
         ERC1967Proxy proxy = new ERC1967Proxy(
             implementation,
             initData

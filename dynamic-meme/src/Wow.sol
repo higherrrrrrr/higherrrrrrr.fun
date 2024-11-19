@@ -61,7 +61,7 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
         address _weth,
         address _nonfungiblePositionManager,
         address _swapRouter
-    ) initializer {
+    ) {  // Remove initializer modifier from constructor
         if (_protocolFeeRecipient == address(0)) revert AddressZero();
         if (_protocolRewards == address(0)) revert AddressZero();
         if (_weth == address(0)) revert AddressZero();
@@ -89,7 +89,7 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
         string memory _tokenURI,
         string memory _name,
         string memory _symbol
-    ) public payable initializer {
+    ) public payable virtual initializer {
         // Validate the creation parameters
         if (_tokenCreator == address(0)) revert AddressZero();
         if (_bondingCurve == address(0)) revert AddressZero();
