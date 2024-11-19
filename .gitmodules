@@ -10,3 +10,6 @@
 [submodule "dynamic-meme/lib/solady"]
 	path = dynamic-meme/lib/solady
 	url = https://github.com/vectorized/solady
+[submodule "app/contracts/lib/openzeppelin-contracts"]
+	path = app/contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
