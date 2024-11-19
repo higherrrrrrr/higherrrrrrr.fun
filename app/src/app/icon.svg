@@ -1,0 +1,9 @@
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path 
+    d="M12 4L4 12H9V20H15V12H20L12 4Z"
+    fill="black"
+    stroke="#22c55e" 
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+</svg>
