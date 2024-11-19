@@ -26,7 +26,9 @@ contract DynamicMeme is Wow {
         address _weth,
         address _nonfungiblePositionManager,
         address _swapRouter
-    ) Wow(_protocolFeeRecipient, _protocolRewards, _weth, _nonfungiblePositionManager, _swapRouter) {}
+    ) Wow(_protocolFeeRecipient, _protocolRewards, _weth, _nonfungiblePositionManager, _swapRouter) {
+        // You can add any additional constructor logic here if needed
+    }
 
     function initialize(
         address _tokenCreator,
@@ -47,6 +49,7 @@ contract DynamicMeme is Wow {
         memeType = _memeType;
         currentMeme = _initialLevels[0].memeName;
 
+        // Call the updated super.initialize with the adjusted parameters
         super.initialize(
             _tokenCreator,
             _platformReferrer,
@@ -56,6 +59,7 @@ contract DynamicMeme is Wow {
             _symbol
         );
     }
+
 
     function name() public view override returns (string memory) {
         return currentMeme;
