@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 
 type Props = {
   words: string[];
+  timeBetweenChars?: number;
 };
 
-const timeBetweenChars = 200;
-
-export function TypeAndDelete({ words }: Props) {
+export function TypeAndDelete({ words, timeBetweenChars = 200 }: Props) {
   const [count, setCount] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
   const [charCount, setCharCount] = useState(1);
@@ -46,7 +45,7 @@ export function TypeAndDelete({ words }: Props) {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [word, count]);
+  }, [word, count, timeBetweenChars]);
 
   return (
     <span>
