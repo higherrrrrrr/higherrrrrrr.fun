@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 
 type Props = {
   words: string[];
@@ -12,8 +12,8 @@ export function TypeAndDelete({ words, timeBetweenChars = 200 }: Props) {
   const [wordIndex, setWordIndex] = useState(0);
   const [charCount, setCharCount] = useState(1);
 
-  let word = words[wordIndex];
-  let textToShow = word.slice(0, charCount);
+  const word = words[wordIndex];
+  const textToShow = word.slice(0, charCount);
 
   useLayoutEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -45,7 +45,7 @@ export function TypeAndDelete({ words, timeBetweenChars = 200 }: Props) {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [word, count, timeBetweenChars]);
+  }, [word, count, timeBetweenChars, words.length]);
 
   return (
     <span>

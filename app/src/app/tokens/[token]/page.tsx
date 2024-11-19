@@ -8,7 +8,7 @@ const token = {
   price: "1000",
   createdAt: "2021-01-01",
 };
-export default function Token({ params }: { params: { token: string } }) {
+export default function Token({}: { params: { token: string } }) {
   return (
     <div className="px-6 max-w-4xl mx-auto w-full">
       <div className="border border-green-600 bg-black p-6">

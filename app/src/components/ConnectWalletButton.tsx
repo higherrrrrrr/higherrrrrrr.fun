@@ -6,7 +6,7 @@ import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
 import { Button } from "./Button";
 
 export function ConnectWalletButton() {
-  const { connectors, connect, error } = useConnect();
+  const { connectors } = useConnect();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
@@ -61,6 +61,7 @@ export function ConnectWalletButton() {
               className="text-left gap-x-1 grid grid-cols-subgrid col-span-full items-center px-2 hover:bg-green-800 [data-focus]:bg-green-600"
             >
               {connector.icon ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={connector.icon}
                   alt={connector.name}

@@ -2,7 +2,7 @@
 
 import { Button, IconButton } from "@/components/Button";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type TickerForPriceLevel = {
   ticker: string;
