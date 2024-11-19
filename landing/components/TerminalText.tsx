@@ -16,7 +16,7 @@ interface TerminalTextProps {
 
 const TerminalText: React.FC<TerminalTextProps> = ({
   messages,
-  typingSpeed = 50,
+  typingSpeed = 125,
 }) => {
   const [displayText, setDisplayText] = useState("");
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
