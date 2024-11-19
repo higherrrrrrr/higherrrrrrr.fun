@@ -10,8 +10,8 @@ import "../styles/globals.css";
 const config = createConfig(
   getDefaultConfig({
     chains: [base],
-    appName: "Higherrrrrrr",
-    walletConnectProjectId: "higherrrrrrr",
+    appName: "higherrrrrrrfun",
+    walletConnectProjectId: "higherrrrrrrfun",
   })
 );
 
