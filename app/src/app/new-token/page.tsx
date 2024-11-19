@@ -1,7 +1,8 @@
 "use client";
 
+import { Button, IconButton } from "@/components/Button";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type TickerForPriceLevel = {
   ticker: string;
@@ -9,53 +10,195 @@ type TickerForPriceLevel = {
 };
 
 export default function NewToken() {
+  const [description, setDescription] = useState("");
+  const [initialPriceTicker, setInitialPriceTicker] = useState("");
   const [priceLevels, setPriceLevels] = useState<TickerForPriceLevel[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    setError(null);
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setSelectedImage(imageUrl);
+    }
+  }
+
+  const [error, setError] = useState<string | null>(null);
+
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Handle form submission
-  };
+
+    if (!selectedImage) {
+      setError("Please select an image");
+      return;
+    }
+
+    if (!description) {
+      setError("Please enter a description");
+      return;
+    }
+
+    let priceLevelsError: string | null = null;
+    for (const level of priceLevels) {
+      if (!level.ticker || !level.greaterThan) {
+        priceLevelsError = "Please fill in all price levels";
+        break;
+      }
+    }
+
+    if (priceLevelsError) {
+      setError(priceLevelsError);
+      return;
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-green-500 font-mono text-3xl mb-8">
+        <h1 className="font-mono text-3xl mb-8">
           create a new{" "}
-          <TypeAndDelete words={["coin", "moment", "generation", "ticker"]} />
+          <span className="text-green-500">
+            <TypeAndDelete words={["coin", "moment", "generation", "ticker"]} />
+          </span>
         </h1>
+
+        {error && <div className="text-red-500 mb-4">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* File Upload */}
           <div className="border border-green-600 p-4">
-            <button className="bg-black border border-green-600 text-green-500 px-4 py-2 font-mono hover:bg-green-600 hover:text-black transition-colors">
-              choose file
-            </button>
-            <span className="ml-4 text-gray-500 font-mono">no file chosen</span>
+            <div className="flex flex-col gap-4">
+              {selectedImage && (
+                <div
+                  className="aspect-square w-48 bg-cover bg-center mx-auto"
+                  style={{ backgroundImage: `url(${selectedImage})` }}
+                />
+              )}
+              <div className="flex items-center gap-x-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  id="image-upload"
+                />
+                <label
+                  htmlFor="image-upload"
+                  className="bg-black border border-green-600 text-green-500 px-4 py-2 font-mono hover:bg-green-600 hover:text-black transition-colors cursor-pointer"
+                >
+                  choose file
+                </label>
+                <span className="text-gray-500 font-mono">
+                  {selectedImage ? "image selected" : "no file chosen"}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Ticker Input */}
           <div>
-            <Label>ticker & price level</Label>
-            <div className="flex gap-x-4">
-              <div className="flex flex-col">
-                <input
-                  type="text"
-                  placeholder="8==D"
-                  className="flex-1 bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-                />
+            <Label>ticker & price levels</Label>
+
+            {/* First price level - locked to "greater than 0" */}
+            {/* Additional price levels */}
+            <div className="grid grid-cols-[1fr_1fr_50px] gap-x-3 gap-y-2 col-span-full items-center">
+              <div className="grid grid-cols-subgrid col-span-full">
+                <div className="flex flex-col flex-1">
+                  <input
+                    type="text"
+                    value={initialPriceTicker}
+                    onChange={(e) => {
+                      setError(null);
+                      setInitialPriceTicker(e.target.value);
+                    }}
+                    placeholder={`8=D`}
+                    className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                  />
+                </div>
+                <div className="flex items-center flex-1 bg-black border border-green-600 p-2 font-mono text-gray-500">
+                  &gt; $0
+                </div>
+
+                <div />
               </div>
-              <input
-                type="number"
-                step="0.01"
-                className="flex-1 bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
+
+              {priceLevels.map((level, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-subgrid col-span-full"
+                >
+                  <div className="flex flex-col flex-1">
+                    <input
+                      type="text"
+                      value={level.ticker}
+                      onChange={(e) => {
+                        setError(null);
+                        const newLevels = [...priceLevels];
+                        newLevels[index].ticker = e.target.value;
+                        setPriceLevels(newLevels);
+                      }}
+                      placeholder={`8${"=".repeat(index + 2)}D${
+                        index > 8 ? "~~~" : ""
+                      }`}
+                      className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    />
+                  </div>
+                  <div className="flex flex-col flex-1">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={level.greaterThan}
+                      onChange={(e) => {
+                        setError(null);
+                        const newLevels = [...priceLevels];
+                        newLevels[index].greaterThan = e.target.value;
+                        setPriceLevels(newLevels);
+                      }}
+                      placeholder={`> $${10 ** (index + 1)}`}
+                      className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    />
+                  </div>
+                  <IconButton
+                    type="button"
+                    onClick={() => {
+                      const newLevels = priceLevels.filter(
+                        (_, i) => i !== index
+                      );
+                      setPriceLevels(newLevels);
+                    }}
+                  >
+                    ×
+                  </IconButton>
+                </div>
+              ))}
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setPriceLevels([
+                    ...priceLevels,
+                    { ticker: "", greaterThan: "" },
+                  ]);
+                }}
+                className="col-span-full"
+              >
+                + add price level
+              </Button>
             </div>
           </div>
 
           {/* Description Input */}
           <div>
             <Label>description</Label>
-            <textarea className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 min-h-[100px]" />
+            <textarea
+              value={description}
+              onChange={(e) => {
+                setError(null);
+                setDescription(e.target.value);
+              }}
+              className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 min-h-[100px]"
+            />
           </div>
 
           {/* NSFW Toggle */}

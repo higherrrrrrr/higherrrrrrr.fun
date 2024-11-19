@@ -52,11 +52,11 @@ export function ConnectWalletButton() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 4 }}
         anchor="bottom end"
-        className="bg-black border border-green-600 flex-col p-2 grid grid-cols-[auto_1fr] mt-2"
+        className="bg-black border border-green-600 flex-col p-2 grid grid-cols-[auto_1fr] mt-2 min-w-[200px]"
       >
         {connectors.map((connector) => (
           <MenuItem key={connector.uid}>
-            <Button
+            <button
               onClick={() => connector.connect()}
               className="text-left gap-x-1 grid grid-cols-subgrid col-span-full items-center px-2 hover:bg-green-800 [data-focus]:bg-green-600"
             >
@@ -72,7 +72,7 @@ export function ConnectWalletButton() {
               <div className="text-white whitespace-nowrap p-2">
                 {connector.name}
               </div>
-            </Button>
+            </button>
           </MenuItem>
         ))}
       </MenuItems>

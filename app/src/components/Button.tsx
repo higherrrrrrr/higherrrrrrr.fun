@@ -18,3 +18,21 @@ export function Button({
     </button>
   );
 }
+
+export function IconButton({
+  children,
+  className,
+  ...rest
+}: PropsWithChildren<ComponentProps<"button">>) {
+  return (
+    <button
+      className={clsx(
+        "border border-green-600 hover:bg-green-600 hover:text-black py-2",
+        className
+      )}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}

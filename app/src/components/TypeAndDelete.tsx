@@ -51,7 +51,7 @@ export function TypeAndDelete({ words }: Props) {
   return (
     <span>
       {textToShow}
-      <span className="text-white">|</span>
+      <span className="text-green-200">|</span>
     </span>
   );
 }
