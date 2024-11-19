@@ -12,6 +12,9 @@
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.0.0",
     "@tanstack/react-query": "^5.0.0",
+    "@usecapsule/evm-wallet-connectors": "^1.7.0",
+    "@usecapsule/react-sdk": "^4.7.0",
+    "@usecapsule/wagmi-v2-integration": "^3.7.0",
     "next": "14.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

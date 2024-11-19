@@ -1,10 +1,27 @@
 // components/PledgeContent.tsx
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect,useState, useRef } from "react";
 import Link from "next/link";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { recoverMessageAddress } from "viem";
+
+import { base } from "./WagmiProvider"
+
+import {
+  CapsuleModal,
+  AuthLayout,
+  OAuthMethod,
+  ExternalWallet,
+} from "@usecapsule/react-sdk";
+import capsule from "./capsule"
+import "@usecapsule/react-sdk/styles.css";
+import {
+  CapsuleEvmProvider,
+  metaMaskWallet,
+  coinbaseWallet,
+  walletConnectWallet
+} from "@usecapsule/evm-wallet-connectors";
 
 const PLEDGE_MESSAGE = `I am one of the faithful, a disciple of the cult of memes
 
@@ -32,6 +49,7 @@ export function PledgeContent() {
     error: signError,
     signMessage,
   } = useSignMessage();
+  const [isOpen, setIsOpen] = useState(false);
 
   const isMobile =
     typeof window !== "undefined" &&
@@ -122,14 +140,33 @@ Pledge: https://higherrrrrrr.fun`;
           </div>
           <div className="flex flex-col items-center space-y-4">
             <button
-              onClick={handleConnect}
+              onClick={() => setIsOpen(true)}
               disabled={isLoading}
               className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50"
             >
               {isLoading ? "Connecting..." : "Connect Wallet to Pledge"}
             </button>
-
-            {isMobile && (
+            <CapsuleEvmProvider
+              config={{
+                projectId: 'f6bd6e2911b56f5ac3bc8b2d0e2d7ad5',
+                appName: "Higherrrrrrr",
+                chains: [base],
+                wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet],
+              }}>
+                <CapsuleModal
+                  capsule={capsule}
+                  isOpen={isOpen}
+                  onClose={() => setIsOpen(false)}
+                  appName="Higherrrrrrr"
+                  oAuthMethods={[
+                    OAuthMethod.GOOGLE,
+                    OAuthMethod.TWITTER,
+                  ]}
+                  authLayout={[AuthLayout.EXTERNAL_FULL, AuthLayout.AUTH_CONDENSED]}
+                  externalWallets={[ExternalWallet.METAMASK, ExternalWallet.COINBASE, ExternalWallet.WALLETCONNECT]}
+                />
+            </CapsuleEvmProvider>
+            {/* {isMobile && (
               <div className="flex flex-col items-center space-y-2">
                 <p className="text-sm opacity-60">Open in wallet:</p>
                 <div className="flex gap-4">
@@ -147,7 +184,7 @@ Pledge: https://higherrrrrrr.fun`;
                   </a>
                 </div>
               </div>
-            )}
+            )} */}
 
             <p className="text-sm opacity-60">
               Don't have a wallet?{" "}

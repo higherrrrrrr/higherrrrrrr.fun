@@ -15,11 +15,11 @@ import {
   coinbaseWallet,
   walletConnectWallet
 } from "@usecapsule/evm-wallet-connectors";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
+import { base } from "wagmi/chains";
 import { Button } from "./Button";
 
 export function ConnectWalletButton() {
@@ -75,18 +75,11 @@ export function ConnectWalletButton() {
         config={{
           projectId: 'f6bd6e2911b56f5ac3bc8b2d0e2d7ad5',
           appName: "Higherrrrrrr",
-          chains: ['sepolia'],
+          // todo
+          chains: [base],
           wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet],
         }}>
           <CapsuleModal
-            // logo={Logo}
-            theme={{
-              backgroundColor: "#1F1F1F",
-              foregroundColor: "#FFF",
-              accentColor: "#FF754A",
-              mode: "dark",
-              font: "Inter",
-            }}
             capsule={capsule}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
@@ -97,9 +90,6 @@ export function ConnectWalletButton() {
             ]}
             authLayout={[AuthLayout.EXTERNAL_FULL, AuthLayout.AUTH_CONDENSED]}
             externalWallets={[ExternalWallet.METAMASK, ExternalWallet.COINBASE, ExternalWallet.WALLETCONNECT]}
-            twoFactorAuthEnabled={false}
-            recoverySecretStepEnabled={false}
-            // onRampTestMode={true}
           />
       </CapsuleEvmProvider>
     </Menu>

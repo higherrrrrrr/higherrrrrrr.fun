@@ -1,13 +1,13 @@
 // components/WagmiProvider.tsx
 "use client";
 
-import { WagmiConfig, createConfig, Chain } from "wagmi";
+import { createConfig, Chain, WagmiConfig, type CreateConfigParameters } from "wagmi";
 import { createPublicClient, http } from "viem";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { injected } from "wagmi/connectors";
+
 
 // Define Base chain
-const base: Chain = {
+export const base: Chain = {
   id: 8453,
   name: "Base",
   network: "base",
@@ -22,20 +22,32 @@ const base: Chain = {
   },
 };
 
-const config = createConfig({
-  chains: [base],
-  connectors: [injected()],
-  client: createPublicClient({
-    chain: base,
-    transport: http("https://mainnet.base.org"),
-  }),
+import { capsuleConnector } from "@usecapsule/wagmi-v2-integration";
+import capsule from "./capsule";
+
+// Create Capsule connector
+const connector = capsuleConnector({
+  capsule: capsule,
+  chains: [base], // Add your supported chains
+  appName: "Higherrrrrrr",
+  options: {},
 });
+
+// Configure Wagmi
+const config: CreateConfigParameters = {
+  chains: [base],
+  connectors: [connector],
+  transports: [http("https://mainnet.base.org")],
+  ssr: true,
+};
+
+const wagmiConfig = createConfig(config);
 
 const queryClient = new QueryClient();
 
 export function WagmiProvider({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiConfig config={config}>
+    <WagmiConfig config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiConfig>
   );

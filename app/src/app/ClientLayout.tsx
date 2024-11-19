@@ -11,9 +11,8 @@ import { createConfig, WagmiProvider, http, type CreateConfigParameters } from "
 
 import { base } from "wagmi/chains";
 
-
 import { capsuleConnector } from "@usecapsule/wagmi-v2-integration";
-import capsule from "./capsule"; // Your Capsule client initialization
+import capsule from "./capsule";
 
 // Create Capsule connector
 const connector = capsuleConnector({
