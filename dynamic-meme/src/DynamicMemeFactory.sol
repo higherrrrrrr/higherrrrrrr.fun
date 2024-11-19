@@ -1,5 +1,4 @@
 // src/DynamicMemeFactory.sol
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
@@ -39,7 +38,7 @@ contract DynamicMemeFactory {
         positionManager = _positionManager;
         swapRouter = _swapRouter;
 
-        // Deploy implementation with immutable values
+        // Deploy implementation with constructor arguments
         implementation = address(new DynamicMeme(
             _protocolFeeRecipient,
             _protocolRewards,
@@ -61,13 +60,13 @@ contract DynamicMemeFactory {
         // Create initialization data
         bytes memory initData = abi.encodeWithSelector(
             DynamicMeme.initialize.selector,
-            msg.sender,           // tokenCreator
-            platformReferrer,     // platformReferrer
-            bondingCurve,        // bondingCurve
-            tokenURI,            // tokenURI
-            symbol,              // symbol
-            memeType,            // memeType
-            levels              // initialLevels
+            msg.sender,                // _tokenCreator
+            platformReferrer,          // _platformReferrer
+            bondingCurve,              // _bondingCurve
+            tokenURI,                  // _tokenURI
+            symbol,                    // _symbol
+            memeType,                  // _memeType
+            levels                     // _initialLevels
         );
 
         // Deploy proxy with initialization

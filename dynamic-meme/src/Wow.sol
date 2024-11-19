@@ -61,12 +61,12 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
         address _weth,
         address _nonfungiblePositionManager,
         address _swapRouter
-    ) {  // Remove initializer modifier from constructor
-        if (_protocolFeeRecipient == address(0)) revert AddressZero();
-        if (_protocolRewards == address(0)) revert AddressZero();
-        if (_weth == address(0)) revert AddressZero();
-        if (_nonfungiblePositionManager == address(0)) revert AddressZero();
-        if (_swapRouter == address(0)) revert AddressZero();
+    ) {
+        require(_protocolFeeRecipient != address(0), "Protocol fee recipient cannot be zero");
+        require(_protocolRewards != address(0), "Protocol rewards cannot be zero");
+        require(_weth != address(0), "WETH cannot be zero");
+        require(_nonfungiblePositionManager != address(0), "Position manager cannot be zero");
+        require(_swapRouter != address(0), "Swap router cannot be zero");
 
         protocolFeeRecipient = _protocolFeeRecipient;
         protocolRewards = _protocolRewards;

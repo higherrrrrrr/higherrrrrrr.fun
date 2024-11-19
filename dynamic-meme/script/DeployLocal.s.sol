@@ -13,9 +13,9 @@ contract DeployLocal is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         // These are mainnet addresses
-        address WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-        address POSITION_MANAGER = 0xC36442b4a4522E871399CD717aBDD847Ab11FE88;
-        address SWAP_ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+        address WETH = 0x4200000000000000000000000000000000000006;
+        address POSITION_MANAGER = 0x03a520b32C04BF3bEEf7BEb72E919cf822Ed34f1;
+        address SWAP_ROUTER = 0x2626664c2603336E57B271c5C0b26F421741e481;
         address MULTISIG = vm.addr(deployerPrivateKey);
 
         // Start deployment
