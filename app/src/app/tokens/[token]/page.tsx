@@ -68,7 +68,7 @@ export default function Token({}: { params: { token: string } }) {
 
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4">Token Details</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-[auto_auto] gap-4">
             <div>
               <div className="text-sm text-gray-400">Contract Address</div>
               <div className="font-mono break-all">{listing.address}</div>
