@@ -50,7 +50,7 @@ export function PledgeContent() {
     signMessage,
   } = useSignMessage();
   const [isOpen, setIsOpen] = useState(false);
-
+  console.log(capsule)
   const isMobile =
     typeof window !== "undefined" &&
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -81,16 +81,21 @@ Pledge: https://higherrrrrrr.fun`;
     }
   }, [signMessageData]);
 
-  const handleConnect = async () => {
-    try {
-      const connector = connectors[0];
-      if (connector) {
-        await connect({ connector });
-      }
-    } catch (err) {
-      console.error("Connection error:", err);
-    }
+  const handleDisconnect = async () => {
+    await capsule.logout();
+    disconnect();
   };
+
+  // const handleConnect = async () => {
+  //   try {
+  //     const connector = connectors[0];
+  //     if (connector) {
+  //       await connect({ connector });
+  //     }
+  //   } catch (err) {
+  //     console.error("Connection error:", err);
+  //   }
+  // };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] space-y-8">
@@ -122,7 +127,7 @@ Pledge: https://higherrrrrrr.fun`;
                 </p>
               )}
               <button
-                onClick={() => disconnect()}
+                onClick={handleDisconnect}
                 className="text-sm opacity-60 hover:opacity-100"
               >
                 Disconnect
