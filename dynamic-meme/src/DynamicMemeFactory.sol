@@ -7,6 +7,11 @@ import "./DynamicMeme.sol";
 import "./BondingCurve.sol";
 
 contract DynamicMemeFactory {
+    struct MemeLevel {
+        uint256 priceThreshold;
+        string memeName;
+    }
+
     address public immutable implementation;
     address public immutable bondingCurve;
     address public immutable protocolFeeRecipient;
@@ -50,7 +55,7 @@ contract DynamicMemeFactory {
         string memory tokenURI,
         string memory memeType,
         address platformReferrer,
-        DynamicMeme.MemeLevel[] memory initialLevels
+        MemeLevel[] calldata levels
     ) external returns (address) {
         bytes memory initData = abi.encodeWithSelector(
             DynamicMeme.initialize.selector,
@@ -60,7 +65,7 @@ contract DynamicMemeFactory {
             tokenURI,
             symbol,
             memeType,
-            initialLevels
+            levels
         );
 
         ERC1967Proxy proxy = new ERC1967Proxy(

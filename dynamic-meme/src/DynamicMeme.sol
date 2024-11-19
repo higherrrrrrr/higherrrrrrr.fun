@@ -14,6 +14,10 @@ contract DynamicMeme is Wow {
     string private currentMeme;
     string public memeType; // e.g. "length", "pepe", "doge", etc.
 
+    address private cachedToken0;
+    address private cachedToken1;
+    bool private tokensInitialized;
+
     event MemeEvolved(string oldMeme, string newMeme, uint256 price);
 
     constructor(
@@ -57,17 +61,29 @@ contract DynamicMeme is Wow {
         return currentMeme;
     }
 
+    // Add this function to initialize token addresses
+    function _initializeTokenAddresses() internal {
+        if (!tokensInitialized && marketType == MarketType.UNISWAP_POOL) {
+            IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
+            cachedToken0 = pool.token0();
+            cachedToken1 = pool.token1();
+            tokensInitialized = true;
+        }
+    }
+
+    // Modify getCurrentPrice to use cached values
     function getCurrentPrice() public view returns (uint256) {
-        if(marketType != MarketType.UNISWAP_POOL) {
+        if(marketType != MarketType.UNISWAP_POOL || !tokensInitialized) {
             return 0;
         }
 
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
-        (uint160 sqrtPriceX96,,,,,,) = pool.slot0();
+        IUniswapV3Pool.Slot0 memory slot = pool.slot0();
+        uint160 sqrtPriceX96 = slot.sqrtPriceX96;
 
         uint256 price = uint256(sqrtPriceX96) * uint256(sqrtPriceX96) * (10**18) >> (96 * 2);
 
-        if(pool.token1() == WETH) {
+        if(cachedToken1 == WETH) {
             price = (10**36) / price;
         }
 
@@ -117,6 +133,7 @@ contract DynamicMeme is Wow {
         return bought;
     }
 
+
     function sell(
         uint256 tokensToSell,
         address recipient,
@@ -125,7 +142,7 @@ contract DynamicMeme is Wow {
         MarketType expectedMarketType,
         uint256 minPayoutSize,
         uint160 sqrtPriceLimitX96
-    ) external override nonReentrant returns (uint256) {
+    ) public override nonReentrant returns (uint256) {  // Changed to public to match parent
         uint256 sold = super.sell(
             tokensToSell,
             recipient,
