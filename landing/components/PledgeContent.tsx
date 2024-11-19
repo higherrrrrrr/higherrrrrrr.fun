@@ -1,27 +1,10 @@
-// components/PledgeContent.tsx
-"use client";
-
-import { useEffect,useState, useRef } from "react";
-import Link from "next/link";
+import { useEffect, useState, useRef } from "react";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { recoverMessageAddress } from "viem";
 
-import { base } from "./WagmiProvider"
-
-import {
-  CapsuleModal,
-  AuthLayout,
-  OAuthMethod,
-  ExternalWallet,
-} from "@usecapsule/react-sdk";
-import capsule from "./capsule"
+import { CapsuleModal, AuthLayout, OAuthMethod, ExternalWallet } from "@usecapsule/react-sdk";
 import "@usecapsule/react-sdk/styles.css";
-import {
-  CapsuleEvmProvider,
-  metaMaskWallet,
-  coinbaseWallet,
-  walletConnectWallet
-} from "@usecapsule/evm-wallet-connectors";
+import { capsuleClient } from "@/client/capsule";
 
 const PLEDGE_MESSAGE = `I am one of the faithful, a disciple of the cult of memes
 
@@ -32,28 +15,11 @@ A new meta for memes. If you believe, pledge your allegiance.`;
 export function PledgeContent() {
   const recoveredAddress = useRef<string>();
   const { address, isConnected } = useAccount();
-  const {
-    connect,
-    connectors,
-    error: connectError,
-    isLoading,
-    pendingConnector,
-  } = useConnect({
-    onSuccess() {
-      signMessage({ message: PLEDGE_MESSAGE });
-    },
-  });
+  // const { connect, connectors, error: connectError } = useConnect();
   const { disconnect } = useDisconnect();
-  const {
-    data: signMessageData,
-    error: signError,
-    signMessage,
-  } = useSignMessage();
+  const { data: signMessageData, error: signError, signMessage } = useSignMessage();
   const [isOpen, setIsOpen] = useState(false);
-  console.log(capsule)
-  const isMobile =
-    typeof window !== "undefined" &&
-    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (signMessageData) {
@@ -82,8 +48,12 @@ Pledge: https://higherrrrrrr.fun`;
   }, [signMessageData]);
 
   const handleDisconnect = async () => {
-    await capsule.logout();
+    await capsuleClient.logout();
     disconnect();
+  };
+
+  const handleModalClose = async () => {
+    setIsOpen(false);
   };
 
   // const handleConnect = async () => {
@@ -109,14 +79,14 @@ Pledge: https://higherrrrrrr.fun`;
               </h1>
               <p className="text-lg opacity-80">
                 Click below to sign the pledge and share it
-              </p>
+                </p>
               <div className="mt-4">↓</div>
             </div>
 
             <button
               onClick={() => signMessage({ message: PLEDGE_MESSAGE })}
               className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors"
-            >
+              >
               Sign & Share Pledge
             </button>
 
@@ -129,7 +99,7 @@ Pledge: https://higherrrrrrr.fun`;
               <button
                 onClick={handleDisconnect}
                 className="text-sm opacity-60 hover:opacity-100"
-              >
+                >
                 Disconnect
               </button>
             </div>
@@ -146,31 +116,20 @@ Pledge: https://higherrrrrrr.fun`;
           <div className="flex flex-col items-center space-y-4">
             <button
               onClick={() => setIsOpen(true)}
-              disabled={isLoading}
               className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50"
-            >
-              {isLoading ? "Connecting..." : "Connect Wallet to Pledge"}
-            </button>
-            <CapsuleEvmProvider
-              config={{
-                projectId: 'f6bd6e2911b56f5ac3bc8b2d0e2d7ad5',
-                appName: "Higherrrrrrr",
-                chains: [base],
-                wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet],
-              }}>
-                <CapsuleModal
-                  capsule={capsule}
-                  isOpen={isOpen}
-                  onClose={() => setIsOpen(false)}
-                  appName="Higherrrrrrr"
-                  oAuthMethods={[
-                    OAuthMethod.GOOGLE,
-                    OAuthMethod.TWITTER,
-                  ]}
-                  authLayout={[AuthLayout.EXTERNAL_FULL, AuthLayout.AUTH_CONDENSED]}
-                  externalWallets={[ExternalWallet.METAMASK, ExternalWallet.COINBASE, ExternalWallet.WALLETCONNECT]}
-                />
-            </CapsuleEvmProvider>
+              >
+              {/* {isLoading ? "Connecting..." : "Connect Wallet to Pledge"} */}
+              Connect Wallet to Pledge
+              </button>
+            <CapsuleModal
+              capsule={capsuleClient}
+              isOpen={isOpen}
+              onClose={handleModalClose}
+              appName="Higherrrrrrr"
+              oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.TWITTER]}
+              authLayout={[AuthLayout.EXTERNAL_FULL, AuthLayout.AUTH_CONDENSED]}
+              externalWallets={[ExternalWallet.METAMASK, ExternalWallet.COINBASE, ExternalWallet.WALLETCONNECT]}
+            />
             {/* {isMobile && (
               <div className="flex flex-col items-center space-y-2">
                 <p className="text-sm opacity-60">Open in wallet:</p>
@@ -198,7 +157,7 @@ Pledge: https://higherrrrrrr.fun`;
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-green-500 hover:text-green-400 underline"
-              >
+                >
                 Download Coinbase Wallet
               </a>
             </p>
@@ -206,11 +165,9 @@ Pledge: https://higherrrrrrr.fun`;
         </>
       )}
 
-      {(connectError || signError) && (
-        <p className="text-red-500 text-sm">
-          {connectError?.message || signError?.message}
-        </p>
-      )}
+      {/* {(connectError || signError) && (
+          <p className="text-red-500 text-sm">{connectError?.message || signError?.message}</p>
+        )} */}
     </div>
   );
 }
