@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/Button";
 import { ConnectWalletButton } from "@/components/ConnectWalletButton";
+import { EthPriceProvider } from "@/components/EthPriceProvider";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Link from "next/link";
@@ -24,10 +25,12 @@ export function ClientLayout({ children }: PropsWithChildren) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <div className="bg-black min-h-screen w-full text-white font-mono flex flex-col">
-          <Header />
-          {children}
-        </div>
+        <EthPriceProvider>
+          <div className="bg-black min-h-screen w-full text-white font-mono flex flex-col">
+            <Header />
+            {children}
+          </div>
+        </EthPriceProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
