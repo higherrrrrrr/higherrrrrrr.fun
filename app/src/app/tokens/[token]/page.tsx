@@ -1,6 +1,4 @@
 import { Button } from "@/components/Button";
-import { ConnectWalletButton } from "@/components/ConnectWalletButton";
-import Link from "next/link";
 
 // This would typically come from an API or database
 // Using the same data structure as the main page for now
