@@ -140,7 +140,7 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
         MarketType expectedMarketType,
         uint256 minOrderSize,
         uint160 sqrtPriceLimitX96
-    ) public payable nonReentrant returns (uint256) {
+    ) public payable virtual nonReentrant returns (uint256) {
         // Ensure the market type is expected
         if (marketType != expectedMarketType) revert InvalidMarketType();
 
@@ -241,7 +241,7 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
         MarketType expectedMarketType,
         uint256 minPayoutSize,
         uint160 sqrtPriceLimitX96
-    ) external nonReentrant returns (uint256) {
+    ) public virtual nonReentrant returns (uint256) {
         // Ensure the market type is expected
         if (marketType != expectedMarketType) revert InvalidMarketType();
 
