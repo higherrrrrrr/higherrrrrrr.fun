@@ -11,6 +11,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { listings, ListingType } from "@/test-tokens";
+import { SparkLine } from "@/components/SparkLine";
+import { ProgressBar } from "@/components/ProgressBar";
+import { Tooltip } from "@/components/Tooltip";
 
 function formatCompactDistance(date1: Date, date2: Date) {
   const years = differenceInYears(date1, date2);
@@ -25,7 +28,7 @@ function formatCompactDistance(date1: Date, date2: Date) {
 
 export default function Tokens() {
   return (
-    <div className="px-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-4 gap-y-8">
+    <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-8">
       {listings.map((listing) => (
         <Listing key={listing.currentTicker} listing={listing} />
       ))}
@@ -43,51 +46,76 @@ function Listing({ listing }: { listing: ListingType }) {
       key={listing.currentTicker}
       // TODO THIS WILL BE A UNIQUE ID EVENTUALLY
       href={`/tokens/${listing.currentTicker}`}
-      className="bg-black border border-green-600 flex overflow-hidden transition-transform hover:scale-[1.02]"
+      className="bg-black border border-green-600 flex  transition-transform hover:scale-[1.02]"
     >
       <div
-        className="aspect-square h-[175px] bg-cover bg-center"
+        className="aspect-square h-[275px] bg-cover bg-center"
         style={{
           backgroundImage: `url(https://picsum.photos/300/300?random=${listing.currentTicker})`,
         }}
       ></div>
 
-      <div className="pt-2 flex flex-col gap-y-2 flex-grow overflow-hidden">
+      <div className="pt-2 flex flex-col gap-y-2 flex-grow ">
         <div className=" px-3 flex flex-col">
-          <div className="flex justify-between items-center">
-            {isHovered ? (
-              <div className="flex font-bold overflow-visible flex-grow items-center">
-                <span className="text-green-500">$</span>
-                <TypeAndDelete words={listing.tickers} timeBetweenChars={50} />
-              </div>
-            ) : (
-              <div className="flex font-bold overflow-hidden flex-grow items-center">
-                <span className="text-green-500">$</span>
-                <ShrinkToFit>{listing.currentTicker}</ShrinkToFit>
-              </div>
-            )}
+          <Tooltip content="The ticker will change as we go higherrrrrrrrrr">
+            <div className="flex justify-between items-center">
+              {isHovered ? (
+                <div className="flex font-bold overflow-visible flex-grow items-center">
+                  <span className="text-green-500">$</span>
+                  <TypeAndDelete
+                    words={listing.priceLevels.map((level) => level.ticker)}
+                    timeBetweenChars={50}
+                  />
+                </div>
+              ) : (
+                <div className="flex font-bold overflow-hidden flex-grow items-center">
+                  <span className="text-green-500">$</span>
+                  <ShrinkToFit>{listing.currentTicker}</ShrinkToFit>
+                </div>
+              )}
 
-            <div className="text-xs flex-shrink-0" title={listing.createdAt}>
-              {formatCompactDistance(new Date(), new Date(listing.createdAt))}
+              <div className="text-xs flex-shrink-0" title={listing.createdAt}>
+                {formatCompactDistance(new Date(), new Date(listing.createdAt))}
+              </div>
             </div>
-          </div>
+          </Tooltip>
+
           <span>
             <span>by </span>
             <ClickToCopy text={listing.address} />
           </span>
         </div>
 
-        <div className="px-3 flex flex-col">
-          <span className="text-xs">price</span>
-          <span className="font-bold">${listing.price}</span>
+        <div className="flex">
+          <div className="px-3 flex flex-col">
+            <Label>price</Label>
+            <span className="font-bold">${listing.price}</span>
+          </div>
+
+          <div className="px-3 flex flex-col">
+            <Label>mkt cap.</Label>
+            <span className="font-bold">
+              $
+              {new Intl.NumberFormat("en-US", {
+                notation: "compact",
+                maximumFractionDigits: 1,
+              }).format(Number(listing.marketCap))}
+            </span>
+          </div>
         </div>
 
-        <div className="mt-auto h-4 w-full bg-green-950">
-          <div
-            className="h-full bg-green-400 animate-pulse"
-            style={{ width: "40%" }} // this is supposed to be how close we are to a real listing
-          />
+        <div className="px-3 flex flex-col">
+          <Label>description</Label>
+          <span className="text-sm line-clamp-3">{listing.description}</span>
         </div>
+
+        <div className="mt-auto">
+          <SparkLine data={listing.tickerHistory} />
+        </div>
+
+        <Tooltip content="Once we reach 100% we will list the token on the exchange.">
+          <ProgressBar progress={40} />
+        </Tooltip>
       </div>
     </Link>
   );
@@ -116,4 +144,8 @@ function ClickToCopy({ text }: { text: string }) {
       )}
     </span>
   );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return <span className="text-xs text-gray-400">{children}</span>;
 }

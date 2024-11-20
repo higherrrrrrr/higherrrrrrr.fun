@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.26.28",
     "@headlessui/react": "^2.2.0",
     "@tanstack/react-query": "^5.60.6",
     "@usecapsule/evm-wallet-connectors": "^1.7.0",
