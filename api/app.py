@@ -2,6 +2,7 @@ from flask import Flask, jsonify, url_for
 from flask_cors import CORS
 from routes import all_blueprints
 from config import Config
+import os
 
 def create_app():
     app = Flask(__name__)
@@ -50,4 +51,6 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Use PORT environment variable provided by Cloud Run
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)
