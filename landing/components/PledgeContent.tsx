@@ -134,7 +134,7 @@ Pledge: https://higherrrrrrr.fun`;
               externalWallets={[
                 ExternalWallet.METAMASK,
                 ExternalWallet.COINBASE,
-                ExternalWallet.WALLETCONNECT,
+                // ExternalWallet.WALLETCONNECT,
               ]}
             />
 
