@@ -7,37 +7,33 @@ import { TypeAndDelete } from "@/components/TypeAndDelete";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
-import { createConfig, WagmiProvider, http, type CreateConfigParameters } from "wagmi";
+import {
+  createConfig,
+  WagmiProvider,
+  http,
+  type CreateConfigParameters,
+} from "wagmi";
+import {
+  CapsuleEvmProvider,
+  coinbaseWallet,
+  metaMaskWallet,
+  walletConnectWallet,
+} from "@usecapsule/evm-wallet-connectors";
 
 import { base } from "wagmi/chains";
 
-import { capsuleConnector } from "@usecapsule/wagmi-v2-integration";
-import capsule from "./capsule";
-
-// Create Capsule connector
-const connector = capsuleConnector({
-  capsule: capsule,
-  chains: [base], // Add your supported chains
-  appName: "Higherrrrrrr",
-  options: {},
-});
-
-// Configure Wagmi
-const config: CreateConfigParameters = {
-  chains: [base],
-  connectors: [connector],
-  transports: {
-    [base.id]: http(),
-  },
-  ssr: true,
-};
-
-const wagmiConfig = createConfig(config);
 const queryClient = new QueryClient();
 
 export function ClientLayout({ children }: PropsWithChildren) {
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <CapsuleEvmProvider
+      config={{
+        projectId: "f6bd6e2911b56f5ac3bc8b2d0e2d7ad5",
+        appName: "Higherrrrrrr",
+        chains: [base],
+        wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet],
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <EthPriceProvider>
           <div className="bg-black min-h-screen w-full text-white font-mono flex flex-col">
@@ -46,7 +42,7 @@ export function ClientLayout({ children }: PropsWithChildren) {
           </div>
         </EthPriceProvider>
       </QueryClientProvider>
-    </WagmiProvider>
+    </CapsuleEvmProvider>
   );
 }
 
@@ -65,7 +61,9 @@ function Header() {
           <Button>+ New Coin</Button>
         </Link>
 
-        <ConnectWalletButton />
+        <div>
+          <ConnectWalletButton />
+        </div>
       </div>
     </div>
   );

@@ -2,7 +2,12 @@ import { useEffect, useState, useRef } from "react";
 import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { recoverMessageAddress } from "viem";
 
-import { CapsuleModal, AuthLayout, OAuthMethod, ExternalWallet } from "@usecapsule/react-sdk";
+import {
+  CapsuleModal,
+  AuthLayout,
+  OAuthMethod,
+  ExternalWallet,
+} from "@usecapsule/react-sdk";
 import "@usecapsule/react-sdk/styles.css";
 import { capsuleClient } from "@/client/capsule";
 
@@ -15,11 +20,16 @@ A new meta for memes. If you believe, pledge your allegiance.`;
 export function PledgeContent() {
   const recoveredAddress = useRef<string>();
   const { address, isConnected } = useAccount();
-  // const { connect, connectors, error: connectError } = useConnect();
   const { disconnect } = useDisconnect();
-  const { data: signMessageData, error: signError, signMessage } = useSignMessage();
+  const {
+    data: signMessageData,
+    error: signError,
+    signMessage,
+  } = useSignMessage();
   const [isOpen, setIsOpen] = useState(false);
-  const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isMobile =
+    typeof window !== "undefined" &&
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (signMessageData) {
@@ -56,17 +66,6 @@ Pledge: https://higherrrrrrr.fun`;
     setIsOpen(false);
   };
 
-  // const handleConnect = async () => {
-  //   try {
-  //     const connector = connectors[0];
-  //     if (connector) {
-  //       await connect({ connector });
-  //     }
-  //   } catch (err) {
-  //     console.error("Connection error:", err);
-  //   }
-  // };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-16rem)] space-y-8">
       {isConnected ? (
@@ -79,14 +78,14 @@ Pledge: https://higherrrrrrr.fun`;
               </h1>
               <p className="text-lg opacity-80">
                 Click below to sign the pledge and share it
-                </p>
+              </p>
               <div className="mt-4">↓</div>
             </div>
 
             <button
               onClick={() => signMessage({ message: PLEDGE_MESSAGE })}
               className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors"
-              >
+            >
               Sign & Share Pledge
             </button>
 
@@ -99,7 +98,7 @@ Pledge: https://higherrrrrrr.fun`;
               <button
                 onClick={handleDisconnect}
                 className="text-sm opacity-60 hover:opacity-100"
-                >
+              >
                 Disconnect
               </button>
             </div>
@@ -117,38 +116,25 @@ Pledge: https://higherrrrrrr.fun`;
             <button
               onClick={() => setIsOpen(true)}
               className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50"
-              >
+            >
               {/* {isLoading ? "Connecting..." : "Connect Wallet to Pledge"} */}
               Connect Wallet to Pledge
-              </button>
+            </button>
             <CapsuleModal
               capsule={capsuleClient}
               isOpen={isOpen}
-              onClose={handleModalClose}
+              onClose={() => setIsOpen(false)}
               appName="Higherrrrrrr"
-              oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.TWITTER]}
-              authLayout={[AuthLayout.EXTERNAL_FULL, AuthLayout.AUTH_CONDENSED]}
-              externalWallets={[ExternalWallet.METAMASK, ExternalWallet.COINBASE, ExternalWallet.WALLETCONNECT]}
+              oAuthMethods={[]}
+              disablePhoneLogin={true}
+              disableEmailLogin={true}
+              authLayout={[AuthLayout.EXTERNAL_FULL]}
+              externalWallets={[
+                ExternalWallet.METAMASK,
+                ExternalWallet.COINBASE,
+                ExternalWallet.WALLETCONNECT,
+              ]}
             />
-            {/* {isMobile && (
-              <div className="flex flex-col items-center space-y-2">
-                <p className="text-sm opacity-60">Open in wallet:</p>
-                <div className="flex gap-4">
-                  <a
-                    href={`https://metamask.app.link/dapp/higherrrrrrr.fun/pledge`}
-                    className="text-sm text-green-500 hover:text-green-400 underline"
-                  >
-                    MetaMask
-                  </a>
-                  <a
-                    href={`https://go.cb-w.com/dapp?cb_url=https://higherrrrrrr.fun/pledge`}
-                    className="text-sm text-green-500 hover:text-green-400 underline"
-                  >
-                    Coinbase Wallet
-                  </a>
-                </div>
-              </div>
-            )} */}
 
             <p className="text-sm opacity-60">
               Don't have a wallet?{" "}
@@ -157,7 +143,7 @@ Pledge: https://higherrrrrrr.fun`;
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-green-500 hover:text-green-400 underline"
-                >
+              >
                 Download Coinbase Wallet
               </a>
             </p>
