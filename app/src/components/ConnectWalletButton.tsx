@@ -1,29 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
 import {
-  CapsuleModal,
   AuthLayout,
-  OAuthMethod,
+  CapsuleModal,
   ExternalWallet,
 } from "@usecapsule/react-sdk";
-import capsule from "../app/capsule";
 import "@usecapsule/react-sdk/styles.css";
-import {
-  CapsuleEvmProvider,
-  metaMaskWallet,
-  coinbaseWallet,
-  walletConnectWallet,
-} from "@usecapsule/evm-wallet-connectors";
+import { useState } from "react";
+import capsule from "../app/capsule";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
-import { useAccount, useConnect, useDisconnect, useEnsName } from "wagmi";
-import { base } from "wagmi/chains";
+import { useAccount, useDisconnect, useEnsName } from "wagmi";
 import { Button } from "./Button";
 
 export function ConnectWalletButton() {
-  const { connectors } = useConnect();
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
