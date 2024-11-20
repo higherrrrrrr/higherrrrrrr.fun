@@ -2,6 +2,9 @@
 
 import Capsule, { Environment } from "@usecapsule/react-sdk";
 
-const capsule = new Capsule(Environment.BETA, '348532d91e01b88e8c53f047678c7595');
+const capsule = new Capsule(
+  Environment.PRODUCTION,
+  "196c6fd5269e56bdcca8929272bf1e9c"
+);
 
-export default capsule
+export default capsule;

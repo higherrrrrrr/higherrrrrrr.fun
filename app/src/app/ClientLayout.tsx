@@ -5,20 +5,14 @@ import { ConnectWalletButton } from "@/components/ConnectWalletButton";
 import { EthPriceProvider } from "@/components/EthPriceProvider";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Link from "next/link";
-import { PropsWithChildren } from "react";
-import {
-  createConfig,
-  WagmiProvider,
-  http,
-  type CreateConfigParameters,
-} from "wagmi";
 import {
   CapsuleEvmProvider,
   coinbaseWallet,
   metaMaskWallet,
   walletConnectWallet,
 } from "@usecapsule/evm-wallet-connectors";
+import Link from "next/link";
+import { PropsWithChildren } from "react";
 
 import { base } from "wagmi/chains";
 
