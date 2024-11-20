@@ -32,7 +32,7 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Cloud Run will provide PORT environment variable
-ENV PORT 8080
+ENV PORT 5000
 
 # Run gunicorn
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 "app:create_app()"
+CMD exec gunicorn --bind 5000 --workers 1 --threads 8 --timeout 0 "app:create_app()"
