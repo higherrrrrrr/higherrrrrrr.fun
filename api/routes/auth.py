@@ -38,7 +38,7 @@ def require_auth(f):
             return f(*args, **kwargs)
         except Exception as e:
             return jsonify({
-                'message': f'The loyal shall be rewarded. {calculate_time_remaining()}. Pledge: https://higherrrrrrr.fun/pledge'
+                'message': f'The loyal shall be rewarded. Pledge: https://higherrrrrrr.fun/pledge'
             }), 401
 
     return decorated
