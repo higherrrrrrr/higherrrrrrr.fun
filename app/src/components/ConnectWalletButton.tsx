@@ -68,6 +68,12 @@ export function ConnectWalletButton() {
         disablePhoneLogin={true}
         disableEmailLogin={true}
         authLayout={[AuthLayout.EXTERNAL_FULL]}
+        theme={{
+          mode: "dark",
+          darkBackgroundColor: "#09090b",
+          darkForegroundColor: "#22c55e",
+          darkAccentColor: "#00ff00",
+        }}
         externalWallets={[
           ExternalWallet.METAMASK,
           ExternalWallet.COINBASE,

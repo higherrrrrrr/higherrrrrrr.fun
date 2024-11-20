@@ -27,9 +27,6 @@ export function PledgeContent() {
     signMessage,
   } = useSignMessage();
   const [isOpen, setIsOpen] = useState(false);
-  const isMobile =
-    typeof window !== "undefined" &&
-    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     if (signMessageData) {
@@ -117,7 +114,6 @@ Pledge: https://higherrrrrrr.fun`;
               onClick={() => setIsOpen(true)}
               className="border-2 border-green-500 px-8 py-4 text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50"
             >
-              {/* {isLoading ? "Connecting..." : "Connect Wallet to Pledge"} */}
               Connect Wallet to Pledge
             </button>
             <CapsuleModal
@@ -129,6 +125,12 @@ Pledge: https://higherrrrrrr.fun`;
               disablePhoneLogin={true}
               disableEmailLogin={true}
               authLayout={[AuthLayout.EXTERNAL_FULL]}
+              theme={{
+                mode: "dark",
+                darkBackgroundColor: "#09090b",
+                darkForegroundColor: "#22c55e",
+                darkAccentColor: "#00ff00",
+              }}
               externalWallets={[
                 ExternalWallet.METAMASK,
                 ExternalWallet.COINBASE,
@@ -150,10 +152,6 @@ Pledge: https://higherrrrrrr.fun`;
           </div>
         </>
       )}
-
-      {/* {(connectError || signError) && (
-          <p className="text-red-500 text-sm">{connectError?.message || signError?.message}</p>
-        )} */}
     </div>
   );
 }
