@@ -11,6 +11,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --countdown-color: theme("colors.green.600");
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,4 +30,12 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: theme("colors.green.800") theme("colors.black");
+}
+
+::selection {
+  background-color: theme("colors.green.800");
+}
+
+.digit > * {
+  filter: none !important;
 }

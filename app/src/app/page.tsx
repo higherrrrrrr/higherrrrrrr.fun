@@ -8,7 +8,7 @@ export default async function Tokens() {
   const highlightedToken = await getHighlightedToken();
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col self-stretch">
       <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 py-8 mb-8">
         <h2 className=" text-2xl px-6 mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
           this one is going highe

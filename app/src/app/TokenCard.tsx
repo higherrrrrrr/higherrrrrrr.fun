@@ -36,7 +36,7 @@ export function TokenCard({ token }: { token: TokenApiType }) {
       key={token.address}
       // TODO THIS WILL BE A UNIQUE ID EVENTUALLY
       href={`/tokens/${token.address}`}
-      className="bg-black border border-green-600 flex  transition-transform hover:scale-[1.02]"
+      className="bg-black border border-green-600 flex flex-col sm:flex-row transition-transform hover:scale-[1.02]"
     >
       <div
         className="aspect-square h-[275px] bg-cover bg-center"

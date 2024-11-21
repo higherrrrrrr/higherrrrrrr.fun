@@ -9,7 +9,7 @@ export function Button({
   return (
     <button
       className={clsx(
-        "min-w-[200px] border border-green-600 hover:bg-green-600 hover:text-black py-2",
+        "min-w-[200px] w-full border border-green-600 hover:bg-green-600 hover:text-black py-2",
         className
       )}
       {...rest}

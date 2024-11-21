@@ -14,16 +14,16 @@ export default function ComingSoon() {
             Welcome to the first meme coin platform where your assets evolve
             visually as they moon. Watch your investments transform in real-time
             as prices climb - each milestone unlocks new variations of your
-            token&apos;s name, creating a dynamic connection between value and its
-            identity.
+            token&apos;s name, creating a dynamic connection between value and
+            its identity.
           </p>
           <p className="text-lg">
             Create your own evolving meme coins or join existing movements.
             Early believers who HODL through the transformative journey will be
             rewarded with exclusive NFTs marking their role in each coin&apos;s
-            ascension. Every price threshold crossed isn&apos;t just a number - it&apos;s
-            a new era in your token&apos;s evolution, permanently etched into the
-            blockchain.
+            ascension. Every price threshold crossed isn&apos;t just a number -
+            it&apos;s a new era in your token&apos;s evolution, permanently
+            etched into the blockchain.
           </p>
         </div>
       </div>
@@ -65,13 +65,24 @@ function CountdownTimer() {
 function DisplayWithLabel({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <Display
-        count={2}
-        value={value}
-        height={100}
-        color="rgb(34 197 94)"
-        skew={false}
-      />
+      <div className="block sm:hidden">
+        <Display
+          count={2}
+          value={value}
+          height={40}
+          color="rgb(34 197 94)"
+          skew={false}
+        />
+      </div>
+      <div className="hidden sm:block">
+        <Display
+          count={2}
+          value={value}
+          height={100}
+          color="var(--countdown-color)"
+          skew={false}
+        />
+      </div>
       <div className="text-lg text-green-500 -mt-8">{label}</div>
     </div>
   );
