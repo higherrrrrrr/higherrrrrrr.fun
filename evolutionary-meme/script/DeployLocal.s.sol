@@ -39,6 +39,10 @@ contract Deploy is Script {
         memeNames[2] = "8===D";
         memeNames[3] = "8====D";
 
+        // Add this before deployMeme
+        bytes4 selector = factory.getInitializeSelector();
+        console.log("Initialize selector:", uint32(selector));
+
         // Deploy meme token
         (address memeToken, address bondingCurve) = factory.deployMeme(
             "MEME",              // symbol

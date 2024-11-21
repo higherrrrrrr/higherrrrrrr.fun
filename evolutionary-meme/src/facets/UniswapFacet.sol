@@ -139,7 +139,7 @@ contract UniswapFacet {
         require(ds.marketType == 1 && ds.tokensInitialized, "Not ready");
 
         IUniswapV3Pool pool = IUniswapV3Pool(ds.poolAddress);
-        uint160 sqrtPriceX96 = pool.slot0().sqrtPriceX96;
+        (uint160 sqrtPriceX96, , , , , ,) = pool.slot0();
 
         uint256 price = uint256(sqrtPriceX96) * uint256(sqrtPriceX96) * (10**18) >> (96 * 2);
 

@@ -14,28 +14,18 @@ contract MemeFacet is IERC721Receiver {
     /// @notice Initializes meme levels and type
     function initializeMeme(
         string memory _memeType,
-        LibDiamond.MemeLevel[] memory _initialLevels
+        LibDiamond.MemeLevel[] memory _memeLevels
     ) external {
-        require(msg.sender == address(this), "Only diamond can initialize");
-        require(_initialLevels.length > 0, "Need at least one meme level");
-
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-
-        // Set meme type
+        
+        // Store meme levels
+        for (uint i = 0; i < _memeLevels.length; i++) {
+            ds.memeLevels.push(_memeLevels[i]);
+        }
+        
+        // Set current meme to first level
+        ds.currentMeme = _memeLevels[0].memeName;
         ds.memeType = _memeType;
-
-        // Clear existing levels if any
-        while (ds.memeLevels.length > 0) {
-            ds.memeLevels.pop();
-        }
-
-        // Set up meme levels
-        for(uint256 i = 0; i < _initialLevels.length; i++) {
-            ds.memeLevels.push(_initialLevels[i]);
-        }
-
-        // Set initial meme name
-        ds.currentMeme = _initialLevels[0].memeName;
     }
 
     /// @notice Updates the meme name based on current price

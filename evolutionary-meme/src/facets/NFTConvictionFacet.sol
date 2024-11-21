@@ -14,11 +14,8 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
  * @notice Implements ERC721 NFTs representing conviction in holding meme tokens
  */
 contract NFTConvictionFacet is IERC721, IERC721Metadata {
-    using Strings for uint256;
     using Address for address;
-
-    // Storage
-    mapping(uint256 => address) public tokenApprovals;
+    using Strings for uint256;
 
     // Events
     event ConvictionMinted(address indexed owner, uint256 indexed tokenId, uint256 amount);
@@ -199,7 +196,8 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
      */
     function getApproved(uint256 tokenId) public view returns (address) {
         if (!_exists(tokenId)) revert NonExistentToken();
-        return tokenApprovals[tokenId];
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        return ds.tokenApprovals[tokenId];
     }
 
     /**
@@ -208,7 +206,7 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
      * @param tokenId Token to check
      */
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
-        address owner = _ownerOf(tokenId); // Use _ownerOf instead of ownerOf
+        address owner = _ownerOf(tokenId);
         return (
             spender == owner ||
             isApprovedForAll(owner, spender) ||
@@ -277,17 +275,9 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
      * @param approved Approval status
      */
     function setApprovalForAll(address operator, bool approved) external {
-        LibDiamond.diamondStorage().convictionApprovals[msg.sender][operator] = approved;
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.operatorApprovals[msg.sender][operator] = approved;
         emit ApprovalForAll(msg.sender, operator, approved);
-    }
-
-    /**
-     * @notice Gets the approved address for a token
-     * @param tokenId Token to check
-     */
-    function getApproved(uint256 tokenId) external view returns (address) {
-        if (!_exists(tokenId)) revert NonExistentToken();
-        return LibDiamond.diamondStorage().tokenApprovals[tokenId];
     }
 
     /**
@@ -296,7 +286,8 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
      * @param operator Operator to check
      */
     function isApprovedForAll(address owner, address operator) public view returns (bool) {
-        return LibDiamond.diamondStorage().convictionApprovals[owner][operator];
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        return ds.operatorApprovals[owner][operator];
     }
 
     /**
@@ -308,26 +299,13 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
     }
 
     /**
-     * @notice Internal function to check if an address is the owner or approved
-     * @param spender Address to check
-     * @param tokenId Token to check
-     */
-    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
-        address owner = _ownerOf(tokenId);
-        return (
-            spender == owner ||
-            isApprovedForAll(owner, spender) ||
-            getApproved(tokenId) == spender
-        );
-    }
-
-    /**
      * @notice Internal function to approve an address for a token
      * @param to Address to approve
      * @param tokenId Token to approve
      */
     function _approve(address to, uint256 tokenId) internal {
-        LibDiamond.diamondStorage().tokenApprovals[tokenId] = to;
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.tokenApprovals[tokenId] = to;
         emit Approval(_ownerOf(tokenId), to, tokenId);
     }
 
@@ -361,7 +339,14 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
      */
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory data) internal {
         _transfer(from, to, tokenId);
-        if (to.isContract()) {
+        
+        // Check if the recipient is a contract
+        uint256 size;
+        assembly {
+            size := extcodesize(to)
+        }
+        
+        if (size > 0) {
             try IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, data) returns (bytes4 retval) {
                 if (retval != IERC721Receiver.onERC721Received.selector) {
                     revert UnsafeRecipient();

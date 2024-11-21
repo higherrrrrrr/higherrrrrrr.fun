@@ -16,7 +16,6 @@ contract CoreFacet {
         string memory _symbol,
         string memory _memeType
     ) external {
-        require(msg.sender == address(this), "Only diamond can initialize");
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
         require(_tokenCreator != address(0), "Zero address");

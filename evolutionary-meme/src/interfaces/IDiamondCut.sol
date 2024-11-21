@@ -25,5 +25,10 @@ interface IDiamondCut {
         bytes calldata _calldata
     ) external;
 
+    /// @notice Gets all function selectors supported by a specific facet
+    /// @param _facet The facet address to query
+    /// @return selectors Array of function selectors supported by the facet
+    function facetFunctionSelectors(address _facet) external view returns (bytes4[] memory selectors);
+
     event DiamondCut(FacetCut[] _diamondCut, address _init, bytes _calldata);
 }
