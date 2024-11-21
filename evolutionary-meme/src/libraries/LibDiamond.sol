@@ -19,6 +19,13 @@ library LibDiamond {
         string memeName;
     }
 
+    struct ConvictionData {
+        uint256 amount;
+        uint256 timestamp;
+        string memeState;
+        uint256 price;
+    }
+
     struct DiamondStorage {
         // Diamond specific storage
         mapping(bytes4 => FacetAddressAndPosition) selectorToFacetAndPosition;
@@ -54,7 +61,13 @@ library LibDiamond {
         MemeLevel[] memeLevels;
 
         // Uniswap specific storage
-        uint256 positionId;   // Added this for Uniswap NFT position tracking
+        uint256 positionId;
+
+        // NFT Conviction storage
+        uint256 nextConvictionId;
+        mapping(uint256 => address) convictionOwner;
+        mapping(uint256 => ConvictionData) convictionData;
+        mapping(address => mapping(address => bool)) convictionApprovals;
     }
 
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {

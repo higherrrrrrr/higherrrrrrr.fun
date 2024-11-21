@@ -4,15 +4,15 @@
 mkdir -p app/src/types/contracts
 
 # Move to the forge project directory first
-cd dynamic-meme
+cd evolutionary-meme
 
-# Generate ABI for DynamicMeme
-echo "Generating ABI for DynamicMeme..."
-forge inspect src/DynamicMeme.sol:DynamicMeme abi > ../app/src/types/contracts/DynamicMeme.json
+# Generate ABI for EvolutionaryMeme
+echo "Generating ABI for EvolutionaryMeme..."
+forge inspect src/EvolutionaryMeme.sol:EvolutionaryMeme abi > ../app/src/types/contracts/EvolutionaryMeme.json
 
-# Generate ABI for DynamicMemeFactory
-echo "Generating ABI for DynamicMemeFactory..."
-forge inspect src/DynamicMemeFactory.sol:DynamicMemeFactory abi > ../app/src/types/contracts/DynamicMemeFactory.json
+# Generate ABI for EvolutionaryMemeFactory
+echo "Generating ABI for EvolutionaryMemeFactory..."
+forge inspect src/EvolutionaryMemeFactory.sol:EvolutionaryMemeFactory abi > ../app/src/types/contracts/EvolutionaryMemeFactory.json
 
 # Move back to root
 cd ..
