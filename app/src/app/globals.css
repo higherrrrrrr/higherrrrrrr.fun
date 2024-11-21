@@ -30,3 +30,7 @@ body {
   scrollbar-width: thin;
   scrollbar-color: theme("colors.green.800") theme("colors.black");
 }
+
+::selection {
+  background-color: theme("colors.green.800");
+}
