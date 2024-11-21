@@ -79,7 +79,7 @@ function DisplayWithLabel({ value, label }: { value: number; label: string }) {
           count={2}
           value={value}
           height={100}
-          color="rgb(34 197 94)"
+          color="var(--countdown-color)"
           skew={false}
         />
       </div>
