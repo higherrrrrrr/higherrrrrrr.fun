@@ -2,13 +2,21 @@
 pragma solidity ^0.8.23;
 
 import {LibDiamond} from "../libraries/LibDiamond.sol";
-import {LibToken} from "../libraries/LibToken.sol";
-import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
-import {MemeFacet} from "./MemeFacet.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 contract BondingCurveFacet {
+    using FixedPointMathLib for uint256;
+    using FixedPointMathLib for int256;
+
+    error InsufficientLiquidity();
+    error OrderTooSmall();
+    error ZeroAddress();
+    error NotBondingCurve();
+    error SlippageTooHigh();
+
     uint256 public constant MIN_ORDER_SIZE = 0.0000001 ether;
 
+    event Transfer(address indexed from, address indexed to, uint256 value);
     event BondingCurveBuy(
         address buyer,
         address recipient,
@@ -16,7 +24,6 @@ contract BondingCurveFacet {
         uint256 tokenAmount,
         uint256 newTotalSupply
     );
-
     event BondingCurveSell(
         address seller,
         address recipient,
@@ -24,13 +31,6 @@ contract BondingCurveFacet {
         uint256 ethAmount,
         uint256 newTotalSupply
     );
-
-    error SlippageTooHigh();
-    error OrderTooSmall();
-    error NotBondingCurve();
-    error AlreadyGraduated();
-    error MaxSupplyReached();
-    error ZeroAddress();
 
     modifier onlyBondingCurve() {
         if (LibDiamond.diamondStorage().marketType != 0) revert NotBondingCurve();
@@ -47,26 +47,17 @@ contract BondingCurveFacet {
         if (msg.value < MIN_ORDER_SIZE) revert OrderTooSmall();
         if (recipient == address(0)) revert ZeroAddress();
 
-        // Calculate tokens to buy
+        // Calculate tokens to buy using bonding curve formula
         uint256 ethForTokens = msg.value;
-        tokensBought = IBondingCurve(ds.bondingCurve).getEthBuyQuote(
-            ds.totalSupply,
-            ethForTokens
-        );
+        tokensBought = getEthBuyQuote(ds.totalSupply, ethForTokens);
 
         if (tokensBought < minTokensOut) revert SlippageTooHigh();
 
         // Check if this would exceed PRIMARY_MARKET_SUPPLY
         uint256 newSupply = ds.totalSupply + tokensBought;
         if (newSupply > LibDiamond.PRIMARY_MARKET_SUPPLY) {
-            // Calculate exact amount to reach PRIMARY_MARKET_SUPPLY
             tokensBought = LibDiamond.PRIMARY_MARKET_SUPPLY - ds.totalSupply;
-
-            // Recalculate ETH needed
-            ethForTokens = IBondingCurve(ds.bondingCurve).getTokenBuyQuote(
-                ds.totalSupply,
-                tokensBought
-            );
+            ethForTokens = getTokenBuyQuote(ds.totalSupply, tokensBought);
 
             // Refund excess ETH
             uint256 refund = msg.value - ethForTokens;
@@ -77,7 +68,9 @@ contract BondingCurveFacet {
         }
 
         // Mint tokens to recipient
-        LibToken._mint(recipient, tokensBought);
+        ds.totalSupply += tokensBought;
+        ds.balances[recipient] += tokensBought;
+        emit Transfer(address(0), recipient, tokensBought);
 
         emit BondingCurveBuy(
             msg.sender,
@@ -105,17 +98,16 @@ contract BondingCurveFacet {
         if (recipient == address(0)) revert ZeroAddress();
         require(tokenAmount <= ds.balances[msg.sender], "Insufficient balance");
 
-        // Calculate ETH to receive
-        ethAmount = IBondingCurve(ds.bondingCurve).getTokenSellQuote(
-            ds.totalSupply,
-            tokenAmount
-        );
+        // Calculate ETH to receive using bonding curve formula
+        ethAmount = getTokenSellQuote(ds.totalSupply, tokenAmount);
 
         if (ethAmount < minEthOut) revert SlippageTooHigh();
         if (ethAmount < MIN_ORDER_SIZE) revert OrderTooSmall();
 
         // Burn tokens from seller
-        LibToken._burn(msg.sender, tokenAmount);
+        ds.balances[msg.sender] -= tokenAmount;
+        ds.totalSupply -= tokenAmount;
+        emit Transfer(msg.sender, address(0), tokenAmount);
 
         // Send ETH to recipient
         (bool success,) = recipient.call{value: ethAmount}("");
@@ -132,72 +124,83 @@ contract BondingCurveFacet {
         return ethAmount;
     }
 
-    function getTokensForEth(uint256 ethAmount) external view onlyBondingCurve returns (uint256) {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        return IBondingCurve(ds.bondingCurve).getEthBuyQuote(
-            ds.totalSupply,
-            ethAmount
-        );
+    // Bonding curve calculation functions
+    function getEthSellQuote(uint256 currentSupply, uint256 ethOrderSize) public pure returns (uint256) {
+        uint256 deltaY = ethOrderSize;
+        uint256 x0 = currentSupply;
+        uint256 exp_b_x0 = uint256((int256(B().mulWad(x0))).expWad());
+
+        uint256 exp_b_x1 = exp_b_x0 - deltaY.fullMulDiv(B(), A());
+        uint256 x1 = uint256(int256(exp_b_x1).lnWad()).divWad(B());
+        uint256 tokensToSell = x0 - x1;
+
+        return tokensToSell;
     }
 
-    function getEthForTokens(uint256 tokenAmount) external view onlyBondingCurve returns (uint256) {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        return IBondingCurve(ds.bondingCurve).getTokenSellQuote(
-            ds.totalSupply,
-            tokenAmount
-        );
+    function getTokenSellQuote(uint256 currentSupply, uint256 tokensToSell) public pure returns (uint256) {
+        if (currentSupply < tokensToSell) revert InsufficientLiquidity();
+        uint256 x0 = currentSupply;
+        uint256 x1 = x0 - tokensToSell;
+
+        uint256 exp_b_x0 = uint256((int256(B().mulWad(x0))).expWad());
+        uint256 exp_b_x1 = uint256((int256(B().mulWad(x1))).expWad());
+
+        uint256 deltaY = (exp_b_x0 - exp_b_x1).fullMulDiv(A(), B());
+
+        return deltaY;
     }
 
+    function getEthBuyQuote(uint256 currentSupply, uint256 ethOrderSize) public pure returns (uint256) {
+        uint256 x0 = currentSupply;
+        uint256 deltaY = ethOrderSize;
+
+        uint256 exp_b_x0 = uint256((int256(B().mulWad(x0))).expWad());
+        uint256 exp_b_x1 = exp_b_x0 + deltaY.fullMulDiv(B(), A());
+        uint256 deltaX = uint256(int256(exp_b_x1).lnWad()).divWad(B()) - x0;
+
+        return deltaX;
+    }
+
+    function getTokenBuyQuote(uint256 currentSupply, uint256 tokenOrderSize) public pure returns (uint256) {
+        uint256 x0 = currentSupply;
+        uint256 x1 = tokenOrderSize + currentSupply;
+
+        uint256 exp_b_x0 = uint256((int256(B().mulWad(x0))).expWad());
+        uint256 exp_b_x1 = uint256((int256(B().mulWad(x1))).expWad());
+
+        uint256 deltaY = (exp_b_x1 - exp_b_x0).fullMulDiv(A(), B());
+
+        return deltaY;
+    }
+
+    function getCurrentPrice(uint256 totalSupply) public pure returns (uint256) {
+        uint256 exp_b_x = uint256((int256(B().mulWad(totalSupply))).expWad());
+        return A().mulWad(exp_b_x);
+    }
+
+    // Constants as functions to match interface
+    function A() public pure returns (uint256) {
+        return 1060848709;
+    }
+
+    function B() public pure returns (uint256) {
+        return 4379701787;
+    }
+
+    // Helper view functions
     function getCurrentPriceView() public view returns (uint256) {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-
-        uint256 remainingTokenLiquidity = ds.balances[address(this)];
-        uint256 ethBalance = address(this).balance;
-
-        if (ethBalance < 0.01 ether) {
-            ethBalance = 0.01 ether;
-        }
-
-        return (remainingTokenLiquidity * 1e18) / ethBalance;
+        return getCurrentPrice(LibDiamond.diamondStorage().totalSupply);
     }
 
-    /// @notice Gets current price and updates meme if needed
-    function getCurrentPrice() external returns (uint256) {
-        // Update meme based on current price
-        if (LibDiamond.diamondStorage().marketType == 1) { // Only if in Uniswap market
-            MemeFacet(address(this)).updateMeme();
-        }
-
-        return getCurrentPriceView();
-    }
-
-    receive() external payable {
-        if (msg.sender != LibDiamond.diamondStorage().weth) {
-            this.buy(msg.sender, msg.sender, 0);
-        }
-    }
-
-    // Helper function to check remaining supply in primary market
     function remainingPrimarySupply() external view returns (uint256) {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         if (ds.totalSupply >= LibDiamond.PRIMARY_MARKET_SUPPLY) return 0;
         return LibDiamond.PRIMARY_MARKET_SUPPLY - ds.totalSupply;
     }
 
-    /// @notice Gets market state using view function
-    function getMarketState() external view returns (
-        uint256 totalSupply,
-        uint256 ethBalance,
-        uint256 spotPrice,
-        bool isGraduated
-    ) {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        return (
-            ds.totalSupply,
-            address(this).balance,
-            getCurrentPriceView(), // Use view version
-            ds.marketType != 0
-        );
+    receive() external payable {
+        if (msg.sender != LibDiamond.diamondStorage().weth) {
+            this.buy{value: msg.value}(msg.sender, msg.sender, 0);
+        }
     }
-
 }

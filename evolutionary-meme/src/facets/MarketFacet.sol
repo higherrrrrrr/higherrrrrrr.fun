@@ -172,7 +172,7 @@ contract MarketFacet {
 
         // Update balances directly in diamond storage
         ds.totalSupply += tokensBought;
-        ds.balances[recipient] += tokensBought;
+        ds.balances[recipient] += tokensBought;  // Make sure this line executes
 
         emit Transfer(address(0), recipient, tokensBought);
 

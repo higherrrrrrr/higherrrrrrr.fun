@@ -3,7 +3,6 @@ pragma solidity ^0.8.23;
 
 import "forge-std/Test.sol";
 import "../src/EvolutionaryMemeFactory.sol";
-import "../src/BondingCurve.sol";
 import "../src/facets/CoreFacet.sol";
 import "../src/facets/MarketFacet.sol";
 import "../src/facets/MemeFacet.sol";
@@ -460,14 +459,13 @@ contract EvolutionaryMemeTest is Test {
     function test_bondingCurveCalculations() public {
         console.log("Starting bonding curve calculations test");
         
-        vm.deal(USER, 100 ether);
+        vm.deal(USER, 10 ether);
         vm.startPrank(USER);
         
         // Log initial state
-        console.log("Initial total supply:", ERC20Facet(memeToken).totalSupply());
-        console.log("Initial user balance:", ERC20Facet(memeToken).balanceOf(USER));
+        _logTokenState("Initial State");
         
-        // Buy initial tokens
+        // Buy tokens
         uint256 buyAmount = 1 ether;
         uint256 expectedTokens = IBondingCurve(bondingCurve).getEthBuyQuote(
             ERC20Facet(memeToken).totalSupply(),
@@ -476,30 +474,57 @@ contract EvolutionaryMemeTest is Test {
         uint256 minTokens = expectedTokens * 90 / 100;
         
         // Execute buy
-        MarketFacet(memeToken).buy{value: buyAmount}(USER, minTokens);
+        uint256 tokensBought = MarketFacet(memeToken).buy{value: buyAmount}(USER, minTokens);
         
-        // Log state after buy
-        uint256 currentSupply = ERC20Facet(memeToken).totalSupply();
-        uint256 userBalance = ERC20Facet(memeToken).balanceOf(USER);
-        console.log("Current supply after buy:", currentSupply);
-        console.log("User token balance after buy:", userBalance);
+        // Log post-buy state
+        _logTokenState("After Buy");
         
-        // Test sell quotes with actual balance
-        uint256 sellAmount = userBalance / 2; // Only sell half
+        // Verify the buy was successful
+        assertGt(tokensBought, 0, "Should receive tokens");
+        assertEq(
+            ERC20Facet(memeToken).balanceOf(USER), 
+            tokensBought, 
+            "User balance should match tokens bought"
+        );
+        
+        // Test selling half of received tokens
+        uint256 sellAmount = tokensBought / 2;
         console.log("Attempting to sell amount:", sellAmount);
         
         // Get sell quote
         uint256 sellQuote = IBondingCurve(bondingCurve).getTokenSellQuote(
-            currentSupply,
+            ERC20Facet(memeToken).totalSupply(),
             sellAmount
         );
         console.log("Sell quote received:", sellQuote);
         
-        // Verify the sell quote
+        // Verify quote
         assertTrue(sellQuote > 0, "Should get valid sell quote");
         assertTrue(
             sellQuote < buyAmount, 
             "Sell quote should be less than original buy amount"
+        );
+        
+        _logTokenState("Before Sell");
+        
+        // Approve tokens for selling
+        ERC20Facet(memeToken).approve(address(memeToken), sellAmount);
+        
+        // Execute sell
+        uint256 ethReceived = MarketFacet(memeToken).sell(
+            sellAmount,
+            sellQuote * 90 / 100, // 10% slippage
+            USER
+        );
+        
+        _logTokenState("After Sell");
+        
+        // Final verification
+        assertGt(ethReceived, 0, "Should receive ETH from sell");
+        assertEq(
+            ERC20Facet(memeToken).balanceOf(USER), 
+            tokensBought - sellAmount, 
+            "User balance should be reduced by sold amount"
         );
         
         vm.stopPrank();
