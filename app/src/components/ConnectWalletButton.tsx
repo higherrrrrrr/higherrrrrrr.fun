@@ -41,7 +41,6 @@ export function ConnectWalletButton() {
             <Button
               onClick={() => {
                 disconnect();
-                location.reload();
               }}
               className="text-left gap-x-1 grid grid-cols-subgrid col-span-full items-center px-2 hover:bg-green-800 [data-focus]:bg-green-600 text-white"
             >

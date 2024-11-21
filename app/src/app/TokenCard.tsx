@@ -1,6 +1,7 @@
 "use client";
 
-import { TokenApiType } from "@/api-types";
+import { TokenApiType } from "@/api";
+import { Address } from "@/components/Address";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ShrinkToFit } from "@/components/ShrinkToFit";
 import { SparkLine } from "@/components/SparkLine";
@@ -46,11 +47,10 @@ export function TokenCard({ token }: { token: TokenApiType }) {
 
       <div className="pt-2 flex flex-col gap-y-2 flex-grow ">
         <div className=" px-3 flex flex-col">
-          <Tooltip content="The ticker will change as we go higherrrrrrrrrr">
+          <Tooltip content="The name will change as we go higherrrrrrrrrr">
             <div className="flex justify-between items-center">
               {isHovered ? (
                 <div className="flex font-bold overflow-visible flex-grow items-center">
-                  <span className="text-green-500">$</span>
                   <TypeAndDelete
                     words={token.price_levels.map((level) => level.name)}
                     timeBetweenChars={50}
@@ -58,20 +58,19 @@ export function TokenCard({ token }: { token: TokenApiType }) {
                 </div>
               ) : (
                 <div className="flex font-bold overflow-hidden flex-grow items-center">
-                  <span className="text-green-500">$</span>
-                  <ShrinkToFit>{token.symbol}</ShrinkToFit>
+                  <ShrinkToFit>{token.name}</ShrinkToFit>
                 </div>
               )}
 
-              <div className="text-xs flex-shrink-0" title={token.launch_date}>
-                {formatCompactDistance(new Date(), new Date(token.launch_date))}
+              <div className="text-sm font-bold flex-shrink-0 text-green-500">
+                ${token.symbol}
               </div>
             </div>
           </Tooltip>
 
           <span>
             <span>by </span>
-            <ClickToCopy text={token.address} />
+            <Address text={token.address} />
           </span>
         </div>
 
@@ -98,6 +97,13 @@ export function TokenCard({ token }: { token: TokenApiType }) {
           <span className="text-sm line-clamp-3">{token.description}</span>
         </div>
 
+        <div className="flex flex-col px-3">
+          <Label>when</Label>
+          <span className="text-sm line-clamp-3">
+            {formatCompactDistance(new Date(), new Date(token.launch_date))}
+          </span>
+        </div>
+
         <div className="mt-auto">
           <SparkLine data={token.ticker_data} />
         </div>
@@ -107,31 +113,6 @@ export function TokenCard({ token }: { token: TokenApiType }) {
         </Tooltip>
       </div>
     </Link>
-  );
-}
-
-function ClickToCopy({ text }: { text: string }) {
-  const [copySuccess, setCopySuccess] = useState(false);
-
-  const handleCopy = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigator.clipboard.writeText(text);
-    setCopySuccess(true);
-    setTimeout(() => setCopySuccess(false), 2000);
-  };
-
-  return (
-    <span
-      onClick={handleCopy}
-      className="text-green-600 text-sm cursor-pointer relative"
-    >
-      {text.slice(0, 6)}...{text.slice(-4)}
-      {copySuccess && (
-        <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-600 text-black px-2 py-1 rounded text-xs">
-          Copied!
-        </span>
-      )}
-    </span>
   );
 }
 
