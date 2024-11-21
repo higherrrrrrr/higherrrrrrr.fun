@@ -3,6 +3,10 @@
 /* eslint-disable */
 export type { DynamicMeme } from "./DynamicMeme";
 export type { DynamicMemeFactory } from "./DynamicMemeFactory";
+export type { EvolutionaryMeme } from "./EvolutionaryMeme";
+export type { EvolutionaryMemeFactory } from "./EvolutionaryMemeFactory";
 export * as factories from "./factories";
 export { DynamicMeme__factory } from "./factories/DynamicMeme__factory";
 export { DynamicMemeFactory__factory } from "./factories/DynamicMemeFactory__factory";
+export { EvolutionaryMeme__factory } from "./factories/EvolutionaryMeme__factory";
+export { EvolutionaryMemeFactory__factory } from "./factories/EvolutionaryMemeFactory__factory";

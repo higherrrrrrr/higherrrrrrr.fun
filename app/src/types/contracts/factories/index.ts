@@ -3,3 +3,5 @@
 /* eslint-disable */
 export { DynamicMeme__factory } from "./DynamicMeme__factory";
 export { DynamicMemeFactory__factory } from "./DynamicMemeFactory__factory";
+export { EvolutionaryMeme__factory } from "./EvolutionaryMeme__factory";
+export { EvolutionaryMemeFactory__factory } from "./EvolutionaryMemeFactory__factory";
