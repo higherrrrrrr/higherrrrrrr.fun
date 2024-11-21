@@ -1,11 +1,6 @@
 "use client";
 
-// countdownt timer at top
-// 1-2 paragraph about project // how the memes evolve. nfts for early hodlers. use a lot of epic words. evolutions, eras, convictions
-// fancy animations for the timer
-// fancy animations for the evoling asset names
 import { Display } from "react-7-segment-display";
-
 import { LAUNCH_DATE } from "@/constants";
 import { useEffect, useState } from "react";
 
@@ -19,15 +14,15 @@ export default function ComingSoon() {
             Welcome to the first meme coin platform where your assets evolve
             visually as they moon. Watch your investments transform in real-time
             as prices climb - each milestone unlocks new variations of your
-            token's name, creating a dynamic connection between value and its
+            token&apos;s name, creating a dynamic connection between value and its
             identity.
           </p>
           <p className="text-lg">
             Create your own evolving meme coins or join existing movements.
             Early believers who HODL through the transformative journey will be
-            rewarded with exclusive NFTs marking their role in each coin's
-            ascension. Every price threshold crossed isn't just a number - it's
-            a new era in your token's evolution, permanently etched into the
+            rewarded with exclusive NFTs marking their role in each coin&apos;s
+            ascension. Every price threshold crossed isn&apos;t just a number - it&apos;s
+            a new era in your token&apos;s evolution, permanently etched into the
             blockchain.
           </p>
         </div>

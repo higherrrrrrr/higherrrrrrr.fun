@@ -3,7 +3,6 @@ pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import "forge-std/console.sol";
-import "./BondingCurve.sol";
 import "./interfaces/IDiamondCut.sol";
 import "./facets/DiamondCutFacet.sol";
 import "./facets/ERC20Facet.sol";
@@ -11,6 +10,7 @@ import "./facets/CoreFacet.sol";
 import "./facets/MarketFacet.sol";
 import "./facets/MemeFacet.sol";
 import "./facets/NFTConvictionFacet.sol";
+import "./facets/BondingCurveFacet.sol";
 import {LibDiamond} from "./libraries/LibDiamond.sol";
 import "./EvolutionaryMeme.sol";
 
@@ -38,6 +38,7 @@ contract EvolutionaryMemeFactory {
     address public immutable marketFacet;
     address public immutable memeFacet;
     address public immutable nftConvictionFacet;
+    address public immutable bondingCurveFacet;
 
     // Events
     event MemeTokenDeployed(
@@ -94,6 +95,7 @@ contract EvolutionaryMemeFactory {
         marketFacet = address(new MarketFacet());
         memeFacet = address(new MemeFacet());
         nftConvictionFacet = address(new NFTConvictionFacet());
+        bondingCurveFacet = address(new BondingCurveFacet());
     }
 
     // Create a struct to hold initialization parameters to reduce stack variables
@@ -187,7 +189,7 @@ contract EvolutionaryMemeFactory {
         if (!success) revert FacetCutFailed();
 
         // Then register all other facets
-        IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](5);
+        IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](6);
         cuts[0] = IDiamondCut.FacetCut({
             facetAddress: erc20Facet,
             action: IDiamondCut.FacetCutAction.Add,
@@ -218,6 +220,12 @@ contract EvolutionaryMemeFactory {
             functionSelectors: _getFunctionSelectors(nftConvictionFacet)
         });
 
+        cuts[5] = IDiamondCut.FacetCut({
+            facetAddress: bondingCurveFacet,
+            action: IDiamondCut.FacetCutAction.Add,
+            functionSelectors: _getFunctionSelectors(bondingCurveFacet)
+        });
+
         try IDiamondCut(memeToken).diamondCut(cuts, address(0), new bytes(0)) {
             // Success
         } catch {
@@ -235,14 +243,8 @@ contract EvolutionaryMemeFactory {
         if (priceThresholds.length != memeNames.length) revert InvalidArrayLengths();
         if (priceThresholds.length == 0) revert InvalidArrayLengths();
 
-        // Deploy bonding curve
-        bondingCurveAddress = address(new BondingCurve());
-
-        // Create first meme level
-        LibDiamond.MemeLevel memory firstLevel = LibDiamond.MemeLevel({
-            priceThreshold: priceThresholds[0],
-            memeName: memeNames[0]
-        });
+        // Use bondingCurveFacet address instead of deploying new contract
+        bondingCurveAddress = bondingCurveFacet;
 
         // Deploy proxy
         memeToken = address(new ERC1967Proxy(
@@ -256,7 +258,10 @@ contract EvolutionaryMemeFactory {
             tokenURI: tokenURI,
             symbol: symbol,
             memeType: memeType,
-            firstLevel: firstLevel
+            firstLevel: LibDiamond.MemeLevel({
+                priceThreshold: priceThresholds[0],
+                memeName: memeNames[0]
+            })
         });
 
         _initializeMeme(memeToken, bondingCurveAddress, params, priceThresholds, memeNames);
@@ -349,6 +354,20 @@ contract EvolutionaryMemeFactory {
             // Both safeTransferFrom functions
             selectors[13] = bytes4(keccak256("safeTransferFrom(address,address,uint256)"));
             selectors[14] = bytes4(keccak256("safeTransferFrom(address,address,uint256,bytes)"));
+        }
+        else if (facet == bondingCurveFacet) {
+            selectors = new bytes4[](11);
+            selectors[0] = BondingCurveFacet.buy.selector;
+            selectors[1] = BondingCurveFacet.sell.selector;
+            selectors[2] = BondingCurveFacet.getEthSellQuote.selector;
+            selectors[3] = BondingCurveFacet.getTokenSellQuote.selector;
+            selectors[4] = BondingCurveFacet.getEthBuyQuote.selector;
+            selectors[5] = BondingCurveFacet.getTokenBuyQuote.selector;
+            selectors[6] = BondingCurveFacet.getCurrentPrice.selector;
+            selectors[7] = BondingCurveFacet.getCurrentPriceView.selector;
+            selectors[8] = BondingCurveFacet.remainingPrimarySupply.selector;
+            selectors[9] = BondingCurveFacet.A.selector;
+            selectors[10] = BondingCurveFacet.B.selector;
         }
         else {
             revert UnknownFacet();
