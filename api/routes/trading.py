@@ -114,12 +114,11 @@ def get_candles(token_address):
         'candles': [sample_candle] * 24  # Returns last 24 candles as placeholder
     })
 
-@trading.route('/highlighted-tokens', methods=['GET'])
+@trading.route('/highlighted-token', methods=['GET'])
 @require_auth
-def get_highlighted_tokens():
-    return jsonify({
-        'tokens': Config.HIGHLIGHTED_TOKENS
-    })
+def get_highlighted_token():
+    return SAMPLE_TOKENS[0]
+
 
 @trading.route('/contract-address', methods=['GET'])
 @require_auth
