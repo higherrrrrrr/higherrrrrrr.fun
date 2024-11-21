@@ -1,5 +1,15 @@
 "use server";
 
+import { notFound } from "next/navigation";
+
+export type NftApiType = {
+  address: string;
+  name: string;
+  minted_at: string;
+  image_url: string;
+  url: string;
+};
+
 export type PriceLevel = {
   name: string;
   greater_than: string;
@@ -81,4 +91,24 @@ export async function getHighlightedToken() {
   }
 
   return (await response.json()) as TokenApiType;
+}
+
+export async function getNftsForAddress(address: string) {
+  const response = await fetch(`http://localhost:8080/api/nfts/${address}`, {
+    headers: {
+      Authorization: "Bearer albertishigher$123$",
+    },
+  });
+
+  if (response.status === 404) {
+    notFound();
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    throw new Error(text);
+  }
+
+  return (await response.json()) as NftApiType[];
 }

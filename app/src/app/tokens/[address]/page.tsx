@@ -1,4 +1,5 @@
 import { getToken } from "@/api";
+import { Address } from "@/components/Address";
 import { Button } from "@/components/Button";
 import { ProgressBar } from "@/components/ProgressBar";
 
@@ -20,12 +21,11 @@ export default async function Token({
         />
 
         <div className="flex flex-col flex-grow gap-y-6">
-          <div>
+          <div className="flex flex-col">
             <h1 className="text-3xl font-bold">{token.name}</h1>
-            <div className="text-green-600">
-              Created by {token.address.slice(0, 6)}...
-              {token.address.slice(-4)}
-            </div>
+            <span className="flex items-baseline gap-1">
+              by <Address text={token.address} />
+            </span>
           </div>
 
           <div className="flex gap-x-6">

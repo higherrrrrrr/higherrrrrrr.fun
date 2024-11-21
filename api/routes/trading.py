@@ -38,6 +38,25 @@ def generate_random_token():
 # Sample token data - you can move this to config or a separate data file
 SAMPLE_TOKENS = [generate_random_token() for _ in range(50)]
 
+def generate_random_nft():
+    address = generate_random_eth_address()
+    return {
+        "address": address,
+        "name": "Random NFT",
+        "minted_at": "2024-03-19T00:00:00Z",
+        "image_url": f"https://picsum.photos/800/800?name={urllib.parse.quote(address)}",
+        "url": "https://opensea.io/assets/matic/0x251be3a17af4892035c37ebf5890f4a4d889dcad/78760900044811865368794127132449502176772068012355272429732834490166931582278",
+    }
+
+@trading.route('/nfts/<address>', methods=['GET'])
+@require_auth
+def get_nfts_for_address(address):
+    nfts = [generate_random_nft() for _ in range(50)]
+       
+    return jsonify(nfts)
+
+
+
 @trading.route('/tokens/<token_address>', methods=['GET'])
 @require_auth
 def get_token(token_address):

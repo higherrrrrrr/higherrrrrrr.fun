@@ -1,6 +1,7 @@
 "use client";
 
 import { TokenApiType } from "@/api";
+import { Address } from "@/components/Address";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ShrinkToFit } from "@/components/ShrinkToFit";
 import { SparkLine } from "@/components/SparkLine";
@@ -69,7 +70,7 @@ export function TokenCard({ token }: { token: TokenApiType }) {
 
           <span>
             <span>by </span>
-            <ClickToCopy text={token.address} />
+            <Address text={token.address} />
           </span>
         </div>
 
@@ -112,31 +113,6 @@ export function TokenCard({ token }: { token: TokenApiType }) {
         </Tooltip>
       </div>
     </Link>
-  );
-}
-
-function ClickToCopy({ text }: { text: string }) {
-  const [copySuccess, setCopySuccess] = useState(false);
-
-  const handleCopy = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigator.clipboard.writeText(text);
-    setCopySuccess(true);
-    setTimeout(() => setCopySuccess(false), 2000);
-  };
-
-  return (
-    <span
-      onClick={handleCopy}
-      className="text-green-600 text-sm cursor-pointer relative"
-    >
-      {text.slice(0, 6)}...{text.slice(-4)}
-      {copySuccess && (
-        <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-600 text-black px-2 py-1 rounded text-xs">
-          Copied!
-        </span>
-      )}
-    </span>
   );
 }
 
