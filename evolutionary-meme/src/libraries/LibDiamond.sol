@@ -8,6 +8,7 @@ library LibDiamond {
     uint256 constant MAX_TOTAL_SUPPLY = 1_000_000_000e18; // 1B tokens
     uint256 constant PRIMARY_MARKET_SUPPLY = 800_000_000e18; // 800M tokens
     uint256 constant SECONDARY_MARKET_SUPPLY = 200_000_000e18; // 200M tokens
+    uint256 constant CONVICTION_THRESHOLD = 1_000_000_000e18 / 1000; // 0.1% of total supply
 
     struct FacetAddressAndPosition {
         address facetAddress;
@@ -67,7 +68,8 @@ library LibDiamond {
         uint256 nextConvictionId;
         mapping(uint256 => address) convictionOwner;
         mapping(uint256 => ConvictionData) convictionData;
-        mapping(address => mapping(address => bool)) convictionApprovals;
+        mapping(uint256 => address) tokenApprovals;
+        mapping(address => mapping(address => bool)) operatorApprovals;
     }
 
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {

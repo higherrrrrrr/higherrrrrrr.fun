@@ -302,8 +302,8 @@ contract MarketFacet {
         });
 
         // Mint position
-        (uint256 positionId, uint128 liquidity, uint256 amount0Used, uint256 amount1Used) =
-                                INonfungiblePositionManager(ds.nonfungiblePositionManager).mint(params);
+        (uint256 positionId, , uint256 amount0Used, uint256 amount1Used) = 
+            INonfungiblePositionManager(ds.nonfungiblePositionManager).mint(params);
 
         // Save position ID
         ds.positionId = positionId;
@@ -370,5 +370,51 @@ contract MarketFacet {
             revert("Not pool");
         }
         return this.onERC721Received.selector;
+    }
+
+    /**
+     * @notice Gets the current price from either bonding curve or Uniswap
+     */
+    function getCurrentPrice() external view returns (uint256) {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        if (ds.marketType == 0) {
+            // Use bonding curve price
+            return getCurrentPriceView();
+        } else {
+            // Use Uniswap price
+            return getUniswapPrice();
+        }
+    }
+
+    /**
+     * @notice Gets the current bonding curve price
+     */
+    function getCurrentPriceView() public view returns (uint256) {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        if (ds.marketType != 0) revert InvalidMarketType();
+        
+        return IBondingCurve(ds.bondingCurve).getCurrentPrice(ds.totalSupply);
+    }
+
+    /**
+     * @notice Gets the current Uniswap price
+     */
+    function getUniswapPrice() public view returns (uint256) {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        if (ds.marketType != 1) revert InvalidMarketType();
+
+        // Get the current sqrt price from the pool
+        IUniswapV3Pool pool = IUniswapV3Pool(ds.poolAddress);
+        (uint160 sqrtPriceX96, , , , , ,) = pool.slot0();
+        
+        // Convert sqrt price to regular price
+        uint256 price = uint256(sqrtPriceX96) * uint256(sqrtPriceX96) * 1e18 >> (96 * 2);
+        
+        // If WETH is token1, invert the price
+        if (address(this) < ds.weth) {
+            price = (1e36 / price);
+        }
+        
+        return price;
     }
 }

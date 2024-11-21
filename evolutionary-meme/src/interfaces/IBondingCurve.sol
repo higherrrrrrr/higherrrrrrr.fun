@@ -34,4 +34,9 @@ interface IBondingCurve {
 
     /// @notice Thrown when trying to sell more tokens than available
     error InsufficientLiquidity();
+
+    /// @notice Returns the current price of the token
+    /// @param totalSupply Current total supply of tokens
+    /// @return Current price of the token
+    function getCurrentPrice(uint256 totalSupply) external view returns (uint256);
 }

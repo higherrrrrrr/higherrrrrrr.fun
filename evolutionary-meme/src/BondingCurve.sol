@@ -75,4 +75,15 @@ contract BondingCurve {
 
         return deltaY;
     }
+
+    /**
+     * @notice Gets the current price based on total supply
+     * @param totalSupply Current total supply
+     * @return Current price in ETH
+     */
+    function getCurrentPrice(uint256 totalSupply) external pure returns (uint256) {
+        // Use the exponential bonding curve formula y = A*e^(Bx)
+        uint256 exp_b_x = uint256((int256(B.mulWad(totalSupply))).expWad());
+        return A.mulWad(exp_b_x);
+    }
 }
