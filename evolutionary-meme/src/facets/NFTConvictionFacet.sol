@@ -17,6 +17,9 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
     using Strings for uint256;
     using Address for address;
 
+    // Storage
+    mapping(uint256 => address) public tokenApprovals;
+
     // Events
     event ConvictionMinted(address indexed owner, uint256 indexed tokenId, uint256 amount);
     event ConvictionBurned(address indexed owner, uint256 indexed tokenId);
@@ -188,6 +191,29 @@ contract NFTConvictionFacet is IERC721, IERC721Metadata {
         address owner = _ownerOf(tokenId);
         if (owner == address(0)) revert NonExistentToken();
         return owner;
+    }
+
+    /**
+     * @notice Gets the approved address for a token ID
+     * @param tokenId The token ID to query
+     */
+    function getApproved(uint256 tokenId) public view returns (address) {
+        if (!_exists(tokenId)) revert NonExistentToken();
+        return tokenApprovals[tokenId];
+    }
+
+    /**
+     * @notice Internal function to check if an address is the owner or approved
+     * @param spender Address to check
+     * @param tokenId Token to check
+     */
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
+        address owner = _ownerOf(tokenId); // Use _ownerOf instead of ownerOf
+        return (
+            spender == owner ||
+            isApprovedForAll(owner, spender) ||
+            getApproved(tokenId) == spender
+        );
     }
 
     /**

@@ -10,6 +10,7 @@ import {ISwapRouter} from "../interfaces/ISwapRouter.sol";
 import {IUniswapV3Pool} from "../interfaces/IUniswapV3Pool.sol";
 import {INonfungiblePositionManager} from "../interfaces/INonfungiblePositionManager.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
+import {NFTConvictionFacet} from "./NFTConvictionFacet.sol";
 
 contract MarketFacet {
     using SafeERC20 for IERC20;

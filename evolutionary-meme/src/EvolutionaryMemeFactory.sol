@@ -2,18 +2,16 @@
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "./DynamicMeme.sol";
 import "./BondingCurve.sol";
 import "./interfaces/IDiamondCut.sol";
 import "./facets/DiamondCutFacet.sol";
 import "./facets/ERC20Facet.sol";
 import "./facets/CoreFacet.sol";
-import "./facets/BondingCurveFacet.sol";
-import "./facets/UniswapFacet.sol";
-import "./facets/FeeFacet.sol";
+import "./facets/MarketFacet.sol";
 import "./facets/MemeFacet.sol";
 import "./facets/NFTConvictionFacet.sol";
 import {LibDiamond} from "./libraries/LibDiamond.sol";
+import "./EvolutionaryMeme.sol";
 
 /**
  * @title EvolutionaryMemeFactory
@@ -27,8 +25,7 @@ contract EvolutionaryMemeFactory {
 
     // Immutable addresses
     address public immutable implementation;
-    address public immutable protocolFeeRecipient;
-    address public immutable protocolRewards;
+    address public immutable feeRecipient;
     address public immutable weth;
     address public immutable positionManager;
     address public immutable swapRouter;
@@ -37,9 +34,7 @@ contract EvolutionaryMemeFactory {
     address public immutable diamondCutFacet;
     address public immutable erc20Facet;
     address public immutable coreFacet;
-    address public immutable bondingCurveFacet;
-    address public immutable uniswapFacet;
-    address public immutable feeFacet;
+    address public immutable marketFacet;
     address public immutable memeFacet;
     address public immutable nftConvictionFacet;
 
@@ -48,29 +43,43 @@ contract EvolutionaryMemeFactory {
         address indexed token,
         address indexed creator,
         string memeType,
-        address bondingCurve
+        address bondingCurve,
+        uint256 timestamp
     );
 
-    /**
-     * @notice Deploys factory and all facet implementations
-     */
+    event FacetAdded(
+        address indexed token,
+        address indexed facet,
+        bytes4[] selectors
+    );
+
+    // Errors
+    error InvalidArrayLengths();
+    error ZeroAddress();
+    error UnknownFacet();
+    error DeploymentFailed();
+    error InvalidInitialization();
+    error FacetCutFailed();
+
     constructor(
-        address _protocolFeeRecipient,
-        address _protocolRewards,
+        address _feeRecipient,
         address _weth,
         address _positionManager,
         address _swapRouter
     ) {
-        protocolFeeRecipient = _protocolFeeRecipient;
-        protocolRewards = _protocolRewards;
+        if (_feeRecipient == address(0)) revert ZeroAddress();
+        if (_weth == address(0)) revert ZeroAddress();
+        if (_positionManager == address(0)) revert ZeroAddress();
+        if (_swapRouter == address(0)) revert ZeroAddress();
+
+        feeRecipient = _feeRecipient;
         weth = _weth;
         positionManager = _positionManager;
         swapRouter = _swapRouter;
 
         // Deploy implementation
-        implementation = address(new DynamicMeme(
-            _protocolFeeRecipient,
-            _protocolRewards,
+        implementation = address(new EvolutionaryMeme(
+            _feeRecipient,
             _weth,
             _positionManager,
             _swapRouter
@@ -80,38 +89,25 @@ contract EvolutionaryMemeFactory {
         diamondCutFacet = address(new DiamondCutFacet());
         erc20Facet = address(new ERC20Facet());
         coreFacet = address(new CoreFacet());
-        bondingCurveFacet = address(new BondingCurveFacet());
-        uniswapFacet = address(new UniswapFacet());
-        feeFacet = address(new FeeFacet());
+        marketFacet = address(new MarketFacet());
         memeFacet = address(new MemeFacet());
         nftConvictionFacet = address(new NFTConvictionFacet());
     }
 
-    /**
-     * @notice Deploys a new meme token with all facets
-     * @param symbol Token symbol
-     * @param tokenURI IPFS URI for token metadata
-     * @param memeType Type of meme (e.g., "length", "pepe", etc.)
-     * @param platformReferrer Address for platform referrer fees
-     * @param priceThresholds Array of price thresholds for meme evolution
-     * @param memeNames Array of meme names corresponding to price thresholds
-     * @return memeToken Address of deployed meme token
-     * @return bondingCurveAddress Address of deployed bonding curve
-     */
     function deployMeme(
         string memory symbol,
         string memory tokenURI,
         string memory memeType,
-        address platformReferrer,
         uint256[] calldata priceThresholds,
         string[] calldata memeNames
     ) external returns (address memeToken, address bondingCurveAddress) {
-        require(priceThresholds.length == memeNames.length, "Arrays must be equal length");
+        if (priceThresholds.length != memeNames.length) revert InvalidArrayLengths();
+        if (priceThresholds.length == 0) revert InvalidArrayLengths();
 
-        // Deploy a new bonding curve for this specific meme token
+        // Deploy bonding curve
         bondingCurveAddress = address(new BondingCurve());
 
-        // Create and marshal meme levels
+        // Create meme levels
         LibDiamond.MemeLevel[] memory memeLevels = new LibDiamond.MemeLevel[](priceThresholds.length);
         for (uint i = 0; i < priceThresholds.length; i++) {
             memeLevels[i] = LibDiamond.MemeLevel({
@@ -120,17 +116,17 @@ contract EvolutionaryMemeFactory {
             });
         }
 
-        // Deploy proxy with the DiamondCutFacet selector already initialized
+        // Deploy proxy
         ERC1967Proxy proxy = new ERC1967Proxy(
             implementation,
-            new bytes(0) // No initialization needed as diamond cut is set up in constructor
+            new bytes(0)
         );
-
         memeToken = address(proxy);
 
-        // Now add all the facets through the diamond cut
-        IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](8);
+        // Setup facets
+        IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](6);
 
+        // Add Diamond Cut facet first
         cuts[0] = IDiamondCut.FacetCut({
             facetAddress: diamondCutFacet,
             action: IDiamondCut.FacetCutAction.Add,
@@ -150,67 +146,55 @@ contract EvolutionaryMemeFactory {
         });
 
         cuts[3] = IDiamondCut.FacetCut({
-            facetAddress: bondingCurveFacet,
+            facetAddress: marketFacet,
             action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(bondingCurveFacet)
+            functionSelectors: _getFunctionSelectors(marketFacet)
         });
 
         cuts[4] = IDiamondCut.FacetCut({
-            facetAddress: uniswapFacet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(uniswapFacet)
-        });
-
-        cuts[5] = IDiamondCut.FacetCut({
-            facetAddress: feeFacet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(feeFacet)
-        });
-
-        cuts[6] = IDiamondCut.FacetCut({
             facetAddress: memeFacet,
             action: IDiamondCut.FacetCutAction.Add,
             functionSelectors: _getFunctionSelectors(memeFacet)
         });
 
-        cuts[7] = IDiamondCut.FacetCut({
+        cuts[5] = IDiamondCut.FacetCut({
             facetAddress: nftConvictionFacet,
             action: IDiamondCut.FacetCutAction.Add,
             functionSelectors: _getFunctionSelectors(nftConvictionFacet)
         });
 
-        // Prepare initialization data for core functionality
+        // Initialize
         bytes memory initData = abi.encodeWithSelector(
             CoreFacet.initialize.selector,
-            msg.sender,           // _tokenCreator
-            platformReferrer,     // _platformReferrer
-            bondingCurveAddress,  // _bondingCurve
-            tokenURI,            // _tokenURI
-            memeLevels[0].memeName, // Initial name is first meme name
-            symbol,              // _symbol
-            memeType            // _memeType
+            bondingCurveAddress,
+            tokenURI,
+            memeLevels[0].memeName,
+            symbol,
+            memeType,
+            memeLevels
         );
 
-        // Add all facets and initialize through diamond cut
-        IDiamondCut(memeToken).diamondCut(
-            cuts,
-            coreFacet,
-            initData
-        );
+        try IDiamondCut(memeToken).diamondCut(cuts, coreFacet, initData) {
+            // Initialize meme state after core initialization
+            MemeFacet(memeToken).initializeMeme(memeType, memeLevels);
 
-        // Initialize meme levels
-        MemeFacet(memeToken).initializeMeme(memeType, memeLevels);
+            emit MemeTokenDeployed(
+                memeToken,
+                msg.sender,
+                memeType,
+                bondingCurveAddress,
+                block.timestamp
+            );
 
-        emit MemeTokenDeployed(memeToken, msg.sender, memeType, bondingCurveAddress);
-        return (memeToken, bondingCurveAddress);
+            return (memeToken, bondingCurveAddress);
+        } catch {
+            revert DeploymentFailed();
+        }
     }
 
-    /**
-     * @notice Returns function selectors for a given facet
-     * @param facet Address of the facet
-     * @return selectors Array of function selectors
-     */
-    function _getFunctionSelectors(address facet) internal view returns (bytes4[] memory selectors) {
+    function _getFunctionSelectors(address facet) internal pure returns (bytes4[] memory selectors) {
+        if (facet == address(0)) revert ZeroAddress();
+
         if (facet == diamondCutFacet) {
             selectors = new bytes4[](1);
             selectors[0] = IDiamondCut.diamondCut.selector;
@@ -228,237 +212,135 @@ contract EvolutionaryMemeFactory {
             selectors[8] = ERC20Facet.transferFrom.selector;
         }
         else if (facet == coreFacet) {
-            selectors = new bytes4[](4);
+            selectors = new bytes4[](6);
             selectors[0] = CoreFacet.initialize.selector;
             selectors[1] = CoreFacet.tokenURI.selector;
             selectors[2] = CoreFacet.marketType.selector;
-            selectors[3] = bytes4(keccak256("multicall(bytes[])")); // If added
+            selectors[3] = bytes4(keccak256("multicall(bytes[])")); // Optional multicall support
+            selectors[4] = bytes4(keccak256("getImplementation()"));
+            selectors[5] = bytes4(keccak256("getMarketState()"));
         }
-        else if (facet == bondingCurveFacet) {
-            selectors = new bytes4[](9);
-            selectors[0] = BondingCurveFacet.buy.selector;
-            selectors[1] = BondingCurveFacet.sell.selector;
-            selectors[2] = BondingCurveFacet.getTokensForEth.selector;
-            selectors[3] = BondingCurveFacet.getEthForTokens.selector;
-            selectors[4] = bytes4(keccak256("currentPrice()"));
-            selectors[5] = bytes4(keccak256("getCurrentPriceView()"));
-            selectors[6] = bytes4(keccak256("getMarketState()"));
-            selectors[7] = bytes4(0xd0e30db0); // receive()
-            selectors[8] = bytes4(keccak256("fallback()"));
-        }
-        else if (facet == uniswapFacet) {
-            selectors = new bytes4[](6);
-            selectors[0] = UniswapFacet.initializePool.selector;
-            selectors[1] = UniswapFacet.graduateMarket.selector;
-            selectors[2] = UniswapFacet.swapExactInputSingle.selector;
-            selectors[3] = UniswapFacet.getCurrentPrice.selector;
-            selectors[4] = UniswapFacet.uniswapV3SwapCallback.selector;
-            selectors[5] = UniswapFacet.onERC721Received.selector;
-        }
-        else if (facet == feeFacet) {
-            selectors = new bytes4[](4);
-            selectors[0] = FeeFacet.collectFees.selector;
-            selectors[1] = FeeFacet.calculateFeeBreakdown.selector;
-            selectors[2] = FeeFacet.previewFees.selector;
-            selectors[3] = FeeFacet.getFeeRecipients.selector;
+        else if (facet == marketFacet) {
+            selectors = new bytes4[](18);
+            // Market core functions
+            selectors[0] = MarketFacet.buy.selector;
+            selectors[1] = MarketFacet.sell.selector;
+            selectors[2] = MarketFacet.getMarketInfo.selector;
+            // Bonding curve functions
+            selectors[3] = MarketFacet.getTokensForEth.selector;
+            selectors[4] = MarketFacet.getEthForTokens.selector;
+            selectors[5] = MarketFacet.getCurrentPrice.selector;
+            selectors[6] = MarketFacet.getCurrentPriceView.selector;
+            // Pool functions
+            selectors[7] = MarketFacet.initializePool.selector;
+            selectors[8] = MarketFacet.graduateMarket.selector;
+            selectors[9] = MarketFacet.swapExactInputSingle.selector;
+            // Callback functions
+            selectors[10] = MarketFacet.uniswapV3SwapCallback.selector;
+            selectors[11] = MarketFacet.onERC721Received.selector;
+            // Market state functions
+            selectors[12] = bytes4(keccak256("getMarketState()"));
+            selectors[13] = bytes4(keccak256("getPoolInfo()"));
+            selectors[14] = bytes4(keccak256("getBondingCurveState()"));
+            // Receive/fallback
+            selectors[15] = bytes4(0xd0e30db0); // receive()
+            selectors[16] = bytes4(keccak256("fallback()"));
+            selectors[17] = bytes4(keccak256("getQuote(uint256)"));
         }
         else if (facet == memeFacet) {
-            selectors = new bytes4[](8);
+            selectors = new bytes4[](10);
             selectors[0] = MemeFacet.initializeMeme.selector;
             selectors[1] = MemeFacet.updateMeme.selector;
             selectors[2] = MemeFacet.getCurrentPrice.selector;
             selectors[3] = MemeFacet.getMemeLevelsCount.selector;
             selectors[4] = MemeFacet.getAllMemeLevels.selector;
             selectors[5] = MemeFacet.getMemeState.selector;
-            selectors[6] = MemeFacet.onERC721Received.selector;
-            selectors[7] = bytes4(keccak256("name()")); // ERC20 name override
+            selectors[6] = MemeFacet.getCurrentMeme.selector;
+            selectors[7] = MemeFacet.getMemeType.selector;
+            selectors[8] = MemeFacet.onERC721Received.selector;
+            selectors[9] = bytes4(keccak256("name()")); // ERC20 name override
         }
         else if (facet == nftConvictionFacet) {
-            selectors = new bytes4[](15);
+            selectors = new bytes4[](16);
+            // NFT core
             selectors[0] = NFTConvictionFacet.hasConviction.selector;
             selectors[1] = NFTConvictionFacet.mintConviction.selector;
             selectors[2] = NFTConvictionFacet.burnConviction.selector;
+            // ERC721 metadata
             selectors[3] = NFTConvictionFacet.tokenURI.selector;
             selectors[4] = NFTConvictionFacet.name.selector;
             selectors[5] = NFTConvictionFacet.symbol.selector;
+            // ERC721 core
             selectors[6] = NFTConvictionFacet.balanceOf.selector;
             selectors[7] = NFTConvictionFacet.ownerOf.selector;
             selectors[8] = NFTConvictionFacet.approve.selector;
             selectors[9] = NFTConvictionFacet.getApproved.selector;
             selectors[10] = NFTConvictionFacet.setApprovalForAll.selector;
             selectors[11] = NFTConvictionFacet.isApprovedForAll.selector;
+            // Transfer functions
             selectors[12] = NFTConvictionFacet.transferFrom.selector;
             selectors[13] = NFTConvictionFacet.safeTransferFrom.selector;
-            selectors[14] = bytes4(keccak256("safeTransferFrom(address,address,uint256,bytes)")); // overloaded version
+            selectors[14] = bytes4(keccak256("safeTransferFrom(address,address,uint256,bytes)"));
+            // Conviction specific
+            selectors[15] = bytes4(keccak256("getConvictionData(uint256)"));
         }
         else {
-            revert("Unknown facet");
+            revert UnknownFacet();
         }
-        return selectors;
     }
 
     /**
-     * @notice Utility function to get all facet addresses
+     * @notice Gets all facet addresses and their selectors
      */
-    function getFacets() external view returns (
-        address diamondCut,
-        address erc20,
-        address core,
-        address bondingCurve,
-        address uniswap,
-        address fee,
-        address meme,
-        address nftConviction
+    function getFacetInfo(address memeToken) external view returns (
+        address[] memory facets,
+        uint256[] memory selectorCounts,
+        bool initialized
     ) {
-        return (
-            diamondCutFacet,
-            erc20Facet,
-            coreFacet,
-            bondingCurveFacet,
-            uniswapFacet,
-            feeFacet,
-            memeFacet,
-            nftConvictionFacet
-        );
+        facets = new address[](6);
+        selectorCounts = new uint256[](6);
+
+        facets[0] = diamondCutFacet;
+        facets[1] = erc20Facet;
+        facets[2] = coreFacet;
+        facets[3] = marketFacet;
+        facets[4] = memeFacet;
+        facets[5] = nftConvictionFacet;
+
+        for(uint i = 0; i < facets.length; i++) {
+            try IDiamondCut(memeToken).facetFunctionSelectors(facets[i]) returns (bytes4[] memory selectors) {
+                selectorCounts[i] = selectors.length;
+            } catch {
+                selectorCounts[i] = 0;
+            }
+        }
+
+        // Check if token is initialized
+        try ERC20Facet(memeToken).name() returns (string memory) {
+            initialized = true;
+        } catch {
+            initialized = false;
+        }
+
+        return (facets, selectorCounts, initialized);
     }
 
     /**
-     * @notice Utility function to get implementation addresses
+     * @notice Gets all system addresses
      */
     function getAddresses() external view returns (
         address _implementation,
-        address _protocolFeeRecipient,
-        address _protocolRewards,
+        address _feeRecipient,
         address _weth,
         address _positionManager,
         address _swapRouter
     ) {
         return (
             implementation,
-            protocolFeeRecipient,
-            protocolRewards,
+            feeRecipient,
             weth,
             positionManager,
             swapRouter
         );
-    }
-
-    /**
-     * @notice Utility function to verify a deployed meme token's facets
-     * @param memeToken Address of the deployed meme token
-     */
-    function verifyDeployment(address memeToken) external view returns (
-        bool hasAllFacets,
-        bool[8] memory facetStatus
-    ) {
-        // Check each facet's functions are properly registered
-        try IDiamondCut(memeToken).facetFunctionSelectors(diamondCutFacet) returns (bytes4[] memory selectors) {
-            facetStatus[0] = selectors.length == _getFunctionSelectors(diamondCutFacet).length;
-        } catch {
-            facetStatus[0] = false;
-        }
-
-        try IDiamondCut(memeToken).facetFunctionSelectors(erc20Facet) returns (bytes4[] memory selectors) {
-            facetStatus[1] = selectors.length == _getFunctionSelectors(erc20Facet).length;
-        } catch {
-            facetStatus[1] = false;
-        }
-
-        try IDiamondCut(memeToken).facetFunctionSelectors(coreFacet) returns (bytes4[] memory selectors) {
-            facetStatus[2] = selectors.length == _getFunctionSelectors(coreFacet).length;
-        } catch {
-            facetStatus[2] = false;
-        }
-
-        try IDiamondCut(memeToken).facetFunctionSelectors(bondingCurveFacet) returns (bytes4[] memory selectors) {
-            facetStatus[3] = selectors.length == _getFunctionSelectors(bondingCurveFacet).length;
-        } catch {
-            facetStatus[3] = false;
-        }
-
-        try IDiamondCut(memeToken).facetFunctionSelectors(uniswapFacet) returns (bytes4[] memory selectors) {
-            facetStatus[4] = selectors.length == _getFunctionSelectors(uniswapFacet).length;
-        } catch {
-            facetStatus[4] = false;
-        }
-
-        try IDiamondCut(memeToken).facetFunctionSelectors(feeFacet) returns (bytes4[] memory selectors) {
-            facetStatus[5] = selectors.length == _getFunctionSelectors(feeFacet).length;
-        } catch {
-            facetStatus[5] = false;
-        }
-
-        try IDiamondCut(memeToken).facetFunctionSelectors(memeFacet) returns (bytes4[] memory selectors) {
-            facetStatus[6] = selectors.length == _getFunctionSelectors(memeFacet).length;
-        } catch {
-            facetStatus[6] = false;
-        }
-
-        try IDiamondCut(memeToken).facetFunctionSelectors(nftConvictionFacet) returns (bytes4[] memory selectors) {
-            facetStatus[7] = selectors.length == _getFunctionSelectors(nftConvictionFacet).length;
-        } catch {
-            facetStatus[7] = false;
-        }
-
-        // Check if all facets are properly registered
-        hasAllFacets = true;
-        for(uint i = 0; i < facetStatus.length; i++) {
-            if (!facetStatus[i]) {
-                hasAllFacets = false;
-                break;
-            }
-        }
-
-        return (hasAllFacets, facetStatus);
-    }
-
-    /**
-     * @notice Helper function to encode meme initialization data
-     * @param tokenCreator Address of token creator
-     * @param platformReferrer Address of platform referrer
-     * @param bondingCurve Address of bonding curve
-     * @param tokenURI Token URI
-     * @param name Initial token name
-     * @param symbol Token symbol
-     * @param memeType Type of meme
-     */
-    function encodeInitData(
-        address tokenCreator,
-        address platformReferrer,
-        address bondingCurve,
-        string memory tokenURI,
-        string memory name,
-        string memory symbol,
-        string memory memeType
-    ) external pure returns (bytes memory) {
-        return abi.encodeWithSelector(
-            CoreFacet.initialize.selector,
-            tokenCreator,
-            platformReferrer,
-            bondingCurve,
-            tokenURI,
-            name,
-            symbol,
-            memeType
-        );
-    }
-
-    /**
-     * @notice Internal helper to combine function selectors into a single array
-     * @param selectors1 First array of selectors
-     * @param selectors2 Second array of selectors
-     */
-    function _combineSelectors(
-        bytes4[] memory selectors1,
-        bytes4[] memory selectors2
-    ) internal pure returns (bytes4[] memory) {
-        bytes4[] memory combined = new bytes4[](selectors1.length + selectors2.length);
-        for (uint i = 0; i < selectors1.length; i++) {
-            combined[i] = selectors1[i];
-        }
-        for (uint i = 0; i < selectors2.length; i++) {
-            combined[selectors1.length + i] = selectors2[i];
-        }
-        return combined;
     }
 }
