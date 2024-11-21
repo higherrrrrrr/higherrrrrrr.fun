@@ -42,7 +42,7 @@ export function ClientLayout({ children }: PropsWithChildren) {
 
 function Header() {
   return (
-    <div className="flex justify-between p-6 items-center">
+    <div className="flex flex-col md:flex-row md:justify-between p-6 md:items-center gap-4">
       <Link href="/" className="text-xl font-bold">
         highe
         <span className="text-green-600">
@@ -50,7 +50,7 @@ function Header() {
         </span>
       </Link>
 
-      <div className="flex gap-x-4">
+      <div className="flex gap-x-4 flex-col sm:flex-row gap-2 items-stretch">
         <Link href="/new-token">
           <Button>+ New Coin</Button>
         </Link>
