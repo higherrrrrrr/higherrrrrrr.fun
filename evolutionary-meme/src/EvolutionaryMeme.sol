@@ -4,7 +4,7 @@ import {LibDiamond} from "./libraries/LibDiamond.sol";
 import {IDiamondCut} from "./interfaces/IDiamondCut.sol";
 
 
-contract DynamicMeme {
+contract EvolutionaryMeme {
     constructor(
         address _protocolFeeRecipient,
         address _protocolRewards,
