@@ -2,7 +2,6 @@
 pragma solidity ^0.8.23;
 
 import {LibDiamond} from "../libraries/LibDiamond.sol";
-import {LibToken} from "../libraries/LibToken.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IWETH} from "../interfaces/IWETH.sol";
@@ -11,6 +10,7 @@ import {IUniswapV3Pool} from "../interfaces/IUniswapV3Pool.sol";
 import {INonfungiblePositionManager} from "../interfaces/INonfungiblePositionManager.sol";
 import {IBondingCurve} from "../interfaces/IBondingCurve.sol";
 import {NFTConvictionFacet} from "./NFTConvictionFacet.sol";
+import "forge-std/console.sol";
 
 contract MarketFacet {
     using SafeERC20 for IERC20;
@@ -22,6 +22,8 @@ contract MarketFacet {
     uint256 internal constant MIN_ORDER_SIZE = 0.0000001 ether;
 
     // Events
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
     event TokensPurchased(
         address indexed buyer,
         address indexed recipient,
@@ -29,7 +31,6 @@ contract MarketFacet {
         uint256 tokenAmount,
         uint8 marketType
     );
-
     event TokensSold(
         address indexed seller,
         address indexed recipient,
@@ -37,7 +38,6 @@ contract MarketFacet {
         uint256 ethAmount,
         uint8 marketType
     );
-
     event MarketGraduated(
         address token,
         address pool,
@@ -155,11 +155,13 @@ contract MarketFacet {
     ) internal returns (uint256) {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
+        // Get quote from bonding curve
         uint256 tokensBought = IBondingCurve(ds.bondingCurve).getEthBuyQuote(
             ds.totalSupply,
             ethAmount
         );
 
+        // Check slippage
         if (tokensBought < minTokensOut) revert SlippageTooHigh();
 
         // Check if this would exceed PRIMARY_MARKET_SUPPLY
@@ -168,7 +170,12 @@ contract MarketFacet {
             tokensBought = LibDiamond.PRIMARY_MARKET_SUPPLY - ds.totalSupply;
         }
 
-        LibToken._mint(recipient, tokensBought);
+        // Update balances directly in diamond storage
+        ds.totalSupply += tokensBought;
+        ds.balances[recipient] += tokensBought;
+
+        emit Transfer(address(0), recipient, tokensBought);
+
         return tokensBought;
     }
 
@@ -211,6 +218,10 @@ contract MarketFacet {
     ) internal returns (uint256) {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
+        // Check balance directly
+        require(ds.balances[msg.sender] >= tokenAmount, "ERC20: insufficient");
+
+        // Get quote
         uint256 ethAmount = IBondingCurve(ds.bondingCurve).getTokenSellQuote(
             ds.totalSupply,
             tokenAmount
@@ -218,8 +229,11 @@ contract MarketFacet {
 
         if (ethAmount < minEthOut) revert SlippageTooHigh();
 
-        // Burn tokens from seller
-        LibToken._burn(msg.sender, tokenAmount);
+        // Update balances directly in diamond storage
+        ds.balances[msg.sender] -= tokenAmount;
+        ds.totalSupply -= tokenAmount;
+
+        emit Transfer(msg.sender, address(0), tokenAmount);
 
         return ethAmount;
     }
@@ -233,11 +247,15 @@ contract MarketFacet {
     ) internal returns (uint256) {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
-        // Transfer tokens to contract
-        LibToken._transfer(msg.sender, address(this), tokenAmount);
+        // Transfer tokens to contract using diamond storage directly
+        require(ds.balances[msg.sender] >= tokenAmount, "ERC20: insufficient");
+        ds.balances[msg.sender] -= tokenAmount;
+        ds.balances[address(this)] += tokenAmount;
+        emit Transfer(msg.sender, address(this), tokenAmount);
 
-        // Approve router
-        LibToken._approve(address(this), ds.swapRouter, tokenAmount);
+        // Set allowance using diamond storage directly
+        ds.allowances[address(this)][ds.swapRouter] = tokenAmount;
+        emit Approval(address(this), ds.swapRouter, tokenAmount);
 
         // Execute swap
         ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
@@ -271,13 +289,16 @@ contract MarketFacet {
         uint256 ethLiquidity = address(this).balance;
         IWETH(ds.weth).deposit{value: ethLiquidity}();
 
-        // Mint secondary market supply
+        // Mint secondary market supply directly
         uint256 tokenLiquidity = LibDiamond.SECONDARY_MARKET_SUPPLY;
-        LibToken._mint(address(this), tokenLiquidity);
+        ds.totalSupply += tokenLiquidity;
+        ds.balances[address(this)] += tokenLiquidity;
+        emit Transfer(address(0), address(this), tokenLiquidity);
 
-        // Approve position manager
+        // Approve position manager using diamond storage directly
         IERC20(ds.weth).safeIncreaseAllowance(ds.nonfungiblePositionManager, ethLiquidity);
-        LibToken._approve(address(this), ds.nonfungiblePositionManager, tokenLiquidity);
+        ds.allowances[address(this)][ds.nonfungiblePositionManager] = tokenLiquidity;
+        emit Approval(address(this), ds.nonfungiblePositionManager, tokenLiquidity);
 
         // Determine token order
         bool isWethToken0 = address(ds.weth) < address(this);

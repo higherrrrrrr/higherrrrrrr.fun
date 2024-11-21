@@ -1,18 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
+import {FixedPointMathLib} from "../lib/solady/src/utils/FixedPointMathLib.sol";
 
-/*
-    !!!         !!!         !!!
-    !!!         !!!         !!!
-    !!!         !!!         !!!
-    !!!         !!!         !!!
-    !!!         !!!         !!!
-    !!!         !!!         !!!
-
-    WOW         WOW         WOW
-*/
 contract BondingCurve {
     using FixedPointMathLib for uint256;
     using FixedPointMathLib for int256;

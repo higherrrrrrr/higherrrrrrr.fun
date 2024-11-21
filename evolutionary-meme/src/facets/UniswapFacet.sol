@@ -2,7 +2,6 @@
 pragma solidity ^0.8.23;
 
 import {LibDiamond} from "../libraries/LibDiamond.sol";
-import {LibToken} from "../libraries/LibToken.sol";
 import {IWETH} from "../interfaces/IWETH.sol";
 import {ISwapRouter} from "../interfaces/ISwapRouter.sol";
 import {IUniswapV3Pool} from "../interfaces/IUniswapV3Pool.sol";
@@ -18,6 +17,8 @@ contract UniswapFacet {
     int24 internal constant LP_TICK_UPPER = 887200;
     uint160 internal constant POOL_SQRT_PRICE_X96 = 79228162514264337593543950336; // 1:1 initial price
 
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
     event MarketGraduated(
         address token,
         address pool,
@@ -25,7 +26,6 @@ contract UniswapFacet {
         uint256 tokenLiquidity,
         uint256 positionId
     );
-
     event SwapExecuted(
         address tokenIn,
         address tokenOut,
@@ -67,13 +67,16 @@ contract UniswapFacet {
         uint256 ethLiquidity = address(this).balance;
         IWETH(ds.weth).deposit{value: ethLiquidity}();
 
-        // Mint secondary market supply using LibToken
+        // Mint secondary market supply directly in diamond storage
         uint256 secondarySupply = LibDiamond.SECONDARY_MARKET_SUPPLY;
-        LibToken._mint(address(this), secondarySupply);
+        ds.totalSupply += secondarySupply;
+        ds.balances[address(this)] += secondarySupply;
+        emit Transfer(address(0), address(this), secondarySupply);
 
         // Approve the position manager
         IERC20(ds.weth).safeIncreaseAllowance(ds.nonfungiblePositionManager, ethLiquidity);
-        IERC20(address(this)).safeIncreaseAllowance(ds.nonfungiblePositionManager, secondarySupply);
+        ds.allowances[address(this)][ds.nonfungiblePositionManager] = secondarySupply;
+        emit Approval(address(this), ds.nonfungiblePositionManager, secondarySupply);
 
         // Set up liquidity position
         INonfungiblePositionManager.MintParams memory params = INonfungiblePositionManager.MintParams({
