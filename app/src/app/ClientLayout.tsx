@@ -30,7 +30,7 @@ export function ClientLayout({ children }: PropsWithChildren) {
     >
       <QueryClientProvider client={queryClient}>
         <EthPriceProvider>
-          <div className="bg-black min-h-screen w-full text-white font-mono flex flex-col">
+          <div className="bg-black min-h-screen w-full text-white font-mono flex flex-col pb-12">
             <Header />
             {children}
           </div>
