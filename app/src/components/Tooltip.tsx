@@ -54,7 +54,7 @@ export function Tooltip({ children, content, position = "top" }: TooltipProps) {
           {...getFloatingProps()}
           className="z-50"
         >
-          <div className="bg-black border border-green-500 text-green-500 px-2 py-2 text-sm font-mono whitespace-nowrap">
+          <div className="bg-black border border-green-500 text-green-500 px-2 py-2 text-sm  whitespace-nowrap">
             {content}
           </div>
         </div>

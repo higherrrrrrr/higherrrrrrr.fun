@@ -5507,6 +5507,13 @@ randombytes@^2.1.0:
   dependencies:
     safe-buffer "^5.1.0"
 
+react-7-segment-display@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/react-7-segment-display/-/react-7-segment-display-1.1.2.tgz#997465c81e0e4c817658f87817280963e27da788"
+  integrity sha512-AgCRiLgl+wntrjcZrt4cr4umLGKg+0sU2Iu50nQupLASg01bNiDT160Tew1InE2Fm9rdHsqHwhZLai4BPFMzSg==
+  dependencies:
+    typescript "^5.4.5"
+
 react-dom@19.0.0-rc-66855b96-20241106:
   version "19.0.0-rc-66855b96-20241106"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-19.0.0-rc-66855b96-20241106.tgz#beba73decfd1b9365a3c83673a298623b15acb0b"
@@ -6301,7 +6308,7 @@ typed-array-length@^1.0.6:
     is-typed-array "^1.1.13"
     possible-typed-array-names "^1.0.0"
 
-typescript@^5:
+typescript@^5, typescript@^5.4.5:
   version "5.6.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.6.3.tgz#5f3449e31c9d94febb17de03cc081dd56d81db5b"
   integrity sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==

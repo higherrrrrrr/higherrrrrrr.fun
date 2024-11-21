@@ -60,7 +60,7 @@ export default function NewToken() {
   return (
     <div className="min-h-screen bg-black p-8">
       <div className="max-w-2xl mx-auto">
-        <h1 className="font-mono text-3xl mb-8">
+        <h1 className=" text-3xl mb-8">
           create a new{" "}
           <span className="text-green-500">
             <TypeAndDelete words={["coin", "moment", "generation"]} />
@@ -89,11 +89,11 @@ export default function NewToken() {
                 />
                 <label
                   htmlFor="image-upload"
-                  className="bg-black border border-green-600 text-green-500 px-4 py-2 font-mono hover:bg-green-600 hover:text-black transition-colors cursor-pointer"
+                  className="bg-black border border-green-600 text-green-500 px-4 py-2  hover:bg-green-600 hover:text-black transition-colors cursor-pointer"
                 >
                   choose file
                 </label>
-                <span className="text-gray-500 font-mono">
+                <span className="text-gray-500 ">
                   {selectedImage ? "image selected" : "no file chosen"}
                 </span>
               </div>
@@ -116,10 +116,10 @@ export default function NewToken() {
                       setInitialPriceName(e.target.value);
                     }}
                     placeholder={`8=D`}
-                    className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                    className="w-full bg-black border border-green-600 p-2  text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                   />
                 </div>
-                <div className="flex items-center flex-1 bg-black border border-green-600 p-2 font-mono text-gray-500">
+                <div className="flex items-center flex-1 bg-black border border-green-600 p-2  text-gray-500">
                   &gt; $0
                 </div>
 
@@ -144,7 +144,7 @@ export default function NewToken() {
                       placeholder={`8${"=".repeat(index + 2)}D${
                         index > 8 ? "~~~" : ""
                       }`}
-                      className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="w-full bg-black border border-green-600 p-2  text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     />
                   </div>
                   <div className="flex flex-col flex-1">
@@ -159,7 +159,7 @@ export default function NewToken() {
                         setPriceLevels(newLevels);
                       }}
                       placeholder={`> $${10 ** (index + 1)}`}
-                      className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                      className="w-full bg-black border border-green-600 p-2  text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
                     />
                   </div>
                   <IconButton
@@ -200,13 +200,13 @@ export default function NewToken() {
                 setError(null);
                 setDescription(e.target.value);
               }}
-              className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 min-h-[100px]"
+              className="w-full bg-black border border-green-600 p-2  text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500 min-h-[100px]"
             />
           </div>
 
           {/* NSFW Toggle */}
           <div>
-            <label className="flex items-center gap-x-3 font-mono text-green-500">
+            <label className="flex items-center gap-x-3  text-green-500">
               <input
                 type="checkbox"
                 className="h-5 w-5 bg-black border-2 border-green-600 text-green-500 checked:bg-green-500 checked:border-green-500 focus:ring-1 focus:ring-green-500 focus:ring-offset-0 rounded-none transition-colors cursor-pointer appearance-none"
@@ -217,7 +217,7 @@ export default function NewToken() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-green-500 text-black font-mono py-3 px-4 hover:bg-green-600 transition-colors flex items-center justify-between"
+            className="w-full bg-green-500 text-black  py-3 px-4 hover:bg-green-600 transition-colors flex items-center justify-between"
           >
             <span>create</span>
             <span>→</span>
@@ -229,7 +229,5 @@ export default function NewToken() {
 }
 
 function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <label className="block font-mono text-gray-400 mb-2">{children}</label>
-  );
+  return <label className="block  text-gray-400 mb-2">{children}</label>;
 }

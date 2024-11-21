@@ -1,6 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Pixelify+Mono&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family: "Pixelify Mono", monospace !important;
+}
 
 :root {
   --background: #ffffff;

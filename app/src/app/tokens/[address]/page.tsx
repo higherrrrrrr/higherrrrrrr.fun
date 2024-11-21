@@ -80,7 +80,7 @@ export default async function Token({
                   className="border-b border-green-600/30 last:border-b-0"
                 >
                   <td className="p-3">${level.greater_than}</td>
-                  <td className="p-3 font-mono">{level.name}</td>
+                  <td className="p-3 ">{level.name}</td>
                   <td className="p-3">
                     {level.name === token.name && (
                       <div className="text-green-500 text-sm">
@@ -99,7 +99,7 @@ export default async function Token({
         <div className="grid grid-cols-[auto_auto] gap-4">
           <div>
             <div className="text-sm text-gray-400">Contract Address</div>
-            <div className="font-mono break-all">{token.address}</div>
+            <div className=" break-all">{token.address}</div>
           </div>
           <div>
             <div className="text-sm text-gray-400">Created At</div>

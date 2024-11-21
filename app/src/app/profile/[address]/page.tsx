@@ -11,7 +11,7 @@ export default async function ProfilePage({
 
   return (
     <div>
-      <h1 className="font-mono text-2xl px-6 mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
+      <h1 className=" text-2xl px-6 mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400">
         {address}
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-6">

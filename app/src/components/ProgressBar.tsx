@@ -9,7 +9,7 @@ export function ProgressBar({ progress }: ProgressBarProps) {
       <div className="h-6 w-full bg-black border border-green-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,#22c55e_50%,transparent_100%)] animate-[scan_2s_linear_infinite] opacity-20" />
         <div className="absolute inset-0 flex items-center justify-start px-2">
-          <div className="font-mono text-xs text-green-500">
+          <div className=" text-xs text-green-500">
             PROGRESS: {Math.floor(progress * 100)}%
           </div>
         </div>

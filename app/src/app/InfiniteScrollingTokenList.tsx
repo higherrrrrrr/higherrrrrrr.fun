@@ -27,7 +27,11 @@ export function InfiniteScrollingTokenList({
 
         const { tokens, pagination } = await getTokensPage(page + 1);
 
-        setPages((pages) => [...pages, tokens]);
+        setPages((pages) => {
+          const newPages = [...pages];
+          newPages[page] = tokens;
+          return newPages;
+        });
         page = pagination.current_page;
         isFetching = false;
         console.log("scrolled to bottom");
