@@ -4,18 +4,18 @@ import { Button, IconButton } from "@/components/Button";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
 import { useState } from "react";
 
-type TickerForPriceLevel = {
-  ticker: string;
+type PriceLevel = {
+  name: string;
   greaterThan: string;
 };
 
 export default function NewToken() {
   const [description, setDescription] = useState("");
-  const [initialPriceTicker, setInitialPriceTicker] = useState("");
-  const [priceLevels, setPriceLevels] = useState<TickerForPriceLevel[]>([
-    { ticker: "", greaterThan: "" },
-    { ticker: "", greaterThan: "" },
-    { ticker: "", greaterThan: "" },
+  const [initialPriceName, setInitialPriceName] = useState("");
+  const [priceLevels, setPriceLevels] = useState<PriceLevel[]>([
+    { name: "", greaterThan: "" },
+    { name: "", greaterThan: "" },
+    { name: "", greaterThan: "" },
   ]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -45,7 +45,7 @@ export default function NewToken() {
 
     let priceLevelsError: string | null = null;
     for (const level of priceLevels) {
-      if (!level.ticker || !level.greaterThan) {
+      if (!level.name || !level.greaterThan) {
         priceLevelsError = "Please fill in all price levels";
         break;
       }
@@ -63,7 +63,7 @@ export default function NewToken() {
         <h1 className="font-mono text-3xl mb-8">
           create a new{" "}
           <span className="text-green-500">
-            <TypeAndDelete words={["coin", "moment", "generation", "ticker"]} />
+            <TypeAndDelete words={["coin", "moment", "generation"]} />
           </span>
         </h1>
 
@@ -100,9 +100,8 @@ export default function NewToken() {
             </div>
           </div>
 
-          {/* Ticker Input */}
           <div>
-            <Label>ticker & price levels</Label>
+            <Label>name & price levels</Label>
 
             {/* First price level - locked to "greater than 0" */}
             {/* Additional price levels */}
@@ -111,10 +110,10 @@ export default function NewToken() {
                 <div className="flex flex-col flex-1">
                   <input
                     type="text"
-                    value={initialPriceTicker}
+                    value={initialPriceName}
                     onChange={(e) => {
                       setError(null);
-                      setInitialPriceTicker(e.target.value);
+                      setInitialPriceName(e.target.value);
                     }}
                     placeholder={`8=D`}
                     className="w-full bg-black border border-green-600 p-2 font-mono text-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
@@ -135,11 +134,11 @@ export default function NewToken() {
                   <div className="flex flex-col flex-1">
                     <input
                       type="text"
-                      value={level.ticker}
+                      value={level.name}
                       onChange={(e) => {
                         setError(null);
                         const newLevels = [...priceLevels];
-                        newLevels[index].ticker = e.target.value;
+                        newLevels[index].name = e.target.value;
                         setPriceLevels(newLevels);
                       }}
                       placeholder={`8${"=".repeat(index + 2)}D${
@@ -182,7 +181,7 @@ export default function NewToken() {
                 onClick={() => {
                   setPriceLevels([
                     ...priceLevels,
-                    { ticker: "", greaterThan: "" },
+                    { name: "", greaterThan: "" },
                   ]);
                 }}
                 className="col-span-full"

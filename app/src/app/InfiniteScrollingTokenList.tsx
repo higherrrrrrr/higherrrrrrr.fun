@@ -4,7 +4,7 @@ import { getTokensPage, TokenApiType } from "@/api";
 import { TokenCard } from "./TokenCard";
 import { useEffect, useMemo, useState } from "react";
 
-export function ClientTokenList({
+export function InfiniteScrollingTokenList({
   tokens: initialTokens,
 }: {
   tokens: TokenApiType[];
@@ -39,7 +39,7 @@ export function ClientTokenList({
   }, []);
 
   return (
-    <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8 px-6">
       {tokens.map((token) => (
         <TokenCard key={token.address} token={token} />
       ))}

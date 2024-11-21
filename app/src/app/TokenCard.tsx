@@ -1,6 +1,6 @@
 "use client";
 
-import { TokenApiType } from "@/api-types";
+import { TokenApiType } from "@/api";
 import { ProgressBar } from "@/components/ProgressBar";
 import { ShrinkToFit } from "@/components/ShrinkToFit";
 import { SparkLine } from "@/components/SparkLine";
@@ -46,11 +46,10 @@ export function TokenCard({ token }: { token: TokenApiType }) {
 
       <div className="pt-2 flex flex-col gap-y-2 flex-grow ">
         <div className=" px-3 flex flex-col">
-          <Tooltip content="The ticker will change as we go higherrrrrrrrrr">
+          <Tooltip content="The name will change as we go higherrrrrrrrrr">
             <div className="flex justify-between items-center">
               {isHovered ? (
                 <div className="flex font-bold overflow-visible flex-grow items-center">
-                  <span className="text-green-500">$</span>
                   <TypeAndDelete
                     words={token.price_levels.map((level) => level.name)}
                     timeBetweenChars={50}
@@ -58,13 +57,12 @@ export function TokenCard({ token }: { token: TokenApiType }) {
                 </div>
               ) : (
                 <div className="flex font-bold overflow-hidden flex-grow items-center">
-                  <span className="text-green-500">$</span>
-                  <ShrinkToFit>{token.symbol}</ShrinkToFit>
+                  <ShrinkToFit>{token.name}</ShrinkToFit>
                 </div>
               )}
 
-              <div className="text-xs flex-shrink-0" title={token.launch_date}>
-                {formatCompactDistance(new Date(), new Date(token.launch_date))}
+              <div className="text-sm font-bold flex-shrink-0 text-green-500">
+                ${token.symbol}
               </div>
             </div>
           </Tooltip>
@@ -96,6 +94,13 @@ export function TokenCard({ token }: { token: TokenApiType }) {
         <div className="px-3 flex flex-col">
           <Label>description</Label>
           <span className="text-sm line-clamp-3">{token.description}</span>
+        </div>
+
+        <div className="flex flex-col px-3">
+          <Label>when</Label>
+          <span className="text-sm line-clamp-3">
+            {formatCompactDistance(new Date(), new Date(token.launch_date))}
+          </span>
         </div>
 
         <div className="mt-auto">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 type SparkLineProps = {
   data: number[];
@@ -9,6 +9,7 @@ type SparkLineProps = {
 export function SparkLine({ data }: SparkLineProps) {
   const [width, setWidth] = useState(0);
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // Create resize observer
     const resizeObserver = new ResizeObserver((entries) => {
@@ -18,7 +19,7 @@ export function SparkLine({ data }: SparkLineProps) {
     });
 
     // Get the wrapper element and observe it
-    const wrapper = document.querySelector(".sparkline-wrapper");
+    const wrapper = wrapperRef.current;
     if (wrapper) {
       resizeObserver.observe(wrapper);
     }
@@ -64,8 +65,13 @@ export function SparkLine({ data }: SparkLineProps) {
   const gradientColor = areWeGoingHigher ? "#22c55e" : "#ef4444";
 
   return (
-    <div className="w-full sparkline-wrapper">
-      <svg width={width} height="32" preserveAspectRatio="none">
+    <div ref={wrapperRef} className="max-w-full w-full h-[32px] relative">
+      <svg
+        width={width}
+        height="32"
+        preserveAspectRatio="none"
+        className="absolute"
+      >
         <defs>
           <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor={gradientColor} stopOpacity="0.5" />

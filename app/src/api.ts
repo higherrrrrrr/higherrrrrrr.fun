@@ -66,3 +66,19 @@ export async function getToken(address: string) {
 
   return (await response.json()) as TokenApiType;
 }
+
+export async function getHighlightedToken() {
+  const response = await fetch(`http://localhost:8080/api/highlighted-token`, {
+    headers: {
+      Authorization: "Bearer albertishigher$123$",
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    throw new Error(text);
+  }
+
+  return (await response.json()) as TokenApiType;
+}
