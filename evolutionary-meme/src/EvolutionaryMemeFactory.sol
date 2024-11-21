@@ -62,6 +62,7 @@ contract EvolutionaryMemeFactory {
     error DeploymentFailed();
     error InvalidInitialization();
     error FacetCutFailed();
+    error SelectorCollision(bytes4 selector);
 
     constructor(
         address _feeRecipient,
@@ -128,17 +129,29 @@ contract EvolutionaryMemeFactory {
         uint256[] calldata priceThresholds,
         string[] calldata memeNames
     ) internal {
+        console.log("Starting _initializeMeme...");
+        console.log("Meme token address:", memeToken);
+        console.log("Bonding curve address:", bondingCurveAddress);
+
         // First register all facets
+        console.log("Registering facets...");
         _registerFacets(memeToken);
+        console.log("Facets registered successfully");
 
         // Then initialize the core facet
+        console.log("Preparing init data...");
         bytes memory initData = _prepareInitData(params);
+        console.log("Init data prepared, initializing core facet...");
+
         try IDiamondCut(memeToken).diamondCut(
             new IDiamondCut.FacetCut[](0),
             coreFacet,
             initData
         ) {
+            console.log("Core facet initialized successfully");
+
             // Create meme levels array for initialization
+            console.log("Creating meme levels...");
             LibDiamond.MemeLevel[] memory memeLevels = new LibDiamond.MemeLevel[](priceThresholds.length);
             for (uint i = 0; i < priceThresholds.length; i++) {
                 memeLevels[i] = LibDiamond.MemeLevel({
@@ -146,35 +159,56 @@ contract EvolutionaryMemeFactory {
                     memeName: memeNames[i]
                 });
             }
+            console.log("Meme levels created successfully");
 
             // Initialize meme state through diamondCut
+            console.log("Preparing meme init data...");
             bytes memory memeInitData = abi.encodeWithSelector(
                 MemeFacet.initializeMeme.selector,
                 params.memeType,
                 memeLevels
             );
+            console.log("Meme init data prepared, initializing meme facet...");
 
             try IDiamondCut(memeToken).diamondCut(
                 new IDiamondCut.FacetCut[](0),
                 memeFacet,
                 memeInitData
             ) {
-                // Success
+                console.log("Meme facet initialized successfully");
+            } catch Error(string memory reason) {
+                console.log("Meme facet initialization failed:", reason);
+                revert DeploymentFailed();
             } catch {
+                console.log("Meme facet initialization failed with low-level error");
                 revert DeploymentFailed();
             }
+        } catch Error(string memory reason) {
+            console.log("Core facet initialization failed:", reason);
+            revert DeploymentFailed();
         } catch {
+            console.log("Core facet initialization failed with low-level error");
             revert DeploymentFailed();
         }
     }
 
     function _registerFacets(address memeToken) internal {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+
         // First register just the DiamondCutFacet
         IDiamondCut.FacetCut[] memory diamondCutCuts = new IDiamondCut.FacetCut[](1);
+        bytes4[] memory cutSelectors = _getFunctionSelectors(diamondCutFacet);
+        
+        // Check for collisions in DiamondCutFacet
+        for(uint i = 0; i < cutSelectors.length; i++) {
+            if(ds.usedSelectors[cutSelectors[i]]) revert SelectorCollision(cutSelectors[i]);
+            ds.usedSelectors[cutSelectors[i]] = true;
+        }
+
         diamondCutCuts[0] = IDiamondCut.FacetCut({
             facetAddress: diamondCutFacet,
             action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(diamondCutFacet)
+            functionSelectors: cutSelectors
         });
 
         // Register diamondCut function first
@@ -190,41 +224,30 @@ contract EvolutionaryMemeFactory {
 
         // Then register all other facets
         IDiamondCut.FacetCut[] memory cuts = new IDiamondCut.FacetCut[](6);
-        cuts[0] = IDiamondCut.FacetCut({
-            facetAddress: erc20Facet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(erc20Facet)
-        });
+        address[6] memory facets = [
+            erc20Facet,
+            coreFacet,
+            marketFacet,
+            memeFacet,
+            nftConvictionFacet,
+            bondingCurveFacet
+        ];
 
-        cuts[1] = IDiamondCut.FacetCut({
-            facetAddress: coreFacet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(coreFacet)
-        });
+        for(uint i = 0; i < facets.length; i++) {
+            bytes4[] memory selectors = _getFunctionSelectors(facets[i]);
+            
+            // Check for collisions
+            for(uint j = 0; j < selectors.length; j++) {
+                if(ds.usedSelectors[selectors[j]]) revert SelectorCollision(selectors[j]);
+                ds.usedSelectors[selectors[j]] = true;
+            }
 
-        cuts[2] = IDiamondCut.FacetCut({
-            facetAddress: marketFacet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(marketFacet)
-        });
-
-        cuts[3] = IDiamondCut.FacetCut({
-            facetAddress: memeFacet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(memeFacet)
-        });
-
-        cuts[4] = IDiamondCut.FacetCut({
-            facetAddress: nftConvictionFacet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(nftConvictionFacet)
-        });
-
-        cuts[5] = IDiamondCut.FacetCut({
-            facetAddress: bondingCurveFacet,
-            action: IDiamondCut.FacetCutAction.Add,
-            functionSelectors: _getFunctionSelectors(bondingCurveFacet)
-        });
+            cuts[i] = IDiamondCut.FacetCut({
+                facetAddress: facets[i],
+                action: IDiamondCut.FacetCutAction.Add,
+                functionSelectors: selectors
+            });
+        }
 
         try IDiamondCut(memeToken).diamondCut(cuts, address(0), new bytes(0)) {
             // Success
@@ -306,21 +329,15 @@ contract EvolutionaryMemeFactory {
             console.log("Registered initialize selector:", uint32(selectors[0]));
         }
         else if (facet == marketFacet) {
-            selectors = new bytes4[](10);
-            // Market core functions
+            selectors = new bytes4[](8);
             selectors[0] = MarketFacet.buy.selector;
             selectors[1] = MarketFacet.sell.selector;
             selectors[2] = MarketFacet.getMarketInfo.selector;
-            // Bonding curve functions
             selectors[3] = MarketFacet.getCurrentPrice.selector;
             selectors[4] = MarketFacet.getCurrentPriceView.selector;
             selectors[5] = MarketFacet.getUniswapPrice.selector;
-            // Callback functions
             selectors[6] = MarketFacet.onERC721Received.selector;
-            // Market state functions
             selectors[7] = bytes4(keccak256("getMarketState()"));
-            selectors[8] = bytes4(keccak256("getPoolInfo()"));
-            selectors[9] = bytes4(keccak256("getBondingCurveState()"));
         }
         else if (facet == memeFacet) {
             selectors = new bytes4[](7);

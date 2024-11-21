@@ -68,7 +68,7 @@ contract EvolutionaryMemeTest is Test {
     }
 
     function _setUp() public {
-        // Original setup code with added logging
+        // Add more detailed logging
         console.log("Starting setup...");
         
         // Deploy facets first
@@ -89,21 +89,23 @@ contract EvolutionaryMemeTest is Test {
 
         // Setup mocks
         _setupMocks();
-
-        // Deploy factory
+        // Deploy factory with detailed logging
+        console.log("Deploying factory...");
         factory = new EvolutionaryMemeFactory(
             FEE_RECIPIENT,
             WETH,
             POSITION_MANAGER,
             SWAP_ROUTER
         );
+        console.log("Factory deployed successfully at:", address(factory));
 
-        // Setup test meme levels with more reasonable thresholds
+        // Setup test meme levels
+        console.log("Setting up meme levels...");
         uint256[] memory priceThresholds = new uint256[](4);
-        priceThresholds[0] = 0.01 ether;  // $15
-        priceThresholds[1] = 0.1 ether;   // $150
-        priceThresholds[2] = 1 ether;     // $1,500
-        priceThresholds[3] = 10 ether;    // $15,000
+        priceThresholds[0] = 0.01 ether;
+        priceThresholds[1] = 0.1 ether;
+        priceThresholds[2] = 1 ether;
+        priceThresholds[3] = 10 ether;
 
         string[] memory memeNames = new string[](4);
         memeNames[0] = "8=D";
@@ -111,7 +113,8 @@ contract EvolutionaryMemeTest is Test {
         memeNames[2] = "8===D";
         memeNames[3] = "8====D";
 
-        // Deploy meme token
+        // Deploy meme token with detailed logging
+        console.log("Deploying meme token...");
         vm.startPrank(USER);
         (address token, address curve) = factory.deployMeme(
             SYMBOL,
@@ -121,58 +124,88 @@ contract EvolutionaryMemeTest is Test {
             memeNames
         );
         vm.stopPrank();
+        console.log("Meme token deployed at:", token);
+        console.log("Bonding curve deployed at:", curve);
 
         memeToken = payable(token);
         bondingCurve = curve;
 
-        // Mock initial market state
+        // Mock initial states
+        console.log("Setting up initial states...");
         vm.store(
             address(memeToken),
-            bytes32(uint256(32)), // marketType slot
-            bytes32(uint256(0))   // BONDING_CURVE
+            bytes32(uint256(32)),
+            bytes32(uint256(0))
         );
 
-        // Mock initial price
         vm.mockCall(
             bondingCurve,
             abi.encodeWithSelector(IBondingCurve.getCurrentPrice.selector),
-            abi.encode(0.01 ether) // Initial price
+            abi.encode(0.01 ether)
         );
+        console.log("Setup completed successfully");
     }
 
     function _setupMocks() internal {
-        // Mock WETH
+        console.log("Setting up mocks...");
+        
+        // Just start with mockCalls
         vm.mockCall(
             WETH,
             abi.encodeWithSelector(IWETH.deposit.selector),
             abi.encode()
         );
-        vm.mockCall(
+
+        // Step 2: Try deposit mock
+        try vm.mockCall(
+            WETH,
+            abi.encodeWithSelector(IWETH.deposit.selector),
+            abi.encode()
+        ) {
+            console.log("WETH deposit mock successful");
+        } catch {
+            console.log("Failed to mock WETH deposit");
+            revert("WETH deposit mock failed");
+        }
+
+        // Step 3: Try withdraw mock
+        try vm.mockCall(
             WETH,
             abi.encodeWithSelector(IWETH.withdraw.selector),
             abi.encode()
-        );
+        ) {
+            console.log("WETH withdraw mock successful");
+        } catch {
+            console.log("Failed to mock WETH withdraw");
+            revert("WETH withdraw mock failed");
+        }
 
-        // Mock Uniswap pool price
-        vm.mockCall(
-            address(0), // Pool address will be set later
-            abi.encodeWithSelector(IUniswapV3Pool.slot0.selector),
-            abi.encode(uint160(1 << 96), 0, 0, 0, 0, 0, false) // Mock price of 1:1
-        );
+        // Step 4: Try transfer mock
+        try vm.mockCall(
+            WETH,
+            abi.encodeWithSelector(IWETH.transfer.selector),
+            abi.encode(true)
+        ) {
+            console.log("WETH transfer mock successful");
+        } catch {
+            console.log("Failed to mock WETH transfer");
+            revert("WETH transfer mock failed");
+        }
 
-        // Mock position manager
-        vm.mockCall(
-            POSITION_MANAGER,
-            abi.encodeWithSelector(bytes4(keccak256("mint((address,address,uint24,int24,int24,uint256,uint256,uint256,uint256,address,uint256))"))),
-            abi.encode(1, 100, 100, 100) // Mock position ID and liquidity amounts
-        );
+        // Step 5: Try transferFrom mock
+        try vm.mockCall(
+            WETH,
+            abi.encodeWithSelector(IWETH.transferFrom.selector),
+            abi.encode(true)
+        ) {
+            console.log("WETH transferFrom mock successful");
+        } catch {
+            console.log("Failed to mock WETH transferFrom");
+            revert("WETH transferFrom mock failed");
+        }
 
-        // Mock swap router
-        vm.mockCall(
-            SWAP_ROUTER,
-            abi.encodeWithSelector(bytes4(keccak256("exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))"))),
-            abi.encode(100) // Mock swap amount
-        );
+        // Continue with other mocks...
+        console.log("WETH mocks completed, continuing setup...");
     }
 
     // Helper function to mock market graduation
@@ -707,4 +740,12 @@ contract EvolutionaryMemeTest is Test {
         console.log("User Balance:", ds.balances[USER]);
         console.log("====================");
     }
+}
+
+// Add this contract to your test file
+contract MockWETH {
+    function deposit() external payable {}
+    function withdraw(uint256) external {}
+    function transfer(address, uint256) external returns (bool) { return true; }
+    function transferFrom(address, address, uint256) external returns (bool) { return true; }
 } 

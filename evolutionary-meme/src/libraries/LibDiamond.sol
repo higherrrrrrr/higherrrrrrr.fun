@@ -70,6 +70,9 @@ library LibDiamond {
         mapping(uint256 => ConvictionData) convictionData;
         mapping(uint256 => address) tokenApprovals;
         mapping(address => mapping(address => bool)) operatorApprovals;
+
+        // Add this new mapping for tracking used selectors during registration
+        mapping(bytes4 => bool) usedSelectors;
     }
 
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {
