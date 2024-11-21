@@ -1,9 +1,13 @@
+import { getToken } from "@/api";
 import { Button } from "@/components/Button";
-import { listings } from "@/test-tokens";
 import { ProgressBar } from "@/components/ProgressBar";
 
-export default function Token() {
-  const listing = listings[0];
+export default async function Token({
+  params,
+}: {
+  params: Promise<{ address: string }>;
+}) {
+  const token = await getToken((await params).address);
 
   return (
     <div className="px-6  py-8 max-w-4xl mx-auto w-full">
@@ -11,23 +15,23 @@ export default function Token() {
         <div
           className="aspect-square h-[300px] bg-cover bg-center"
           style={{
-            backgroundImage: `url(https://picsum.photos/300/300?random=${listing.currentTicker})`,
+            backgroundImage: `url(${token.image_url})`,
           }}
         />
 
         <div className="flex flex-col flex-grow gap-y-6">
           <div>
-            <h1 className="text-3xl font-bold">${listing.currentTicker}</h1>
+            <h1 className="text-3xl font-bold">{token.name}</h1>
             <div className="text-green-600">
-              Created by {listing.address.slice(0, 6)}...
-              {listing.address.slice(-4)}
+              Created by {token.address.slice(0, 6)}...
+              {token.address.slice(-4)}
             </div>
           </div>
 
           <div className="flex gap-x-6">
             <div className="flex flex-col">
               <div className="text-sm text-gray-400">price</div>
-              <div className="text-2xl font-bold">${listing.price}</div>
+              <div className="text-2xl font-bold">${token.price}</div>
             </div>
 
             <div className="flex flex-col">
@@ -37,14 +41,14 @@ export default function Token() {
                 {new Intl.NumberFormat("en-US", {
                   notation: "compact",
                   maximumFractionDigits: 1,
-                }).format(Number(listing.marketCap))}
+                }).format(Number(token.market_cap))}
               </div>
             </div>
           </div>
 
           <div className="flex flex-col">
             <div className="text-sm text-gray-400">description</div>
-            <div className="text-sm">{listing.description}</div>
+            <div className="text-sm">{token.description}</div>
           </div>
           <div className="mt-auto flex gap-x-2">
             <Button className="w-full">Buy Token</Button>
@@ -55,7 +59,7 @@ export default function Token() {
 
       <div className="mt-8">
         <h2 className="text-xl font-bold mb-4">Listing Progress</h2>
-        <ProgressBar progress={40} />
+        <ProgressBar progress={token.progress} />
       </div>
 
       <div className="mt-8">
@@ -65,20 +69,20 @@ export default function Token() {
             <thead>
               <tr className="border-b border-green-600">
                 <th className="p-3 text-left">Price</th>
-                <th className="p-3 text-left">Ticker</th>
+                <th className="p-3 text-left">Name</th>
                 <th className="p-3 text-left"></th>
               </tr>
             </thead>
             <tbody>
-              {listing.priceLevels.map((level) => (
+              {token.price_levels.map((level) => (
                 <tr
-                  key={level.ticker}
+                  key={level.name}
                   className="border-b border-green-600/30 last:border-b-0"
                 >
-                  <td className="p-3">${level.greaterThan}</td>
-                  <td className="p-3 font-mono">${level.ticker}</td>
+                  <td className="p-3">${level.greater_than}</td>
+                  <td className="p-3 font-mono">{level.name}</td>
                   <td className="p-3">
-                    {level.ticker === listing.currentTicker && (
+                    {level.name === token.name && (
                       <div className="text-green-500 text-sm">
                         Current Level
                       </div>
@@ -95,11 +99,11 @@ export default function Token() {
         <div className="grid grid-cols-[auto_auto] gap-4">
           <div>
             <div className="text-sm text-gray-400">Contract Address</div>
-            <div className="font-mono break-all">{listing.address}</div>
+            <div className="font-mono break-all">{token.address}</div>
           </div>
           <div>
             <div className="text-sm text-gray-400">Created At</div>
-            <div>{new Date(listing.createdAt).toLocaleDateString()}</div>
+            <div>{new Date(token.launch_date).toLocaleDateString()}</div>
           </div>
         </div>
       </div>
