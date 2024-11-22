@@ -3,12 +3,7 @@
     "type": "constructor",
     "inputs": [
       {
-        "name": "_protocolFeeRecipient",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_protocolRewards",
+        "name": "_feeRecipient",
         "type": "address",
         "internalType": "address"
       },
@@ -18,12 +13,17 @@
         "internalType": "address"
       },
       {
-        "name": "_positionManager",
+        "name": "_nonfungiblePositionManager",
         "type": "address",
         "internalType": "address"
       },
       {
         "name": "_swapRouter",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_bondingCurve",
         "type": "address",
         "internalType": "address"
       }
@@ -45,40 +45,48 @@
   },
   {
     "type": "function",
-    "name": "deployMeme",
+    "name": "convictionImplementation",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "createHigherrrrrrr",
     "inputs": [
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string"
+      },
       {
         "name": "symbol",
         "type": "string",
         "internalType": "string"
       },
       {
-        "name": "tokenURI",
+        "name": "uri",
         "type": "string",
         "internalType": "string"
-      },
-      {
-        "name": "memeType",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "platformReferrer",
-        "type": "address",
-        "internalType": "address"
       },
       {
         "name": "levels",
         "type": "tuple[]",
-        "internalType": "struct DynamicMemeFactory.MemeLevel[]",
+        "internalType": "struct IHigherrrrrrr.PriceLevel[]",
         "components": [
           {
-            "name": "priceThreshold",
+            "name": "price",
             "type": "uint256",
             "internalType": "uint256"
           },
           {
-            "name": "memeName",
+            "name": "name",
             "type": "string",
             "internalType": "string"
           }
@@ -87,16 +95,21 @@
     ],
     "outputs": [
       {
-        "name": "",
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "conviction",
         "type": "address",
         "internalType": "address"
       }
     ],
-    "stateMutability": "nonpayable"
+    "stateMutability": "payable"
   },
   {
     "type": "function",
-    "name": "implementation",
+    "name": "feeRecipient",
     "inputs": [],
     "outputs": [
       {
@@ -109,33 +122,7 @@
   },
   {
     "type": "function",
-    "name": "positionManager",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "protocolFeeRecipient",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "protocolRewards",
+    "name": "nonfungiblePositionManager",
     "inputs": [],
     "outputs": [
       {
@@ -174,7 +161,7 @@
   },
   {
     "type": "event",
-    "name": "MemeTokenDeployed",
+    "name": "NewToken",
     "inputs": [
       {
         "name": "token",
@@ -183,18 +170,22 @@
         "internalType": "address"
       },
       {
-        "name": "creator",
+        "name": "conviction",
         "type": "address",
         "indexed": true,
         "internalType": "address"
-      },
-      {
-        "name": "memeType",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "Unauthorized",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddress",
+    "inputs": []
   }
 ]

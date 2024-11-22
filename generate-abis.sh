@@ -3,16 +3,24 @@
 # Create directories if they don't exist
 mkdir -p app/src/types/contracts
 
-# Move to the forge project directory first
-cd evolutionary-meme
+# Move to the protocol directory
+cd protocol
 
-# Generate ABI for EvolutionaryMeme
-echo "Generating ABI for EvolutionaryMeme..."
-forge inspect src/EvolutionaryMeme.sol:EvolutionaryMeme abi > ../app/src/types/contracts/EvolutionaryMeme.json
+# Generate ABI for Higherrrrrrr
+echo "Generating ABI for Higherrrrrrr..."
+forge inspect src/Higherrrrrrr.sol:Higherrrrrrr abi > ../app/src/types/contracts/Higherrrrrrr.json
 
-# Generate ABI for EvolutionaryMemeFactory
-echo "Generating ABI for EvolutionaryMemeFactory..."
-forge inspect src/EvolutionaryMemeFactory.sol:EvolutionaryMemeFactory abi > ../app/src/types/contracts/EvolutionaryMemeFactory.json
+# Generate ABI for HigherrrrrrrFactory
+echo "Generating ABI for HigherrrrrrrFactory..."
+forge inspect src/HigherrrrrrrFactory.sol:HigherrrrrrrFactory abi > ../app/src/types/contracts/HigherrrrrrrFactory.json
+
+# Generate ABI for HigherrrrrrrConviction
+echo "Generating ABI for HigherrrrrrrConviction..."
+forge inspect src/HigherrrrrrrConviction.sol:HigherrrrrrrConviction abi > ../app/src/types/contracts/HigherrrrrrrConviction.json
+
+# Generate ABI for BondingCurve
+echo "Generating ABI for BondingCurve..."
+forge inspect src/BondingCurve.sol:BondingCurve abi > ../app/src/types/contracts/BondingCurve.json
 
 # Move back to root
 cd ..

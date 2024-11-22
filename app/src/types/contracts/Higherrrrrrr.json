@@ -3,12 +3,7 @@
     "type": "constructor",
     "inputs": [
       {
-        "name": "_protocolFeeRecipient",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_protocolRewards",
+        "name": "_feeRecipient",
         "type": "address",
         "internalType": "address"
       },
@@ -36,6 +31,19 @@
   },
   {
     "type": "function",
+    "name": "CONVICTION_THRESHOLD",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "MAX_TOTAL_SUPPLY",
     "inputs": [],
     "outputs": [
@@ -50,58 +58,6 @@
   {
     "type": "function",
     "name": "MIN_ORDER_SIZE",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "ORDER_REFERRER_FEE_BPS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "PLATFORM_REFERRER_FEE_BPS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "PROTOCOL_FEE_BPS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "TOKEN_CREATOR_FEE_BPS",
     "inputs": [],
     "outputs": [
       {
@@ -172,7 +128,7 @@
         "internalType": "address"
       },
       {
-        "name": "value",
+        "name": "amount",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -246,11 +202,6 @@
         "internalType": "address"
       },
       {
-        "name": "orderReferrer",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "comment",
         "type": "string",
         "internalType": "string"
@@ -258,7 +209,7 @@
       {
         "name": "expectedMarketType",
         "type": "uint8",
-        "internalType": "enum IWow.MarketType"
+        "internalType": "enum IHigherrrrrrr.MarketType"
       },
       {
         "name": "minOrderSize",
@@ -279,6 +230,19 @@
       }
     ],
     "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "convictionNFT",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -308,25 +272,37 @@
   },
   {
     "type": "function",
-    "name": "getAllMemeLevels",
+    "name": "decreaseAllowance",
+    "inputs": [
+      {
+        "name": "spender",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "subtractedValue",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "feeRecipient",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "tuple[]",
-        "internalType": "struct DynamicMeme.MemeLevel[]",
-        "components": [
-          {
-            "name": "priceThreshold",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "memeName",
-            "type": "string",
-            "internalType": "string"
-          }
-        ]
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "view"
@@ -384,59 +360,6 @@
   },
   {
     "type": "function",
-    "name": "getMemeLevelsCount",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getMemeState",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "currentMemeName",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "currentMemeType",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "currentPrice",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "levels",
-        "type": "tuple[]",
-        "internalType": "struct DynamicMeme.MemeLevel[]",
-        "components": [
-          {
-            "name": "priceThreshold",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "memeName",
-            "type": "string",
-            "internalType": "string"
-          }
-        ]
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "getTokenBuyQuote",
     "inputs": [
       {
@@ -475,73 +398,32 @@
   },
   {
     "type": "function",
-    "name": "initialize",
+    "name": "increaseAllowance",
     "inputs": [
       {
-        "name": "_tokenCreator",
+        "name": "spender",
         "type": "address",
         "internalType": "address"
       },
       {
-        "name": "_platformReferrer",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_bondingCurve",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_tokenURI",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "_symbol",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "_memeType",
-        "type": "string",
-        "internalType": "string"
-      },
-      {
-        "name": "_initialLevels",
-        "type": "tuple[]",
-        "internalType": "struct DynamicMeme.MemeLevel[]",
-        "components": [
-          {
-            "name": "priceThreshold",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "memeName",
-            "type": "string",
-            "internalType": "string"
-          }
-        ]
+        "name": "addedValue",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
-    "outputs": [],
-    "stateMutability": "payable"
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
     "name": "initialize",
     "inputs": [
-      {
-        "name": "_tokenCreator",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "_platformReferrer",
-        "type": "address",
-        "internalType": "address"
-      },
       {
         "name": "_bondingCurve",
         "type": "address",
@@ -561,6 +443,28 @@
         "name": "_symbol",
         "type": "string",
         "internalType": "string"
+      },
+      {
+        "name": "_priceLevels",
+        "type": "tuple[]",
+        "internalType": "struct IHigherrrrrrr.PriceLevel[]",
+        "components": [
+          {
+            "name": "price",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "internalType": "string"
+          }
+        ]
+      },
+      {
+        "name": "_convictionNFT",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "outputs": [],
@@ -574,44 +478,7 @@
       {
         "name": "",
         "type": "uint8",
-        "internalType": "enum IWow.MarketType"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "memeLevels",
-    "inputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "priceThreshold",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "memeName",
-        "type": "string",
-        "internalType": "string"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "memeType",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "string",
-        "internalType": "string"
+        "internalType": "enum IHigherrrrrrr.MarketType"
       }
     ],
     "stateMutability": "view"
@@ -638,6 +505,19 @@
         "name": "",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "numPriceLevels",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -678,19 +558,6 @@
   },
   {
     "type": "function",
-    "name": "platformReferrer",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "poolAddress",
     "inputs": [],
     "outputs": [
@@ -704,26 +571,24 @@
   },
   {
     "type": "function",
-    "name": "protocolFeeRecipient",
-    "inputs": [],
-    "outputs": [
+    "name": "priceLevels",
+    "inputs": [
       {
         "name": "",
-        "type": "address",
-        "internalType": "address"
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "protocolRewards",
-    "inputs": [],
     "outputs": [
       {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
+        "name": "price",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string"
       }
     ],
     "stateMutability": "view"
@@ -743,11 +608,6 @@
         "internalType": "address"
       },
       {
-        "name": "orderReferrer",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "comment",
         "type": "string",
         "internalType": "string"
@@ -755,7 +615,7 @@
       {
         "name": "expectedMarketType",
         "type": "uint8",
-        "internalType": "enum IWow.MarketType"
+        "internalType": "enum IHigherrrrrrr.MarketType"
       },
       {
         "name": "minPayoutSize",
@@ -785,12 +645,12 @@
       {
         "name": "",
         "type": "tuple",
-        "internalType": "struct IWow.MarketState",
+        "internalType": "struct IHigherrrrrrr.MarketState",
         "components": [
           {
             "name": "marketType",
             "type": "uint8",
-            "internalType": "enum IWow.MarketType"
+            "internalType": "enum IHigherrrrrrr.MarketType"
           },
           {
             "name": "marketAddress",
@@ -824,19 +684,6 @@
         "name": "",
         "type": "string",
         "internalType": "string"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "tokenCreator",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
       }
     ],
     "stateMutability": "view"
@@ -877,7 +724,7 @@
         "internalType": "address"
       },
       {
-        "name": "value",
+        "name": "amount",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -906,7 +753,7 @@
         "internalType": "address"
       },
       {
-        "name": "value",
+        "name": "amount",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -944,13 +791,6 @@
     "stateMutability": "nonpayable"
   },
   {
-    "type": "function",
-    "name": "updateMeme",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
     "type": "event",
     "name": "Approval",
     "inputs": [
@@ -977,70 +817,7 @@
   },
   {
     "type": "event",
-    "name": "Initialized",
-    "inputs": [
-      {
-        "name": "version",
-        "type": "uint64",
-        "indexed": false,
-        "internalType": "uint64"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "MemeEvolved",
-    "inputs": [
-      {
-        "name": "oldMeme",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
-      },
-      {
-        "name": "newMeme",
-        "type": "string",
-        "indexed": false,
-        "internalType": "string"
-      },
-      {
-        "name": "price",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "Transfer",
-    "inputs": [
-      {
-        "name": "from",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "to",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "value",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "WowMarketGraduated",
+    "name": "HigherrrrrrMarketGraduated",
     "inputs": [
       {
         "name": "tokenAddress",
@@ -1076,14 +853,14 @@
         "name": "marketType",
         "type": "uint8",
         "indexed": false,
-        "internalType": "enum IWow.MarketType"
+        "internalType": "enum IHigherrrrrrr.MarketType"
       }
     ],
     "anonymous": false
   },
   {
     "type": "event",
-    "name": "WowTokenBuy",
+    "name": "HigherrrrrrTokenBuy",
     "inputs": [
       {
         "name": "buyer",
@@ -1093,12 +870,6 @@
       },
       {
         "name": "recipient",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "orderReferrer",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -1149,59 +920,23 @@
         "name": "marketType",
         "type": "uint8",
         "indexed": false,
-        "internalType": "enum IWow.MarketType"
+        "internalType": "enum IHigherrrrrrr.MarketType"
       }
     ],
     "anonymous": false
   },
   {
     "type": "event",
-    "name": "WowTokenFees",
+    "name": "HigherrrrrrTokenFees",
     "inputs": [
       {
-        "name": "tokenCreator",
+        "name": "feeRecipient",
         "type": "address",
         "indexed": true,
         "internalType": "address"
       },
       {
-        "name": "platformReferrer",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "orderReferrer",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "protocolFeeRecipient",
-        "type": "address",
-        "indexed": false,
-        "internalType": "address"
-      },
-      {
-        "name": "tokenCreatorFee",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "platformReferrerFee",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "orderReferrerFee",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      },
-      {
-        "name": "protocolFee",
+        "name": "fee",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -1211,7 +946,7 @@
   },
   {
     "type": "event",
-    "name": "WowTokenSell",
+    "name": "HigherrrrrrTokenSell",
     "inputs": [
       {
         "name": "seller",
@@ -1221,12 +956,6 @@
       },
       {
         "name": "recipient",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "orderReferrer",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -1277,14 +1006,14 @@
         "name": "marketType",
         "type": "uint8",
         "indexed": false,
-        "internalType": "enum IWow.MarketType"
+        "internalType": "enum IHigherrrrrrr.MarketType"
       }
     ],
     "anonymous": false
   },
   {
     "type": "event",
-    "name": "WowTokenTransfer",
+    "name": "HigherrrrrrTokenTransfer",
     "inputs": [
       {
         "name": "from",
@@ -1326,95 +1055,47 @@
     "anonymous": false
   },
   {
+    "type": "event",
+    "name": "Initialized",
+    "inputs": [
+      {
+        "name": "version",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "uint8"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Transfer",
+    "inputs": [
+      {
+        "name": "from",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "to",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "value",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
     "type": "error",
     "name": "AddressZero",
     "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "ERC20InsufficientAllowance",
-    "inputs": [
-      {
-        "name": "spender",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "allowance",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "needed",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "ERC20InsufficientBalance",
-    "inputs": [
-      {
-        "name": "sender",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "balance",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "needed",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "ERC20InvalidApprover",
-    "inputs": [
-      {
-        "name": "approver",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "ERC20InvalidReceiver",
-    "inputs": [
-      {
-        "name": "receiver",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "ERC20InvalidSender",
-    "inputs": [
-      {
-        "name": "sender",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "ERC20InvalidSpender",
-    "inputs": [
-      {
-        "name": "spender",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
   },
   {
     "type": "error",
@@ -1443,12 +1124,12 @@
   },
   {
     "type": "error",
-    "name": "InvalidInitialization",
+    "name": "InvalidMarketType",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "InvalidMarketType",
+    "name": "InvalidPriceLevels",
     "inputs": []
   },
   {
@@ -1463,7 +1144,7 @@
   },
   {
     "type": "error",
-    "name": "NotInitializing",
+    "name": "NoPriceLevels",
     "inputs": []
   },
   {
@@ -1478,23 +1159,12 @@
   },
   {
     "type": "error",
-    "name": "ReentrancyGuardReentrantCall",
+    "name": "SlippageBoundsExceeded",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "SafeERC20FailedOperation",
-    "inputs": [
-      {
-        "name": "token",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "SlippageBoundsExceeded",
+    "name": "TooManyPriceLevels",
     "inputs": []
   }
 ]
