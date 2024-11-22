@@ -2,22 +2,19 @@
 pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IConvictionFeature.sol";
 import "./interfaces/IWow.sol";
 import "./SVGLib.sol";
 
-contract ConvictionFeature is IConvictionFeature, ERC721 {
-    using Counters for Counters.Counter;
-    
+contract ConvictionFeature is IConvictionFeature, ERC721 {    
     /// @notice The Wow token contract address
     address public wowToken;
     
     /// @notice Whether the contract has been initialized
     bool private _initialized;
     
-    /// @notice Counter for token IDs
-    Counters.Counter private _tokenIds;
+    /// @notice Simple counter for token IDs
+    uint256 private _nextTokenId;
     
     /// @notice Threshold percentage for minting (0.1% = 1000)
     uint256 public constant CONVICTION_THRESHOLD = 1000; // 0.1%
@@ -39,9 +36,14 @@ contract ConvictionFeature is IConvictionFeature, ERC721 {
         _;
     }
     
-    // Start uninitialized with placeholder name
-    constructor() ERC721("", "") {}
+    // Start uninitialized with temporary name/symbol
+    constructor() ERC721("Conviction", "CONV") {
+        _nextTokenId = 1; // Start token IDs at 1
+    }
     
+    string private _name;
+    string private _symbol;
+
     function initialize(address _wowToken) external {
         require(!_initialized, "ConvictionFeature: already initialized");
         require(_wowToken != address(0), "ConvictionFeature: zero address");
@@ -49,10 +51,21 @@ contract ConvictionFeature is IConvictionFeature, ERC721 {
         wowToken = _wowToken;
         _initialized = true;
         
-        // Set the NFT name and symbol based on the original token
+        // Get the token name from the Wow contract
         string memory tokenName = IWow(wowToken).name();
+        
+        // Store the new name and symbol
         _name = string(abi.encodePacked(tokenName, " Conviction"));
-        _symbol = string(abi.encodePacked(tokenName, "CONV"));
+        _symbol = "CONV";
+    }
+
+    // Override the name and symbol functions
+    function name() public view virtual override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view virtual override returns (string memory) {
+        return _symbol;
     }
     
     function isInitialized() external view returns (bool) {
@@ -70,24 +83,23 @@ contract ConvictionFeature is IConvictionFeature, ERC721 {
             return 0;
         }
         
-        _tokenIds.increment();
-        uint256 newTokenId = _tokenIds.current();
+        uint256 tokenId = _nextTokenId++;
         
-        _mint(to, newTokenId);
-        _userTokens[to].push(newTokenId);
+        _mint(to, tokenId);
+        _userTokens[to].push(tokenId);
         
-        convictionData[newTokenId] = ConvictionData({
+        convictionData[tokenId] = ConvictionData({
             name: currentName,
             amount: amount,
             timestamp: block.timestamp
         });
         
-        emit ConvictionMinted(to, newTokenId, amount, currentName);
+        emit ConvictionMinted(to, tokenId, amount, currentName);
         
-        return newTokenId;
+        return tokenId;
     }
     
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view override(ERC721, IConvictionFeature) returns (string memory) {
         require(_exists(tokenId), "ConvictionFeature: URI query for nonexistent token");
         
         ConvictionData memory data = convictionData[tokenId];

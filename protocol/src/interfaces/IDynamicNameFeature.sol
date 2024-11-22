@@ -1,5 +1,16 @@
+pragma solidity ^0.8.23;
+
+import "./IWowFeature.sol";
+
 // IDynamicNameFeature.sol
-interface IDynamicNameFeature is IWowFeature {
+interface IDynamicNameFeature {
+
+    function initialize(
+        address _wowToken,
+        uint256[] memory _thresholds,
+        string[] memory _names
+    ) external;
+
     /// @notice Event emitted when the token name changes
     event NameChanged(string oldName, string newName, uint256 priceThreshold);
     

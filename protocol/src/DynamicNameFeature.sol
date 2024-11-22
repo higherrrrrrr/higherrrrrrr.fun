@@ -50,11 +50,12 @@ contract DynamicNameFeature is IDynamicNameFeature {
         address _wowToken,
         uint256[] memory _thresholds,
         string[] memory _names
-    ) external {
+    ) external override {
         require(!_initialized, "DynamicNameFeature: already initialized");
         require(_wowToken != address(0), "DynamicNameFeature: zero address");
         require(_thresholds.length == _names.length, "DynamicNameFeature: arrays length mismatch");
         require(_thresholds.length > 0, "DynamicNameFeature: empty thresholds");
+    
         
         // Validate thresholds are sorted
         for (uint256 i = 1; i < _thresholds.length; i++) {
@@ -101,7 +102,7 @@ contract DynamicNameFeature is IDynamicNameFeature {
         whenInitialized 
         returns (string memory) 
     {
-        require(names[threshold].bytes(names[threshold]).length > 0, "DynamicNameFeature: threshold not found");
+        require(bytes(names[threshold]).length > 0, "DynamicNameFeature: threshold not found"); 
         return names[threshold];
     }
     

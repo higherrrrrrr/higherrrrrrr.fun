@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from "@openzeppelin-upgradeable/contracts/proxy/utils/Initializable.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {ERC20Upgradeable} from "@openzeppelin-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"; 
 
 import {IWow} from "./interfaces/IWow.sol";
 import {INonfungiblePositionManager} from "./interfaces/INonfungiblePositionManager.sol";
@@ -15,6 +15,10 @@ import {ISwapRouter} from "./interfaces/ISwapRouter.sol";
 import {IProtocolRewards} from "./interfaces/IProtocolRewards.sol";
 import {IWETH} from "./interfaces/IWETH.sol";
 import {BondingCurve} from "./BondingCurve.sol";
+
+import {IConvictionFeature} from "./interfaces/IConvictionFeature.sol";
+import {IDynamicNameFeature} from "./interfaces/IDynamicNameFeature.sol";
+import "./WowFeatureRegistry.sol"; 
 
 /* 
     !!!         !!!         !!!    
@@ -337,16 +341,11 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
     /// @dev No-op to allow a swap on the pool to set the correct initial price, if needed
     function uniswapV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata) external {}
 
-    /// @dev Overrides ERC20's _update function to
-    ///      - Prevent transfers to the pool if the market has not graduated.
-    ///      - Emit the superset `WowTokenTransfer` event with each ERC20 transfer.
-    function _update(address from, address to, uint256 value) internal virtual override {
+    function _transfer(address from, address to, uint256 value) internal virtual override {
         if (marketType == MarketType.BONDING_CURVE && to == poolAddress) revert MarketNotGraduated();
-
-        super._update(from, to, value);
-
+        super._transfer(from, to, value);
         emit WowTokenTransfer(from, to, value, balanceOf(from), balanceOf(to), totalSupply());
-    }
+    } 
 
     /// @dev Validates a bonding curve buy order and if necessary, recalculates the order data if the size is greater than the remaining supply
     function _validateBondingCurveBuy(uint256 minOrderSize)
@@ -461,7 +460,8 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
 
         // Approve the nonfungible position manager to transfer the WETH and tokens
         SafeERC20.safeIncreaseAllowance(IERC20(WETH), address(nonfungiblePositionManager), ethLiquidity);
-        SafeERC20.safeIncreaseAllowance(this, address(nonfungiblePositionManager), SECONDARY_MARKET_SUPPLY);
+        SafeERC20.safeIncreaseAllowance(IERC20(address(this)), address(nonfungiblePositionManager), SECONDARY_MARKET_SUPPLY);
+
 
         // Determine the token order
         bool isWethToken0 = address(WETH) < address(this);
@@ -471,7 +471,7 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
         uint256 amount1 = isWethToken0 ? SECONDARY_MARKET_SUPPLY : ethLiquidity;
 
         // Get the current and desired price of the pool
-        uint160 currentSqrtPriceX96 = IUniswapV3Pool(poolAddress).slot0().sqrtPriceX96;
+        (uint160 currentSqrtPriceX96,,,,,,) = IUniswapV3Pool(poolAddress).slot0();
         uint160 desiredSqrtPriceX96 = isWethToken0 ? POOL_SQRT_PRICE_X96_WETH_0 : POOL_SQRT_PRICE_X96_TOKEN_0;
 
         // If the current price is not the desired price, set the desired price
@@ -554,7 +554,7 @@ contract Wow is IWow, Initializable, ERC20Upgradeable, ReentrancyGuardUpgradeabl
         return (amount * bps) / 10_000;
     }
 
-    function name() public view override returns (string memory) {
+    function name() public view override(ERC20Upgradeable, IWow) returns (string memory) {
         address dynamicNameFeature = featureRegistry.getFeature(keccak256("DYNAMIC_NAME"));
         if (dynamicNameFeature != address(0)) {
             return IDynamicNameFeature(dynamicNameFeature).getCurrentName();

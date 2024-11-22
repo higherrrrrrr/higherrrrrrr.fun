@@ -230,4 +230,9 @@ interface IWow {
     /// @notice Returns the address of the platform referrer
     /// @return The platform referrer's address
     function platformReferrer() external view returns (address);
+
+    // Add this to the interface (with the other function declarations)
+    /// @notice Returns the name of the token
+    /// @return The token name
+    function name() external view returns (string memory);
 }

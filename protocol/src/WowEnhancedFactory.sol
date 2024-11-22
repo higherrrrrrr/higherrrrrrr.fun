@@ -76,57 +76,78 @@ contract WowEnhancedFactory {
         string memory baseTokenName,
         string memory symbol,
         NameConfig calldata nameConfig
-    ) external payable returns (address wowToken) {
+    ) external payable returns (address) {
         // Input validation
+        _validateInputs(tokenCreator, baseTokenName, symbol, nameConfig);
+
+        // Deploy core contracts
+        (Wow wow, BondingCurve bondingCurve) = _deployCore(
+            tokenCreator,
+            platformReferrer,
+            tokenURI,
+            baseTokenName,
+            symbol
+        );
+
+        // Deploy and setup features
+        (address dynamicName, address conviction) = _setupFeatures(
+            address(wow),
+            nameConfig
+        );
+
+        emit WowTokenDeployed(
+            address(wow),
+            tokenCreator,
+            address(wow.featureRegistry()),
+            dynamicName,
+            conviction,
+            baseTokenName,
+            symbol,
+            nameConfig.priceThresholds,
+            nameConfig.names
+        );
+
+        return address(wow);
+    }
+
+    function _validateInputs(
+        address tokenCreator,
+        string memory baseTokenName,
+        string memory symbol,
+        NameConfig calldata nameConfig
+    ) internal pure {
         require(tokenCreator != address(0), "Zero address: tokenCreator");
         require(bytes(baseTokenName).length > 0, "Empty base name");
         require(bytes(symbol).length > 0, "Empty symbol");
         require(nameConfig.priceThresholds.length == nameConfig.names.length, "Config length mismatch");
         require(nameConfig.priceThresholds.length > 0, "Empty name config");
 
-        // Validate name config is properly sorted
         for (uint256 i = 1; i < nameConfig.priceThresholds.length; i++) {
             require(
                 nameConfig.priceThresholds[i] > nameConfig.priceThresholds[i-1],
                 "Price thresholds not sorted"
             );
         }
+    }
 
-        // Deploy contracts in order
-        BondingCurve bondingCurve = new BondingCurve();
+    function _deployCore(
+        address tokenCreator,
+        address platformReferrer,
+        string memory tokenURI,
+        string memory baseTokenName,
+        string memory symbol
+    ) internal returns (Wow wow, BondingCurve bondingCurve) {
+        bondingCurve = new BondingCurve();
 
-        // Create registry with temporary address, will recreate with correct address
-        WowFeatureRegistry tempRegistry = new WowFeatureRegistry(address(0));
-
-        // Deploy main Wow token
-        Wow wow = new Wow(
+        // Deploy main Wow token first (without registry)
+        wow = new Wow(
             protocolFeeRecipient,
             protocolRewards,
             weth,
             nonfungiblePositionManager,
             swapRouter,
-            address(tempRegistry)
+            address(0) // Temporary zero address for registry
         );
-
-        // Deploy real registry with correct Wow address
-        WowFeatureRegistry registry = new WowFeatureRegistry(address(wow));
-
-        // Deploy features
-        DynamicNameFeature dynamicName = new DynamicNameFeature();
-        ConvictionFeature conviction = new ConvictionFeature();
-
-        // Initialize features
-        dynamicName.initialize(
-            address(wow),
-            nameConfig.priceThresholds,
-            nameConfig.names
-        );
-
-        conviction.initialize(address(wow));
-
-        // Register features in registry
-        registry.registerFeature(keccak256("DYNAMIC_NAME"), address(dynamicName));
-        registry.registerFeature(keccak256("CONVICTION"), address(conviction));
 
         // Initialize Wow token
         wow.initialize{value: msg.value}(
@@ -137,66 +158,33 @@ contract WowEnhancedFactory {
             baseTokenName,
             symbol
         );
-
-        emit WowTokenDeployed(
-            address(wow),
-            tokenCreator,
-            address(registry),
-            address(dynamicName),
-            address(conviction),
-            baseTokenName,
-            symbol,
-            nameConfig.priceThresholds,
-            nameConfig.names
-        );
-
-        return address(wow);
     }
 
-    /**
-     * @notice Verifies that a Wow token deployment was successful
-     * @param wowToken The address of the Wow token to verify
-     * @return success Whether the deployment was successful
-     * @return details Human-readable details about the verification
-     */
-    function verifyDeployment(address wowToken) external view returns (bool success, string memory details) {
-        try Wow(wowToken).featureRegistry() returns (address registryAddress) {
-            if (registryAddress == address(0)) {
-                return (false, "Invalid registry address");
-            }
+    function _setupFeatures(
+        address wowToken,
+        NameConfig calldata nameConfig
+    ) internal returns (address dynamicName, address conviction) {
+        // Deploy registry with correct Wow address
+        WowFeatureRegistry registry = new WowFeatureRegistry(wowToken);
 
-            WowFeatureRegistry registry = WowFeatureRegistry(registryAddress);
-            
-            address dynamicName = registry.getFeature(keccak256("DYNAMIC_NAME"));
-            if (dynamicName == address(0)) {
-                return (false, "Dynamic name feature not found");
-            }
-            
-            address conviction = registry.getFeature(keccak256("CONVICTION"));
-            if (conviction == address(0)) {
-                return (false, "Conviction feature not found");
-            }
+        // Deploy features
+        dynamicName = address(new DynamicNameFeature());
+        conviction = address(new ConvictionFeature());
 
-            try IDynamicNameFeature(dynamicName).isInitialized() returns (bool initialized) {
-                if (!initialized) {
-                    return (false, "Dynamic name feature not initialized");
-                }
-            } catch {
-                return (false, "Failed to check dynamic name initialization");
-            }
+        // Register features with initialization data
+        registry.registerFeature(
+            keccak256("DYNAMIC_NAME"),
+            dynamicName,
+            abi.encode(nameConfig.priceThresholds, nameConfig.names)
+        );
 
-            try IConvictionFeature(conviction).isInitialized() returns (bool initialized) {
-                if (!initialized) {
-                    return (false, "Conviction feature not initialized");
-                }
-            } catch {
-                return (false, "Failed to check conviction initialization");
-            }
+        registry.registerFeature(
+            keccak256("CONVICTION"),
+            conviction,
+            "" // No extra init data needed
+        );
 
-            return (true, "Deployment verified successfully");
-        } catch {
-            return (false, "Failed to verify Wow token");
-        }
+        return (dynamicName, conviction);
     }
 
     /**
@@ -211,15 +199,15 @@ contract WowEnhancedFactory {
         address dynamicNameAddress,
         address convictionAddress
     ) {
-        registryAddress = address(Wow(wowToken).featureRegistry());
+        registryAddress = address(Wow(payable(wowToken)).featureRegistry());
         
         if (registryAddress != address(0)) {
             WowFeatureRegistry registry = WowFeatureRegistry(registryAddress);
             dynamicNameAddress = registry.getFeature(keccak256("DYNAMIC_NAME"));
             convictionAddress = registry.getFeature(keccak256("CONVICTION"));
         }
-    }
+    } 
 
-    /// @notice Allows the contract to receive ETH
-    receive() external payable {}
-}
+        /// @notice Allows the contract to receive ETH
+        receive() external payable {}
+    }

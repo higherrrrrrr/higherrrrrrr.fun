@@ -1,3 +1,7 @@
+pragma solidity ^0.8.23;
+
+import "./IWowFeature.sol";
+
 interface IConvictionFeature is IWowFeature {
     /// @notice Event emitted when a new conviction NFT is minted
     event ConvictionMinted(address indexed holder, uint256 indexed tokenId, uint256 amount, string name);
