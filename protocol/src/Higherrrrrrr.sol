@@ -459,8 +459,8 @@ contract Higherrrrrrr is IHigherrrrrrr, Initializable, ERC20Upgradeable, Reentra
         private
         returns (uint256)
     {
-        // Transfer the tokens from the seller to this contract
-        transfer(address(this), tokensToSell);
+        // Transfer the tokens from the seller to this contract using transferFrom
+        _transfer(msg.sender, address(this), tokensToSell);
 
         // Approve the swap router to spend the tokens
         this.approve(swapRouter, tokensToSell);
