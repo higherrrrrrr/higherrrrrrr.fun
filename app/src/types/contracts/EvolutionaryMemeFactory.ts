@@ -26,6 +26,7 @@ import type {
 export interface EvolutionaryMemeFactoryInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "bondingCurveFacet"
       | "coreFacet"
       | "deployMeme"
       | "diamondCutFacet"
@@ -47,6 +48,10 @@ export interface EvolutionaryMemeFactoryInterface extends Interface {
     nameOrSignatureOrTopic: "FacetAdded" | "MemeTokenDeployed"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "bondingCurveFacet",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "coreFacet", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "deployMeme",
@@ -99,6 +104,10 @@ export interface EvolutionaryMemeFactoryInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "weth", values?: undefined): string;
 
+  decodeFunctionResult(
+    functionFragment: "bondingCurveFacet",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "coreFacet", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "deployMeme", data: BytesLike): Result;
   decodeFunctionResult(
@@ -232,6 +241,8 @@ export interface EvolutionaryMemeFactory extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  bondingCurveFacet: TypedContractMethod<[], [string], "view">;
+
   coreFacet: TypedContractMethod<[], [string], "view">;
 
   deployMeme: TypedContractMethod<
@@ -298,6 +309,9 @@ export interface EvolutionaryMemeFactory extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "bondingCurveFacet"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "coreFacet"
   ): TypedContractMethod<[], [string], "view">;

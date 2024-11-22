@@ -37,6 +37,19 @@ const _abi = [
   },
   {
     type: "function",
+    name: "bondingCurveFacet",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "coreFacet",
     inputs: [],
     outputs: [
@@ -378,6 +391,17 @@ const _abi = [
     type: "error",
     name: "InvalidInitialization",
     inputs: [],
+  },
+  {
+    type: "error",
+    name: "SelectorCollision",
+    inputs: [
+      {
+        name: "selector",
+        type: "bytes4",
+        internalType: "bytes4",
+      },
+    ],
   },
   {
     type: "error",
