@@ -7,3 +7,11 @@ venv
 .env
 
 __pycache__
+
+# Foundry
+protocol/cache/
+protocol/out/
+protocol/.coverage_artifacts
+protocol/.coverage_cache
+protocol/coverage/
+protocol/broadcast/
