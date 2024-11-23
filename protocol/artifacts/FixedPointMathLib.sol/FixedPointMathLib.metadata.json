@@ -1,0 +1,123 @@
+{
+  "compiler": {
+    "version": "0.8.23+commit.f704f362"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "DivFailed"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "DivWadFailed"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "ExpOverflow"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "FactorialOverflow"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "FullMulDivFailed"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "LnWadUndefined"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "MantissaOverflow"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "MulDivFailed"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "MulWadFailed"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "OutOfDomain"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "RPowOverflow"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "SDivWadFailed"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "SMulWadFailed"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {},
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {},
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin-upgradeable/contracts/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "ds-test/=lib/forge-std/lib/ds-test/src/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+      "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "solady/=lib/solady/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "lib/solady/src/utils/FixedPointMathLib.sol": "FixedPointMathLib"
+    },
+    "evmVersion": "paris",
+    "libraries": {},
+    "viaIR": true
+  },
+  "sources": {
+    "lib/solady/src/utils/FixedPointMathLib.sol": {
+      "keccak256": "0x7a53e482c395049e68e3863bd2677b9707bf875f5934c5d74294ab466bacbcfd",
+      "urls": [
+        "bzz-raw://5c8498030ebbd41a4c0cb708dc9be8d18da4767b2107a6bcbc5f91221baba687",
+        "dweb:/ipfs/QmQ3veAScgn3GyP5pR6fYEtefRNSM3YBSwYe1BSoETiq2K"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

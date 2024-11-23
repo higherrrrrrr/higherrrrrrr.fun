@@ -1,0 +1,1596 @@
+{
+  "compiler": {
+    "version": "0.8.23+commit.f704f362"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_feeRecipient",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_weth",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_nonfungiblePositionManager",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "_swapRouter",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "AddressZero"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "EthAmountTooSmall"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "EthTransferFailed"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InitialOrderSizeTooLarge"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InsufficientFunds"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InsufficientLiquidity"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidMarketType"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "InvalidPriceLevels"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "MarketAlreadyGraduated"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "MarketNotGraduated"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "NoPriceLevels"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "OnlyPool"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "OnlyWeth"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "SlippageBoundsExceeded"
+      },
+      {
+        "inputs": [],
+        "type": "error",
+        "name": "TooManyPriceLevels"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "spender",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Approval",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "tokenAddress",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "poolAddress",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalEthLiquidity",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalTokenLiquidity",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "lpPositionId",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "enum IHigherrrrrrr.MarketType",
+            "name": "marketType",
+            "type": "uint8",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "HigherrrrrrMarketGraduated",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "buyer",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalEth",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "ethFee",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "ethSold",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokensBought",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "buyerTokenBalance",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "comment",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "enum IHigherrrrrrr.MarketType",
+            "name": "marketType",
+            "type": "uint8",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "HigherrrrrrTokenBuy",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "feeRecipient",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "fee",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "HigherrrrrrTokenFees",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "seller",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalEth",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "ethFee",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "ethBought",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "tokensSold",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "sellerTokenBalance",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "string",
+            "name": "comment",
+            "type": "string",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "enum IHigherrrrrrr.MarketType",
+            "name": "marketType",
+            "type": "uint8",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "HigherrrrrrTokenSell",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "fromTokenBalance",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "toTokenBalance",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "HigherrrrrrTokenTransfer",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint8",
+            "name": "version",
+            "type": "uint8",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Initialized",
+        "anonymous": false
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address",
+            "indexed": true
+          },
+          {
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256",
+            "indexed": false
+          }
+        ],
+        "type": "event",
+        "name": "Transfer",
+        "anonymous": false
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "CONVICTION_THRESHOLD",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "MAX_TOTAL_SUPPLY",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "MIN_ORDER_SIZE",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "TOTAL_FEE_BPS",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "WETH",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "spender",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "allowance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "spender",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "approve",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "balanceOf",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "bondingCurve",
+        "outputs": [
+          {
+            "internalType": "contract BondingCurve",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokensToBurn",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "burn"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "refundRecipient",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "comment",
+            "type": "string"
+          },
+          {
+            "internalType": "enum IHigherrrrrrr.MarketType",
+            "name": "expectedMarketType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minOrderSize",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceLimitX96",
+            "type": "uint160"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function",
+        "name": "buy",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "convictionNFT",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "currentExchangeRate",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "decimals",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "spender",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "subtractedValue",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "decreaseAllowance",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "feeRecipient",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getCurrentPrice",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "ethOrderSize",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getEthBuyQuote",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "ethOrderSize",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getEthSellQuote",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenOrderSize",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getTokenBuyQuote",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokenOrderSize",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "getTokenSellQuote",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "spender",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "addedValue",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "increaseAllowance",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "_bondingCurve",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "_tokenURI",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "_name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "_symbol",
+            "type": "string"
+          },
+          {
+            "internalType": "struct IHigherrrrrrr.PriceLevel[]",
+            "name": "_priceLevels",
+            "type": "tuple[]",
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "internalType": "address",
+            "name": "_convictionNFT",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "payable",
+        "type": "function",
+        "name": "initialize"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "marketType",
+        "outputs": [
+          {
+            "internalType": "enum IHigherrrrrrr.MarketType",
+            "name": "",
+            "type": "uint8"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "name",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "nonfungiblePositionManager",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "numPriceLevels",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "onERC721Received",
+        "outputs": [
+          {
+            "internalType": "bytes4",
+            "name": "",
+            "type": "bytes4"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "poolAddress",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "priceLevels",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "tokensToSell",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "comment",
+            "type": "string"
+          },
+          {
+            "internalType": "enum IHigherrrrrrr.MarketType",
+            "name": "expectedMarketType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "minPayoutSize",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceLimitX96",
+            "type": "uint160"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "sell",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "state",
+        "outputs": [
+          {
+            "internalType": "struct IHigherrrrrrr.MarketState",
+            "name": "",
+            "type": "tuple",
+            "components": [
+              {
+                "internalType": "enum IHigherrrrrrr.MarketType",
+                "name": "marketType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "address",
+                "name": "marketAddress",
+                "type": "address"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "swapRouter",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "symbol",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "tokenURI",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "totalSupply",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transfer",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "transferFrom",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "int256",
+            "name": "amount0Delta",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "amount1Delta",
+            "type": "int256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "uniswapV3SwapCallback"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "payable",
+        "type": "receive"
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "allowance(address,address)": {
+          "details": "See {IERC20-allowance}."
+        },
+        "approve(address,uint256)": {
+          "details": "See {IERC20-approve}. NOTE: If `amount` is the maximum `uint256`, the allowance is not updated on `transferFrom`. This is semantically equivalent to an infinite approval. Requirements: - `spender` cannot be the zero address."
+        },
+        "balanceOf(address)": {
+          "details": "See {IERC20-balanceOf}."
+        },
+        "burn(uint256)": {
+          "params": {
+            "tokensToBurn": "The number of tokens to burn"
+          }
+        },
+        "buy(address,address,string,uint8,uint256,uint160)": {
+          "params": {
+            "comment": "A comment associated with the buy order",
+            "expectedMarketType": "The expected market type (0 = BONDING_CURVE, 1 = UNISWAP_POOL)",
+            "minOrderSize": "The minimum tokens to prevent slippage",
+            "recipient": "The address to receive the purchased tokens",
+            "refundRecipient": "The address to receive any excess ETH",
+            "sqrtPriceLimitX96": "The price limit for Uniswap V3 pool swaps, ignored if market is bonding curve."
+          }
+        },
+        "decimals()": {
+          "details": "Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the default value returned by this function, unless it's overridden. NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}."
+        },
+        "decreaseAllowance(address,uint256)": {
+          "details": "Atomically decreases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address. - `spender` must have allowance for the caller of at least `subtractedValue`."
+        },
+        "getCurrentPrice()": {
+          "returns": {
+            "_0": "The current price in ETH"
+          }
+        },
+        "increaseAllowance(address,uint256)": {
+          "details": "Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address."
+        },
+        "initialize(address,string,string,string,(uint256,string)[],address)": {
+          "params": {
+            "_bondingCurve": "The address of the bonding curve module",
+            "_name": "The token name",
+            "_priceLevels": "The price levels and names",
+            "_symbol": "The token symbol",
+            "_tokenURI": "The ERC20 token URI"
+          }
+        },
+        "onERC721Received(address,address,uint256,bytes)": {
+          "details": "For receiving the Uniswap V3 LP NFT on market graduation."
+        },
+        "sell(uint256,address,string,uint8,uint256,uint160)": {
+          "params": {
+            "comment": "A comment associated with the sell order",
+            "expectedMarketType": "The expected market type (0 = BONDING_CURVE, 1 = UNISWAP_POOL)",
+            "minPayoutSize": "The minimum ETH payout to prevent slippage",
+            "recipient": "The address to receive the ETH payout",
+            "sqrtPriceLimitX96": "The price limit for Uniswap V3 pool swaps, ignored if market is bonding curve",
+            "tokensToSell": "The number of tokens to sell"
+          }
+        },
+        "symbol()": {
+          "details": "Returns the symbol of the token, usually a shorter version of the name."
+        },
+        "totalSupply()": {
+          "details": "See {IERC20-totalSupply}."
+        },
+        "transfer(address,uint256)": {
+          "details": "See {IERC20-transfer}. Requirements: - `to` cannot be the zero address. - the caller must have a balance of at least `amount`."
+        },
+        "transferFrom(address,address,uint256)": {
+          "details": "See {IERC20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {ERC20}. NOTE: Does not update the allowance if the current allowance is the maximum `uint256`. Requirements: - `from` and `to` cannot be the zero address. - `from` must have a balance of at least `amount`. - the caller must have allowance for ``from``'s tokens of at least `amount`."
+        },
+        "uniswapV3SwapCallback(int256,int256,bytes)": {
+          "details": "No-op to allow a swap on the pool to set the correct initial price, if needed"
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "burn(uint256)": {
+          "notice": "Burns tokens after the market has graduated to Uniswap V3"
+        },
+        "buy(address,address,string,uint8,uint256,uint160)": {
+          "notice": "Purchases tokens using ETH, either from the bonding curve or Uniswap V3 pool"
+        },
+        "convictionNFT()": {
+          "notice": "Returns the address of the Conviction NFT contract"
+        },
+        "currentExchangeRate()": {
+          "notice": "The current exchange rate of the token if the market has not graduated.         This will revert if the market has graduated to the Uniswap V3 pool."
+        },
+        "getCurrentPrice()": {
+          "notice": "Returns the current price from Uniswap pool or 0 if in bonding curve"
+        },
+        "getEthBuyQuote(uint256)": {
+          "notice": "The number of tokens that can be bought from a given amount of ETH.         This will revert if the market has graduated to the Uniswap V3 pool."
+        },
+        "getEthSellQuote(uint256)": {
+          "notice": "The number of tokens for selling a given amount of ETH.         This will revert if the market has graduated to the Uniswap V3 pool."
+        },
+        "getTokenBuyQuote(uint256)": {
+          "notice": "The amount of ETH needed to buy a given number of tokens.         This will revert if the market has graduated to the Uniswap V3 pool."
+        },
+        "getTokenSellQuote(uint256)": {
+          "notice": "The amount of ETH that can be received for selling a given number of tokens.         This will revert if the market has graduated to the Uniswap V3 pool."
+        },
+        "initialize(address,string,string,string,(uint256,string)[],address)": {
+          "notice": "Initializes a new Higherrrrrrr token"
+        },
+        "sell(uint256,address,string,uint8,uint256,uint160)": {
+          "notice": "Sells tokens for ETH, either to the bonding curve or Uniswap V3 pool"
+        },
+        "state()": {
+          "notice": "Returns current market type and address"
+        },
+        "tokenURI()": {
+          "notice": "Returns the URI of the token"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin-upgradeable/contracts/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "ds-test/=lib/forge-std/lib/ds-test/src/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+      "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "solady/=lib/solady/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "src/Higherrrrrrr.sol": "Higherrrrrrr"
+    },
+    "evmVersion": "paris",
+    "libraries": {},
+    "viaIR": true
+  },
+  "sources": {
+    "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol": {
+      "keccak256": "0x89be10e757d242e9b18d5a32c9fbe2019f6d63052bbe46397a430a1d60d7f794",
+      "urls": [
+        "bzz-raw://f103ee2e4aecd37aac6ceefe670709cdd7613dee25fa2d4d9feaf7fc0aaa155e",
+        "dweb:/ipfs/QmRiNZLoJk5k3HPMYGPGjZFd2ke1ZxjhJZkM45Ec9GH9hv"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/security/ReentrancyGuardUpgradeable.sol": {
+      "keccak256": "0xb82ef33f43b6b96109687d91b39c94573fdccaaa423fe28e8ba0977b31c023e0",
+      "urls": [
+        "bzz-raw://ec9c629f63e66379f9c868a74f971064701cc6e30583872aa653f8b932518025",
+        "dweb:/ipfs/QmY4MnZF2VMFwJkAwpdQwxEWA3KcGbNBKEmAVYePMVQWUR"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol": {
+      "keccak256": "0xd14a627157b9a411d2410713e5dd3a377e9064bd5c194a90748bbf27ea625784",
+      "urls": [
+        "bzz-raw://29d6a502187e88fdb4ac51319b6cfc82e7ba886a435480e229e5f838d2da55ee",
+        "dweb:/ipfs/QmQNWKr3axXvQowZi31ydXRdeZ7UnE7oN8XAz9FCkx1JhN"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol": {
+      "keccak256": "0x0e1f0f5f62f67a881cd1a9597acbc0a5e4071f3c2c10449a183b922ae7272e3f",
+      "urls": [
+        "bzz-raw://c25f742ff154998d19a669e2508c3597b363e123ce9144cd0fcf6521229f401f",
+        "dweb:/ipfs/QmQXRuFzStEWqeEPbhQU6cAg9PaSowxJVo4PDKyRod7dco"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol": {
+      "keccak256": "0x605434219ebbe4653f703640f06969faa5a1d78f0bfef878e5ddbb1ca369ceeb",
+      "urls": [
+        "bzz-raw://4c9c634f99dd02d73ce7498b03a6305e251c05eeebb71457306561c1fab0fa7d",
+        "dweb:/ipfs/QmbYRBbZHy8YoaQKXdPryiL3CSS7uUaRfRYi1TUj9cTqJQ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/AddressUpgradeable.sol": {
+      "keccak256": "0x9c80f545915582e63fe206c6ce27cbe85a86fc10b9cd2a0e8c9488fb7c2ee422",
+      "urls": [
+        "bzz-raw://310136ad60820af4177a11a61d77a3686faf5fca4942b600e08fc940db38396b",
+        "dweb:/ipfs/QmbCzMNSTL7Zi7M4UCSqBrkHtp4jjxUnGbkneCZKdR1qeq"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol": {
+      "keccak256": "0x963ea7f0b48b032eef72fe3a7582edf78408d6f834115b9feadd673a4d5bd149",
+      "urls": [
+        "bzz-raw://d6520943ea55fdf5f0bafb39ed909f64de17051bc954ff3e88c9e5621412c79c",
+        "dweb:/ipfs/QmWZ4rAKTQbNG2HxGs46AcTXShsVytKeLs7CUCdCSv5N7a"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "keccak256": "0xba43b97fba0d32eb4254f6a5a297b39a19a247082a02d6e69349e071e2946218",
+      "urls": [
+        "bzz-raw://fc980984badf3984b6303b377711220e067722bbd6a135b24669ff5069ef9f32",
+        "dweb:/ipfs/QmPHXMSXj99XjSVM21YsY6aNtLLjLVXDbyN76J5HQYvvrz"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+      "keccak256": "0x287b55befed2961a7eabd7d7b1b2839cbca8a5b80ef8dcbb25ed3d4c2002c305",
+      "urls": [
+        "bzz-raw://bd39944e8fc06be6dbe2dd1d8449b5336e23c6a7ba3e8e9ae5ae0f37f35283f5",
+        "dweb:/ipfs/QmPV3FGYjVwvKSgAXKUN3r9T9GwniZz83CxBpM7vyj2G53"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol": {
+      "keccak256": "0xec63854014a5b4f2b3290ab9103a21bdf902a508d0f41a8573fea49e98bf571a",
+      "urls": [
+        "bzz-raw://bc5b5dc12fbc4002f282eaa7a5f06d8310ed62c1c77c5770f6283e058454c39a",
+        "dweb:/ipfs/Qme9rE2wS3yBuyJq9GgbmzbsBQsW2M2sVFqYYLw7bosGrv"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol": {
+      "keccak256": "0x909d608c2db6eb165ca178c81289a07ed2e118e444d0025b2a85c97d0b44a4fa",
+      "urls": [
+        "bzz-raw://656cda26512ddd7373c2d5551c8fae759fc30f05b10f0fc2e738e9274199dbd4",
+        "dweb:/ipfs/QmTSArSzQRFbQmHgq7U1PZXnsDFhvDZhKVu9CzMG4yo6Lx"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol": {
+      "keccak256": "0x2c309e7df9e05e6ce15bedfe74f3c61b467fc37e0fae9eab496acf5ea0bbd7ff",
+      "urls": [
+        "bzz-raw://7063b5c98711a98018ba4635ac74cee1c1cfa2ea01099498e062699ed9530005",
+        "dweb:/ipfs/QmeJ8rGXkcv7RrqLdAW8PCXPAykxVsddfYY6g5NaTwmRFE"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol": {
+      "keccak256": "0x5bce51e11f7d194b79ea59fe00c9e8de9fa2c5530124960f29a24d4c740a3266",
+      "urls": [
+        "bzz-raw://7e66dfde185df46104c11bc89d08fa0760737aa59a2b8546a656473d810a8ea4",
+        "dweb:/ipfs/QmXvyqtXPaPss2PD7eqPoSao5Szm2n6UMoiG8TZZDjmChR"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol": {
+      "keccak256": "0xa82b58eca1ee256be466e536706850163d2ec7821945abd6b4778cfb3bee37da",
+      "urls": [
+        "bzz-raw://6e75cf83beb757b8855791088546b8337e9d4684e169400c20d44a515353b708",
+        "dweb:/ipfs/QmYvPafLfoquiDMEj7CKHtvbgHu7TJNPSVPSCjrtjV8HjV"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/token/ERC721/extensions/IERC721Metadata.sol": {
+      "keccak256": "0x75b829ff2f26c14355d1cba20e16fe7b29ca58eb5fef665ede48bc0f9c6c74b9",
+      "urls": [
+        "bzz-raw://a0a107160525724f9e1bbbab031defc2f298296dd9e331f16a6f7130cec32146",
+        "dweb:/ipfs/QmemujxSd7gX8A9M8UwmNbz4Ms3U9FG9QfudUgxwvTmPWf"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Address.sol": {
+      "keccak256": "0x006dd67219697fe68d7fbfdea512e7c4cb64a43565ed86171d67e844982da6fa",
+      "urls": [
+        "bzz-raw://2455248c8ddd9cc6a7af76a13973cddf222072427e7b0e2a7d1aff345145e931",
+        "dweb:/ipfs/QmfYjnjRbWqYpuxurqveE6HtzsY1Xx323J428AKQgtBJZm"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Base64.sol": {
+      "keccak256": "0x5f3461639fe20794cfb4db4a6d8477388a15b2e70a018043084b7c4bedfa8136",
+      "urls": [
+        "bzz-raw://77e5309e2cc4cdc3395214edb0ff43ff5a5f7373f5a425383e540f6fab530f96",
+        "dweb:/ipfs/QmTV8DZ9knJDa3b5NPBFQqjvTzodyZVjRUg5mx5A99JPLJ"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "keccak256": "0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7",
+      "urls": [
+        "bzz-raw://6df0ddf21ce9f58271bdfaa85cde98b200ef242a05a3f85c2bc10a8294800a92",
+        "dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/Strings.sol": {
+      "keccak256": "0x3088eb2868e8d13d89d16670b5f8612c4ab9ff8956272837d8e90106c59c14a0",
+      "urls": [
+        "bzz-raw://b81d9ff6559ea5c47fc573e17ece6d9ba5d6839e213e6ebc3b4c5c8fe4199d7f",
+        "dweb:/ipfs/QmPCW1bFisUzJkyjroY3yipwfism9RRCigCcK1hbXtVM8n"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol": {
+      "keccak256": "0xd10975de010d89fd1c78dc5e8a9a7e7f496198085c151648f20cba166b32582b",
+      "urls": [
+        "bzz-raw://fb0048dee081f6fffa5f74afc3fb328483c2a30504e94a0ddd2a5114d731ec4d",
+        "dweb:/ipfs/QmZptt1nmYoA5SgjwnSgWqgUSDgm4q52Yos3xhnMv3MV43"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+      "keccak256": "0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1",
+      "urls": [
+        "bzz-raw://be161e54f24e5c6fae81a12db1a8ae87bc5ae1b0ddc805d82a1440a68455088f",
+        "dweb:/ipfs/QmP7C3CHdY9urF4dEMb9wmsp1wMxHF6nhA2yQE5SKiPAdy"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/math/Math.sol": {
+      "keccak256": "0xe4455ac1eb7fc497bb7402579e7b4d64d928b846fce7d2b6fde06d366f21c2b3",
+      "urls": [
+        "bzz-raw://cc8841b3cd48ad125e2f46323c8bad3aa0e88e399ec62acb9e57efa7e7c8058c",
+        "dweb:/ipfs/QmSqE4mXHA2BXW58deDbXE8MTcsL5JSKNDbm23sVQxRLPS"
+      ],
+      "license": "MIT"
+    },
+    "lib/openzeppelin-contracts/contracts/utils/math/SignedMath.sol": {
+      "keccak256": "0xf92515413956f529d95977adc9b0567d583c6203fc31ab1c23824c35187e3ddc",
+      "urls": [
+        "bzz-raw://c50fcc459e49a9858b6d8ad5f911295cb7c9ab57567845a250bf0153f84a95c7",
+        "dweb:/ipfs/QmcEW85JRzvDkQggxiBBLVAasXWdkhEysqypj9EaB6H2g6"
+      ],
+      "license": "MIT"
+    },
+    "lib/solady/src/utils/FixedPointMathLib.sol": {
+      "keccak256": "0x7a53e482c395049e68e3863bd2677b9707bf875f5934c5d74294ab466bacbcfd",
+      "urls": [
+        "bzz-raw://5c8498030ebbd41a4c0cb708dc9be8d18da4767b2107a6bcbc5f91221baba687",
+        "dweb:/ipfs/QmQ3veAScgn3GyP5pR6fYEtefRNSM3YBSwYe1BSoETiq2K"
+      ],
+      "license": "MIT"
+    },
+    "src/BondingCurve.sol": {
+      "keccak256": "0x3db91a4fa501c250479ccbaabee4899040d6ac062175960a21e8a65db721f957",
+      "urls": [
+        "bzz-raw://a17f22e3db9a4d51cd233e72b60341154221bfefcbd3e268f9a8e4da6bd3471b",
+        "dweb:/ipfs/QmdssMiFm419K9nhsicGZXCBcgwrHNNtvLDkJYJCpfKrKN"
+      ],
+      "license": "MIT"
+    },
+    "src/Higherrrrrrr.sol": {
+      "keccak256": "0xf25d7360cb1ac04e88125591aea000674a36cb6accca81da51b74ad6a32f6882",
+      "urls": [
+        "bzz-raw://e2541b26735e84b02d0bb53acdb0ecb35aec4bcb3a682443c6c61ef3a7d342ba",
+        "dweb:/ipfs/QmeV7GupW6RAKMFadqA7wA8feJyA3axtoTdCV5gGahPTeH"
+      ],
+      "license": "MIT"
+    },
+    "src/HigherrrrrrrConviction.sol": {
+      "keccak256": "0x6539ee90cdeda1a636300dddd789f26bc64a4942a2eb03a9f6d4788be7ebb2a8",
+      "urls": [
+        "bzz-raw://4165497621c6da83c31b6b01dbcb8e037e66125bcb3e4a0636b8d73ea7e5c1a8",
+        "dweb:/ipfs/QmYz2u1vfBuBr77hYTXEyZgcJiF6Gwb1aVYS7yiUy319VJ"
+      ],
+      "license": "MIT"
+    },
+    "src/interfaces/IHigherrrrrrr.sol": {
+      "keccak256": "0x54a07c02023be1af6b749cbe3980c49e8bc3612d5ad8d516c122f4516d704039",
+      "urls": [
+        "bzz-raw://fbe170301e4d40aa817f61c61f98ce9f41bad4a0c413d3b1ea3c177a12252220",
+        "dweb:/ipfs/QmVacygJyP5rJC97BwoDgv6p17ExfrMSGa7zjmPDHnGjJC"
+      ],
+      "license": "MIT"
+    },
+    "src/interfaces/INonfungiblePositionManager.sol": {
+      "keccak256": "0x51ba80043e1ea7bbdd1f7fb4de12a6415e4b6798af6e004af6b5f9aa342b0036",
+      "urls": [
+        "bzz-raw://d117f98fee5ac0b34adba78d315057d5731aee2111d6e6476b815f303cde87c3",
+        "dweb:/ipfs/QmPDtuMhWfRBbyAWBjnd88jBm4fEhFqmsfkssaUj6L6nav"
+      ],
+      "license": "GPL-2.0-or-later"
+    },
+    "src/interfaces/ISwapRouter.sol": {
+      "keccak256": "0x012ff82208f36151f734dfec5d3d6a0548477f3d2726fcf6cdb6a480af554d7c",
+      "urls": [
+        "bzz-raw://c5b93e5174838ac39076fda1767a2f22435139974316076a08711b3a69e531af",
+        "dweb:/ipfs/Qmb6qaTXnbXDDUoxxXF9QgLVhpVeZPnt2LgYkCURDFtnkA"
+      ],
+      "license": "GPL-2.0-or-later"
+    },
+    "src/interfaces/IUniswapV3Pool.sol": {
+      "keccak256": "0xee16ed6b6a0d2a76a09fc106505ccbb769bdce122830e2e2ca26da09d2d8c553",
+      "urls": [
+        "bzz-raw://aa9415d8e6e99a0125805fc16a2937154b93d849b140448c380884e2377f1973",
+        "dweb:/ipfs/QmY3rP9y3f22TD85KwUSsXAgcMxQB8vXpFVuucCy2TTWuH"
+      ],
+      "license": "MIT"
+    },
+    "src/interfaces/IUniswapV3SwapCallback.sol": {
+      "keccak256": "0x1e0d6e0409369d5299f4281dd4fd41f4ae24ff5a1f74ee89dc99a82062ca2a0c",
+      "urls": [
+        "bzz-raw://7de2f9c1f9433fa208d9a2a9f776520c7e5b0eea047f88f7118da059fe81cf9a",
+        "dweb:/ipfs/QmdLAmtZSNiKPzSP1HMUxCRjzACSgYusAjA4H8jVQddNny"
+      ],
+      "license": "GPL-2.0-or-later"
+    },
+    "src/interfaces/IWETH.sol": {
+      "keccak256": "0xca114bc7d5267ee5a2c4be9c091d93c0b91cf60534abe1a2600cdb135422c1d0",
+      "urls": [
+        "bzz-raw://e82ce67504dd1dac062e5a010f9edf4217eb8962d066d10b30a6536616edc791",
+        "dweb:/ipfs/QmZ7dzTJgVefDYEhnMZSmecJ5RVEXAZoq7FDj3jdWhu5HQ"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

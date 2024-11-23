@@ -1,0 +1,211 @@
+{
+  "compiler": {
+    "version": "0.8.23+commit.f704f362"
+  },
+  "language": "Solidity",
+  "output": {
+    "abi": [
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "feeGrowthGlobal0X128",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "feeGrowthGlobal1X128",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "view",
+        "type": "function",
+        "name": "slot0",
+        "outputs": [
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceX96",
+            "type": "uint160"
+          },
+          {
+            "internalType": "int24",
+            "name": "tick",
+            "type": "int24"
+          },
+          {
+            "internalType": "uint16",
+            "name": "observationIndex",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "observationCardinality",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "observationCardinalityNext",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "feeProtocol",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "unlocked",
+            "type": "bool"
+          }
+        ]
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "zeroForOne",
+            "type": "bool"
+          },
+          {
+            "internalType": "int256",
+            "name": "amountSpecified",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint160",
+            "name": "sqrtPriceLimitX96",
+            "type": "uint160"
+          },
+          {
+            "internalType": "bytes",
+            "name": "data",
+            "type": "bytes"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "swap",
+        "outputs": [
+          {
+            "internalType": "int256",
+            "name": "amount0",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "amount1",
+            "type": "int256"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "token0",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+        "name": "token1",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ]
+      }
+    ],
+    "devdoc": {
+      "kind": "dev",
+      "methods": {
+        "feeGrowthGlobal0X128()": {
+          "details": "This value can overflow the uint256"
+        },
+        "feeGrowthGlobal1X128()": {
+          "details": "This value can overflow the uint256"
+        }
+      },
+      "version": 1
+    },
+    "userdoc": {
+      "kind": "user",
+      "methods": {
+        "feeGrowthGlobal0X128()": {
+          "notice": "The fee growth as a Q128.128 fees of token0 collected per unit of liquidity for the entire life of the pool"
+        },
+        "feeGrowthGlobal1X128()": {
+          "notice": "The fee growth as a Q128.128 fees of token1 collected per unit of liquidity for the entire life of the pool"
+        }
+      },
+      "version": 1
+    }
+  },
+  "settings": {
+    "remappings": [
+      "@openzeppelin-upgradeable/contracts/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+      "ds-test/=lib/forge-std/lib/ds-test/src/",
+      "erc4626-tests/=lib/openzeppelin-contracts-upgradeable/lib/erc4626-tests/",
+      "forge-std/=lib/forge-std/src/",
+      "openzeppelin-contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/",
+      "openzeppelin-contracts/=lib/openzeppelin-contracts/",
+      "openzeppelin/=lib/openzeppelin-contracts-upgradeable/contracts/",
+      "solady/=lib/solady/"
+    ],
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "metadata": {
+      "bytecodeHash": "ipfs"
+    },
+    "compilationTarget": {
+      "src/interfaces/IUniswapV3Pool.sol": "IUniswapV3Pool"
+    },
+    "evmVersion": "paris",
+    "libraries": {},
+    "viaIR": true
+  },
+  "sources": {
+    "src/interfaces/IUniswapV3Pool.sol": {
+      "keccak256": "0xee16ed6b6a0d2a76a09fc106505ccbb769bdce122830e2e2ca26da09d2d8c553",
+      "urls": [
+        "bzz-raw://aa9415d8e6e99a0125805fc16a2937154b93d849b140448c380884e2377f1973",
+        "dweb:/ipfs/QmY3rP9y3f22TD85KwUSsXAgcMxQB8vXpFVuucCy2TTWuH"
+      ],
+      "license": "MIT"
+    }
+  },
+  "version": 1
+}

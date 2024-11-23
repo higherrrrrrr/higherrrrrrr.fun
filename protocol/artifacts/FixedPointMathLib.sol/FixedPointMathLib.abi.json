@@ -1,0 +1,67 @@
+[
+  {
+    "type": "error",
+    "name": "DivFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "DivWadFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ExpOverflow",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "FactorialOverflow",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "FullMulDivFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "LnWadUndefined",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "MantissaOverflow",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "MulDivFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "MulWadFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OutOfDomain",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RPowOverflow",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SDivWadFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SMulWadFailed",
+    "inputs": []
+  }
+]
