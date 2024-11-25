@@ -15,7 +15,7 @@ const Protocol: NextPage = () => {
 
       <main className="terminal-container mb-8 min-h-screen flex items-center justify-center">
         <div className="max-w-3xl mx-auto p-6">
-          <h1 className="text-green-500 text-4xl font-bold mb-6 text-left">Higherrrrrrr Protocol and Token</h1>
+          <h1 className="text-green-500 text-4xl font-bold mb-6 text-left">Higherrrrrrr Protocol</h1>
           <div className="terminal-text text-green-500 space-y-4">
             <p className="mb-4">
               The internet changed everything by making information infinite. But it was memes that made meaning infinite - creating a new universal language that spreads virally across every human boundary. Until now, we've been forced to express this new language through static tokens that can't capture its living, evolving nature.
