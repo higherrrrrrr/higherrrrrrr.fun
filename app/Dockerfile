@@ -2,17 +2,24 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install build dependencies
+# Install build dependencies and encoding
 RUN apk add --no-cache python3 make g++ gcc
+RUN npm install -g encoding pino-pretty
 
+# Copy package files
 COPY package*.json ./
 COPY yarn.lock ./
+
+# Install dependencies
+RUN yarn install
+
+# Copy the rest of the app
 COPY . .
 
-RUN yarn install --frozen-lockfile
+# Build the app
 RUN yarn build
 
 EXPOSE 3000
-ENV PORT 3000
 
+# Start the app
 CMD ["yarn", "start"]

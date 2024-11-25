@@ -2,6 +2,11 @@ import { ethers } from 'ethers'
 import HigherrrrrrrFactoryABI from '@/types/contracts/HigherrrrrrrFactory.json'
 import { PriceLevel, TokenCreationResult } from './higherrrrrrr'
 
+interface ContractConfig {
+  address: string;
+  abi: any[];
+}
+
 export class HigherrrrrrrFactory {
     private contract: ethers.Contract;
 

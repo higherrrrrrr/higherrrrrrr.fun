@@ -6,8 +6,8 @@ import ComingSoon from "./coming-soon";
 import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
-  title: "higherrrrrrrrrrr",
-  description: "can you take me higherrrrrrrrrrrrrrrr",
+  title: "higherrrrrrr.fun",
+  description: "A new meme coin trading platform for evolutionary memes",
 };
 
 export default async function RootLayout({

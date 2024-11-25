@@ -24,7 +24,9 @@
     "react": "19.0.0-rc-66855b96-20241106",
     "react-7-segment-display": "^1.1.2",
     "react-dom": "19.0.0-rc-66855b96-20241106",
-    "wagmi": "^2"
+    "wagmi": "^2",
+    "encoding": "^0.1.13",
+    "pino-pretty": "^10.2.3"
   },
   "devDependencies": {
     "@types/node": "^20",

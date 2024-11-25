@@ -14,7 +14,7 @@ export default function ComingSoon() {
             Welcome to Higherrrrrrr, a new kind of meme token platform where your
             tokens visually evolve as they increase in value. Create or trade
             tokens that automatically transform their names and symbols through
-            smart contracts as they hit different price milestones. It's a fun
+            smart contracts as they hit different price milestones. It&apos;s a fun
             new way to make meme tokens more interactive and engaging for
             communities.
           </p>
