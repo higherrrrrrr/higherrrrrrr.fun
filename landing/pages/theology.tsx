@@ -15,6 +15,7 @@ const Theology: NextPage = () => {
 
       <main className="terminal-container mb-10 min-h-screen flex items-center justify-center">
         <div className="max-w-3xl mx-auto p-8">
+          <h1 className="text-green-500 text-4xl font-bold mb-8 text-center">Asset Backed Religions</h1>
           <pre className="terminal-text text-green-500 whitespace-pre-wrap">
             {"The greatest movements in human history weren't built on rational economic incentives. They were built on belief. When you look critically at the largest projects in crypto, it becomes clear that we're not building currencies or companies - we're creating new ideologies.\n\n" +
               "Bitcoin isn't just technology. It's a belief system with its own prophets, rituals, and artifacts. Satoshi isn't merely a founder, but a messiah who delivered the genesis block and disappeared into legend. The community has created shrines to founders like Vitalik and Brian, transforming them from developers into divine figures.\n\n" +
