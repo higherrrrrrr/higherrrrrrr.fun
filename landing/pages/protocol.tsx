@@ -31,15 +31,15 @@ const Protocol: NextPage = () => {
             </p>
             
             <p className="mb-4">
-              Evolutionary tokens change this paradigm entirely. They grow and transform with their community. Each price milestone unlocks a new evolution, changing the token's fundamental metadata - its name, symbol, and identity. The token evolves autonomously as it achieves new heights:
+              Evolutionary tokens change this paradigm entirely. They grow and transform with their community. Each price milestone unlocks a new evolution, dynamically updating the token's fundamental metadata on-chain - its name, symbol, and identity evolve autonomously through smart contracts as it achieves new heights:
             </p>
 
             <pre className="bg-black/30 p-4 rounded-lg font-mono text-sm mb-6 flex flex-col">
-              <span>$0.0001: "highr"</span>
-              <span>$0.001:  "highrrr"</span>
-              <span>$0.01:   "highrrrrrr"</span>
-              <span>$0.1:    "highrrrrrrrrr"</span>
-              <span>$1:      "highrrrrrrrrrrrr"</span>
+              <span>$0.0001: name = "highr"</span>
+              <span>$0.001:  name = "highrrr"</span>
+              <span>$0.01:   name = "highrrrrrr"</span>
+              <span>$0.1:    name = "highrrrrrrrrr"</span>
+              <span>$1:      name = "highrrrrrrrrrrrr"</span>
             </pre>
 
             <p className="mb-6">
@@ -96,13 +96,13 @@ const Protocol: NextPage = () => {
               Coming soon: the Higherrrrrrr governance token. This will put the future direction of the protocol in the hands of the community. The token will follow a community-first distribution model with 85% allocated to the community through an initial liquidity offering and multi-stage airdrops, and 15% reserved for the core team. Early participants in the protocol will be eligible for governance token allocation.
             </p>
 
-            <h2 className="text-2xl font-bold mt-6 mb-3">Launch Points Program</h2>
+            <h2 className="text-2xl font-bold mt-6 mb-3">Points Program</h2>
             <p className="mb-4">
               To celebrate our launch and reward early believers, we're introducing a comprehensive points program:
             </p>
             <ul className="list-disc pl-6 mb-6 space-y-2">
               <li>Make your initial pledge to start earning points</li>
-              <li>Generate additional points through trading activity</li>
+              <li>Generate additional points through trading activity and volume</li>
             </ul>
 
             <p className="text-xl font-bold mt-6">
