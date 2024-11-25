@@ -6,24 +6,24 @@ import { useEffect, useState } from "react";
 
 export default function ComingSoon() {
   return (
-    <div className="w-screen h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-y-8">
+    <div className="w-screen min-h-screen flex items-center justify-center bg-black">
+      <div className="flex flex-col items-center gap-y-12 max-w-3xl mx-auto px-6">
         <CountdownTimer />
-        <div className="max-w-xl text-balance space-y-4 px-8">
-          <p className="text-lg">
-            Welcome to the first meme coin platform where your assets evolve
-            visually as they moon. Watch your investments transform in real-time
-            as prices climb - each milestone unlocks new variations of your
-            token&apos;s name, creating a dynamic connection between value and
-            its identity.
+        <div className="text-balance space-y-8 text-green-500">
+          <p className="text-xl sm:text-2xl terminal-text leading-normal">
+            Welcome to Higherrrrrrr, a new kind of meme token platform where your
+            tokens visually evolve as they increase in value. Create or trade
+            tokens that automatically transform their names and symbols through
+            smart contracts as they hit different price milestones. It's a fun
+            new way to make meme tokens more interactive and engaging for
+            communities.
           </p>
-          <p className="text-lg">
-            Create your own evolving meme coins or join existing movements.
-            Early believers who HODL through the transformative journey will be
-            rewarded with exclusive NFTs marking their role in each coin&apos;s
-            ascension. Every price threshold crossed isn&apos;t just a number -
-            it&apos;s a new era in your token&apos;s evolution, permanently
-            etched into the blockchain.
+          <p className="text-xl sm:text-2xl terminal-text leading-normal">
+            Early supporters who hold through price milestones will receive
+            special Conviction NFTs to commemorate their participation. Whether
+            you want to launch your own evolving token or join existing
+            projects, Higherrrrrrr adds a new dimension to meme trading by
+            making price action visible in the token itself.
           </p>
         </div>
       </div>
@@ -54,7 +54,7 @@ function CountdownTimer() {
   }, [timeTilLaunch]);
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-x-4 sm:gap-x-8">
       <DisplayWithLabel value={hours} label="hours" />
       <DisplayWithLabel value={minutes} label="minutes" />
       <DisplayWithLabel value={seconds} label="seconds" />
@@ -69,7 +69,7 @@ function DisplayWithLabel({ value, label }: { value: number; label: string }) {
         <Display
           count={2}
           value={value}
-          height={40}
+          height={50}
           color="rgb(34 197 94)"
           skew={false}
         />
@@ -79,11 +79,11 @@ function DisplayWithLabel({ value, label }: { value: number; label: string }) {
           count={2}
           value={value}
           height={100}
-          color="var(--countdown-color)"
+          color="rgb(34 197 94)"
           skew={false}
         />
       </div>
-      <div className="text-lg text-green-500 -mt-8">{label}</div>
+      <div className="text-base sm:text-lg text-green-500 -mt-6 sm:-mt-8 terminal-text">{label}</div>
     </div>
   );
 }

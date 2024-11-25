@@ -4,22 +4,6 @@ from config import Config
 from datetime import datetime
 import pytz
 
-def calculate_time_remaining():
-    # Target time: November 22nd, 2024 at 3PM PST
-    pst = pytz.timezone('America/Los_Angeles')
-    target = datetime(2024, 11, 22, 15, 0, 0, tzinfo=pst)
-    now = datetime.now(pst)
-
-    # Calculate difference
-    diff = target - now
-
-    # Calculate days, hours, minutes
-    days = diff.days
-    hours = diff.seconds // 3600
-    minutes = (diff.seconds % 3600) // 60
-
-    return f"{days}d {hours}h {minutes}m"
-
 def is_past_unlock_time():
     # Target time: November 26th, 2024 at 11:59:59 PM EST
     est = pytz.timezone('America/New_York')

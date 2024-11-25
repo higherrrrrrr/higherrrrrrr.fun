@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  font-family: "Pixelify Mono", monospace !important;
+}
+
 /* Global font override */
 * {
   font-family: "Pixelify Mono", monospace !important;
