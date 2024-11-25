@@ -2,7 +2,10 @@
 
 import { Button, IconButton } from "@/components/Button";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ethers } from 'ethers';
+import { useAccount, useWalletClient } from 'wagmi';
+import { HigherrrrrrrFactory } from '@/lib/contracts/higherrrrrrrFactory';
 
 type PriceLevel = {
   name: string;
@@ -10,6 +13,18 @@ type PriceLevel = {
 };
 
 export default function NewToken() {
+  const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
+
+  useEffect(() => {
+    if (walletClient) {
+      new ethers.BrowserProvider(walletClient as any)
+        .getSigner()
+        .then(setSigner);
+    }
+  }, [walletClient]);
+
   const [description, setDescription] = useState("");
   const [initialPriceName, setInitialPriceName] = useState("");
   const [priceLevels, setPriceLevels] = useState<PriceLevel[]>([
@@ -19,22 +34,106 @@ export default function NewToken() {
   ]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    setError(null);
-    const file = e.target.files?.[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);
-    }
-  }
+  const [isCreating, setIsCreating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      setError(null);
+
+      // Create preview
+      const previewUrl = URL.createObjectURL(file);
+      setSelectedImage(previewUrl);
+
+      // Create form data
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload to API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+
+      const { url } = await response.json();
+      setUploadedImageUrl(url);
+
+
+    } catch (error: any) {
+      console.error('Upload failed:', error);
+      setError(error.message || 'Failed to upload image');
+      setSelectedImage(null);
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function createToken() {
+    if (!signer || !address) {
+      setError("Please connect your wallet");
+      return;
+    }
+
+    if (!uploadedImageUrl) {
+      setError("Please upload an image first");
+      return;
+    }
+
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      const factory = new HigherrrrrrrFactory(
+        process.env.NEXT_PUBLIC_FACTORY_ADDRESS!,
+        signer
+      );
+
+      const formattedLevels = [
+        { 
+          price: ethers.parseEther("0"), 
+          name: initialPriceName 
+        },
+        ...priceLevels.map(level => ({
+          price: ethers.parseEther(level.greaterThan),
+          name: level.name
+        }))
+      ];
+
+      // Create token with direct metadata
+      const tx = await factory.createHigherrrrrrr(
+        initialPriceName,
+        initialPriceName.toUpperCase(),
+        uploadedImageUrl,
+        formattedLevels
+      );
+
+      window.location.href = `/token/${tx.tokenAddress}`;
+
+    } catch (err: any) {
+      console.error("Error creating token:", err);
+      setError(err.message || "Failed to create token");
+    } finally {
+      setIsCreating(false);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!selectedImage) {
-      setError("Please select an image");
+    if (!uploadedImageUrl) {
+      setError("Please upload an image first");
       return;
     }
 
@@ -55,6 +154,8 @@ export default function NewToken() {
       setError(priceLevelsError);
       return;
     }
+
+    await createToken();
   }
 
   return (
@@ -86,6 +187,7 @@ export default function NewToken() {
                   onChange={handleFileSelect}
                   className="hidden"
                   id="image-upload"
+                  disabled={isUploading}
                 />
                 <label
                   htmlFor="image-upload"
@@ -217,9 +319,10 @@ export default function NewToken() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-green-500 text-black  py-3 px-4 hover:bg-green-600 transition-colors flex items-center justify-between"
+            disabled={isCreating}
+            className="w-full bg-green-500 text-black py-3 px-4 hover:bg-green-600 transition-colors flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>create</span>
+            <span>{isCreating ? "creating..." : "create"}</span>
             <span>→</span>
           </button>
         </form>
