@@ -13,9 +13,9 @@ const Theology: NextPage = () => {
         />
       </Head>
 
-      <main className="terminal-container mb-10 min-h-screen flex items-center justify-center">
-        <div className="max-w-3xl mx-auto p-8">
-          <h1 className="text-green-500 text-4xl font-bold mb-8 text-center">Asset Backed Religions</h1>
+      <main className="terminal-container mb-8 min-h-screen flex items-center justify-center">
+        <div className="max-w-3xl mx-auto p-6">
+          <h1 className="text-green-500 text-4xl font-bold mb-6 text-left">Asset Backed Religions</h1>
           <pre className="terminal-text text-green-500 whitespace-pre-wrap">
             {"The greatest movements in human history weren't built on rational economic incentives. They were built on belief. When you look critically at the largest projects in crypto, it becomes clear that we're not building currencies or companies - we're creating new ideologies.\n\n" +
               "Bitcoin isn't just technology. It's a belief system with its own prophets, rituals, and artifacts. Satoshi isn't merely a founder, but a messiah who delivered the genesis block and disappeared into legend. The community has created shrines to founders like Vitalik and Brian, transforming them from developers into divine figures.\n\n" +
@@ -36,33 +36,48 @@ const Theology: NextPage = () => {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-4 flex justify-center gap-8 bg-black">
-        <Link
-          href="https://twitter.com/higherrrrrrrfun"
-          target="_blank"
-          className="text-green-500 hover:text-green-400 text-sm"
-        >
-          Twitter
-        </Link>
-        <Link
-          href="https://discord.gg/RKrFDw8jRW"
-          target="_blank"
-          className="text-green-500 hover:text-green-400 text-sm"
-        >
-          Discord
-        </Link>
-        <Link
-          href="/faq"
-          className="text-green-500 hover:text-green-400 text-sm"
-        >
-          FAQ
-        </Link>
-        <Link
-          href="/theology"
-          className="text-green-500 hover:text-green-400 text-sm"
-        >
-          Theology
-        </Link>
+      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-black">
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 max-w-3xl mx-auto px-4">
+          <Link
+            href="https://twitter.com/higherrrrrrrfun"
+            target="_blank"
+            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
+          >
+            Twitter
+          </Link>
+          <Link
+            href="https://discord.gg/RKrFDw8jRW"
+            target="_blank"
+            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
+          >
+            Discord
+          </Link>
+          <Link
+            href="/faq"
+            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
+          >
+            FAQ
+          </Link>
+          <Link
+            href="/theology"
+            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
+          >
+            Theology
+          </Link>
+          <Link
+            href="/protocol"
+            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
+          >
+            Protocol
+          </Link>
+          <Link
+            href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol"
+            target="_blank"
+            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
+          >
+            GitHub
+          </Link>
+        </div>
       </footer>
     </div>
   );
