@@ -91,11 +91,6 @@ const Protocol: NextPage = () => {
               <li>Historical price achievement data</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-6 mb-3">Protocol Governance</h2>
-            <p className="mb-6">
-              Coming soon: the Higherrrrrrr governance token. This will put the future direction of the protocol in the hands of the community. The token will follow a community-first distribution model with 85% allocated to the community through an initial liquidity offering and multi-stage airdrops, and 15% reserved for the core team. Early participants in the protocol will be eligible for governance token allocation.
-            </p>
-
             <h2 className="text-2xl font-bold mt-6 mb-3">Points Program</h2>
             <p className="mb-4">
               To celebrate our launch and reward early believers, we're introducing a comprehensive points program:
