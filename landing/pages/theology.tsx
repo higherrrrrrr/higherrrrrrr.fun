@@ -70,13 +70,6 @@ const Theology: NextPage = () => {
           >
             Protocol
           </Link>
-          <Link
-            href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol"
-            target="_blank"
-            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
-          >
-            GitHub
-          </Link>
         </div>
       </footer>
     </div>

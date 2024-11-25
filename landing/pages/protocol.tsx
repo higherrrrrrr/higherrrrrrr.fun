@@ -67,18 +67,6 @@ const Protocol: NextPage = () => {
             <p className="mb-4">
               To ensure the security of these evolutionary mechanics, we're committing 2% of the total token supply to a bug bounty program focused on critical money-moving vulnerabilities in the protocol's smart contracts.
             </p>
-            
-            <p className="mb-4">
-              For full technical details, including smart contract architecture and security features, visit our{" "}
-              <Link
-                href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol"
-                target="_blank"
-                className="text-green-500 hover:text-green-400 underline"
-              >
-                GitHub
-              </Link>
-              .
-            </p>
 
             <h2 className="text-2xl font-bold mt-6 mb-3">Conviction NFTs</h2>
             <p className="mb-4">
@@ -140,13 +128,6 @@ const Protocol: NextPage = () => {
             className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
           >
             Protocol
-          </Link>
-          <Link
-            href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol"
-            target="_blank"
-            className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
-          >
-            GitHub
           </Link>
         </div>
       </footer>
