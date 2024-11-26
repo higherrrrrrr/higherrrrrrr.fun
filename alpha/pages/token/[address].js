@@ -187,14 +187,6 @@ export default function TokenPage() {
     }
   };
 
-  useEffect(() => {
-    getLatestTokens(5)
-      .then(data => {
-        setLatestTokens(data.tokens);
-      })
-      .catch(console.error);
-  }, []);
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
@@ -436,26 +428,6 @@ export default function TokenPage() {
           </div>
         </div>
       </div>
-
-      {latestTokens.length > 0 && (
-        <div className="border border-green-500/30 rounded-lg p-6 space-y-4">
-          <h2 className="text-xl font-bold">Recent Tokens</h2>
-          <div className="space-y-2">
-            {latestTokens.map(token => (
-              <Link 
-                key={token.address} 
-                href={`/token/${token.address}`}
-                className="block p-3 border border-green-500/20 rounded hover:border-green-500/50"
-              >
-                <div className="flex justify-between">
-                  <span>{token.address}</span>
-                  <span>{new Date(token.timestamp * 1000).toLocaleString()}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

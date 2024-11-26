@@ -40,9 +40,16 @@ export default function ComingSoon() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black p-8">
       <div className="flex flex-col items-center max-w-4xl">
-        <div className="mb-16">
+        <div className="mb-8">
           <CountdownTimer />
         </div>
+        
+        <div className="mb-16 text-center">
+          <p className="text-2xl font-mono text-green-500 animate-pulse">
+            Buy the coin. Loop in your friends. The more it goes up, the more it evolves. Watch it transform as it goes higherrrrrrr!
+          </p>
+        </div>
+
         <div className="space-y-12 text-center max-w-[800px]">
           <p className="text-xl terminal-text text-green-500">
             Welcome to Higherrrrrrr, a new kind of meme token platform where your tokens visually evolve as 
