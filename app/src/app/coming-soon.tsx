@@ -11,20 +11,16 @@ export default function ComingSoon() {
         <CountdownTimer />
         <div className="text-balance space-y-3 sm:space-y-6 text-green-500 w-[95%] sm:w-[90%] max-w-[600px] text-center">
           <p className="text-sm sm:text-xl terminal-text">
-            Watch your coins change before your eyes as their price ascends, with each milestone 
-            revealing a new variation of the coin&apos;s name, creating a dynamic dance between 
-            its value and identity.
+            Welcome to Higherrrrrrr, a new kind of meme token platform where your tokens visually evolve as 
+            they increase in value. Create or trade tokens that automatically transform their names and 
+            symbols through smart contracts as they hit different price milestones. It&apos;s a fun new way to 
+            make meme tokens more interactive and engaging for communities.
           </p>
           <p className="text-sm sm:text-xl terminal-text">
-            You have the power to craft your own evolving meme coins or join established movements.
-          </p>
-          <p className="text-sm sm:text-xl terminal-text">
-            Those who steadfastly hodl their coins in this transformative journey will be rewarded 
-            with exclusive NFTs, signifying their place in the coin&apos;s ascent.
-          </p>
-          <p className="text-sm sm:text-xl terminal-text">
-            Each price threshold crossed is a divine moment in the evolution of your coin, eternally 
-            engraved in the blockchain&apos;s record.
+            Early supporters who hold through price milestones will receive special Conviction NFTs 
+            to commemorate their participation. Whether you want to launch your own evolving token or join 
+            existing projects, Higherrrrrrr adds a new dimension to meme trading by making price action 
+            visible in the token itself.
           </p>
         </div>
       </div>
