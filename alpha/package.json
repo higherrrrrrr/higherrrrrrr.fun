@@ -9,22 +9,25 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
-    "@tanstack/react-query": "^5.14.2",
+    "@tanstack/react-query": "5.14.2",
     "clsx": "^2.0.0",
+    "connectkit": "1.5.3",
     "date-fns": "^2.30.0",
-    "ethers": "^6.9.0",
+    "ethers": "6.9.0",
     "framer-motion": "^10.16.16",
     "js-cookie": "^3.0.5",
     "next": "14.0.4",
     "react": "^18",
-    "react-dom": "^18",
     "react-7-segment-display": "^1.1.2",
-    "viem": "^1.19.11",
-    "wagmi": "^1.4.10"
+    "react-dom": "^18",
+    "viem": "1.19.11",
+    "wagmi": "1.4.10"
   },
   "devDependencies": {
+    "@typechain/ethers-v6": "^0.5.1",
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
-    "tailwindcss": "^3.3.0"
+    "tailwindcss": "^3.3.0",
+    "typechain": "^8.3.2"
   }
 }
