@@ -19,34 +19,53 @@ export default function MainLayout({ children }) {
     deletingSpeed: 100,
   });
 
-  // Force client-side rendering
+  // Force client-side rendering and check launch status
   useEffect(() => {
     setMounted(true);
     
-    // Check if we're past launch date
-    const now = new Date().getTime();
-    const isAfterLaunch = now >= LAUNCH_DATE.getTime();
-    
-    if (isAfterLaunch) {
-      setShouldShowComingSoon(false);
-      return;
-    }
+    // Function to check launch status
+    const checkLaunchStatus = () => {
+      const now = new Date().getTime();
+      const isAfterLaunch = now >= LAUNCH_DATE.getTime();
+      
+      if (isAfterLaunch) {
+        setShouldShowComingSoon(false);
+        localStorage.setItem('auth_token', 'LAUNCHED');
+        return true;
+      }
+      return false;
+    };
 
-    // Check for existing auth
-    const storedAuthToken = localStorage.getItem('auth_token');
-    if (storedAuthToken) {
-      getContractAddress()
-        .then(data => {
-          if (data.factory_address) {
-            setShouldShowComingSoon(false);
-          }
-        })
-        .catch(console.error);
+    // Initial check
+    const isLaunched = checkLaunchStatus();
+    
+    // If not launched, check for auth token and set up timer
+    if (!isLaunched) {
+      const storedAuthToken = localStorage.getItem('auth_token');
+      if (storedAuthToken) {
+        getContractAddress()
+          .then(data => {
+            if (data.factory_address) {
+              setShouldShowComingSoon(false);
+            }
+          })
+          .catch(console.error);
+      }
+      
+      // Set up periodic check every 30 seconds
+      const timer = setInterval(checkLaunchStatus, 30000);
+      return () => clearInterval(timer);
     }
   }, []);
 
+  // Secret password functionality
   useEffect(() => {
     const handleKeyPress = async (e) => {
+      // Skip password check if already launched
+      if (new Date().getTime() >= LAUNCH_DATE.getTime()) {
+        return;
+      }
+
       const newSequence = (keySequence + e.key).slice(-12);
       setKeySequence(newSequence);
 
