@@ -5,7 +5,7 @@ import { ConnectKitButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import { useTypewriter } from '../hooks/useTypewriter';
 
-const LAUNCH_DATE = new Date("2024-11-26T12:00:00-05:00");
+const LAUNCH_DATE = new Date("2024-11-26T17:00:00-08:00");
 
 export default function MainLayout({ children }) {
   const [shouldShowComingSoon, setShouldShowComingSoon] = useState(true);
