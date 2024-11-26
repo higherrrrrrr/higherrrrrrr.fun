@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "DISABLE_ESLINT_PLUGIN=true next build",
-    "start": "next start"
+    "start": "next start",
+    "generate": "wagmi generate"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@tanstack/react-query": "5.14.2",
+    "@wagmi/cli": "^2.1.18",
     "clsx": "^2.0.0",
     "connectkit": "1.5.3",
     "date-fns": "^2.30.0",
@@ -20,7 +22,7 @@
     "react": "^18",
     "react-7-segment-display": "^1.1.2",
     "react-dom": "^18",
-    "viem": "1.19.11",
+    "viem": "^1.19.11",
     "wagmi": "1.4.10"
   },
   "devDependencies": {

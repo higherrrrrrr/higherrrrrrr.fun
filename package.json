@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "generate-interfaces": "node scripts/generate-interfaces.js"
+  }
+} 
