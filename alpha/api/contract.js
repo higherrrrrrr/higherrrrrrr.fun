@@ -9,5 +9,8 @@ export async function getContractAddress() {
       }
     }
   );
-  return response.json();
+
+  const data = await response.json();
+  console.log('Factory address:', data);
+  return data;
 } 

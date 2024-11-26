@@ -132,5 +132,5 @@ def get_highlighted_token():
 @require_auth
 def get_contract_address():
     return jsonify({
-        'contract_address': Config.CONTRACT_ADDRESS
+        'factory_address': Config.CONTRACT_ADDRESS
     })

@@ -67,7 +67,7 @@ export default function LaunchPage() {
       getEthPrice()
     ]).then(([addressData, priceData]) => {
       console.log('ETH Price:', priceData.price_usd);
-      setFactoryAddress(addressData.factory);
+      setFactoryAddress(addressData.factory_address);
       setEthPrice(priceData.price_usd);
       
       // Update initial USD prices
@@ -95,6 +95,8 @@ export default function LaunchPage() {
     }
     return '';
   };
+
+  
 
   const { write: createToken, data: createData } = useContractWrite({
     address: factoryAddress,

@@ -5,10 +5,10 @@ from datetime import datetime
 import pytz
 
 def is_past_unlock_time():
-    # Target time: November 26th, 2024 at 12:00:00 PM EST
-    est = pytz.timezone('America/New_York')
-    unlock_time = datetime(2024, 11, 26, 12, 0, 0, tzinfo=est)
-    now = datetime.now(est)
+    # Target time: November 26th, 2024 at 5:00:00 PM PST
+    pst = pytz.timezone('America/Los_Angeles')
+    unlock_time = datetime(2024, 11, 26, 17, 0, 0, tzinfo=pst)
+    now = datetime.now(pst)
     return now >= unlock_time
 
 def require_auth(f):
