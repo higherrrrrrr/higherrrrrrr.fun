@@ -11,9 +11,6 @@ export default function ComingSoon() {
         <CountdownTimer />
         <div className="text-balance space-y-3 sm:space-y-6 text-green-500 w-[95%] sm:w-[90%] max-w-[600px] text-center">
           <p className="text-sm sm:text-xl terminal-text">
-            Welcome to the first memecoin platform where your coins evolve visually as they moon.
-          </p>
-          <p className="text-sm sm:text-xl terminal-text">
             Watch your coins change before your eyes as their price ascends, with each milestone 
             revealing a new variation of the coin&apos;s name, creating a dynamic dance between 
             its value and identity.
