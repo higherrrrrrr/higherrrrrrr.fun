@@ -1,16 +1,54 @@
-import { WagmiConfig, createConfig, configureChains } from 'wagmi';
+import { WagmiConfig, createConfig } from 'wagmi';
 import { base } from 'wagmi/chains';
-import { publicProvider } from 'wagmi/providers/public';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { ConnectKitProvider, ConnectKitButton as DefaultConnectButton } from 'connectkit';
+import { ConnectKitProvider, ConnectKitButton as DefaultConnectButton, getDefaultConfig } from 'connectkit';
 import { useEffect, useState, createContext, useContext } from 'react';
 import { getContractAddress } from '../api/contract';
+import { http } from 'viem';
 
 export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
 
+// Define Anvil chain as a fork of Base
+const anvil = {
+  ...base,
+  id: 31337,
+  name: 'Local Base Fork',
+  network: 'base',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'ETH',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: { http: ['http://127.0.0.1:8545'] },
+    public: { http: ['http://127.0.0.1:8545'] },
+  },
+  contracts: {
+    multicall3: {
+      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+      blockCreated: 0
+    }
+  }
+};
+
+// Create initial config
+const isLocal = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+const chains = [isLocal ? anvil : base];
+
+const wagmiConfig = createConfig(
+  getDefaultConfig({
+    appName: "Higherrrrrrr",
+    chains,
+    transports: {
+      [base.id]: http('https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a'),
+      [anvil.id]: http('http://127.0.0.1:8545'),
+    },
+  }),
+);
+
 function Web3ProviderInner({ children }) {
-  const [config, setConfig] = useState(null);
   const [factoryAddress, setFactoryAddress] = useState(null);
 
   useEffect(() => {
@@ -19,24 +57,6 @@ function Web3ProviderInner({ children }) {
         const { factory_address } = await getContractAddress();
         console.log('Factory address:', factory_address);
         setFactoryAddress(factory_address);
-
-        // Configure chain with Base only
-        const { publicClient, webSocketPublicClient } = configureChains(
-          [base],
-          [
-            alchemyProvider({ apiKey: 'l0XzuD715Z-zd21ie5dbpLKrptTuq07a' }),
-            publicProvider()
-          ]
-        );
-
-        // Create wagmi config
-        const wagmiConfig = createConfig({
-          autoConnect: true,
-          publicClient,
-          webSocketPublicClient,
-        });
-
-        setConfig(wagmiConfig);
       } catch (error) {
         console.error('Failed to initialize Web3Provider:', error);
       }
@@ -45,7 +65,7 @@ function Web3ProviderInner({ children }) {
     init();
   }, []);
 
-  if (!config || !factoryAddress) {
+  if (!factoryAddress) {
     return (
       <div className="min-h-screen bg-black">
         {children}
@@ -54,29 +74,26 @@ function Web3ProviderInner({ children }) {
   }
 
   return (
-    <WagmiConfig config={config}>
+    <FactoryContext.Provider value={factoryAddress}>
+      {children}
+    </FactoryContext.Provider>
+  );
+}
+
+export function Web3Provider({ children }) {
+  return (
+    <WagmiConfig config={wagmiConfig}>
       <ConnectKitProvider
         customTheme={{
           "--ck-font-family": "monospace",
           "--ck-accent-color": "#22c55e",
           "--ck-accent-text-color": "#000000",
         }}
-        options={{
-          hideBalance: false,
-          hideNetwork: false,
-          walletConnectName: 'WalletConnect',
-        }}
       >
-        <FactoryContext.Provider value={factoryAddress}>
-          {children}
-        </FactoryContext.Provider>
+        <Web3ProviderInner>{children}</Web3ProviderInner>
       </ConnectKitProvider>
     </WagmiConfig>
   );
-}
-
-export function Web3Provider({ children }) {
-  return <Web3ProviderInner>{children}</Web3ProviderInner>;
 }
 
 export function ConnectKitButton() {
@@ -84,4 +101,8 @@ export function ConnectKitButton() {
 }
 
 // Export the current chain for use elsewhere in the app
-export const getCurrentChain = () => base; 
+export const getCurrentChain = () => {
+  const isLocal = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  return isLocal ? anvil : base;
+}; 

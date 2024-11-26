@@ -1,12 +1,15 @@
 import { createPublicClient, http, formatEther } from 'viem';
-import { baseMainnet } from 'viem/chains';
-import { CURRENT_RPC_URL } from './config';
-import { HigherrrrrrrABI } from './generated';
+import { base } from 'wagmi/chains';
+import { getCurrentChain } from '../components/Web3Provider';
+import { higherrrrrrrAbi } from './generated';
 
-const publicClient = createPublicClient({
-  chain: baseMainnet,
-  transport: http(CURRENT_RPC_URL)
-});
+const getPublicClient = () => {
+  const chain = getCurrentChain();
+  return createPublicClient({
+    chain: chain as any,
+    transport: http(chain.rpcUrls.default.http[0])
+  });
+};
 
 export interface TokenState {
   name: string;
@@ -23,90 +26,88 @@ export interface TokenState {
 }
 
 export async function getTokenState(tokenAddress: string): Promise<TokenState> {
-  const [
-    name,
-    symbol,
-    totalSupply,
-    currentPrice,
-    maxSupply,
-    owner,
-    paused,
-    priceIncreaseFactor,
-    priceDecreaseFactor,
-    lastActionTimestamp,
-    cooldownPeriod
-  ] = await publicClient.multicall({
+  const publicClient = getPublicClient();
+  console.log('Getting token state for:', tokenAddress);
+
+  const results = await publicClient.multicall({
     contracts: [
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
         functionName: 'name'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
         functionName: 'symbol'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
         functionName: 'totalSupply'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
         functionName: 'getCurrentPrice'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
-        functionName: 'maxSupply'
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
+        functionName: 'MAX_TOTAL_SUPPLY'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
         functionName: 'owner'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
         functionName: 'paused'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
-        functionName: 'priceIncreaseFactor'
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
+        functionName: 'PRICE_INCREASE_FACTOR'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
-        functionName: 'priceDecreaseFactor'
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
+        functionName: 'PRICE_DECREASE_FACTOR'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
         functionName: 'lastActionTimestamp'
       },
       {
-        address: tokenAddress,
-        abi: HigherrrrrrrABI,
-        functionName: 'cooldownPeriod'
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
+        functionName: 'COOLDOWN_PERIOD'
       }
     ]
   });
 
+  console.log('Multicall results:', results);
+
+  // Check if any of the results failed
+  if (results.some(r => !r.status)) {
+    throw new Error('Failed to fetch token state');
+  }
+
   return {
-    name: name.result as string,
-    symbol: symbol.result as string,
-    totalSupply: formatEther(totalSupply.result as bigint),
-    currentPrice: formatEther(currentPrice.result as bigint),
-    maxSupply: formatEther(maxSupply.result as bigint),
-    owner: owner.result as string,
-    paused: paused.result as boolean,
-    priceIncreaseFactor: (priceIncreaseFactor.result as bigint).toString(),
-    priceDecreaseFactor: (priceDecreaseFactor.result as bigint).toString(),
-    lastActionTimestamp: Number(lastActionTimestamp.result),
-    cooldownPeriod: Number(cooldownPeriod.result)
+    name: results[0].result?.toString() || '',
+    symbol: results[1].result?.toString() || '',
+    totalSupply: formatEther(results[2].result || 0n),
+    currentPrice: formatEther(results[3].result || 0n),
+    maxSupply: formatEther(results[4].result || 0n),
+    owner: results[5].result?.toString() || '',
+    paused: Boolean(results[6].result),
+    priceIncreaseFactor: formatEther(results[7].result || 0n),
+    priceDecreaseFactor: formatEther(results[8].result || 0n),
+    lastActionTimestamp: Number(results[9].result || 0),
+    cooldownPeriod: Number(results[10].result || 0)
   };
 }
 

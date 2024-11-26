@@ -4,12 +4,14 @@ import Cookies from 'js-cookie';
 import { ConnectKitButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import { useTypewriter } from '../hooks/useTypewriter';
+import { getContractAddress } from '../api/contract';
 
 const LAUNCH_DATE = new Date("2024-11-26T17:00:00-08:00");
 
 export default function MainLayout({ children }) {
   const [shouldShowComingSoon, setShouldShowComingSoon] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const [keySequence, setKeySequence] = useState("");
   const logoText = useTypewriter("Higherrrrrrr", {
     minRs: 3,
     maxRs: 8,
@@ -28,6 +30,34 @@ export default function MainLayout({ children }) {
     }
     setInitialized(true);
   }, []);
+
+  useEffect(() => {
+    const handleKeyPress = async (e) => {
+      const newSequence = (keySequence + e.key).slice(-4);
+      setKeySequence(newSequence);
+
+      if (newSequence.length === 4) {
+        try {
+          const authToken = newSequence;
+          localStorage.setItem('auth_token', authToken);
+          
+          const data = await getContractAddress();
+          
+          if (data.factory_address) {
+            Cookies.set('launch-override', 'true', { expires: 7 });
+            Cookies.set('auth_token', authToken, { expires: 7 });
+            setShouldShowComingSoon(false);
+          }
+        } catch (error) {
+          console.debug('Invalid sequence:', error);
+          localStorage.removeItem('auth_token');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [keySequence]);
 
   if (!initialized) {
     return null;

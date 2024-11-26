@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
-import { parseEther } from 'viem';
-import { higherrrrrrrFactoryAbi } from '../onchain/generated';
+import { parseEther, decodeEventLog } from 'viem';
+import { higherrrrrrrFactoryAbi, higherrrrrrrFactoryAddress } from '../onchain/generated';
 import { getEthPrice } from '../api/price';
 import { getContractAddress } from '../api/contract';
+import { ethers } from 'ethers';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 const DEFAULT_PRICE_LEVELS = [
@@ -49,6 +50,9 @@ const formatEth = (num) => {
     maximumFractionDigits: 6
   });
 };
+
+// keccak256("NewToken(address,address)")
+const NEW_TOKEN_EVENT_SIGNATURE = "0x46960970e01c8cbebf9e58299b0acf8137b299ef06eb6c4f5be2c0443d5e5f22";
 
 export default function LaunchPage() {
   const router = useRouter();
@@ -104,12 +108,41 @@ export default function LaunchPage() {
     functionName: 'createHigherrrrrrr'
   });
 
+  console.log(createData?.hash)
+
   const { isLoading } = useWaitForTransaction({
     hash: createData?.hash,
     onSuccess: (data) => {
-      const newTokenEvent = data.logs.find(log => log.topics[0] === '0x...');
-      if (newTokenEvent) {
-        router.push(`/token/${newTokenEvent.args.token}`);
+      console.log('Transaction successful, looking for NewToken event in logs:', data.logs);
+      
+      // Look for the token deployment event
+      const deployEvent = data.logs.find(log => {
+        try {
+          return log.topics[0] === NEW_TOKEN_EVENT_SIGNATURE;
+        } catch (error) {
+          console.log('Failed to check log:', error);
+          return false;
+        }
+      });
+
+      console.log('Found NewToken event:', deployEvent);
+
+      if (deployEvent) {
+        // The token address is the first indexed parameter
+        const tokenAddress = `0x${deployEvent.topics[1].slice(26)}`;
+        console.log('Found deployed token at:', tokenAddress);
+        router.push(`/token/${tokenAddress}`);
+      } else {
+        console.log('Could not find NewToken event in logs:', data.logs);
+      }
+    },
+    onError: (error) => {
+      if (error.message.includes('User denied')) {
+        console.log('User rejected transaction');
+        setError('Transaction was rejected');
+      } else {
+        console.error('Transaction failed:', error);
+        setError('Transaction failed: ' + error.message);
       }
     }
   });
