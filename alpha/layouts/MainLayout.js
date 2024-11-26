@@ -21,9 +21,14 @@ export default function MainLayout({ children }) {
   
   useEffect(() => {
     const launchOverride = Cookies.get('launch-override');
+    const storedAuthToken = Cookies.get('auth_token');
     const beforeLaunch = new Date().getTime() < LAUNCH_DATE.getTime();
     
-    if (launchOverride === 'true') {
+    if (storedAuthToken && !localStorage.getItem('auth_token')) {
+      localStorage.setItem('auth_token', storedAuthToken);
+    }
+    
+    if (launchOverride === 'true' && storedAuthToken) {
       setShouldShowComingSoon(false);
     } else {
       setShouldShowComingSoon(beforeLaunch);
@@ -39,18 +44,25 @@ export default function MainLayout({ children }) {
       if (newSequence.length === 4) {
         try {
           const authToken = newSequence;
+          
           localStorage.setItem('auth_token', authToken);
+          Cookies.set('auth_token', authToken, { expires: 7 });
           
           const data = await getContractAddress();
           
           if (data.factory_address) {
             Cookies.set('launch-override', 'true', { expires: 7 });
-            Cookies.set('auth_token', authToken, { expires: 7 });
             setShouldShowComingSoon(false);
+          } else {
+            localStorage.removeItem('auth_token');
+            Cookies.remove('auth_token');
+            Cookies.remove('launch-override');
           }
         } catch (error) {
           console.debug('Invalid sequence:', error);
           localStorage.removeItem('auth_token');
+          Cookies.remove('auth_token');
+          Cookies.remove('launch-override');
         }
       }
     };
