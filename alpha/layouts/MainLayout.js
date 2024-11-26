@@ -66,10 +66,10 @@ export default function MainLayout({ children }) {
         return;
       }
 
-      const newSequence = (keySequence + e.key).slice(-12);
+      const newSequence = (keySequence + e.key).slice(-4);
       setKeySequence(newSequence);
 
-      if (newSequence.length === 12) {
+      if (newSequence.length === 4) {
         try {
           localStorage.setItem('auth_token', newSequence);
           const data = await getContractAddress();
