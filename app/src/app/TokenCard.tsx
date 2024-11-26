@@ -7,13 +7,16 @@ import { ShrinkToFit } from "@/components/ShrinkToFit";
 import { SparkLine } from "@/components/SparkLine";
 import { Tooltip } from "@/components/Tooltip";
 import { TypeAndDelete } from "@/components/TypeAndDelete";
+import { Higherrrrrrr } from "@/lib/contracts/higherrrrrrr";
+import { getRpcUrl } from "@/lib/config";
+import { ethers } from "ethers";
 import {
   differenceInYears,
   differenceInMonths,
   differenceInDays,
 } from "date-fns";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function formatCompactDistance(date1: Date, date2: Date) {
   const years = differenceInYears(date1, date2);
@@ -26,15 +29,50 @@ function formatCompactDistance(date1: Date, date2: Date) {
   return `${Math.abs(days)}d ago`;
 }
 
+interface OnChainTokenData {
+  price: bigint;
+  totalSupply: bigint;
+}
+
 export function TokenCard({ token }: { token: TokenApiType }) {
   const [isHovered, setIsHovered] = useState(false);
+  const [onChainData, setOnChainData] = useState<OnChainTokenData | null>(null);
+
+  useEffect(() => {
+    async function fetchOnChainData() {
+      try {
+        const provider = new ethers.JsonRpcProvider(getRpcUrl());
+        const contract = new Higherrrrrrr(token.address, provider);
+        
+        const [price, totalSupply] = await Promise.all([
+          contract.getCurrentPrice(),
+          contract.totalSupply()
+        ]);
+
+        setOnChainData({ price, totalSupply });
+      } catch (error) {
+        console.error('Failed to fetch on-chain data:', error);
+      }
+    }
+
+    fetchOnChainData();
+  }, [token.address]);
+
+  // Calculate market cap using on-chain data if available
+  const marketCap = onChainData 
+    ? Number(onChainData.price * onChainData.totalSupply) / 1e18 // Adjust for decimals
+    : token.market_cap;
+
+  // Use on-chain price if available
+  const price = onChainData 
+    ? Number(onChainData.price) / 1e18 // Adjust for decimals
+    : token.price;
 
   return (
     <Link
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       key={token.address}
-      // TODO THIS WILL BE A UNIQUE ID EVENTUALLY
       href={`/tokens/${token.address}`}
       className="bg-black border border-green-600 flex flex-col sm:flex-row transition-transform hover:scale-[1.02]"
     >
@@ -45,8 +83,8 @@ export function TokenCard({ token }: { token: TokenApiType }) {
         }}
       ></div>
 
-      <div className="pt-2 flex flex-col gap-y-2 flex-grow ">
-        <div className=" px-3 flex flex-col">
+      <div className="pt-2 flex flex-col gap-y-2 flex-grow">
+        <div className="px-3 flex flex-col">
           <Tooltip content="The name will change as we go higherrrrrrrrrr">
             <div className="flex justify-between items-center">
               {isHovered ? (
@@ -68,16 +106,18 @@ export function TokenCard({ token }: { token: TokenApiType }) {
             </div>
           </Tooltip>
 
-          <span>
-            <span>by </span>
-            <Address text={token.address} />
-          </span>
+          <div>
+            <span>
+              <span>by </span>
+              <Address address={token.address} />
+            </span>
+          </div>
         </div>
 
         <div className="flex">
           <div className="px-3 flex flex-col">
             <Label>price</Label>
-            <span className="font-bold">${token.price}</span>
+            <span className="font-bold">${price.toFixed(4)}</span>
           </div>
 
           <div className="px-3 flex flex-col">
@@ -87,7 +127,7 @@ export function TokenCard({ token }: { token: TokenApiType }) {
               {new Intl.NumberFormat("en-US", {
                 notation: "compact",
                 maximumFractionDigits: 1,
-              }).format(Number(token.market_cap))}
+              }).format(marketCap)}
             </span>
           </div>
         </div>

@@ -59,6 +59,22 @@ export class Higherrrrrrr {
         return await this.contract.getTokenSellQuote(tokenOrderSize);
     }
 
+    // Get price levels
+    async getPriceLevels(): Promise<PriceLevel[]> {
+        const numLevels = await this.contract.numPriceLevels();
+        const levels: PriceLevel[] = [];
+        
+        for (let i = 0; i < numLevels; i++) {
+            const level = await this.contract.priceLevels(i);
+            levels.push({
+                price: level.price,
+                name: level.name
+            });
+        }
+        
+        return levels;
+    }
+
     // Write functions
     async buy(
         recipient: string,

@@ -57,19 +57,6 @@ def get_nfts_for_address(address):
     return jsonify(nfts)
 
 
-
-@trading.route('/tokens/<token_address>', methods=['GET'])
-@require_auth
-def get_token(token_address):
-    # Find token with matching address
-    token = next((token for token in SAMPLE_TOKENS if token["address"].lower() == token_address.lower()), None)
-    
-    if not token:
-        return jsonify({'error': 'Token not found'}), 404
-        
-    return jsonify(token)
-
-
 @trading.route('/tokens', methods=['GET'])
 @require_auth
 def get_tokens():
