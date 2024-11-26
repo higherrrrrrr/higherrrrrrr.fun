@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useWallet } from '../hooks/useWallet';
-import { getTokens, getHighlightedToken } from '../api/tokens';
+import { getHighlightedToken } from '../api/tokens';
 import { getLatestTokens } from '../api/contract';
+import { getTokenState, getProgressToNextLevel } from '../onchain/tokenState';
 import Link from 'next/link';
-import { getProgressToNextLevel } from '../onchain/tokenState';
 
 export default function TokensList() {
   const { address } = useWallet();
-  const [tokens, setTokens] = useState([]);
   const [highlightedToken, setHighlightedToken] = useState(null);
   const [latestTokens, setLatestTokens] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,16 +14,44 @@ export default function TokensList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [highlighted, allTokens, latest] = await Promise.all([
-          getHighlightedToken(),
-          getTokens(),
-          getLatestTokens(5)
-        ]);
-        setHighlightedToken(highlighted);
-        setTokens(allTokens?.tokens || []);
+        console.log('Fetching token data...');
+        
+        // First get the highlighted token address
+        const highlighted = await getHighlightedToken();
+        console.log('Raw highlighted token response:', highlighted);
+        
+        if (highlighted && highlighted.address) {
+          try {
+            // Then fetch its state
+            const highlightedState = await getTokenState(highlighted.address);
+            console.log('Highlighted token state:', highlightedState);
+            
+            // Combine the data
+            const combinedHighlightedToken = {
+              ...highlighted,
+              ...highlightedState,
+              address: highlighted.address
+            };
+            console.log('Combined highlighted token:', combinedHighlightedToken);
+            setHighlightedToken(combinedHighlightedToken);
+          } catch (stateError) {
+            console.error('Failed to fetch highlighted token state:', stateError);
+          }
+        } else {
+          console.log('No highlighted token found');
+        }
+
+        // Get latest tokens
+        const latest = await getLatestTokens(100);
+        console.log('Latest tokens:', latest);
         setLatestTokens(latest.tokens || []);
+        
       } catch (error) {
         console.error('Failed to fetch tokens:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack
+        });
       } finally {
         setIsLoading(false);
       }
@@ -41,6 +68,9 @@ export default function TokensList() {
     );
   }
 
+  const recentDeployments = latestTokens.slice(0, 5);
+  const allTokens = latestTokens.slice(5);
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       {highlightedToken && (
@@ -52,13 +82,13 @@ export default function TokensList() {
         </div>
       )}
 
-      {latestTokens.length > 0 && (
+      {recentDeployments.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-mono text-green-500 border-b border-green-500/20 pb-2">
             Recent Deployments
           </h2>
           <div className="space-y-4">
-            {latestTokens.map((token) => (
+            {recentDeployments.map((token) => (
               <Link 
                 key={token.address} 
                 href={`/token/${token.address}`}
@@ -86,9 +116,9 @@ export default function TokensList() {
           Recent Launches
         </h2>
         <div className="space-y-4">
-          {tokens.map((token) => (
+          {allTokens.map((token) => (
             <TokenCard 
-              key={token.address || token.id} 
+              key={token.address} 
               token={token} 
               featured={false} 
             />
@@ -101,6 +131,16 @@ export default function TokensList() {
 
 function TokenCard({ token, featured }) {
   if (!token) return null;
+  
+  console.log('Rendering TokenCard:', {
+    token,
+    featured,
+    address: token.address,
+    currentName: token.currentName,
+    priceLevels: token.priceLevels,
+    price: token.currentPrice || token.price,
+    marketType: token.marketType
+  });
 
   const formatNumber = (num) => {
     if (!num && num !== 0) return '0';
@@ -109,21 +149,26 @@ function TokenCard({ token, featured }) {
 
   const formatPrice = (num) => {
     if (!num && num !== 0) return '0.00000000';
-    return typeof num === 'number' ? num.toFixed(8) : '0.00000000';
+    const value = parseFloat(num);
+    return isNaN(value) ? '0.00000000' : value.toFixed(8);
   };
 
-  // Calculate market cap
-  const marketCap = parseFloat(token.totalSupply) * parseFloat(token.currentPrice);
-  
-  // Get next price level if available
-  const currentPriceLevel = token.priceLevels?.findIndex(
-    level => parseFloat(level.price) > parseFloat(token.currentPrice)
+  // Get the next price level
+  const currentPriceIndex = token.priceLevels?.findIndex(
+    level => level.name === token.currentName
   );
-  const nextPrice = token.priceLevels?.[currentPriceLevel]?.price;
-  const nextStageName = token.priceLevels?.[currentPriceLevel]?.name;
+  const nextPriceLevel = token.priceLevels?.[currentPriceIndex + 1];
 
-  // Calculate progress
-  const progress = getProgressToNextLevel(token);
+  // Calculate values based on available data
+  const price = parseFloat(token.currentPrice || token.price || 0);
+  const supply = parseFloat(token.totalSupply || 0);
+  const marketCap = price * supply;
+
+  // Get current stage name
+  const currentStage = token.currentName || token.name || 'Unknown Token';
+  
+  // Only show progress for bonding curve tokens
+  const progress = token.marketType === 0 ? getProgressToNextLevel(token) : 0;
 
   return (
     <Link 
@@ -145,10 +190,10 @@ function TokenCard({ token, featured }) {
         </div>
         <div className="text-right">
           <p className="text-green-500 font-mono">
-            ${formatPrice(parseFloat(token.currentPrice))}
+            ${formatPrice(price)}
           </p>
           <p className="text-green-500/70 text-sm font-mono">
-            {token.currentName || 'Stage 0'}
+            {currentStage}
           </p>
         </div>
       </div>
@@ -158,13 +203,15 @@ function TokenCard({ token, featured }) {
           <span className="text-green-500/70">Market Cap</span>
           <span className="text-green-500">${formatNumber(marketCap)}</span>
         </div>
-        <div className="flex justify-between text-sm font-mono">
-          <span className="text-green-500/70">Next Stage</span>
-          <span className="text-green-500">
-            {nextPrice ? `$${formatPrice(parseFloat(nextPrice))}` : 'Max Stage'}
-          </span>
-        </div>
-        {progress > 0 && (
+        {nextPriceLevel && (
+          <div className="flex justify-between text-sm font-mono">
+            <span className="text-green-500/70">Next Stage</span>
+            <span className="text-green-500">
+              ${formatPrice(nextPriceLevel.price)}
+            </span>
+          </div>
+        )}
+        {token.marketType === 0 && progress > 0 && (
           <div className="mt-2">
             <div className="h-1 bg-green-500/20 rounded-full overflow-hidden">
               <div 
@@ -173,7 +220,7 @@ function TokenCard({ token, featured }) {
               />
             </div>
             <div className="text-xs text-green-500/50 mt-1 text-right font-mono">
-              {Math.min(progress, 100).toFixed(1)}% to {nextStageName || 'next stage'}
+              {Math.min(progress, 100).toFixed(1)}% to next stage
             </div>
           </div>
         )}

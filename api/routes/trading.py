@@ -33,46 +33,112 @@ FACTORY_ABI = [
     }
 ]
 
+# Cache for latest tokens
+class TokenCache:
+    def __init__(self):
+        self.tokens = []
+        self.timestamp = 0
+
+token_cache = TokenCache()
+CACHE_DURATION = 60  # 1 minute in seconds
+
 def get_latest_tokens(limit=10):
-    w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
-    factory_contract = w3.eth.contract(
-        address=Config.CONTRACT_ADDRESS, 
-        abi=FACTORY_ABI
-    )
+    global token_cache
+    current_time = time.time()
     
-    # Get latest block
-    latest_block = w3.eth.block_number
+    # Return cached tokens if they're still valid
+    if token_cache.tokens and current_time - token_cache.timestamp < CACHE_DURATION:
+        print("Returning cached tokens")
+        return token_cache.tokens[:limit]
     
-    # Look back 1000 blocks or to genesis
-    from_block = max(0, latest_block - 1000)
-    
-    # Get NewToken events
-    events = factory_contract.events.NewToken.get_logs(
-        fromBlock=from_block,
-        toBlock='latest'
-    )
-    
-    # Sort by block number descending and take latest n
-    sorted_events = sorted(
-        events, 
-        key=lambda x: x['blockNumber'], 
-        reverse=True
-    )[:limit]
-    
-    tokens = []
-    for event in sorted_events:
-        token_address = event['args']['token']
-        block = w3.eth.get_block(event['blockNumber'])
+    try:
+        print(f"Using RPC URL: {Config.RPC_URL}")
+        print(f"Using Contract Address: {Config.CONTRACT_ADDRESS}")
         
-        tokens.append({
-            'address': token_address,
-            'conviction': event['args']['conviction'],
-            'timestamp': block['timestamp'],
-            'block_number': event['blockNumber'],
-            'transaction_hash': event['transactionHash'].hex()
-        })
-    
-    return tokens
+        w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
+        
+        if not w3.is_connected():
+            print("Failed to connect to RPC endpoint")
+            return []
+            
+        contract_address = Web3.to_checksum_address(Config.CONTRACT_ADDRESS)
+        factory_contract = w3.eth.contract(
+            address=contract_address, 
+            abi=FACTORY_ABI
+        )
+        
+        latest_block = w3.eth.block_number
+        print(f"Latest block: {latest_block}")
+        
+        # Look back further - 10000 blocks instead of 1000
+        from_block = max(0, latest_block - 10000)
+        
+        # Get all NewToken events
+        try:
+            # First try with create_filter
+            event_filter = factory_contract.events.NewToken.create_filter(
+                fromBlock=from_block
+            )
+            events = event_filter.get_all_entries()
+        except Exception as e:
+            print(f"Filter method failed, trying get_logs: {str(e)}")
+            # Fallback to get_logs if create_filter fails
+            events = w3.eth.get_logs({
+                'address': contract_address,
+                'fromBlock': from_block,
+                'toBlock': 'latest',
+                'topics': [
+                    Web3.keccak(text='NewToken(address,address)').hex()
+                ]
+            })
+        
+        # Sort by block number descending
+        sorted_events = sorted(
+            events, 
+            key=lambda x: x['blockNumber'], 
+            reverse=True
+        )
+        
+        tokens = []
+        for event in sorted_events:
+            try:
+                # Handle both direct event logs and filtered events
+                if hasattr(event, 'args'):
+                    token_address = event.args.token
+                else:
+                    # Decode the event data manually
+                    token_address = '0x' + event['topics'][1][-40:]
+                
+                block = w3.eth.get_block(event['blockNumber'])
+                
+                tokens.append({
+                    'address': token_address,
+                    'conviction': event.args.conviction if hasattr(event, 'args') else None,
+                    'timestamp': block['timestamp'],
+                    'block_number': event['blockNumber'],
+                    'transaction_hash': event['transactionHash'].hex()
+                })
+                
+            except Exception as e:
+                print(f"Error processing event: {str(e)}")
+                continue
+        
+        print(f"Found {len(tokens)} tokens")
+        
+        # Update cache
+        token_cache.tokens = tokens
+        token_cache.timestamp = current_time
+        
+        return tokens[:limit]
+        
+    except Exception as e:
+        print(f"Error in get_latest_tokens: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        if token_cache.tokens:
+            print("Returning expired cached tokens due to error")
+            return token_cache.tokens[:limit]
+        return []
 
 @trading.route('/tokens/latest', methods=['GET'])
 @require_auth
@@ -86,94 +152,9 @@ def get_latest_token_deploys():
     except Exception as e:
         current_app.logger.error(f"Error getting latest tokens: {str(e)}")
         return jsonify({
-            'error': 'Failed to fetch latest tokens'
+            'error': 'Failed to fetch latest tokens',
+            'details': str(e)
         }), 500
-
-def generate_ticker_data():
-    return [random.randint(0, 100) for _ in range(24)]
-
-def generate_random_eth_address():
-    return "0x" + "".join(random.choices("0123456789abcdef", k=40))
-
-def generate_random_token():
-    address = generate_random_eth_address()
-    
-    return {
-        "address": address,
-        "symbol": "DEGEN",
-        "name": "Degen Token",
-        "description": "A token that is very degen",
-        "image_url": f"https://picsum.photos/300/300?name={urllib.parse.quote(address)}",
-        "price_levels": [
-            {"name": "DEGEN", "greater_than": "0"},
-            {"name": "DEGENK", "greater_than": "1000"},
-            {"name": "DEGENKK", "greater_than": "2000"},
-            {"name": "DEGENKKK", "greater_than": "3000"},
-        ],
-        "progress": random.randint(0, 100) / 100,
-        "price": 0.0042,
-        "volume_24h": 1234567.89,
-        "market_cap": 9876543.21,
-        "launch_date": "2024-03-19T00:00:00Z",
-        "ticker_data": generate_ticker_data(),
-    }
-
-# Sample token data - you can move this to config or a separate data file
-SAMPLE_TOKENS = [generate_random_token() for _ in range(50)]
-
-def generate_random_nft():
-    address = generate_random_eth_address()
-    return {
-        "address": address,
-        "name": "Random NFT",
-        "minted_at": "2024-03-19T00:00:00Z",
-        "image_url": f"https://picsum.photos/800/800?name={urllib.parse.quote(address)}",
-        "url": "https://opensea.io/assets/matic/0x251be3a17af4892035c37ebf5890f4a4d889dcad/78760900044811865368794127132449502176772068012355272429732834490166931582278",
-    }
-
-@trading.route('/nfts/<address>', methods=['GET'])
-@require_auth
-def get_nfts_for_address(address):
-    nfts = [generate_random_nft() for _ in range(50)]
-       
-    return jsonify(nfts)
-
-
-@trading.route('/tokens', methods=['GET'])
-@require_auth
-def get_tokens():
-    page = int(request.args.get('page', 1))
-    limit = int(request.args.get('limit', 10))
-
-    # Calculate start and end indices for pagination
-    start_idx = (page - 1) * limit
-    end_idx = start_idx + limit
-
-    # Get total count and paginated data
-    total_tokens = len(SAMPLE_TOKENS)
-    tokens_page = SAMPLE_TOKENS[start_idx:end_idx]
-
-    return jsonify({
-        'tokens': tokens_page,
-        'pagination': {
-            'current_page': page,
-            'total_pages': (total_tokens + limit - 1) // limit,
-            'total_items': total_tokens,
-            'items_per_page': limit,
-            'has_next': end_idx < total_tokens,
-            'has_prev': page > 1
-        }
-    })
-
-@trading.route('/price/<token_address>', methods=['GET'])
-@require_auth
-def get_price(token_address):
-    # Placeholder for price fetching logic
-    return jsonify({
-        'token_address': token_address,
-        'price': 0.0,  # Replace with actual price fetching
-        'timestamp': '2024-03-19T00:00:00Z'
-    })
 
 # Cache duration in seconds (5 minutes)
 CACHE_DURATION = 300
@@ -221,30 +202,38 @@ def get_eth_price():
         'timestamp': price_data['timestamp']
     })
 
-@trading.route('/candles/<token_address>', methods=['GET'])
-@require_auth
-def get_candles(token_address):
-    # Placeholder for candle data
-    sample_candle = {
-        'timestamp': '2024-03-19T00:00:00Z',
-        'open': 0.0,
-        'high': 0.0,
-        'low': 0.0,
-        'close': 0.0,
-        'volume': 0.0
-    }
-
-    return jsonify({
-        'token_address': token_address,
-        'interval': '1h',  # You might want to make this configurable
-        'candles': [sample_candle] * 24  # Returns last 24 candles as placeholder
-    })
-
 @trading.route('/highlighted-token', methods=['GET'])
 @require_auth
 def get_highlighted_token():
-    return SAMPLE_TOKENS[0]
-
+    highlighted_address = Config.HIGHLIGHTED_TOKEN
+    print("Config values:", {
+        "HIGHLIGHTED_TOKEN": Config.HIGHLIGHTED_TOKEN,
+        "CONTRACT_ADDRESS": Config.CONTRACT_ADDRESS,
+        "RPC_URL": Config.RPC_URL
+    })
+    
+    if not highlighted_address:
+        print("No highlighted token found in config")
+        return jsonify({'error': 'No highlighted token configured'}), 404
+        
+    try:
+        print(f"Returning highlighted token with address: {highlighted_address}")
+        # Create a token object with the address
+        token = {
+            'address': highlighted_address.strip(),  # Clean any whitespace
+        }
+        
+        print(f"Returning highlighted token: {token}")
+        return jsonify(token)  # Make sure we're returning valid JSON
+        
+    except Exception as e:
+        print(f"Error getting highlighted token: {str(e)}")
+        import traceback
+        traceback.print_exc()  # Print full stack trace
+        return jsonify({
+            'error': 'Failed to get highlighted token',
+            'details': str(e)
+        }), 500
 
 @trading.route('/contract-address', methods=['GET'])
 @require_auth

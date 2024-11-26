@@ -1,37 +1,38 @@
 import { getApiUrl } from './getApiUrl';
 
-export async function getTokens(page = 1, limit = 10) {
-  const response = await fetch(
-    `${getApiUrl()}/tokens?page=${page}&limit=${limit}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    }
-  );
-  return response.json();
-}
-
-export async function getToken(address) {
-  const response = await fetch(
-    `${getApiUrl()}/tokens/${address}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    }
-  );
-  return response.json();
-}
+// Helper to get auth token with Bearer
+const getAuthHeader = () => {
+  const token = localStorage.getItem('auth_token');
+  return token ? `Bearer ${token}` : '';
+};
 
 export async function getHighlightedToken() {
-  const response = await fetch(
-    `${getApiUrl()}/highlighted-token`,
-    {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+  console.log('Fetching highlighted token...');
+  try {
+    const response = await fetch(
+      `${getApiUrl()}/highlighted-token`,
+      {
+        headers: {
+          'Authorization': getAuthHeader()
+        }
       }
+    );
+    
+    // Log the raw response for debugging
+    const text = await response.text();
+    console.log('Raw API response:', text);
+    
+    try {
+      const data = JSON.parse(text);
+      console.log('Parsed highlighted token:', data);
+      return data;
+    } catch (parseError) {
+      console.error('Failed to parse response:', parseError);
+      console.error('Raw response was:', text);
+      throw parseError;
     }
-  );
-  return response.json();
+  } catch (error) {
+    console.error('Highlighted token fetch failed:', error);
+    throw error;
+  }
 } 

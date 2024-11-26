@@ -1,4 +1,3 @@
 [submodule "higherrrrrrr-protocol"]
 	path = higherrrrrrr-protocol
 	url = git@github.com:Thrive-Point-Group/higherrrrrrr-protocol.git
-	ignore = dirty

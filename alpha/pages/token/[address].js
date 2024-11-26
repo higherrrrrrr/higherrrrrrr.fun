@@ -90,9 +90,9 @@ export default function TokenPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Simplify quote reads to only use token amounts
-  const { data: buyQuote } = useContractRead({
-    address: address,
+  // Update quote reads to handle errors and invalid states
+  const { data: buyQuote, isError: buyQuoteError } = useContractRead({
+    address: address ? `0x${address.replace('0x', '')}` : undefined,
     abi: higherrrrrrrAbi,
     functionName: 'getTokenBuyQuote',
     args: [parseEther(
@@ -102,11 +102,12 @@ export default function TokenPage() {
       amount : 
       '0'
     )],
+    enabled: Boolean(amount && isBuying && address), // Only run when needed
     watch: true,
   });
 
-  const { data: sellQuote } = useContractRead({
-    address: address,
+  const { data: sellQuote, isError: sellQuoteError } = useContractRead({
+    address: address ? `0x${address.replace('0x', '')}` : undefined,
     abi: higherrrrrrrAbi,
     functionName: 'getTokenSellQuote',
     args: [parseEther(
@@ -116,6 +117,7 @@ export default function TokenPage() {
       amount : 
       '0'
     )],
+    enabled: Boolean(amount && !isBuying && address), // Only run when needed
     watch: true,
   });
 
@@ -136,32 +138,34 @@ export default function TokenPage() {
   };
 
   const handleTransaction = () => {
-    if (!userAddress) return; // Don't proceed if no wallet connected
+    if (!userAddress) return;
 
     if (isBuying) {
       const quote = buyQuote;
-      if (!quote) return;
+      if (!quote || buyQuoteError) return;
       
       buyToken({
         value: quote,
         args: [
-          userAddress, // recipient (user's address)
-          userAddress, // refund recipient (user's address)
-          "", // comment
-          0, // expected market type (0 = BONDING_CURVE, 1 = UNISWAP_POOL)
-          parseEther("0.0000001"), // min order size (0.0000001 ETH)
-          0n // sqrt price limit (0 for bonding curve)
+          userAddress,
+          userAddress,
+          "",
+          0,
+          parseEther("0.0000001"),
+          0n
         ]
       });
     } else {
+      if (!amount || sellQuoteError) return;
+      
       sellToken({
         args: [
-          parseEther(amount), // tokens to sell
-          userAddress, // recipient (user's address)
-          "", // comment
-          0, // expected market type (0 = BONDING_CURVE, 1 = UNISWAP_POOL)
-          parseEther("0.0000001"), // min payout size (0.0000001 ETH)
-          0n // sqrt price limit (0 for bonding curve)
+          parseEther(amount),
+          userAddress,
+          "",
+          0,
+          parseEther("0.0000001"),
+          0n
         ]
       });
     }
@@ -244,8 +248,8 @@ export default function TokenPage() {
           </div>
         </div>
 
-        {/* Progress Bar (if on bonding curve) */}
-        {tokenState.marketType === 0 && (
+        {/* Progress Bar (only show if on bonding curve and supply < 800M) */}
+        {tokenState.marketType === 0 && parseFloat(tokenState.totalSupply) < 800_000_000 && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Bonding Curve Progress</span>
@@ -290,21 +294,11 @@ export default function TokenPage() {
               {tokenState.priceLevels.map((level, index) => {
                 const levelUsdPrice = parseFloat(level.price) * ethPrice;
                 const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
-                const currentPrice = parseFloat(tokenState.currentPrice) * ethPrice;
+                const isCurrentLevel = level.name === tokenState.currentName;
                 
-                // Debug each level comparison
-                console.log(`Comparing Level ${index + 1}:`, {
-                  levelName: level.name,
-                  levelPrice: levelUsdPrice,
-                  currentPrice,
-                  isCurrentLevel: levelUsdPrice <= currentPrice && 
-                    (index === tokenState.priceLevels.length - 1 || 
-                     parseFloat(tokenState.priceLevels[index + 1].price) * ethPrice > currentPrice)
-                });
-
-                const isCurrentLevel = levelUsdPrice <= currentPrice && 
-                  (index === tokenState.priceLevels.length - 1 || 
-                   parseFloat(tokenState.priceLevels[index + 1].price) * ethPrice > currentPrice);
+                // Find if this level is achieved (any level before current)
+                const currentLevelIndex = tokenState.priceLevels.findIndex(l => l.name === tokenState.currentName);
+                const isAchieved = index <= currentLevelIndex;
 
                 return (
                   <tr 
@@ -325,10 +319,10 @@ export default function TokenPage() {
                     <td className="p-4 text-center">
                       {isCurrentLevel ? (
                         <span className="text-green-500">Current</span>
-                      ) : levelUsdPrice > currentPrice ? (
-                        <span className="text-green-500/30">Locked</span>
-                      ) : (
+                      ) : isAchieved ? (
                         <span className="text-green-500/50">Achieved</span>
+                      ) : (
+                        <span className="text-green-500/30">Locked</span>
                       )}
                     </td>
                   </tr>
@@ -394,12 +388,10 @@ export default function TokenPage() {
                   <span>{isBuying ? "You'll Pay" : "You'll Receive"}</span>
                   <span>
                     {isBuying 
-                      ? buyQuote 
-                        ? `${formatEther(buyQuote)} ETH`
-                        : '...'
-                      : sellQuote
-                        ? `${formatEther(sellQuote)} ETH`
-                        : '...'
+                      ? (buyQuoteError ? 'Quote unavailable' : 
+                         buyQuote ? `${formatEther(buyQuote)} ETH` : '...')
+                      : (sellQuoteError ? 'Quote unavailable' : 
+                         sellQuote ? `${formatEther(sellQuote)} ETH` : '...')
                     }
                   </span>
                 </div>
@@ -407,12 +399,10 @@ export default function TokenPage() {
                   <span>USD Value</span>
                   <span>
                     {isBuying 
-                      ? buyQuote 
-                        ? `$${(parseFloat(formatEther(buyQuote)) * ethPrice).toFixed(2)}`
-                        : '...'
-                      : sellQuote
-                        ? `$${(parseFloat(formatEther(sellQuote)) * ethPrice).toFixed(2)}`
-                        : '...'
+                      ? (buyQuoteError ? '-' :
+                         buyQuote ? `$${(parseFloat(formatEther(buyQuote)) * ethPrice).toFixed(2)}` : '...')
+                      : (sellQuoteError ? '-' :
+                         sellQuote ? `$${(parseFloat(formatEther(sellQuote)) * ethPrice).toFixed(2)}` : '...')
                     }
                   </span>
                 </div>
@@ -421,7 +411,12 @@ export default function TokenPage() {
 
             <button
               onClick={handleTransaction}
-              disabled={tokenState.paused || isLoading || !amount || (isBuying ? !buyQuote : !sellQuote)}
+              disabled={
+                tokenState.paused || 
+                isLoading || 
+                !amount || 
+                (isBuying ? !buyQuote || buyQuoteError : !sellQuote || sellQuoteError)
+              }
               className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
             >
               {isLoading 
