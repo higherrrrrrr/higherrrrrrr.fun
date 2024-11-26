@@ -9,6 +9,7 @@ export default function TokensList() {
   const { address } = useWallet();
   const [highlightedToken, setHighlightedToken] = useState(null);
   const [latestTokens, setLatestTokens] = useState([]);
+  const [tokenStates, setTokenStates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -16,42 +17,24 @@ export default function TokensList() {
       try {
         console.log('Fetching token data...');
         
-        // First get the highlighted token address
-        const highlighted = await getHighlightedToken();
-        console.log('Raw highlighted token response:', highlighted);
+        const [highlighted, latest] = await Promise.all([
+          getHighlightedToken(),
+          getLatestTokens(100)
+        ]);
         
         if (highlighted && highlighted.address) {
-          try {
-            // Then fetch its state
-            const highlightedState = await getTokenState(highlighted.address);
-            console.log('Highlighted token state:', highlightedState);
-            
-            // Combine the data
-            const combinedHighlightedToken = {
-              ...highlighted,
-              ...highlightedState,
-              address: highlighted.address
-            };
-            console.log('Combined highlighted token:', combinedHighlightedToken);
-            setHighlightedToken(combinedHighlightedToken);
-          } catch (stateError) {
-            console.error('Failed to fetch highlighted token state:', stateError);
-          }
-        } else {
-          console.log('No highlighted token found');
+          const highlightedState = await getTokenState(highlighted.address);
+          setHighlightedToken({
+            ...highlighted,
+            ...highlightedState,
+            address: highlighted.address
+          });
         }
 
-        // Get latest tokens
-        const latest = await getLatestTokens(100);
-        console.log('Latest tokens:', latest);
         setLatestTokens(latest.tokens || []);
         
       } catch (error) {
         console.error('Failed to fetch tokens:', error);
-        console.error('Error details:', {
-          message: error.message,
-          stack: error.stack
-        });
       } finally {
         setIsLoading(false);
       }
@@ -60,6 +43,25 @@ export default function TokensList() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchTokenStates = async () => {
+      const states = {};
+      for (const token of latestTokens) {
+        try {
+          const state = await getTokenState(token.address);
+          states[token.address] = state;
+        } catch (error) {
+          console.error(`Failed to fetch state for token ${token.address}:`, error);
+        }
+      }
+      setTokenStates(states);
+    };
+
+    if (latestTokens.length > 0) {
+      fetchTokenStates();
+    }
+  }, [latestTokens]);
+
   if (isLoading) {
     return (
       <div className="text-green-500 font-mono text-center animate-pulse">
@@ -67,9 +69,6 @@ export default function TokensList() {
       </div>
     );
   }
-
-  const recentDeployments = latestTokens.slice(0, 5);
-  const allTokens = latestTokens.slice(5);
 
   return (
     <div className="max-w-2xl mx-auto space-y-8">
@@ -82,49 +81,31 @@ export default function TokensList() {
         </div>
       )}
 
-      {recentDeployments.length > 0 && (
+      {latestTokens.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-mono text-green-500 border-b border-green-500/20 pb-2">
-            Recent Deployments
+            Recent Launches
           </h2>
           <div className="space-y-4">
-            {recentDeployments.map((token) => (
-              <Link 
-                key={token.address} 
-                href={`/token/${token.address}`}
-                className="block border border-green-500/30 rounded-lg p-4 hover:border-green-500/60 transition-colors"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-mono text-green-500">{token.address}</div>
-                    <div className="text-sm text-green-500/70 font-mono">
-                      {new Date(token.timestamp * 1000).toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="text-green-500/50 font-mono">
-                    Block #{token.block_number}
-                  </div>
-                </div>
-              </Link>
-            ))}
+            {latestTokens.map((token) => {
+              const tokenState = tokenStates[token.address];
+              if (!tokenState) return null;
+              
+              return (
+                <TokenCard 
+                  key={token.address} 
+                  token={{
+                    ...token,
+                    ...tokenState,
+                    address: token.address
+                  }}
+                  featured={false} 
+                />
+              );
+            })}
           </div>
         </div>
       )}
-
-      <div className="space-y-4">
-        <h2 className="text-2xl font-mono text-green-500 border-b border-green-500/20 pb-2">
-          Recent Launches
-        </h2>
-        <div className="space-y-4">
-          {allTokens.map((token) => (
-            <TokenCard 
-              key={token.address} 
-              token={token} 
-              featured={false} 
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
@@ -171,60 +152,71 @@ function TokenCard({ token, featured }) {
   const progress = token.marketType === 0 ? getProgressToNextLevel(token) : 0;
 
   return (
-    <Link 
-      href={`/token/${token.address}`}
-      className={`block border rounded-lg p-6 transition-colors ${
-        featured 
-          ? "border-green-500 bg-green-500/5 hover:bg-green-500/10" 
-          : "border-green-500/50 hover:border-green-500"
-      }`}
-    >
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-xl font-mono text-green-500">
-            {token.name || 'Unknown Token'}
-          </h3>
-          <p className="text-green-500/70 font-mono">
-            ${token.symbol || '???'}
-          </p>
+    <div className={`block border rounded-lg p-6 transition-colors ${
+      featured 
+        ? "border-green-500 bg-green-500/5 hover:bg-green-500/10" 
+        : "border-green-500/50 hover:border-green-500"
+    }`}>
+      <Link 
+        href={`/token/${token.address}`}
+      >
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-xl font-mono text-green-500">
+              {token.name || 'Unknown Token'}
+            </h3>
+            <p className="text-green-500/70 font-mono">
+              ${token.symbol || '???'}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-green-500 font-mono">
+              ${formatPrice(price)}
+            </p>
+            <p className="text-green-500/70 text-sm font-mono">
+              {currentStage}
+            </p>
+          </div>
         </div>
-        <div className="text-right">
-          <p className="text-green-500 font-mono">
-            ${formatPrice(price)}
-          </p>
-          <p className="text-green-500/70 text-sm font-mono">
-            {currentStage}
-          </p>
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm font-mono">
-          <span className="text-green-500/70">Market Cap</span>
-          <span className="text-green-500">${formatNumber(marketCap)}</span>
-        </div>
-        {nextPriceLevel && (
+        
+        <div className="space-y-2">
           <div className="flex justify-between text-sm font-mono">
-            <span className="text-green-500/70">Next Stage</span>
-            <span className="text-green-500">
-              ${formatPrice(nextPriceLevel.price)}
-            </span>
+            <span className="text-green-500/70">Market Cap</span>
+            <span className="text-green-500">${formatNumber(marketCap)}</span>
           </div>
-        )}
-        {token.marketType === 0 && progress > 0 && (
-          <div className="mt-2">
-            <div className="h-1 bg-green-500/20 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-green-500 transition-all duration-500"
-                style={{ width: `${Math.min(progress, 100)}%` }}
-              />
+          {nextPriceLevel && (
+            <div className="flex justify-between text-sm font-mono">
+              <span className="text-green-500/70">Next Stage</span>
+              <span className="text-green-500">
+                ${formatPrice(nextPriceLevel.price)}
+              </span>
             </div>
-            <div className="text-xs text-green-500/50 mt-1 text-right font-mono">
-              {Math.min(progress, 100).toFixed(1)}% to next stage
+          )}
+          {token.marketType === 0 && progress > 0 && (
+            <div className="mt-2">
+              <div className="h-1 bg-green-500/20 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-green-500 transition-all duration-500"
+                  style={{ width: `${Math.min(progress, 100)}%` }}
+                />
+              </div>
+              <div className="text-xs text-green-500/50 mt-1 text-right font-mono">
+                {Math.min(progress, 100).toFixed(1)}% to next stage
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      </Link>
+
+      {/* Trade Button */}
+      <div className="mt-4 pt-4 border-t border-green-500/20">
+        <Link 
+          href={`/token/${token.address}`}
+          className="block w-full px-4 py-2 bg-green-500 hover:bg-green-400 text-black font-mono text-center rounded transition-colors"
+        >
+          Trade
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }

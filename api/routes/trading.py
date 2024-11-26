@@ -9,6 +9,7 @@ import json
 from functools import lru_cache
 import time
 import requests
+import traceback
 
 trading = Blueprint('trading', __name__)
 
@@ -33,7 +34,6 @@ FACTORY_ABI = [
     }
 ]
 
-# Cache for latest tokens
 class TokenCache:
     def __init__(self):
         self.tokens = []
@@ -46,84 +46,107 @@ def get_latest_tokens(limit=10):
     global token_cache
     current_time = time.time()
     
-    # Return cached tokens if they're still valid
-    if token_cache.tokens and current_time - token_cache.timestamp < CACHE_DURATION:
-        print("Returning cached tokens")
-        return token_cache.tokens[:limit]
-    
     try:
-        print(f"Using RPC URL: {Config.RPC_URL}")
-        print(f"Using Contract Address: {Config.CONTRACT_ADDRESS}")
+        # Debug connection info
+        print("\n=== Starting get_latest_tokens ===")
+        print(f"RPC URL: {Config.RPC_URL}")
+        print(f"Factory Address: {Config.CONTRACT_ADDRESS}")
         
+        # Check cache
+        if token_cache.tokens and current_time - token_cache.timestamp < CACHE_DURATION:
+            print("Returning cached tokens")
+            return token_cache.tokens[:limit]
+        
+        # Initialize Web3
         w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
         
         if not w3.is_connected():
-            print("Failed to connect to RPC endpoint")
+            print("❌ Failed to connect to RPC endpoint")
             return []
+        
+        print("✅ Connected to RPC endpoint")
             
-        contract_address = Web3.to_checksum_address(Config.CONTRACT_ADDRESS)
-        factory_contract = w3.eth.contract(
-            address=contract_address, 
-            abi=FACTORY_ABI
-        )
-        
-        latest_block = w3.eth.block_number
-        print(f"Latest block: {latest_block}")
-        
-        # Look back further - 10000 blocks instead of 1000
-        from_block = max(0, latest_block - 10000)
-        
-        # Get all NewToken events
+        # Setup contract
         try:
-            # First try with create_filter
+            contract_address = Web3.to_checksum_address(Config.CONTRACT_ADDRESS)
+            factory_contract = w3.eth.contract(
+                address=contract_address, 
+                abi=FACTORY_ABI
+            )
+            print("✅ Contract initialized")
+        except Exception as e:
+            print("❌ Failed to initialize contract:", str(e))
+            traceback.print_exc()
+            return []
+        
+        # Get latest block
+        latest_block = w3.eth.block_number
+        from_block = max(0, latest_block - 10000)
+        print(f"Scanning blocks {from_block} to {latest_block}")
+        
+        # Get events
+        try:
+            print("Attempting to get events using create_filter...")
             event_filter = factory_contract.events.NewToken.create_filter(
                 fromBlock=from_block
             )
             events = event_filter.get_all_entries()
-        except Exception as e:
-            print(f"Filter method failed, trying get_logs: {str(e)}")
-            # Fallback to get_logs if create_filter fails
-            events = w3.eth.get_logs({
-                'address': contract_address,
-                'fromBlock': from_block,
-                'toBlock': 'latest',
-                'topics': [
-                    Web3.keccak(text='NewToken(address,address)').hex()
-                ]
-            })
-        
-        # Sort by block number descending
-        sorted_events = sorted(
-            events, 
-            key=lambda x: x['blockNumber'], 
-            reverse=True
-        )
-        
-        tokens = []
-        for event in sorted_events:
+            print(f"✅ Found {len(events)} events using create_filter")
+        except Exception as filter_error:
+            print(f"❌ Filter method failed: {str(filter_error)}")
+            print("Falling back to get_logs...")
+            
             try:
-                # Handle both direct event logs and filtered events
+                event_signature_hash = Web3.keccak(text='NewToken(address,address)').hex()
+                events = w3.eth.get_logs({
+                    'address': contract_address,
+                    'fromBlock': from_block,
+                    'toBlock': 'latest',
+                    'topics': [event_signature_hash]
+                })
+                print(f"✅ Found {len(events)} events using get_logs")
+            except Exception as logs_error:
+                print(f"❌ get_logs failed: {str(logs_error)}")
+                traceback.print_exc()
+                return []
+        
+        # Process events
+        tokens = []
+        for event in sorted(events, key=lambda x: x['blockNumber'], reverse=True):
+            try:
+                print(f"\nProcessing event from block {event['blockNumber']}")
+                
                 if hasattr(event, 'args'):
+                    print("Event has args - using direct access")
                     token_address = event.args.token
+                    conviction_address = event.args.conviction
                 else:
-                    # Decode the event data manually
-                    token_address = '0x' + event['topics'][1][-40:]
+                    print("Event is raw log - decoding manually")
+                    topics = event['topics']
+                    token_address = Web3.to_checksum_address('0x' + topics[1].hex()[-40:])
+                    conviction_address = Web3.to_checksum_address('0x' + topics[2].hex()[-40:])
+                
+                print(f"Token Address: {token_address}")
+                print(f"Conviction Address: {conviction_address}")
                 
                 block = w3.eth.get_block(event['blockNumber'])
                 
-                tokens.append({
+                token_data = {
                     'address': token_address,
-                    'conviction': event.args.conviction if hasattr(event, 'args') else None,
+                    'conviction': conviction_address,
                     'timestamp': block['timestamp'],
                     'block_number': event['blockNumber'],
                     'transaction_hash': event['transactionHash'].hex()
-                })
+                }
+                print(f"✅ Successfully processed token: {token_data}")
+                tokens.append(token_data)
                 
             except Exception as e:
-                print(f"Error processing event: {str(e)}")
+                print(f"❌ Error processing event: {str(e)}")
+                traceback.print_exc()
                 continue
         
-        print(f"Found {len(tokens)} tokens")
+        print(f"\n=== Found {len(tokens)} total tokens ===")
         
         # Update cache
         token_cache.tokens = tokens
@@ -132,8 +155,7 @@ def get_latest_tokens(limit=10):
         return tokens[:limit]
         
     except Exception as e:
-        print(f"Error in get_latest_tokens: {str(e)}")
-        import traceback
+        print(f"❌ Fatal error in get_latest_tokens: {str(e)}")
         traceback.print_exc()
         if token_cache.tokens:
             print("Returning expired cached tokens due to error")
@@ -145,15 +167,21 @@ def get_latest_tokens(limit=10):
 def get_latest_token_deploys():
     try:
         limit = int(request.args.get('limit', 10))
+        print(f"\n=== GET /tokens/latest with limit={limit} ===")
+        
         tokens = get_latest_tokens(limit)
+        print(f"Returning {len(tokens)} tokens")
+        
         return jsonify({
             'tokens': tokens
         })
     except Exception as e:
-        current_app.logger.error(f"Error getting latest tokens: {str(e)}")
+        error_msg = f"Error getting latest tokens: {str(e)}"
+        print(f"❌ {error_msg}")
+        traceback.print_exc()
         return jsonify({
-            'error': 'Failed to fetch latest tokens',
-            'details': str(e)
+            'error': error_msg,
+            'details': traceback.format_exc()
         }), 500
 
 # Cache duration in seconds (5 minutes)
