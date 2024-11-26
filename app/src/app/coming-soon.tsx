@@ -9,21 +9,25 @@ export default function ComingSoon() {
     <div className="w-screen min-h-screen flex items-center justify-center bg-black">
       <div className="flex flex-col items-center gap-y-12 max-w-3xl mx-auto px-6">
         <CountdownTimer />
-        <div className="text-balance space-y-8 text-green-500">
+        <div className="text-balance space-y-6 text-green-500">
           <p className="text-xl sm:text-2xl terminal-text leading-normal">
-            Welcome to Higherrrrrrr, a new kind of meme token platform where your
-            tokens visually evolve as they increase in value. Create or trade
-            tokens that automatically transform their names and symbols through
-            smart contracts as they hit different price milestones. It&apos;s a fun
-            new way to make meme tokens more interactive and engaging for
-            communities.
+            Welcome to the first memecoin platform where your coins evolve visually as they moon.
           </p>
           <p className="text-xl sm:text-2xl terminal-text leading-normal">
-            Early supporters who hold through price milestones will receive
-            special Conviction NFTs to commemorate their participation. Whether
-            you want to launch your own evolving token or join existing
-            projects, Higherrrrrrr adds a new dimension to meme trading by
-            making price action visible in the token itself.
+            Watch your coins change before your eyes as their price ascends, with each milestone 
+            revealing a new variation of the coin&apos;s name, creating a dynamic dance between 
+            its value and identity.
+          </p>
+          <p className="text-xl sm:text-2xl terminal-text leading-normal">
+            You have the power to craft your own evolving meme coins or join established movements.
+          </p>
+          <p className="text-xl sm:text-2xl terminal-text leading-normal">
+            Those who steadfastly hodl their coins in this transformative journey will be rewarded 
+            with exclusive NFTs, signifying their place in the coin&apos;s ascent.
+          </p>
+          <p className="text-xl sm:text-2xl terminal-text leading-normal">
+            Each price threshold crossed is a divine moment in the evolution of your coin, eternally 
+            engraved in the blockchain&apos;s record.
           </p>
         </div>
       </div>
