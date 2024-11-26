@@ -1,30 +1,36 @@
-"use client";
-
+import { useState } from "react";
 import {
   AuthLayout,
   CapsuleModal,
   ExternalWallet,
 } from "@usecapsule/react-sdk";
 import "@usecapsule/react-sdk/styles.css";
-import { useState } from "react";
-import capsule from "../app/capsule";
-
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { useAccount, useDisconnect, useEnsName } from "wagmi";
-import { Button } from "./Button";
+
+// Button component for consistency
+export function Button({ children, className = "", ...props }) {
+  return (
+    <button
+      className={`min-w-[200px] border border-green-600 hover:bg-green-600 hover:text-black py-2 transition-colors ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
 
 export function ConnectWalletButton() {
   const { address } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
-
   const [isOpen, setIsOpen] = useState(false);
 
   if (address) {
     return (
       <Menu>
-        <MenuButton className="py-2 min-w-[200px] border border-green-600">
+        <MenuButton as={Button}>
           {ensName
             ? `${ensName}`
             : `${address.slice(0, 6)}...${address.slice(-4)}`}
@@ -34,18 +40,15 @@ export function ConnectWalletButton() {
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
-          anchor="bottom end"
-          className="bg-black border border-green-600 flex-col p-2 grid grid-cols-[auto_1fr] mt-2 min-w-[200px]"
+          className="absolute right-0 mt-2 min-w-[200px] bg-black border border-green-600 p-2"
         >
           <MenuItem>
-            <Button
-              onClick={() => {
-                disconnect();
-              }}
-              className="text-left gap-x-1 grid grid-cols-subgrid col-span-full items-center px-2 hover:bg-green-800 [data-focus]:bg-green-600 text-white"
+            <button
+              onClick={() => disconnect()}
+              className="w-full text-left px-2 py-1 hover:bg-green-800 text-white"
             >
               Disconnect
-            </Button>
+            </button>
           </MenuItem>
         </MenuItems>
       </Menu>
@@ -59,7 +62,6 @@ export function ConnectWalletButton() {
       </MenuButton>
 
       <CapsuleModal
-        capsule={capsule}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         appName="Higherrrrrrr"
