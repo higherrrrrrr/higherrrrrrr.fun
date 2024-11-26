@@ -12,13 +12,22 @@ import {
   walletConnectWallet,
 } from "@usecapsule/evm-wallet-connectors";
 import Link from "next/link";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect } from "react";
+import Cookies from "js-cookie";
 
 import { base } from "wagmi/chains";
 
 const queryClient = new QueryClient();
 
 export function ClientLayout({ children }: PropsWithChildren) {
+  useEffect(() => {
+    // Get token from cookie and set in localStorage
+    const token = Cookies.get('auth_token');
+    if (token) {
+      localStorage.setItem('auth_token', token);
+    }
+  }, []);
+
   return (
     <CapsuleEvmProvider
       config={{

@@ -6,7 +6,15 @@ import os
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    
+    # Configure CORS to allow all origins, methods, and headers
+    CORS(app, resources={
+        r"/*": {
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Authorization", "Content-Type"]
+        }
+    })
 
     # Root endpoint without authentication
     @app.route('/', methods=['GET'])
@@ -52,5 +60,5 @@ def create_app():
 if __name__ == '__main__':
     app = create_app()
     # Use PORT environment variable provided by Cloud Run
-    port = int(os.environ.get('PORT', 8080))
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)

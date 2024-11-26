@@ -5,9 +5,9 @@ from datetime import datetime
 import pytz
 
 def is_past_unlock_time():
-    # Target time: November 26th, 2024 at 11:59:59 PM EST
+    # Target time: November 26th, 2024 at 12:00:00 PM EST
     est = pytz.timezone('America/New_York')
-    unlock_time = datetime(2024, 11, 26, 23, 59, 59, tzinfo=est)
+    unlock_time = datetime(2024, 11, 26, 12, 0, 0, tzinfo=est)
     now = datetime.now(est)
     return now >= unlock_time
 

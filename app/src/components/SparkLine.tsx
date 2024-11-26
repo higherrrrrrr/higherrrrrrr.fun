@@ -2,91 +2,63 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-type SparkLineProps = {
-  data: number[];
-};
+interface SparkLineProps {
+  data?: number[];
+  width?: number;
+  height?: number;
+  color?: string;
+}
 
-export function SparkLine({ data }: SparkLineProps) {
-  const [width, setWidth] = useState(0);
-
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    // Create resize observer
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setWidth(entry.contentRect.width);
-      }
-    });
-
-    // Get the wrapper element and observe it
-    const wrapper = wrapperRef.current;
-    if (wrapper) {
-      resizeObserver.observe(wrapper);
-    }
-
-    // Cleanup observer on unmount
-    return () => {
-      if (wrapper) {
-        resizeObserver.unobserve(wrapper);
-      }
-    };
-  }, []);
-
-  const lowest = Math.min(...data);
-  const highest = Math.max(...data);
-  const range = highest - lowest;
-
-  const fullData = Array(24).fill(undefined);
-  const startIndex = 24 - data.length;
-  data.forEach((value, index) => {
-    fullData[startIndex + index] = value;
-  });
-
-  let sparkLinePath = `M 0 32`;
-  fullData.forEach((value, i) => {
-    if (value === undefined) return;
-    const x = (i / 23) * width;
-    const y = 32 - ((value - lowest) / range) * 32;
-    sparkLinePath += ` L ${x} ${y}`;
-  });
-  sparkLinePath += ` L ${width} 32 L 0 32`;
-
-  let linePath = `M 0 32`;
-  fullData.forEach((value, i) => {
-    if (value === undefined) return;
-    const x = (i / 23) * width;
-    const y = 32 - ((value - lowest) / range) * 32;
-    linePath += ` ${i == 0 ? "M" : "L"} ${x} ${y}`;
-  });
-
-  const gradientId = useId();
-
-  const areWeGoingHigher = data[data.length - 1] > data[0];
-  const gradientColor = areWeGoingHigher ? "#22c55e" : "#ef4444";
-
-  return (
-    <div ref={wrapperRef} className="max-w-full w-full h-[32px] relative">
-      <svg
-        width={width}
-        height="32"
-        preserveAspectRatio="none"
-        className="absolute"
-      >
-        <defs>
-          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor={gradientColor} stopOpacity="0.5" />
-            <stop offset="100%" stopColor={gradientColor} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={sparkLinePath} fill={`url(#${gradientId})`} strokeWidth="0" />
-        <path
-          d={linePath}
-          fill="none"
-          stroke={gradientColor}
-          strokeWidth="1.5"
-          vectorEffect="non-scaling-stroke"
+export function SparkLine({
+  data = [],
+  width = 200,
+  height = 32,
+  color = "rgb(34 197 94)"
+}: SparkLineProps) {
+  // Early return if no data
+  if (!data || data.length === 0) {
+    return (
+      <svg width={width} height={height}>
+        <line
+          x1="0"
+          y1={height / 2}
+          x2={width}
+          y2={height / 2}
+          stroke={color}
+          strokeOpacity={0.2}
         />
       </svg>
-    </div>
+    );
+  }
+
+  // Normalize data
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min;
+
+  const fullData = data.map((value) => {
+    if (range === 0) return height / 2;
+    return height - ((value - min) / range) * height;
+  });
+
+  // Generate path
+  let sparkLinePath = `M 0 ${fullData[0] || height / 2}`;
+  fullData.forEach((value, i) => {
+    if (value === undefined) return;
+    const x = (i / (data.length - 1)) * width;
+    sparkLinePath += ` L ${x} ${value}`;
+  });
+
+  return (
+    <svg width={width} height={height}>
+      <path
+        d={sparkLinePath}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

@@ -1,6 +1,14 @@
 "use server";
 
+import { cookies } from 'next/headers';
+import { api } from '@/lib/api';
 import { notFound } from "next/navigation";
+
+// Helper to get auth token from cookies on server side
+function getServerSideToken(): string {
+  const cookieStore = cookies();
+  return cookieStore.get('auth_token')?.value || 'albertishigher$123$';
+}
 
 export type NftApiType = {
   address: string;
@@ -40,75 +48,74 @@ type Pagination = {
 };
 
 export async function getTokensPage(page: number = 1) {
-  const params = new URLSearchParams();
-  params.set("page", page.toString());
-
-  const response = await fetch(`http://localhost:8080/api/tokens?${params}`, {
-    headers: {
-      Authorization: "Bearer albertishigher$123$",
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-
-    throw new Error(text);
+  try {
+    const response = await fetch(
+      `${process.env.API_URL || 'http://localhost:5000'}/api/tokens?page=${page}&limit=10`,
+      {
+        headers: {
+          'Authorization': `Bearer ${getServerSideToken()}`
+        }
+      }
+    );
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch tokens:', error);
+    throw error;
   }
-
-  return (await response.json()) as {
-    tokens: TokenApiType[];
-    pagination: Pagination;
-  };
 }
 
 export async function getToken(address: string) {
-  const response = await fetch(`http://localhost:8080/api/tokens/${address}`, {
-    headers: {
-      Authorization: "Bearer albertishigher$123$",
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-
-    throw new Error(text);
+  try {
+    const response = await fetch(
+      `${process.env.API_URL || 'http://localhost:5000'}/api/tokens/${address}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${getServerSideToken()}`
+        }
+      }
+    );
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch token:', error);
+    throw error;
   }
-
-  return (await response.json()) as TokenApiType;
 }
 
 export async function getHighlightedToken() {
-  const response = await fetch(`http://localhost:8080/api/highlighted-token`, {
-    headers: {
-      Authorization: "Bearer albertishigher$123$",
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-
-    throw new Error(text);
+  try {
+    const response = await fetch(
+      `${process.env.API_URL || 'http://localhost:5000'}/api/highlighted-token`,
+      {
+        headers: {
+          'Authorization': `Bearer ${getServerSideToken()}`
+        }
+      }
+    );
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch highlighted token:', error);
+    throw error;
   }
-
-  return (await response.json()) as TokenApiType;
 }
 
 export async function getNftsForAddress(address: string) {
-  const response = await fetch(`http://localhost:8080/api/nfts/${address}`, {
-    headers: {
-      Authorization: "Bearer albertishigher$123$",
-    },
-  });
-
-  if (response.status === 404) {
-    notFound();
+  try {
+    const response = await fetch(
+      `${process.env.API_URL || 'http://localhost:5000'}/api/nfts/${address}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${getServerSideToken()}`
+        }
+      }
+    );
+    if (response.status === 404) {
+      notFound();
+    }
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('404')) {
+      notFound();
+    }
+    throw error;
   }
-
-  if (!response.ok) {
-    const text = await response.text();
-
-    throw new Error(text);
-  }
-
-  return (await response.json()) as NftApiType[];
 }

@@ -18,17 +18,20 @@
     "@usecapsule/wagmi-v2-integration": "^3.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "encoding": "^0.1.13",
     "ethers": "^6.13.4",
     "framer-motion": "^11.11.17",
+    "js-cookie": "^3.0.5",
     "next": "15.0.3",
+    "pino-pretty": "^10.2.3",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-7-segment-display": "^1.1.2",
     "react-dom": "19.0.0-rc-66855b96-20241106",
-    "wagmi": "^2",
-    "encoding": "^0.1.13",
-    "pino-pretty": "^10.2.3"
+    "wagmi": "^2"
   },
   "devDependencies": {
+    "@typechain/ethers-v6": "^0.5.1",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -38,8 +41,7 @@
     "eslint-plugin-react-compiler": "^19.0.0-beta-0dec889-20241115",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "@typechain/ethers-v6": "^0.5.1",
-    "typechain": "^8.3.2"
+    "typechain": "^8.3.2",
+    "typescript": "^5"
   }
 }
