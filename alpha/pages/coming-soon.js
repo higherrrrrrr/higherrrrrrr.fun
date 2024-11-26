@@ -45,7 +45,7 @@ export default function ComingSoon() {
         </div>
         
         <div className="mb-16 text-center">
-          <p className="text-2xl font-mono text-green-500 animate-pulse">
+          <p className="text-2xl font-mono text-green-500">
             Buy the coin. Loop in your friends. The more it goes up, the more it evolves. Watch it transform as it goes higherrrrrrr!
           </p>
         </div>
