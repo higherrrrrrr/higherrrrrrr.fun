@@ -157,7 +157,8 @@ export default function LaunchPage() {
       return;
     }
     
-    const name = `${formData.symbol} Token`;
+    // Use just the first level's name as the token name
+    const name = formData.priceLevels[0].name;
     const uri = `https://higherrrrrrr.fun/metadata/${formData.symbol.toLowerCase()}`;
     
     const levels = formData.priceLevels.map(level => ({
