@@ -1,4 +1,4 @@
-import { Display } from "react-7-segment-display";
+import { Display } from "react-seven-segment-display";
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import { getContractAddress } from '../api/contract';

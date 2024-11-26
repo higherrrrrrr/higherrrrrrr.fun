@@ -17,7 +17,7 @@
     "js-cookie": "^3.0.5",
     "next": "14.0.4",
     "react": "^18",
-    "react-7-segment-display": "^1.2.0",
+    "react-seven-segment-display": "^2.1.0",
     "react-dom": "^18",
     "viem": "^1.19.11",
     "wagmi": "^1.4.10"
