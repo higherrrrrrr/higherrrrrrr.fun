@@ -8,6 +8,11 @@ import { cookies } from "next/headers";
 export const metadata: Metadata = {
   title: "higherrrrrrr.fun",
   description: "A new meme coin trading platform for evolutionary memes",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" }
+    ]
+  }
 };
 
 export default async function RootLayout({
@@ -27,6 +32,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" type="image/png" href="/logorounded.png" />
+      </head>
       <body>
         {shouldRenderComingSoon ? (
           <ComingSoon />
