@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getTokenState, getProgressToNextLevel } from '../../onchain';
-import { useContractWrite, useWaitForTransaction } from 'wagmi';
+import { useContractWrite, useWaitForTransaction, useContractRead } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
-import { parseEther } from 'viem';
+import { parseEther, formatEther } from 'viem';
 import { higherrrrrrrAbi } from '../../onchain/generated';
 import { getEthPrice } from '../../api/price';
+import { getLatestTokens } from '../../api/contract';
+import Link from 'next/link';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
@@ -18,6 +20,8 @@ export default function TokenPage() {
   const [amount, setAmount] = useState('');
   const [amountUsd, setAmountUsd] = useState('');
   const [isBuying, setIsBuying] = useState(true);
+  const [priceUnit, setPriceUnit] = useState('TOKEN');
+  const [latestTokens, setLatestTokens] = useState([]);
 
   // Buy contract interaction
   const { write: buyToken, data: buyData } = useContractWrite({
@@ -85,25 +89,81 @@ export default function TokenPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleAmountChange = (value, isUsd = false) => {
-    if (isUsd) {
-      setAmountUsd(value);
-      // Convert USD to tokens using current price
-      const tokenAmount = parseFloat(value) / (parseFloat(tokenState.currentPrice) * ethPrice);
-      setAmount(tokenAmount.toString());
+  // Add quote contract reads
+  const { data: buyQuote } = useContractRead({
+    address: address,
+    abi: higherrrrrrrAbi,
+    functionName: 'getTokenBuyQuote',
+    args: [parseEther(
+      amount && 
+      !isNaN(amount) && 
+      isFinite(parseFloat(amount)) ? 
+      amount : 
+      '0'
+    )],
+    watch: true,
+  });
+
+  const { data: sellQuote } = useContractRead({
+    address: address,
+    abi: higherrrrrrrAbi,
+    functionName: 'getTokenSellQuote',
+    args: [parseEther(
+      amount && 
+      !isNaN(amount) && 
+      isFinite(parseFloat(amount)) ? 
+      amount : 
+      '0'
+    )],
+    watch: true,
+  });
+
+  const handleAmountChange = (value) => {
+    // Validate input is a valid number
+    if (value === '' || 
+        isNaN(value) || 
+        !isFinite(parseFloat(value)) || 
+        parseFloat(value) < 0) {
+      setAmount('');
+      setAmountUsd('');
+      return;
+    }
+
+    // Limit decimal places to 18
+    const formattedValue = parseFloat(value).toFixed(18);
+
+    if (priceUnit === 'TOKEN') {
+      setAmount(formattedValue);
+      // Convert tokens to USD using quote
+      const quote = isBuying ? buyQuote : sellQuote;
+      if (quote) {
+        const ethAmount = formatEther(quote);
+        const usdAmount = parseFloat(ethAmount) * ethPrice;
+        setAmountUsd(usdAmount.toFixed(6));
+      }
     } else {
-      setAmount(value);
-      // Convert tokens to USD using current price
-      const usdAmount = parseFloat(value) * parseFloat(tokenState.currentPrice) * ethPrice;
-      setAmountUsd(usdAmount.toString());
+      setAmountUsd(formattedValue);
+      // Convert USD to tokens
+      const ethAmount = parseFloat(value) / ethPrice;
+      if (isBuying) {
+        // For buying, we need to estimate tokens received for ETH
+        const tokenAmount = ethAmount / parseFloat(tokenState.currentPrice);
+        setAmount(tokenAmount.toFixed(18));
+      } else {
+        // For selling, we need to estimate ETH received for tokens
+        const tokenAmount = ethAmount / parseFloat(tokenState.currentPrice);
+        setAmount(tokenAmount.toFixed(18));
+      }
     }
   };
 
   const handleTransaction = () => {
     if (isBuying) {
-      const ethAmount = parseFloat(amount) * parseFloat(tokenState.currentPrice);
+      const quote = buyQuote;
+      if (!quote) return;
+      
       buyToken({
-        value: parseEther(ethAmount.toString()),
+        value: quote,
         args: [
           "0x0000000000000000000000000000000000000000", // recipient (self)
           "0x0000000000000000000000000000000000000000", // refund recipient (self)
@@ -126,6 +186,14 @@ export default function TokenPage() {
       });
     }
   };
+
+  useEffect(() => {
+    getLatestTokens(5)
+      .then(data => {
+        setLatestTokens(data.tokens);
+      })
+      .catch(console.error);
+  }, []);
 
   if (loading) {
     return (
@@ -299,28 +367,39 @@ export default function TokenPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm mb-2">Amount (Tokens)</label>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => handleAmountChange(e.target.value, false)}
-                  className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
-                  placeholder="Enter token amount..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-2">Amount (USD)</label>
-                <input
-                  type="number"
-                  value={amountUsd}
-                  onChange={(e) => handleAmountChange(e.target.value, true)}
-                  className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
-                  placeholder="Enter USD amount..."
-                />
+            <div className="flex justify-between items-center mb-4">
+              <label className="text-sm text-green-500/70">Amount</label>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setPriceUnit('TOKEN')}
+                  className={`px-3 py-1 text-sm rounded ${
+                    priceUnit === 'TOKEN' 
+                      ? 'bg-green-500 text-black' 
+                      : 'border border-green-500 text-green-500'
+                  }`}
+                >
+                  Tokens
+                </button>
+                <button
+                  onClick={() => setPriceUnit('USD')}
+                  className={`px-3 py-1 text-sm rounded ${
+                    priceUnit === 'USD' 
+                      ? 'bg-green-500 text-black' 
+                      : 'border border-green-500 text-green-500'
+                  }`}
+                >
+                  USD
+                </button>
               </div>
             </div>
+
+            <input
+              type="number"
+              value={priceUnit === 'TOKEN' ? amount : amountUsd}
+              onChange={(e) => handleAmountChange(e.target.value)}
+              className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
+              placeholder={`Enter amount in ${priceUnit === 'TOKEN' ? 'tokens' : 'USD'}...`}
+            />
 
             <div className="flex justify-between text-sm">
               <span>Current Price</span>
@@ -331,28 +410,52 @@ export default function TokenPage() {
               <span>{isBuying ? "You'll Pay" : "You'll Receive"}</span>
               <span>
                 {isBuying 
-                  ? `${(parseFloat(amount || '0') * parseFloat(tokenState.currentPrice)).toFixed(6)} ETH ($${amountUsd || '0'})`
-                  : `${(parseFloat(amount || '0') * parseFloat(tokenState.currentPrice)).toFixed(6)} ETH ($${amountUsd || '0'})`
+                  ? buyQuote 
+                    ? `${formatEther(buyQuote)} ETH ($${(parseFloat(formatEther(buyQuote)) * ethPrice).toFixed(2)})`
+                    : '...'
+                  : sellQuote
+                    ? `${formatEther(sellQuote)} ETH ($${(parseFloat(formatEther(sellQuote)) * ethPrice).toFixed(2)})`
+                    : '...'
                 }
               </span>
             </div>
 
             <button
               onClick={handleTransaction}
-              disabled={tokenState.paused || isLoading || !amount}
+              disabled={tokenState.paused || isLoading || !amount || (isBuying ? !buyQuote : !sellQuote)}
               className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
             >
               {isLoading 
                 ? (isBuying ? "Buying..." : "Selling...") 
                 : (isBuying 
-                    ? `Buy ${amount || '0'} Tokens` 
-                    : `Sell ${amount || '0'} Tokens`
+                    ? `Buy ${amount || '0'} Tokens for ${buyQuote ? formatEther(buyQuote) : '...'} ETH` 
+                    : `Sell ${amount || '0'} Tokens for ${sellQuote ? formatEther(sellQuote) : '...'} ETH`
                   )
               }
             </button>
           </div>
         </div>
       </div>
+
+      {latestTokens.length > 0 && (
+        <div className="border border-green-500/30 rounded-lg p-6 space-y-4">
+          <h2 className="text-xl font-bold">Recent Tokens</h2>
+          <div className="space-y-2">
+            {latestTokens.map(token => (
+              <Link 
+                key={token.address} 
+                href={`/token/${token.address}`}
+                className="block p-3 border border-green-500/20 rounded hover:border-green-500/50"
+              >
+                <div className="flex justify-between">
+                  <span>{token.address}</span>
+                  <span>{new Date(token.timestamp * 1000).toLocaleString()}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

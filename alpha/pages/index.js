@@ -1,22 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { getTokens, getHighlightedToken } from '../api/tokens';
+import { getLatestTokens } from '../api/contract';
+import Link from 'next/link';
 
 export default function TokensList() {
   const { address } = useWallet();
   const [tokens, setTokens] = useState([]);
   const [highlightedToken, setHighlightedToken] = useState(null);
+  const [latestTokens, setLatestTokens] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [highlighted, allTokens] = await Promise.all([
+        const [highlighted, allTokens, latest] = await Promise.all([
           getHighlightedToken(),
-          getTokens()
+          getTokens(),
+          getLatestTokens(5)
         ]);
         setHighlightedToken(highlighted);
-        setTokens(allTokens || []);
+        setTokens(allTokens?.tokens || []);
+        setLatestTokens(latest.tokens || []);
       } catch (error) {
         console.error('Failed to fetch tokens:', error);
       } finally {
@@ -46,18 +51,47 @@ export default function TokensList() {
         </div>
       )}
 
+      {latestTokens.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-mono text-green-500 border-b border-green-500/20 pb-2">
+            Recent Deployments
+          </h2>
+          <div className="space-y-4">
+            {latestTokens.map((token) => (
+              <Link 
+                key={token.address} 
+                href={`/token/${token.address}`}
+                className="block border border-green-500/30 rounded-lg p-4 hover:border-green-500/60 transition-colors"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <div className="font-mono text-green-500">{token.address}</div>
+                    <div className="text-sm text-green-500/70 font-mono">
+                      {new Date(token.timestamp * 1000).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-green-500/50 font-mono">
+                    Block #{token.block_number}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <h2 className="text-2xl font-mono text-green-500 border-b border-green-500/20 pb-2">
-          Active Tokens
+          Recent Launches
         </h2>
         <div className="space-y-4">
-          {/* {tokens && tokens.map((token) => (
+          {tokens.map((token) => (
             <TokenCard 
               key={token.address || token.id} 
               token={token} 
               featured={false} 
             />
-          ))} */}
+          ))}
         </div>
       </div>
     </div>
@@ -78,8 +112,9 @@ function TokenCard({ token, featured }) {
   };
 
   return (
-    <div 
-      className={`border rounded-lg p-6 transition-colors ${
+    <Link 
+      href={`/token/${token.address}`}
+      className={`block border rounded-lg p-6 transition-colors ${
         featured 
           ? "border-green-500 bg-green-500/5 hover:bg-green-500/10" 
           : "border-green-500/50 hover:border-green-500"
@@ -106,18 +141,6 @@ function TokenCard({ token, featured }) {
           <span className="text-green-500">${formatPrice(token.nextStagePrice)}</span>
         </div>
       </div>
-
-      <div className="mt-6">
-        <button 
-          className={`w-full px-4 py-2 font-mono rounded transition-colors ${
-            featured 
-              ? "bg-green-500 hover:bg-green-400 text-black" 
-              : "bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-black"
-          }`}
-        >
-          Trade
-        </button>
-      </div>
-    </div>
+    </Link>
   );
 }

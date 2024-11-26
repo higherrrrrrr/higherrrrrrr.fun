@@ -4,8 +4,87 @@ from flask import Blueprint, jsonify, current_app, request
 from .auth import require_auth
 from config import Config
 from services.price_service import PriceService
+from web3 import Web3
+import json
 
 trading = Blueprint('trading', __name__)
+
+# Add ABI for NewToken event
+FACTORY_ABI = [
+    {
+        "anonymous": False,
+        "inputs": [
+            {
+                "indexed": True,
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "indexed": True,
+                "name": "conviction",
+                "type": "address"
+            }
+        ],
+        "name": "NewToken",
+        "type": "event"
+    }
+]
+
+def get_latest_tokens(limit=10):
+    w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
+    factory_contract = w3.eth.contract(
+        address=Config.CONTRACT_ADDRESS, 
+        abi=FACTORY_ABI
+    )
+    
+    # Get latest block
+    latest_block = w3.eth.block_number
+    
+    # Look back 1000 blocks or to genesis
+    from_block = max(0, latest_block - 1000)
+    
+    # Get NewToken events
+    events = factory_contract.events.NewToken.get_logs(
+        fromBlock=from_block,
+        toBlock='latest'
+    )
+    
+    # Sort by block number descending and take latest n
+    sorted_events = sorted(
+        events, 
+        key=lambda x: x['blockNumber'], 
+        reverse=True
+    )[:limit]
+    
+    tokens = []
+    for event in sorted_events:
+        token_address = event['args']['token']
+        block = w3.eth.get_block(event['blockNumber'])
+        
+        tokens.append({
+            'address': token_address,
+            'conviction': event['args']['conviction'],
+            'timestamp': block['timestamp'],
+            'block_number': event['blockNumber'],
+            'transaction_hash': event['transactionHash'].hex()
+        })
+    
+    return tokens
+
+@trading.route('/tokens/latest', methods=['GET'])
+@require_auth
+def get_latest_token_deploys():
+    try:
+        limit = int(request.args.get('limit', 10))
+        tokens = get_latest_tokens(limit)
+        return jsonify({
+            'tokens': tokens
+        })
+    except Exception as e:
+        current_app.logger.error(f"Error getting latest tokens: {str(e)}")
+        return jsonify({
+            'error': 'Failed to fetch latest tokens'
+        }), 500
 
 def generate_ticker_data():
     return [random.randint(0, 100) for _ in range(24)]

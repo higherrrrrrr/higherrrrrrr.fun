@@ -13,4 +13,16 @@ export async function getContractAddress() {
   const data = await response.json();
   console.log('Factory address:', data);
   return data;
+}
+
+export async function getLatestTokens(limit = 10) {
+  const response = await fetch(
+    `${getApiUrl()}/tokens/latest?limit=${limit}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      }
+    }
+  );
+  return response.json();
 } 
