@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "typechain --target ethers-v6 --out-dir src/types/contracts './src/types/contracts/*.json' && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -38,6 +38,8 @@
     "eslint-plugin-react-compiler": "^19.0.0-beta-0dec889-20241115",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@typechain/ethers-v6": "^0.5.1",
+    "typechain": "^8.3.2"
   }
 }

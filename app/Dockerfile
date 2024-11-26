@@ -10,8 +10,8 @@ RUN npm install -g encoding pino-pretty
 COPY package*.json ./
 COPY yarn.lock ./
 
-# Install dependencies
-RUN yarn install
+# Install dependencies including dev dependencies
+RUN yarn install --production=false
 
 # Copy the rest of the app
 COPY . .
