@@ -3,6 +3,7 @@ import random
 from flask import Blueprint, jsonify, current_app, request
 from .auth import require_auth
 from config import Config
+from services.price_service import PriceService
 
 trading = Blueprint('trading', __name__)
 
@@ -108,10 +109,11 @@ def get_price(token_address):
 @trading.route('/eth/price', methods=['GET'])
 @require_auth
 def get_eth_price():
+    price_data = PriceService.get_eth_price()
     return jsonify({
         'symbol': 'ETH',
-        'price_usd': 0.0,  # Replace with actual ETH price
-        'timestamp': '2024-03-19T00:00:00Z'
+        'price_usd': price_data['price_usd'],
+        'timestamp': price_data['timestamp']
     })
 
 @trading.route('/candles/<token_address>', methods=['GET'])
