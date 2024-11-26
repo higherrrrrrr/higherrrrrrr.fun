@@ -1,6 +1,7 @@
 import { Display } from "react-7-segment-display";
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
+import { getContractAddress } from '../api/contract';
 
 const LAUNCH_DATE = new Date("2024-11-26T12:00:00-05:00");
 
@@ -14,14 +15,10 @@ export default function ComingSoon() {
 
       if (newSequence.length === 4) {
         try {
-          localStorage.setItem('auth_token', newSequence);
+          const authToken = newSequence;
+          localStorage.setItem('auth_token', authToken);
           
-          const response = await fetch('/api/contract-address', {
-            headers: {
-              'Authorization': `Bearer ${authToken}`
-            }
-          });
-          const data = await response.json();
+          const data = await getContractAddress();
           
           if (data.contract_address) {
             Cookies.set('launch-override', 'true', { expires: 7 });
@@ -29,11 +26,8 @@ export default function ComingSoon() {
             window.location.href = '/';
           }
         } catch (error) {
-          console.debug('Invalid sequence');
-        } finally {
-          if (!Cookies.get('auth_token')) {
-            localStorage.removeItem('auth_token');
-          }
+          console.debug('Invalid sequence:', error);
+          localStorage.removeItem('auth_token');
         }
       }
     };
