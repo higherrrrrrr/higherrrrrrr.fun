@@ -1,19 +1,40 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Install dependencies first (better caching)
 COPY package.json yarn.lock ./
-
-# Install dependencies using yarn
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 # Copy source
 COPY . .
 
-# Expose port
+# Set environment variables
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
+
+# Build the app
+RUN yarn build
+
+# Production image
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy necessary files from builder
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+
+# Set environment variables
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
+ENV PORT 3000
+
 EXPOSE 3000
 
-# Run in development mode
-CMD ["yarn", "dev"]
+# Start the application
+CMD ["yarn", "start"]

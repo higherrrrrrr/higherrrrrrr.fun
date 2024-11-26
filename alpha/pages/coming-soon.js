@@ -1,4 +1,4 @@
-import { Display } from "react-seven-segment-display";
+import { Display } from "react-7-segment-display";
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import { getContractAddress } from '../api/contract';
@@ -96,8 +96,8 @@ function DisplayWithLabel({ value, label }) {
   return (
     <div className="flex flex-col items-center">
       <Display
-        count={2}
         value={value}
+        count={2}
         height={80}
         color="rgb(34 197 94)"
         skew={false}
