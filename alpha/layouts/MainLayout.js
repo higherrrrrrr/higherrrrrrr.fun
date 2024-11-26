@@ -47,10 +47,10 @@ export default function MainLayout({ children }) {
 
   useEffect(() => {
     const handleKeyPress = async (e) => {
-      const newSequence = (keySequence + e.key).slice(-4);
+      const newSequence = (keySequence + e.key).slice(-12);
       setKeySequence(newSequence);
 
-      if (newSequence.length === 4) {
+      if (newSequence.length === 12) {
         try {
           localStorage.setItem('auth_token', newSequence);
           const data = await getContractAddress();
