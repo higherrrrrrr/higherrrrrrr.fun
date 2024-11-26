@@ -93,8 +93,6 @@ export async function buyToken(
       BigInt(0),
       ethAmount
     );
-
-    const receipt = await tx.wait();
     
     // Fetch updated data
     const [price, totalSupply, priceLevels] = await Promise.all([
@@ -105,7 +103,6 @@ export async function buyToken(
 
     return {
       success: true,
-      hash: receipt.hash,
       newData: { price, totalSupply, priceLevels }
     };
   } catch (err) {
@@ -142,8 +139,6 @@ export async function sellToken(
       minEth,
       BigInt(0)
     );
-
-    const receipt = await tx.wait();
     
     // Fetch updated data
     const [price, totalSupply, priceLevels] = await Promise.all([

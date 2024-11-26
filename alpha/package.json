@@ -1,0 +1,30 @@
+{
+  "name": "alpha",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@tanstack/react-query": "^5.14.2",
+    "@usecapsule/evm-wallet-connectors": "^0.1.20",
+    "@usecapsule/react-sdk": "^0.1.20",
+    "clsx": "^2.0.0",
+    "date-fns": "^2.30.0",
+    "ethers": "^6.9.0",
+    "framer-motion": "^10.16.16",
+    "js-cookie": "^3.0.5",
+    "next": "14.0.4",
+    "react": "^18",
+    "react-7-segment-display": "^1.2.0",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.0.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0"
+  }
+}

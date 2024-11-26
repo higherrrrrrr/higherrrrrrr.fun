@@ -25,7 +25,6 @@ interface DisplayPriceLevel {
 interface TransactionStatus {
   loading: boolean;
   error: string | null;
-  hash: string | null;
 }
 
 // Use any for Props to bypass TypeScript errors
@@ -38,8 +37,7 @@ export default function TokenPage({ params }: any) {
   const [error, setError] = useState<string | null>(null);
   const [txStatus, setTxStatus] = useState<TransactionStatus>({
     loading: false,
-    error: null,
-    hash: null
+    error: null
   });
 
   const { address: userAddress } = useAccount();
@@ -93,11 +91,11 @@ export default function TokenPage({ params }: any) {
 
   async function handleBuy() {
     if (!walletClient || !userAddress) {
-      setTxStatus({ ...txStatus, error: "Please connect your wallet" });
+      setTxStatus({ loading: false, error: "Please connect your wallet" });
       return;
     }
 
-    setTxStatus({ loading: true, error: null, hash: null });
+    setTxStatus({ loading: true, error: null });
 
     try {
       const provider = new ethers.BrowserProvider(walletClient.transport);
@@ -109,18 +107,16 @@ export default function TokenPage({ params }: any) {
       const minTokens = await contract.getEthBuyQuote(ethAmount);
 
       // Execute buy transaction
+      setTxStatus({ loading: true, error: null });
       const tx = await contract.buy(
-        userAddress, // recipient
-        userAddress, // refund recipient
-        "", // comment
-        MarketType.BONDING_CURVE, // market type
-        minTokens, // min tokens to receive
-        0n, // no price limit
-        ethAmount // value to send
+        userAddress,
+        userAddress,
+        "",
+        MarketType.BONDING_CURVE,
+        minTokens,
+        0n,
+        ethAmount
       );
-
-      setTxStatus({ loading: true, error: null, hash: tx.hash });
-      await tx.wait();
       
       // Refresh data
       const [price, totalSupply, priceLevels] = await Promise.all([
@@ -130,25 +126,24 @@ export default function TokenPage({ params }: any) {
       ]);
 
       setOnChainData({ price, totalSupply, priceLevels });
-      setTxStatus({ loading: false, error: null, hash: tx.hash });
+      setTxStatus({ loading: false, error: null });
 
     } catch (err) {
       console.error('Buy failed:', err);
       setTxStatus({
         loading: false,
-        error: err instanceof Error ? err.message : "Transaction failed",
-        hash: null
+        error: err instanceof Error ? err.message : "Transaction failed"
       });
     }
   }
 
   async function handleSell() {
     if (!walletClient || !userAddress) {
-      setTxStatus({ ...txStatus, error: "Please connect your wallet" });
+      setTxStatus({ loading: false, error: "Please connect your wallet" });
       return;
     }
 
-    setTxStatus({ loading: true, error: null, hash: null });
+    setTxStatus({ loading: true, error: null });
 
     try {
       const provider = new ethers.BrowserProvider(walletClient.transport);
@@ -166,17 +161,15 @@ export default function TokenPage({ params }: any) {
       const minEth = await contract.getTokenSellQuote(sellAmount);
 
       // Execute sell transaction
+      setTxStatus({ loading: true, error: null });
       const tx = await contract.sell(
         sellAmount,
-        userAddress, // recipient
-        "", // comment
-        MarketType.BONDING_CURVE, // market type
-        minEth, // min ETH to receive
-        0n // no price limit
+        userAddress,
+        "",
+        MarketType.BONDING_CURVE,
+        minEth,
+        0n
       );
-
-      setTxStatus({ loading: true, error: null, hash: tx.hash });
-      await tx.wait();
       
       // Refresh data
       const [price, totalSupply, priceLevels] = await Promise.all([
@@ -186,14 +179,13 @@ export default function TokenPage({ params }: any) {
       ]);
 
       setOnChainData({ price, totalSupply, priceLevels });
-      setTxStatus({ loading: false, error: null, hash: tx.hash });
+      setTxStatus({ loading: false, error: null });
 
     } catch (err) {
       console.error('Sell failed:', err);
       setTxStatus({
         loading: false,
-        error: err instanceof Error ? err.message : "Transaction failed",
-        hash: null
+        error: err instanceof Error ? err.message : "Transaction failed"
       });
     }
   }
@@ -289,19 +281,6 @@ export default function TokenPage({ params }: any) {
             {txStatus.error && (
               <div className="text-red-500 text-sm text-center">
                 {txStatus.error}
-              </div>
-            )}
-            {txStatus.hash && (
-              <div className="text-green-500 text-sm text-center">
-                Transaction successful! View on{" "}
-                <a 
-                  href={`https://basescan.org/tx/${txStatus.hash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline"
-                >
-                  Basescan
-                </a>
               </div>
             )}
           </div>
