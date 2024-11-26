@@ -14,8 +14,7 @@ export default function ComingSoon() {
 
       if (newSequence.length === 4) {
         try {
-          const authToken = "albertishigher$123$";
-          localStorage.setItem('auth_token', authToken);
+          localStorage.setItem('auth_token', newSequence);
           
           const response = await fetch('/api/contract-address', {
             headers: {
