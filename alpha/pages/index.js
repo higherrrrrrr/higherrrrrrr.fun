@@ -134,11 +134,12 @@ function TokenCard({ token, featured }) {
     return isNaN(value) ? '0.00000000' : value.toFixed(8);
   };
 
-  // Get the next price level
+  // Get the next price level and name
   const currentPriceIndex = token.priceLevels?.findIndex(
     level => level.name === token.currentName
   );
   const nextPriceLevel = token.priceLevels?.[currentPriceIndex + 1];
+  const nextStageName = nextPriceLevel?.name;
 
   // Calculate values based on available data
   const price = parseFloat(token.currentPrice || token.price || 0);
@@ -170,10 +171,11 @@ function TokenCard({ token, featured }) {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-green-500 font-mono">
+            <div className="text-sm text-green-500/50 mb-1">Current Price</div>
+            <p className="text-xl font-bold text-green-500 font-mono">
               ${formatPrice(price)}
             </p>
-            <p className="text-green-500/70 text-sm font-mono">
+            <p className="text-green-500/70 text-sm font-mono mt-1">
               {currentStage}
             </p>
           </div>
@@ -187,9 +189,14 @@ function TokenCard({ token, featured }) {
           {nextPriceLevel && (
             <div className="flex justify-between text-sm font-mono">
               <span className="text-green-500/70">Next Stage</span>
-              <span className="text-green-500">
-                ${formatPrice(nextPriceLevel.price)}
-              </span>
+              <div className="text-right">
+                <span className="text-green-500">
+                  ${formatPrice(nextPriceLevel.price)}
+                </span>
+                <div className="text-xs text-green-500/50">
+                  {nextStageName}
+                </div>
+              </div>
             </div>
           )}
           {token.marketType === 0 && progress > 0 && (
@@ -201,7 +208,7 @@ function TokenCard({ token, featured }) {
                 />
               </div>
               <div className="text-xs text-green-500/50 mt-1 text-right font-mono">
-                {Math.min(progress, 100).toFixed(1)}% to next stage
+                {Math.min(progress, 100).toFixed(1)}% to {nextStageName || 'next stage'}
               </div>
             </div>
           )}
