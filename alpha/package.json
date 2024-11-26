@@ -18,7 +18,7 @@
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-7-segment-display": "2.1.0",
+    "react-7-segment-display": "^1.1.2",
     "viem": "^1.19.11",
     "wagmi": "^1.4.10"
   },

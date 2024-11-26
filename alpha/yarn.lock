@@ -2720,7 +2720,7 @@ randombytes@^2.1.0:
   dependencies:
     safe-buffer "^5.1.0"
 
-react-7-segment-display@2.1.0:
+react-7-segment-display@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/react-7-segment-display/-/react-7-segment-display-1.1.2.tgz#997465c81e0e4c817658f87817280963e27da788"
   integrity sha512-AgCRiLgl+wntrjcZrt4cr4umLGKg+0sU2Iu50nQupLASg01bNiDT160Tew1InE2Fm9rdHsqHwhZLai4BPFMzSg==
