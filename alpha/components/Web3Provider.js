@@ -15,34 +15,42 @@ function Web3ProviderInner({ children }) {
 
   useEffect(() => {
     async function init() {
-      const { factory_address } = await getContractAddress();
-      console.log('Factory address:', factory_address);
-      setFactoryAddress(factory_address);
+      try {
+        const { factory_address } = await getContractAddress();
+        console.log('Factory address:', factory_address);
+        setFactoryAddress(factory_address);
 
-      // Configure chain with Base only
-      const { publicClient, webSocketPublicClient } = configureChains(
-        [base],
-        [
-          alchemyProvider({ apiKey: 'l0XzuD715Z-zd21ie5dbpLKrptTuq07a' }),
-          publicProvider()
-        ]
-      );
+        // Configure chain with Base only
+        const { publicClient, webSocketPublicClient } = configureChains(
+          [base],
+          [
+            alchemyProvider({ apiKey: 'l0XzuD715Z-zd21ie5dbpLKrptTuq07a' }),
+            publicProvider()
+          ]
+        );
 
-      // Create wagmi config
-      const wagmiConfig = createConfig({
-        autoConnect: true,
-        publicClient,
-        webSocketPublicClient,
-      });
+        // Create wagmi config
+        const wagmiConfig = createConfig({
+          autoConnect: true,
+          publicClient,
+          webSocketPublicClient,
+        });
 
-      setConfig(wagmiConfig);
+        setConfig(wagmiConfig);
+      } catch (error) {
+        console.error('Failed to initialize Web3Provider:', error);
+      }
     }
 
-    init().catch(console.error);
+    init();
   }, []);
 
   if (!config || !factoryAddress) {
-    return null;
+    return (
+      <div className="min-h-screen bg-black">
+        {children}
+      </div>
+    );
   }
 
   return (

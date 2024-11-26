@@ -9,6 +9,7 @@ const LAUNCH_DATE = new Date("2024-11-26T17:00:00-08:00");
 
 export default function MainLayout({ children }) {
   const [shouldShowComingSoon, setShouldShowComingSoon] = useState(true);
+  const [initialized, setInitialized] = useState(false);
   const logoText = useTypewriter("Higherrrrrrr", {
     minRs: 3,
     maxRs: 8,
@@ -25,7 +26,12 @@ export default function MainLayout({ children }) {
     } else {
       setShouldShowComingSoon(beforeLaunch);
     }
+    setInitialized(true);
   }, []);
+
+  if (!initialized) {
+    return null;
+  }
 
   if (shouldShowComingSoon) {
     return <ComingSoon />;
