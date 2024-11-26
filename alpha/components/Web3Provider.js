@@ -42,7 +42,7 @@ function Web3ProviderInner({ children }) {
   }, []);
 
   if (!config || !factoryAddress) {
-    return <div className="text-green-500 font-mono">Loading web3...</div>;
+    return null;
   }
 
   return (
