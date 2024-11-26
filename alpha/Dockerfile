@@ -13,6 +13,7 @@ COPY . .
 # Set environment variables
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
+ENV DISABLE_ESLINT_PLUGIN true
 
 # Build the app
 RUN yarn build
