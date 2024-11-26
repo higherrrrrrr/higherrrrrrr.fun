@@ -3,6 +3,7 @@ from flask_cors import CORS
 from routes import all_blueprints
 from config import Config
 import os
+from routes.trading import get_eth_price
 
 def create_app():
     app = Flask(__name__)
@@ -46,6 +47,10 @@ def create_app():
         return jsonify({
             'endpoints': sorted(endpoints, key=lambda x: x['endpoint'])
         })
+
+    @app.route('/eth/price', methods=['GET'])
+    def eth_price():
+        return get_eth_price()
 
     return app
 

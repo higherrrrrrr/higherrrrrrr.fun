@@ -6,6 +6,9 @@ from config import Config
 from services.price_service import PriceService
 from web3 import Web3
 import json
+from functools import lru_cache
+import time
+import requests
 
 trading = Blueprint('trading', __name__)
 
@@ -171,6 +174,42 @@ def get_price(token_address):
         'price': 0.0,  # Replace with actual price fetching
         'timestamp': '2024-03-19T00:00:00Z'
     })
+
+# Cache duration in seconds (5 minutes)
+CACHE_DURATION = 300
+
+class PriceCache:
+    def __init__(self):
+        self.price = None
+        self.timestamp = 0
+
+eth_price_cache = PriceCache()
+
+def get_eth_price_from_source():
+    # Replace with your actual ETH price source
+    response = requests.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
+    return response.json()['ethereum']['usd']
+
+@lru_cache(maxsize=1)
+def get_cached_timestamp():
+    return time.time()
+
+def get_eth_price():
+    global eth_price_cache
+    current_time = time.time()
+    
+    # Return cached price if it's still valid
+    if eth_price_cache.price and current_time - eth_price_cache.timestamp < CACHE_DURATION:
+        return jsonify({'price': eth_price_cache.price})
+    
+    # Fetch new price if cache is invalid
+    try:
+        price = get_eth_price_from_source()
+        eth_price_cache.price = price
+        eth_price_cache.timestamp = current_time
+        return jsonify({'price': price})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @trading.route('/eth/price', methods=['GET'])
 @require_auth
