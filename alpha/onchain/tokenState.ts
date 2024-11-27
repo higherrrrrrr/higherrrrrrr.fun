@@ -163,14 +163,31 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
 }
 
 export async function getTokenStates(tokenAddresses: string[]): Promise<{ [key: string]: TokenState }> {
-  const states: { [key: string]: TokenState } = {};
-  for (const address of tokenAddresses) {
+  console.log('Fetching states for tokens:', tokenAddresses);
+  
+  // Create array of promises for each token state
+  const statePromises = tokenAddresses.map(async (address) => {
     try {
-      states[address] = await getTokenState(address);
+      const state = await getTokenState(address);
+      return { address, state };
     } catch (error) {
       console.error(`Error getting state for token ${address}:`, error);
+      return { address, error };
     }
-  }
+  });
+
+  // Wait for all promises to resolve
+  const results = await Promise.all(statePromises);
+
+  // Combine results into state object
+  const states: { [key: string]: TokenState } = {};
+  results.forEach(({ address, state, error }) => {
+    if (state && !error) {
+      states[address] = state;
+    }
+  });
+
+  console.log('Fetched all token states:', states);
   return states;
 }
 
