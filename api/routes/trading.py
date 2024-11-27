@@ -40,7 +40,7 @@ class TokenCache:
         self.timestamp = 0
 
 token_cache = TokenCache()
-CACHE_DURATION = 360  # 1 minute in seconds
+CACHE_DURATION = 3600  # 1 minute in seconds
 
 def get_latest_tokens(limit=10):
     global token_cache
