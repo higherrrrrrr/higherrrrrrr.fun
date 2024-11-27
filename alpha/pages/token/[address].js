@@ -143,13 +143,13 @@ export default function TokenPage() {
     setAmount(numValue);
   };
 
-  // Add minimum ETH constant
-  const MIN_ETH_AMOUNT = parseEther("0.0000001");
+  // Define MIN_ETH_AMOUNT as a string instead of bigint
+  const MIN_ETH_AMOUNT = "0.0000001";
 
   // Add error state
   const [error, setError] = useState("");
 
-  // Modify handleTransaction to use correct market type
+  // Update handleTransaction
   const handleTransaction = () => {
     if (!userAddress) return;
     setError(""); // Clear previous errors
@@ -161,8 +161,8 @@ export default function TokenPage() {
       if (!quote || quoteError) return;
       
       // Check minimum amount for buying
-      if (quote < MIN_ETH_AMOUNT) {
-        setError(`Minimum trade amount is ${formatEther(MIN_ETH_AMOUNT)} ETH`);
+      if (parseFloat(formatEther(quote)) < parseFloat(MIN_ETH_AMOUNT)) {
+        setError(`Minimum trade amount is ${MIN_ETH_AMOUNT} ETH`);
         return;
       }
       
@@ -172,9 +172,9 @@ export default function TokenPage() {
           userAddress,
           userAddress,
           "",
-          marketType, // Pass correct market type
-          MIN_ETH_AMOUNT,
-          0n
+          marketType,
+          parseEther(MIN_ETH_AMOUNT),
+          0
         ]
       });
     } else {
@@ -182,8 +182,8 @@ export default function TokenPage() {
       
       // Check minimum amount for selling
       const quote = currentQuote;
-      if (quote < MIN_ETH_AMOUNT) {
-        setError(`Minimum trade amount is ${formatEther(MIN_ETH_AMOUNT)} ETH`);
+      if (parseFloat(formatEther(quote)) < parseFloat(MIN_ETH_AMOUNT)) {
+        setError(`Minimum trade amount is ${MIN_ETH_AMOUNT} ETH`);
         return;
       }
       
@@ -192,35 +192,53 @@ export default function TokenPage() {
           parseEther(amount),
           userAddress,
           "",
-          marketType, // Pass correct market type
-          MIN_ETH_AMOUNT,
-          0n
+          marketType,
+          parseEther(MIN_ETH_AMOUNT),
+          0
         ]
       });
     }
   };
 
   // Add state for Uniswap quotes
-  const [uniswapBuyQuote, setUniswapBuyQuote] = useState<bigint | null>(null);
-  const [uniswapSellQuote, setUniswapSellQuote] = useState<bigint | null>(null);
-  const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [uniswapBuyQuote, setUniswapBuyQuote] = useState(null);
+  const [uniswapSellQuote, setUniswapSellQuote] = useState(null);
+  const [quoteError, setQuoteError] = useState(null);
 
   // Update quotes when amount changes
   useEffect(() => {
-    if (!amount || !tokenState || !address) return;
+    if (!amount || !tokenState || !address) {
+      console.log('Quote Debug: Missing required data for quote', { amount, tokenState, address });
+      return;
+    }
 
     const updateQuote = async () => {
       try {
+        console.log('Quote Debug: Updating quote', {
+          marketType: tokenState.marketType,
+          isBuying,
+          amount
+        });
+        
         setQuoteError(null);
         if (tokenState.marketType === 1) {
           // Uniswap market
           const tokenAmount = parseEther(amount);
+          console.log('Quote Debug: Fetching Uniswap quote', {
+            address,
+            poolAddress: tokenState.poolAddress,
+            tokenAmount: tokenAmount.toString()
+          });
+          
           const quote = await getUniswapQuote(
             address,
             tokenState.poolAddress,
             tokenAmount,
             isBuying
           );
+          
+          console.log('Quote Debug: Got Uniswap quote', { quote: quote?.toString() });
+          
           if (isBuying) {
             setUniswapBuyQuote(quote);
           } else {
@@ -228,7 +246,7 @@ export default function TokenPage() {
           }
         }
       } catch (error) {
-        console.error('Quote error:', error);
+        console.error('Quote Debug: Error getting quote:', error);
         setQuoteError('Failed to get quote');
       }
     };
@@ -240,17 +258,22 @@ export default function TokenPage() {
   const currentQuote = useMemo(() => {
     if (!tokenState || !amount) return null;
     
-    if (tokenState.marketType === 0) {
-      // Bonding curve market
-      return isBuying ? buyQuote : sellQuote;
-    } else {
-      // Uniswap market
-      return isBuying ? uniswapBuyQuote : uniswapSellQuote;
+    try {
+      if (tokenState.marketType === 0) {
+        // Bonding curve market
+        return isBuying ? buyQuote : sellQuote;
+      } else {
+        // Uniswap market
+        return isBuying ? uniswapBuyQuote : uniswapSellQuote;
+      }
+    } catch (error) {
+      console.error('Quote calculation error:', error);
+      return null;
     }
   }, [tokenState, amount, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote]);
 
   // Update error display
-  const quoteError = useMemo(() => {
+  const quoteErrorState = useMemo(() => {
     if (!tokenState) return false;
     if (tokenState.marketType === 0) {
       return isBuying ? buyQuoteError : sellQuoteError;
@@ -258,6 +281,55 @@ export default function TokenPage() {
       return quoteError;
     }
   }, [tokenState, isBuying, buyQuoteError, sellQuoteError, quoteError]);
+
+  // Add debug logging to isQuoteAvailable
+  const isQuoteAvailable = useMemo(() => {
+    if (!tokenState || !amount) {
+      console.log('Quote Debug: No token state or amount', { tokenState, amount });
+      return false;
+    }
+    
+    console.log('Quote Debug: State', {
+      marketType: tokenState.marketType,
+      isBuying,
+      buyQuote,
+      sellQuote,
+      uniswapBuyQuote,
+      uniswapSellQuote,
+      buyQuoteError,
+      sellQuoteError,
+      quoteError
+    });
+    
+    if (tokenState.marketType === 0) {
+      // Bonding curve market
+      const isAvailable = isBuying ? 
+        (buyQuote !== null && !buyQuoteError) : 
+        (sellQuote !== null && !sellQuoteError);
+      
+      console.log('Quote Debug: Bonding curve quote available:', isAvailable, {
+        buyQuote,
+        sellQuote,
+        buyQuoteError,
+        sellQuoteError
+      });
+      
+      return isAvailable;
+    } else {
+      // Uniswap market
+      const isAvailable = isBuying ? 
+        (uniswapBuyQuote !== null && !quoteError) : 
+        (uniswapSellQuote !== null && !quoteError);
+      
+      console.log('Quote Debug: Uniswap quote available:', isAvailable, {
+        uniswapBuyQuote,
+        uniswapSellQuote,
+        quoteError
+      });
+      
+      return isAvailable;
+    }
+  }, [tokenState, amount, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote, buyQuoteError, sellQuoteError, quoteError]);
 
   if (loading) {
     return (
@@ -430,23 +502,19 @@ export default function TokenPage() {
                 <div className="flex justify-between text-sm">
                   <span>{isBuying ? "You'll Pay" : "You'll Receive"}</span>
                   <span>
-                    {quoteError ? 'Quote unavailable' : 
+                    {!isQuoteAvailable ? 'Quote unavailable' : 
                      currentQuote ? `${formatEther(currentQuote)} ETH` : '...'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-green-500/70">
                   <span>USD Value</span>
                   <span>
-                    {isBuying 
-                      ? (buyQuoteError ? '-' :
-                         buyQuote ? `$${(parseFloat(formatEther(buyQuote)) * ethPrice).toFixed(2)}` : '...')
-                      : (sellQuoteError ? '-' :
-                         sellQuote ? `$${(parseFloat(formatEther(sellQuote)) * ethPrice).toFixed(2)}` : '...')
-                    }
+                    {!isQuoteAvailable ? '-' :
+                     currentQuote ? `$${(parseFloat(formatEther(currentQuote)) * ethPrice).toFixed(2)}` : '...'}
                   </span>
                 </div>
                 <div className="text-xs text-green-500/50 mt-2">
-                  Minimum trade amount: {formatEther(MIN_ETH_AMOUNT)} ETH
+                  Minimum trade amount: {MIN_ETH_AMOUNT} ETH
                 </div>
               </div>
             )}
@@ -457,8 +525,8 @@ export default function TokenPage() {
                 tokenState.paused || 
                 isLoading || 
                 !amount || 
-                (isBuying ? !buyQuote || buyQuoteError : !sellQuote || sellQuoteError) ||
-                (isBuying ? buyQuote < MIN_ETH_AMOUNT : sellQuote < MIN_ETH_AMOUNT)
+                !isQuoteAvailable ||
+                (currentQuote && parseFloat(formatEther(currentQuote)) < parseFloat(MIN_ETH_AMOUNT))
               }
               className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
             >

@@ -149,15 +149,9 @@ export default function MainLayout({ children }) {
             href="https://base.org" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-green-500/50 hover:text-green-500 font-mono text-sm transition-colors flex items-center space-x-2"
+            className="text-green-500/50 hover:text-green-500 font-mono text-sm transition-colors"
           >
-            <span>Built on</span>
-            <img 
-              src="/base-logo.svg" 
-              alt="Base" 
-              className="h-4 w-4 inline-block"
-            />
-            <span>Base</span>
+            Built on Base
           </a>
         </div>
       </footer>

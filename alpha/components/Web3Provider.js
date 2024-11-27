@@ -10,53 +10,36 @@ export const useFactory = () => useContext(FactoryContext);
 
 const ALCHEMY_RPC = 'https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a';
 
-// Define Anvil chain as a fork of Base
-const anvil = {
+// Completely override Base chain with our RPC
+const baseChain = {
   ...base,
-  id: 31337,
-  name: 'Local Base Fork',
-  network: 'base',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'ETH',
-    symbol: 'ETH',
-  },
   rpcUrls: {
-    default: { http: ['http://127.0.0.1:8545'] },
-    public: { http: ['http://127.0.0.1:8545'] },
-  },
-  contracts: {
-    multicall3: {
-      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
-      blockCreated: 0
+    default: {
+      http: [ALCHEMY_RPC],
+      webSocket: []
+    },
+    public: {
+      http: [ALCHEMY_RPC],
+      webSocket: []
+    },
+    alchemy: {
+      http: [ALCHEMY_RPC],
+      webSocket: []
     }
   }
 };
 
-// Override Base chain RPC
-const baseChain = {
-  ...base,
-  rpcUrls: {
-    ...base.rpcUrls,
-    default: { http: [ALCHEMY_RPC] },
-    public: { http: [ALCHEMY_RPC] },
-  }
-};
-
-// Create initial config
-const isLocal = typeof window !== 'undefined' && 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-const chains = [isLocal ? anvil : baseChain];
+// Always use Base mainnet through Alchemy
+const chains = [baseChain];
 
 const wagmiConfig = createConfig(
   getDefaultConfig({
     appName: "Higherrrrrrr",
     chains,
     transports: {
-      [base.id]: http(ALCHEMY_RPC),
-      [anvil.id]: http('http://127.0.0.1:8545'),
+      [baseChain.id]: http(ALCHEMY_RPC),
     },
+    walletConnectProjectId: "YOUR_PROJECT_ID", // Add if you have one
   }),
 );
 
@@ -113,8 +96,4 @@ export function ConnectKitButton() {
 }
 
 // Export the current chain for use elsewhere in the app
-export const getCurrentChain = () => {
-  const isLocal = typeof window !== 'undefined' && 
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-  return isLocal ? anvil : baseChain;
-}; 
+export const getCurrentChain = () => baseChain; 

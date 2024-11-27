@@ -2,8 +2,37 @@ import { createPublicClient, http, formatEther } from 'viem';
 import { base } from 'wagmi/chains';
 import { getCurrentChain } from '../components/Web3Provider';
 import { higherrrrrrrAbi } from './generated';
-import { Pool } from '@uniswap/v3-sdk';
-import { Token } from '@uniswap/sdk-core';
+import { Pool, TickMath, TICK_SPACINGS } from '@uniswap/v3-sdk';
+import { Token, CurrencyAmount } from '@uniswap/sdk-core';
+
+// Add Uniswap V3 Pool ABI
+const UniswapV3PoolABI = [
+  {
+    "inputs": [],
+    "name": "slot0",
+    "outputs": [
+      { "internalType": "uint160", "name": "sqrtPriceX96", "type": "uint160" },
+      { "internalType": "int24", "name": "tick", "type": "int24" },
+      { "internalType": "uint16", "name": "observationIndex", "type": "uint16" },
+      { "internalType": "uint16", "name": "observationCardinality", "type": "uint16" },
+      { "internalType": "uint16", "name": "observationCardinalityNext", "type": "uint16" },
+      { "internalType": "uint8", "name": "feeProtocol", "type": "uint8" },
+      { "internalType": "bool", "name": "unlocked", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "liquidity",
+    "outputs": [{ "internalType": "uint128", "name": "", "type": "uint128" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+// Add WETH address
+const WETH_ADDRESS = '0x4200000000000000000000000000000000000006';
 
 const getPublicClient = () => {
   const chain = getCurrentChain();
@@ -163,48 +192,120 @@ export function getProgressToNextLevel(state: TokenState): number {
   return 0;
 }
 
-// Add function to get Uniswap quote
+// Add tick data provider interface
+interface TickDataProvider {
+  getTick(tick: number): Promise<{
+    liquidityNet: string;
+    liquidityGross: string;
+  }>;
+  nextInitializedTickWithinOneWord(
+    tick: number,
+    lte: boolean,
+    tickSpacing: number
+  ): Promise<[number, boolean]>;
+}
+
+// Complete tick data provider implementation
+class StaticTickDataProvider implements TickDataProvider {
+  async getTick(tick: number) {
+    return {
+      liquidityNet: '0',
+      liquidityGross: '0'
+    };
+  }
+
+  async nextInitializedTickWithinOneWord(
+    tick: number,
+    lte: boolean,
+    tickSpacing: number
+  ): Promise<[number, boolean]> {
+    // Calculate the next tick based on direction
+    const nextTick = lte 
+      ? Math.floor(tick / tickSpacing) * tickSpacing 
+      : Math.ceil(tick / tickSpacing) * tickSpacing;
+
+    // Return the next tick and whether it's initialized (always false in this case)
+    return [nextTick, false];
+  }
+}
+
 export async function getUniswapQuote(
-  tokenAddress: string, 
+  tokenAddress: string,
   poolAddress: string,
   tokenAmount: bigint,
   isBuy: boolean
 ): Promise<bigint> {
+  console.log('Getting Uniswap quote:', {
+    tokenAddress,
+    poolAddress,
+    tokenAmount: tokenAmount.toString(),
+    isBuy
+  });
+
   const publicClient = getPublicClient();
 
-  // Get pool state
-  const [slot0, liquidity] = await Promise.all([
-    publicClient.readContract({
-      address: poolAddress as `0x${string}`,
-      abi: UniswapV3PoolABI,
-      functionName: 'slot0'
-    }),
-    publicClient.readContract({
-      address: poolAddress as `0x${string}`,
-      abi: UniswapV3PoolABI,
-      functionName: 'liquidity'
-    })
-  ]);
+  try {
+    // Get pool state
+    const [slot0, liquidity] = await Promise.all([
+      publicClient.readContract({
+        address: poolAddress as `0x${string}`,
+        abi: UniswapV3PoolABI,
+        functionName: 'slot0'
+      }),
+      publicClient.readContract({
+        address: poolAddress as `0x${string}`,
+        abi: UniswapV3PoolABI,
+        functionName: 'liquidity'
+      })
+    ]);
 
-  // Create SDK instances
-  const WETH = new Token(base.id, WETH_ADDRESS, 18, 'WETH');
-  const TOKEN = new Token(base.id, tokenAddress, 18);
+    console.log('Pool state:', {
+      sqrtPriceX96: slot0[0].toString(),
+      tick: slot0[1],
+      liquidity: liquidity.toString()
+    });
 
-  const pool = new Pool(
-    WETH,
-    TOKEN,
-    LP_FEE,
-    slot0.sqrtPriceX96.toString(),
-    liquidity.toString(),
-    slot0.tick
-  );
+    // Create SDK instances
+    const wethToken = new Token(base.id, WETH_ADDRESS, 18, 'WETH');
+    const token = new Token(base.id, tokenAddress, 18, 'TOKEN');
 
-  // Get quote
-  if (isBuy) {
-    const quote = await pool.getOutputAmount(tokenAmount);
-    return quote[0].quotient;
-  } else {
-    const quote = await pool.getInputAmount(tokenAmount);
-    return quote[0].quotient;
+    // Create tick data provider
+    const tickDataProvider = new StaticTickDataProvider();
+
+    // Create pool instance with tick data provider
+    const pool = new Pool(
+      wethToken,
+      token,
+      500, // 0.05% fee tier
+      slot0[0].toString(),
+      liquidity.toString(),
+      slot0[1],
+      tickDataProvider
+    );
+
+    // Convert tokenAmount to CurrencyAmount
+    const inputToken = isBuy ? wethToken : token;
+    const amount = CurrencyAmount.fromRawAmount(
+      inputToken,
+      tokenAmount.toString()
+    );
+
+    console.log('Calculating quote with:', {
+      inputToken: inputToken.address,
+      amount: amount.toExact(),
+      poolPrice: pool.token0Price.toSignificant(6)
+    });
+
+    // Get quote
+    if (isBuy) {
+      const [outputAmount] = await pool.getOutputAmount(amount);
+      return BigInt(outputAmount.quotient.toString());
+    } else {
+      const [outputAmount] = await pool.getInputAmount(amount);
+      return BigInt(outputAmount.quotient.toString());
+    }
+  } catch (error) {
+    console.error('Pool quote error:', error);
+    throw error;
   }
 } 
