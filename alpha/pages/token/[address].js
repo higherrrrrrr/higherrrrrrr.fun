@@ -108,7 +108,7 @@ export default function TokenPage() {
       amount : 
       '0'
     )],
-    enabled: Boolean(amount && isBuying && address), // Only run when needed
+    enabled: Boolean(amount && isBuying && address && tokenState?.marketType === 0), // Only for bonding curve
     watch: true,
   });
 
@@ -123,7 +123,7 @@ export default function TokenPage() {
       amount : 
       '0'
     )],
-    enabled: Boolean(amount && !isBuying && address), // Only run when needed
+    enabled: Boolean(amount && !isBuying && address && tokenState?.marketType === 0), // Only for bonding curve
     watch: true,
   });
 
@@ -149,14 +149,16 @@ export default function TokenPage() {
   // Add error state
   const [error, setError] = useState("");
 
-  // Modify handleTransaction to include validation
+  // Modify handleTransaction to use correct market type
   const handleTransaction = () => {
     if (!userAddress) return;
     setError(""); // Clear previous errors
 
+    const marketType = tokenState?.marketType || 0;
+
     if (isBuying) {
-      const quote = buyQuote;
-      if (!quote || buyQuoteError) return;
+      const quote = currentQuote;
+      if (!quote || quoteError) return;
       
       // Check minimum amount for buying
       if (quote < MIN_ETH_AMOUNT) {
@@ -170,16 +172,16 @@ export default function TokenPage() {
           userAddress,
           userAddress,
           "",
-          0,
+          marketType, // Pass correct market type
           MIN_ETH_AMOUNT,
           0n
         ]
       });
     } else {
-      if (!amount || sellQuoteError) return;
+      if (!amount || quoteError) return;
       
       // Check minimum amount for selling
-      const quote = sellQuote;
+      const quote = currentQuote;
       if (quote < MIN_ETH_AMOUNT) {
         setError(`Minimum trade amount is ${formatEther(MIN_ETH_AMOUNT)} ETH`);
         return;
@@ -190,7 +192,7 @@ export default function TokenPage() {
           parseEther(amount),
           userAddress,
           "",
-          0,
+          marketType, // Pass correct market type
           MIN_ETH_AMOUNT,
           0n
         ]
@@ -236,7 +238,7 @@ export default function TokenPage() {
 
   // Use appropriate quote based on market type
   const currentQuote = useMemo(() => {
-    if (!tokenState) return null;
+    if (!tokenState || !amount) return null;
     
     if (tokenState.marketType === 0) {
       // Bonding curve market
@@ -245,7 +247,17 @@ export default function TokenPage() {
       // Uniswap market
       return isBuying ? uniswapBuyQuote : uniswapSellQuote;
     }
-  }, [tokenState, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote]);
+  }, [tokenState, amount, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote]);
+
+  // Update error display
+  const quoteError = useMemo(() => {
+    if (!tokenState) return false;
+    if (tokenState.marketType === 0) {
+      return isBuying ? buyQuoteError : sellQuoteError;
+    } else {
+      return quoteError;
+    }
+  }, [tokenState, isBuying, buyQuoteError, sellQuoteError, quoteError]);
 
   if (loading) {
     return (
