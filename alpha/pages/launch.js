@@ -6,6 +6,8 @@ import { higherrrrrrrFactoryAbi, higherrrrrrrFactoryAddress } from '../onchain/g
 import { getEthPrice } from '../api/price';
 import { getContractAddress } from '../api/contract';
 import { ethers } from 'ethers';
+import { useConnectModal } from '../components/Web3Provider';
+import { useAccount } from 'wagmi';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 const DEFAULT_PRICE_LEVELS = [
@@ -56,6 +58,8 @@ const NEW_TOKEN_EVENT_SIGNATURE = "0x46960970e01c8cbebf9e58299b0acf8137b299ef06e
 
 export default function LaunchPage() {
   const router = useRouter();
+  const { openConnectModal } = useConnectModal();
+  const { address: userAddress } = useAccount();
   const [factoryAddress, setFactoryAddress] = useState('');
   const [ethPrice, setEthPrice] = useState(0);
   const [priceUnit, setPriceUnit] = useState('ETH');
@@ -149,6 +153,12 @@ export default function LaunchPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Check for wallet connection first
+    if (!userAddress) {
+      openConnectModal();
+      return;
+    }
     
     // Validate prices before submitting
     const validationError = validatePrices(formData.priceLevels);
@@ -355,7 +365,9 @@ export default function LaunchPage() {
           disabled={isLoading || !!error}
           className="w-full px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-mono font-bold rounded transition-colors text-sm md:text-base"
         >
-          {isLoading ? "Creating Token..." : "Launch Token"}
+          {!userAddress ? "Connect Wallet to Launch" :
+           isLoading ? "Creating Token..." : 
+           "Launch Token"}
         </button>
       </form>
     </div>
