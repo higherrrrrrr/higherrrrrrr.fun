@@ -137,7 +137,7 @@ export default function MainLayout({ children }) {
     <div className="min-h-screen bg-black flex flex-col">
       <header className="flex flex-col md:flex-row md:justify-between items-center p-3 md:p-6 max-w-7xl mx-auto w-full gap-3 md:gap-0">
         <Link href="/">
-          <h1 className="text-lg md:text-2xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
+          <h1 className="text-2xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
             {isMobile ? "Higherrrrrrr" : animatedLogoText}
           </h1>
         </Link>

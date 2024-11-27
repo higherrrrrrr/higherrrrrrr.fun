@@ -320,26 +320,31 @@ export default function TokenPage() {
     <div className="min-h-screen bg-black text-green-500 font-mono">
       {/* Ticker Bar */}
       <div className="border-b border-green-500/30 p-4">
-        <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <div className="text-2xl font-bold">{tokenState.symbol}</div>
-          <div className="flex space-x-8">
-            <div>
-              <div className="text-sm text-green-500/50">Price</div>
-              <div className="text-lg">
-                ${formatUsdPrice(usdPrice)}
+        <div className="max-w-4xl mx-auto">
+          {/* Stack vertically on mobile, horizontal on desktop */}
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div className="text-2xl font-bold">{tokenState.symbol}</div>
+            
+            {/* Grid for stats on mobile, flex on desktop */}
+            <div className="grid grid-cols-2 md:flex md:space-x-8 gap-4">
+              <div>
+                <div className="text-sm text-green-500/50">Price</div>
+                <div className="text-lg">
+                  ${formatUsdPrice(usdPrice)}
+                </div>
               </div>
-            </div>
-            <div>
-              <div className="text-sm text-green-500/50">Market Cap</div>
-              <div className="text-lg">
-                {formatMarketCap(marketCapUsd)}
+              <div>
+                <div className="text-sm text-green-500/50">Market Cap</div>
+                <div className="text-lg">
+                  {formatMarketCap(marketCapUsd)}
+                </div>
               </div>
-            </div>
-            <div>
-              <div className="text-sm text-green-500/50">Supply</div>
-              <div className="flex flex-col">
-                <span>{totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                <span className="text-sm text-green-500/70">{((totalSupply / 1_000_000_000) * 100).toFixed(2)}%</span>
+              <div className="col-span-2 md:col-span-1">
+                <div className="text-sm text-green-500/50">Supply</div>
+                <div className="flex flex-col">
+                  <span>{totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                  <span className="text-sm text-green-500/70">{((totalSupply / 1_000_000_000) * 100).toFixed(2)}%</span>
+                </div>
               </div>
             </div>
           </div>
