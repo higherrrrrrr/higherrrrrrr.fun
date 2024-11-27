@@ -102,15 +102,12 @@ export default function TokensList() {
           </h2>
           <div className="space-y-4">
             {latestTokens.map((token) => {
-              const tokenState = tokenStates[token.address];
-              if (!tokenState) return null;
-              
               return (
                 <TokenCard 
                   key={token.address} 
                   token={{
                     ...token,
-                    ...tokenState,
+                    ...(tokenStates[token.address] || {}),
                     address: token.address
                   }}
                   featured={false} 
@@ -127,6 +124,24 @@ export default function TokensList() {
 function TokenCard({ token, featured }) {
   if (!token) return null;
   
+  const isLoading = !token.currentName && !token.name;
+  
+  if (isLoading) {
+    return (
+      <div className={`block border rounded-lg p-6 transition-colors ${
+        featured 
+          ? "border-green-500 bg-green-500/5" 
+          : "border-green-500/50"
+      }`}>
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-green-500/20 rounded w-1/4"></div>
+          <div className="h-8 bg-green-500/20 rounded w-1/2"></div>
+          <div className="h-4 bg-green-500/20 rounded w-3/4"></div>
+        </div>
+      </div>
+    );
+  }
+
   console.log('Rendering TokenCard:', {
     token,
     featured,

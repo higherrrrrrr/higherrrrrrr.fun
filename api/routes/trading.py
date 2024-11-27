@@ -67,49 +67,47 @@ def get_latest_tokens(limit=10):
         
         # Get latest block and calculate range
         latest_block = w3.eth.block_number
-        # Look back ~2 hours of blocks (assuming 2s block time)
-        blocks_to_search = 3600
+        blocks_to_search = 1000  # About 30 minutes of blocks
         from_block = max(0, latest_block - blocks_to_search)
         
         print(f"Searching blocks {from_block} to {latest_block}")
         
         try:
-            # Get logs directly without using contract events
-            event_signature = w3.keccak(text='NewToken(address,address)').hex()
+            # Use the correct event signature
+            factory_address = Web3.to_checksum_address(Config.CONTRACT_ADDRESS)
+            event_signature = '0x46960970e01c8cbebf9e58299b0acf8137b299ef06eb6c4f5be2c0443d5e5f22'
             
             logs = w3.eth.get_logs({
-                'fromBlock': hex(from_block),  # Use hex format
-                'toBlock': hex(latest_block),  # Use hex format
-                'address': Web3.to_checksum_address(Config.CONTRACT_ADDRESS),
+                'fromBlock': from_block,
+                'toBlock': latest_block,
+                'address': factory_address,
                 'topics': [event_signature]
             })
             
-            print(f"✅ Found {len(logs)} logs")
+            print(f"✅ Found {len(logs)} NewToken events")
             
             # Process logs
             tokens = []
             for log in sorted(logs, key=lambda x: x['blockNumber'], reverse=True):
                 try:
-                    # Extract token address from the first topic (index 1)
                     token_address = Web3.to_checksum_address('0x' + log['topics'][1].hex()[-40:])
                     conviction_address = Web3.to_checksum_address('0x' + log['topics'][2].hex()[-40:])
                     
-                    # Get block timestamp
                     block = w3.eth.get_block(log['blockNumber'])
                     
                     token_data = {
                         'address': token_address,
                         'conviction': conviction_address,
-                        'timestamp': block['timestamp'],
                         'block_number': log['blockNumber'],
+                        'timestamp': block['timestamp'],
                         'transaction_hash': log['transactionHash'].hex()
                     }
                     
-                    print(f"✅ Processed token: {token_address}")
+                    print(f"✅ Found token: {token_address}")
                     tokens.append(token_data)
                     
                 except Exception as e:
-                    print(f"❌ Error processing log: {str(e)}")
+                    print(f"❌ Error processing event: {str(e)}")
                     continue
             
             # Update cache
@@ -119,7 +117,7 @@ def get_latest_tokens(limit=10):
             return tokens[:limit]
             
         except Exception as e:
-            print(f"❌ Error getting logs: {str(e)}")
+            print(f"❌ Error getting events: {str(e)}")
             raise
             
     except Exception as e:
