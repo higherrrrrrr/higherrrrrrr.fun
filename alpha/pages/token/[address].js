@@ -143,12 +143,26 @@ export default function TokenPage() {
     setAmount(numValue);
   };
 
+  // Add minimum ETH constant
+  const MIN_ETH_AMOUNT = parseEther("0.0000001");
+
+  // Add error state
+  const [error, setError] = useState("");
+
+  // Modify handleTransaction to include validation
   const handleTransaction = () => {
     if (!userAddress) return;
+    setError(""); // Clear previous errors
 
     if (isBuying) {
       const quote = buyQuote;
       if (!quote || buyQuoteError) return;
+      
+      // Check minimum amount for buying
+      if (quote < MIN_ETH_AMOUNT) {
+        setError(`Minimum trade amount is ${formatEther(MIN_ETH_AMOUNT)} ETH`);
+        return;
+      }
       
       buyToken({
         value: quote,
@@ -157,12 +171,19 @@ export default function TokenPage() {
           userAddress,
           "",
           0,
-          parseEther("0.0000001"),
+          MIN_ETH_AMOUNT,
           0n
         ]
       });
     } else {
       if (!amount || sellQuoteError) return;
+      
+      // Check minimum amount for selling
+      const quote = sellQuote;
+      if (quote < MIN_ETH_AMOUNT) {
+        setError(`Minimum trade amount is ${formatEther(MIN_ETH_AMOUNT)} ETH`);
+        return;
+      }
       
       sellToken({
         args: [
@@ -170,7 +191,7 @@ export default function TokenPage() {
           userAddress,
           "",
           0,
-          parseEther("0.0000001"),
+          MIN_ETH_AMOUNT,
           0n
         ]
       });
@@ -211,6 +232,12 @@ export default function TokenPage() {
   const totalSupply = parseFloat(tokenState.totalSupply);
   const marketCapUsd = usdPrice * totalSupply;
 
+  // Helper function to get current level index
+  const getCurrentLevelIndex = (tokenState) => {
+    if (!tokenState?.priceLevels || !tokenState?.currentName) return 0;
+    return tokenState.priceLevels.findIndex(level => level.name === tokenState.currentName);
+  };
+
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
       {/* Ticker Bar */}
@@ -250,7 +277,7 @@ export default function TokenPage() {
             {tokenState.currentName || 'Loading...'}
           </div>
           <div className="text-xl text-green-500/70">
-            Level {tokenState.currentLevel} of {tokenState.priceLevels.length}
+            Level {getCurrentLevelIndex(tokenState) + 1} of {tokenState.priceLevels?.length || 0}
           </div>
         </div>
 
@@ -331,6 +358,12 @@ export default function TokenPage() {
               <span>{tokenState.currentPrice} ETH (${(parseFloat(tokenState.currentPrice) * ethPrice).toFixed(2)})</span>
             </div>
 
+            {error && (
+              <div className="text-red-500 text-sm mt-2">
+                {error}
+              </div>
+            )}
+
             {amount && (
               <div className="space-y-2 p-4 bg-green-500/5 rounded-lg">
                 <div className="flex justify-between text-sm">
@@ -355,6 +388,9 @@ export default function TokenPage() {
                     }
                   </span>
                 </div>
+                <div className="text-xs text-green-500/50 mt-2">
+                  Minimum trade amount: {formatEther(MIN_ETH_AMOUNT)} ETH
+                </div>
               </div>
             )}
 
@@ -364,7 +400,8 @@ export default function TokenPage() {
                 tokenState.paused || 
                 isLoading || 
                 !amount || 
-                (isBuying ? !buyQuote || buyQuoteError : !sellQuote || sellQuoteError)
+                (isBuying ? !buyQuote || buyQuoteError : !sellQuote || sellQuoteError) ||
+                (isBuying ? buyQuote < MIN_ETH_AMOUNT : sellQuote < MIN_ETH_AMOUNT)
               }
               className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
             >

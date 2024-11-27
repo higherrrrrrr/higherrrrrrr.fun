@@ -121,8 +121,8 @@ export default function MainLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <header className="flex justify-between items-center p-4 md:p-6 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-black flex flex-col">
+      <header className="flex justify-between items-center p-4 md:p-6 max-w-7xl mx-auto w-full">
         <Link href="/">
           <h1 className="text-xl md:text-2xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
             {logoText}
@@ -138,7 +138,29 @@ export default function MainLayout({ children }) {
           <ConnectKitButton />
         </div>
       </header>
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-8">{children}</main>
+
+      <main className="flex-grow max-w-7xl mx-auto px-4 md:px-6 py-8 w-full">
+        {children}
+      </main>
+
+      <footer className="border-t border-green-500/20 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex justify-center items-center">
+          <a 
+            href="https://base.org" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-green-500/50 hover:text-green-500 font-mono text-sm transition-colors flex items-center space-x-2"
+          >
+            <span>Built on</span>
+            <img 
+              src="/base-logo.svg" 
+              alt="Base" 
+              className="h-4 w-4 inline-block"
+            />
+            <span>Base</span>
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
