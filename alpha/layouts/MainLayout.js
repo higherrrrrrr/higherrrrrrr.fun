@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTypewriter } from '../hooks/useTypewriter';
 import { getContractAddress } from '../api/contract';
 
-const LAUNCH_DATE = new Date("2024-11-26T17:00:00-08:00");
+const LAUNCH_DATE = new Date("2024-11-25T17:00:00-08:00");
 
 export default function MainLayout({ children }) {
   const [mounted, setMounted] = useState(false);
