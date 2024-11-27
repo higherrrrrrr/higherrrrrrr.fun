@@ -163,7 +163,6 @@ def get_latest_tokens(limit=10):
         return []
 
 @trading.route('/tokens/latest', methods=['GET'])
-@require_auth
 def get_latest_token_deploys():
     try:
         limit = int(request.args.get('limit', 10))
