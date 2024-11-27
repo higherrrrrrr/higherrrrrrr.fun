@@ -192,12 +192,27 @@ export async function getTokenStates(tokenAddresses: string[]): Promise<{ [key: 
 }
 
 export function getProgressToNextLevel(state: TokenState): number {
-  if (state.marketType === 0) { // BONDING_CURVE
-    const totalSupply = parseFloat(state.totalSupply);
-    const maxBondingSupply = 800_000_000; // 800M tokens
-    return (totalSupply / maxBondingSupply) * 100;
-  }
-  return 0;
+  if (!state || !state.priceLevels || !state.currentPrice) return 0;
+
+  // Find current level index
+  const currentLevelIndex = state.priceLevels.findIndex(level => level.name === state.currentName);
+  if (currentLevelIndex === -1 || currentLevelIndex === state.priceLevels.length - 1) return 0;
+
+  // Get current and next level prices
+  const currentLevelPrice = parseFloat(state.priceLevels[currentLevelIndex].price);
+  const nextLevelPrice = parseFloat(state.priceLevels[currentLevelIndex + 1].price);
+  const currentPrice = parseFloat(state.currentPrice);
+
+  // Calculate progress percentage
+  const priceDifference = nextLevelPrice - currentLevelPrice;
+  const currentProgress = currentPrice - currentLevelPrice;
+  
+  if (priceDifference <= 0) return 0;
+  
+  const progressPercentage = (currentProgress / priceDifference) * 100;
+  
+  // Clamp between 0 and 100
+  return Math.max(0, Math.min(100, progressPercentage));
 }
 
 export async function getUniswapQuote(
