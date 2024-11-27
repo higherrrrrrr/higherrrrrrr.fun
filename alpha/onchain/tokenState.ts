@@ -208,6 +208,12 @@ export async function getUniswapQuote(
 ): Promise<bigint> {
   try {
     console.log('Getting quote for amount:', tokenAmount.toString());
+
+    // Validate amount isn't too large
+    const MAX_AMOUNT = BigInt('1000000000000000000000000'); // 1M tokens
+    if (tokenAmount > MAX_AMOUNT) {
+      throw new Error('Amount too large');
+    }
     
     // Get current price from pool
     const slot0 = await publicClient.readContract({
@@ -219,23 +225,43 @@ export async function getUniswapQuote(
     const sqrtPriceX96 = BigInt(slot0[0].toString());
     console.log('sqrtPriceX96:', sqrtPriceX96.toString());
 
-    // Calculate price with more precision
-    const Q96 = BigInt(2) ** BigInt(96);
-    const priceX96 = (sqrtPriceX96 * sqrtPriceX96) / Q96;
-    console.log('priceX96:', priceX96.toString());
+    // Calculate price with proper scaling
+    const Q96 = BigInt('79228162514264337593543950336'); // 2^96
+    const PRECISION = BigInt('1000000000000000000'); // 10^18
 
-    // Add 18 decimals of precision for the calculation
-    const PRECISION = BigInt(10) ** BigInt(18);
-    
     if (isBuy) {
-      // For buying: amount * price
-      const quote = (tokenAmount * priceX96 * PRECISION) / (Q96 * PRECISION);
-      console.log('Buy quote:', quote.toString());
+      // For buying: amount * sqrtPrice^2 / 2^192
+      const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
+      const denominator = Q96 * Q96;
+      const quote = numerator / denominator;
+      
+      console.log('Buy quote calculation:', {
+        numerator: numerator.toString(),
+        denominator: denominator.toString(),
+        quote: quote.toString()
+      });
+
+      if (quote <= 0n) {
+        throw new Error('Invalid quote calculation');
+      }
+
       return quote;
     } else {
-      // For selling: amount / price
-      const quote = (tokenAmount * Q96 * PRECISION) / (priceX96 * PRECISION);
-      console.log('Sell quote:', quote.toString());
+      // For selling: amount * 2^192 / sqrtPrice^2
+      const numerator = tokenAmount * Q96 * Q96;
+      const denominator = sqrtPriceX96 * sqrtPriceX96;
+      const quote = numerator / denominator;
+
+      console.log('Sell quote calculation:', {
+        numerator: numerator.toString(),
+        denominator: denominator.toString(),
+        quote: quote.toString()
+      });
+
+      if (quote <= 0n) {
+        throw new Error('Invalid quote calculation');
+      }
+
       return quote;
     }
 
