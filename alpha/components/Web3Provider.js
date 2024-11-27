@@ -30,9 +30,9 @@ const baseChain = {
   }
 };
 
-// Always use Base mainnet through Alchemy
 const chains = [baseChain];
 
+// Create config outside of component to prevent recreation
 const wagmiConfig = createConfig(
   getDefaultConfig({
     appName: "Higherrrrrrr",
@@ -46,25 +46,77 @@ const wagmiConfig = createConfig(
 
 function Web3ProviderInner({ children }) {
   const [factoryAddress, setFactoryAddress] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    let mounted = true;
+
     async function init() {
       try {
         const { factory_address } = await getContractAddress();
         console.log('Factory address:', factory_address);
-        setFactoryAddress(factory_address);
+        
+        if (mounted) {
+          setFactoryAddress(factory_address);
+          setIsInitialized(true);
+        }
       } catch (error) {
         console.error('Failed to initialize Web3Provider:', error);
+        if (mounted) {
+          setError(error);
+          setIsInitialized(true); // Still mark as initialized even on error
+        }
       }
     }
 
     init();
+
+    // Cleanup function
+    return () => {
+      mounted = false;
+    };
   }, []);
 
+  // Show loading state
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="text-green-500/50 p-4 font-mono">Initializing Web3...</div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="text-red-500 p-4 font-mono">
+          Failed to initialize: {error.message}
+          <button 
+            onClick={() => window.location.reload()}
+            className="ml-2 underline"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Only render children when we have the factory address
   if (!factoryAddress) {
     return (
       <div className="min-h-screen bg-black">
-        {children}
+        <div className="text-red-500 p-4 font-mono">
+          No factory address found
+          <button 
+            onClick={() => window.location.reload()}
+            className="ml-2 underline"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -85,6 +137,9 @@ export function Web3Provider({ children }) {
           "--ck-accent-color": "#22c55e",
           "--ck-accent-text-color": "#000000",
         }}
+        options={{
+          initialChainId: baseChain.id,
+        }}
       >
         <Web3ProviderInner>{children}</Web3ProviderInner>
       </ConnectKitProvider>
@@ -96,5 +151,4 @@ export function ConnectKitButton() {
   return <DefaultConnectButton />;
 }
 
-// Export the current chain for use elsewhere in the app
 export const getCurrentChain = () => baseChain; 
