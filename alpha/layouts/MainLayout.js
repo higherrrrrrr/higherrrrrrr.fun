@@ -142,13 +142,13 @@ export default function MainLayout({ children }) {
           </h1>
         </Link>
         
-        <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end">
-          <Link href="/launch" className="flex-grow md:flex-grow-0">
-            <button className="w-full md:w-auto px-3 md:px-4 py-2 text-sm md:text-base bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors">
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <Link href="/launch">
+            <button className="px-3 md:px-4 py-2.5 text-sm md:text-base bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors whitespace-nowrap">
               Launch Token
             </button>
           </Link>
-          <div className="flex-shrink-0">
+          <div className="w-auto">
             <ConnectKitButton />
           </div>
         </div>
