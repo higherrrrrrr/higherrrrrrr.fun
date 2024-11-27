@@ -11,13 +11,26 @@ export default function MainLayout({ children }) {
   const [mounted, setMounted] = useState(false);
   const [shouldShowComingSoon, setShouldShowComingSoon] = useState(true);
   const [keySequence, setKeySequence] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
   
-  const logoText = useTypewriter("Higherrrrrrr", {
+  const animatedLogoText = useTypewriter("Higherrrrrrr", {
     minRs: 3,
     maxRs: 8,
     typingSpeed: 150,
     deletingSpeed: 100,
   });
+
+  useEffect(() => {
+    setMounted(true);
+    setIsMobile(window.innerWidth < 768);
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Force client-side rendering and check launch status
   useEffect(() => {
@@ -122,34 +135,36 @@ export default function MainLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
-      <header className="flex justify-between items-center p-4 md:p-6 max-w-7xl mx-auto w-full">
+      <header className="flex flex-col md:flex-row md:justify-between items-center p-3 md:p-6 max-w-7xl mx-auto w-full gap-3 md:gap-0">
         <Link href="/">
-          <h1 className="text-xl md:text-2xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
-            {logoText}
+          <h1 className="text-lg md:text-2xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
+            {isMobile ? "Higherrrrrrr" : animatedLogoText}
           </h1>
         </Link>
         
-        <div className="flex items-center space-x-4">
-          <Link href="/launch">
-            <button className="px-4 py-2 text-sm md:text-base bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors transform hover:scale-105">
+        <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto justify-end">
+          <Link href="/launch" className="flex-grow md:flex-grow-0">
+            <button className="w-full md:w-auto px-3 md:px-4 py-2 text-sm md:text-base bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors">
               Launch Token
             </button>
           </Link>
-          <ConnectKitButton />
+          <div className="flex-shrink-0">
+            <ConnectKitButton />
+          </div>
         </div>
       </header>
 
-      <main className="flex-grow max-w-7xl mx-auto px-4 md:px-6 py-8 w-full">
+      <main className="flex-grow max-w-7xl mx-auto px-3 md:px-6 py-4 md:py-8 w-full">
         {children}
       </main>
 
       <footer className="border-t border-green-500/20 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex justify-center items-center">
+        <div className="max-w-7xl mx-auto px-3 md:px-6 py-3 md:py-4 flex justify-center items-center">
           <a 
             href="https://base.org" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-green-500/50 hover:text-green-500 font-mono text-sm transition-colors"
+            className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
           >
             Built on Base
           </a>

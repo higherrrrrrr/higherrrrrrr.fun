@@ -239,23 +239,25 @@ export default function LaunchPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-mono font-bold text-green-500 mb-6">Launch New Token</h1>
+    <div className="max-w-2xl mx-auto px-3 md:px-0">
+      <h1 className="text-2xl md:text-3xl font-mono font-bold text-green-500 mb-4 md:mb-6">
+        Launch New Token
+      </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 border border-green-500/50 p-6 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6 border border-green-500/50 p-4 md:p-6 rounded-lg">
         {error && (
-          <div className="text-red-500 font-mono border border-red-500/50 p-2 rounded">
+          <div className="text-red-500 font-mono border border-red-500/50 p-2 rounded text-sm md:text-base">
             {error}
           </div>
         )}
         
         <div>
-          <label className="block font-mono text-green-500 mb-2">Token Symbol</label>
+          <label className="block font-mono text-green-500 mb-2 text-sm md:text-base">Token Symbol</label>
           <input
             type="text"
             value={formData.symbol}
             onChange={(e) => setFormData(prev => ({ ...prev, symbol: e.target.value }))}
-            className="w-full bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none"
+            className="w-full bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none text-sm md:text-base"
             placeholder="MEME"
             required
           />
@@ -263,12 +265,12 @@ export default function LaunchPage() {
 
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-mono text-green-500">Price Levels</h2>
+            <h2 className="text-lg md:text-xl font-mono text-green-500">Price Levels</h2>
             <div className="flex space-x-2">
               <button
                 type="button"
                 onClick={() => setPriceUnit('ETH')}
-                className={`px-3 py-1 font-mono rounded ${
+                className={`px-2 md:px-3 py-1 font-mono rounded text-sm md:text-base ${
                   priceUnit === 'ETH' 
                     ? 'bg-green-500 text-black' 
                     : 'border border-green-500 text-green-500'
@@ -279,7 +281,7 @@ export default function LaunchPage() {
               <button
                 type="button"
                 onClick={() => setPriceUnit('USD')}
-                className={`px-3 py-1 font-mono rounded ${
+                className={`px-2 md:px-3 py-1 font-mono rounded text-sm md:text-base ${
                   priceUnit === 'USD' 
                     ? 'bg-green-500 text-black' 
                     : 'border border-green-500 text-green-500'
@@ -291,9 +293,9 @@ export default function LaunchPage() {
           </div>
 
           {formData.priceLevels.map((level, index) => (
-            <div key={index} className="flex space-x-4">
+            <div key={index} className="flex flex-col md:flex-row gap-3 md:space-x-4">
               <div className="flex-1">
-                <label className="block font-mono text-green-500 mb-2">
+                <label className="block font-mono text-green-500 mb-2 text-sm md:text-base">
                   Price ({priceUnit})
                 </label>
                 <input
@@ -305,32 +307,32 @@ export default function LaunchPage() {
                     e.target.value
                   )}
                   step={priceUnit === 'ETH' ? "0.0001" : "0.01"}
-                  className="w-full bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none"
+                  className="w-full bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none text-sm md:text-base"
                   required
                 />
-                <div className="text-green-500/50 text-sm mt-1 font-mono">
+                <div className="text-green-500/50 text-xs md:text-sm mt-1 font-mono">
                   {priceUnit === 'ETH' 
                     ? formatUsd(parseFloat(level.usdPrice))
                     : `${formatEth(parseFloat(level.price))} ETH`}
                 </div>
-                <div className="text-green-500/50 text-sm mt-1 font-mono">
+                <div className="text-green-500/50 text-xs md:text-sm mt-1 font-mono">
                   Market Cap: {formatUsd(parseFloat(level.usdPrice) * MAX_SUPPLY)}
                 </div>
               </div>
               <div className="flex-1">
-                <label className="block font-mono text-green-500 mb-2">Level Name</label>
+                <label className="block font-mono text-green-500 mb-2 text-sm md:text-base">Level Name</label>
                 <div className="flex space-x-2">
                   <input
                     type="text"
                     value={level.name}
                     onChange={(e) => handlePriceLevelChange(index, 'name', e.target.value)}
-                    className="flex-1 bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none"
+                    className="flex-1 bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none text-sm md:text-base"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => removePriceLevel(index)}
-                    className="px-3 py-1 border border-red-500 text-red-500 hover:bg-red-500 hover:text-black font-mono rounded transition-colors"
+                    className="px-2 md:px-3 py-1 border border-red-500 text-red-500 hover:bg-red-500 hover:text-black font-mono rounded transition-colors text-sm md:text-base"
                   >
                     X
                   </button>
@@ -342,7 +344,7 @@ export default function LaunchPage() {
           <button
             type="button"
             onClick={addPriceLevel}
-            className="w-full mt-4 px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-black font-mono rounded transition-colors"
+            className="w-full mt-4 px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-black font-mono rounded transition-colors text-sm md:text-base"
           >
             + Add Price Level
           </button>
@@ -351,7 +353,7 @@ export default function LaunchPage() {
         <button
           type="submit"
           disabled={isLoading || !!error}
-          className="w-full px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-mono font-bold rounded transition-colors"
+          className="w-full px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-mono font-bold rounded transition-colors text-sm md:text-base"
         >
           {isLoading ? "Creating Token..." : "Launch Token"}
         </button>

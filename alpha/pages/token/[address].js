@@ -396,27 +396,44 @@ export default function TokenPage() {
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
       {/* Ticker Bar */}
-      <div className="border-b border-green-500/30 p-4">
-        <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <div className="text-2xl font-bold">{tokenState.symbol}</div>
-          <div className="flex space-x-8">
-            <div>
-              <div className="text-sm text-green-500/50">Price</div>
-              <div className="text-lg">
-                ${formatUsdPrice(usdPrice)}
+      <div className="border-b border-green-500/30 p-3 md:p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Mobile Layout */}
+          <div className="md:hidden space-y-3">
+            <div className="flex justify-between items-center">
+              <div className="text-xl font-bold">{tokenState.symbol}</div>
+              <div className="text-lg">${formatUsdPrice(usdPrice)}</div>
+            </div>
+            <div className="flex justify-between text-sm">
+              <div>
+                <div className="text-green-500/50">Market Cap</div>
+                <div>{formatMarketCap(marketCapUsd)}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-green-500/50">Supply</div>
+                <div>{((totalSupply / 1_000_000_000) * 100).toFixed(2)}%</div>
               </div>
             </div>
-            <div>
-              <div className="text-sm text-green-500/50">Market Cap</div>
-              <div className="text-lg">
-                {formatMarketCap(marketCapUsd)}
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex justify-between items-center">
+            <div className="text-2xl font-bold">{tokenState.symbol}</div>
+            <div className="flex space-x-8">
+              <div>
+                <div className="text-sm text-green-500/50">Price</div>
+                <div className="text-lg">${formatUsdPrice(usdPrice)}</div>
               </div>
-            </div>
-            <div>
-              <div className="text-sm text-green-500/50">Supply</div>
-              <div className="flex flex-col">
-                <span>{totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                <span className="text-sm text-green-500/70">{((totalSupply / 1_000_000_000) * 100).toFixed(2)}%</span>
+              <div>
+                <div className="text-sm text-green-500/50">Market Cap</div>
+                <div className="text-lg">{formatMarketCap(marketCapUsd)}</div>
+              </div>
+              <div>
+                <div className="text-sm text-green-500/50">Supply</div>
+                <div className="flex flex-col">
+                  <span>{totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                  <span className="text-sm text-green-500/70">{((totalSupply / 1_000_000_000) * 100).toFixed(2)}%</span>
+                </div>
               </div>
             </div>
           </div>
@@ -424,42 +441,42 @@ export default function TokenPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto p-8 space-y-12">
+      <div className="max-w-4xl mx-auto p-3 md:p-8 space-y-6 md:space-y-12">
         {/* Current Level */}
-        <div className="text-center py-12">
-          <div className="text-sm text-green-500/50 mb-4">Current Name</div>
-          <div className="text-7xl font-bold mb-6">
+        <div className="text-center py-6 md:py-12">
+          <div className="text-sm text-green-500/50 mb-2 md:mb-4">Current Name</div>
+          <div className="text-4xl md:text-7xl font-bold mb-3 md:mb-6">
             {tokenState.currentName || 'Loading...'}
           </div>
-          <div className="text-xl text-green-500/70">
+          <div className="text-lg md:text-xl text-green-500/70">
             Level {getCurrentLevelIndex(tokenState) + 1} of {tokenState.priceLevels?.length || 0}
           </div>
         </div>
 
-        {/* Progress Bar (only show if on bonding curve and supply < 800M) */}
+        {/* Progress Bar */}
         {tokenState.marketType === 0 && parseFloat(tokenState.totalSupply) < 800_000_000 && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Bonding Curve Progress</span>
               <span>{(parseFloat(tokenState.totalSupply) / 8000000).toFixed(2)}%</span>
             </div>
-            <div className="w-full bg-green-500/20 rounded-full h-4">
+            <div className="w-full bg-green-500/20 rounded-full h-3 md:h-4">
               <div 
-                className="bg-green-500 h-4 rounded-full transition-all"
+                className="bg-green-500 h-full rounded-full transition-all"
                 style={{ width: `${(parseFloat(tokenState.totalSupply) / 8000000)}%` }}
               />
             </div>
           </div>
         )}
 
-        {/* Trading Interface - Moved up */}
-        <div className="border border-green-500/30 rounded-lg p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">Trade Token</h2>
+        {/* Trading Interface */}
+        <div className="border border-green-500/30 rounded-lg p-4 md:p-6 space-y-4 md:space-y-6">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+            <h2 className="text-lg md:text-xl font-bold">Trade Token</h2>
             <div className="flex space-x-2">
               <button
                 onClick={() => setIsBuying(true)}
-                className={`px-4 py-2 rounded ${
+                className={`flex-1 md:flex-none px-3 md:px-4 py-2 text-sm md:text-base rounded ${
                   isBuying 
                     ? 'bg-green-500 text-black' 
                     : 'border border-green-500 text-green-500'
@@ -469,7 +486,7 @@ export default function TokenPage() {
               </button>
               <button
                 onClick={() => setIsBuying(false)}
-                className={`px-4 py-2 rounded ${
+                className={`flex-1 md:flex-none px-3 md:px-4 py-2 text-sm md:text-base rounded ${
                   !isBuying 
                     ? 'bg-green-500 text-black' 
                     : 'border border-green-500 text-green-500'
@@ -480,33 +497,38 @@ export default function TokenPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <label className="text-sm text-green-500/70">Amount in Tokens</label>
+          {/* Trading Form */}
+          <div className="space-y-3 md:space-y-4">
+            <div>
+              <label className="text-sm text-green-500/70 mb-2">Amount in Tokens</label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={amount}
+                onChange={(e) => handleAmountChange(e.target.value)}
+                className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none text-sm md:text-base"
+                placeholder="Enter amount of tokens..."
+              />
             </div>
-
-            <input
-              type="text"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => handleAmountChange(e.target.value)}
-              className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
-              placeholder="Enter amount of tokens..."
-            />
 
             <div className="flex justify-between text-sm">
               <span>Current Price</span>
-              <span>{tokenState.currentPrice} ETH (${(parseFloat(tokenState.currentPrice) * ethPrice).toFixed(2)})</span>
+              <span className="text-right">{tokenState.currentPrice} ETH<br />
+                <span className="text-green-500/70 text-xs">
+                  (${(parseFloat(tokenState.currentPrice) * ethPrice).toFixed(2)})
+                </span>
+              </span>
             </div>
 
             {error && (
-              <div className="text-red-500 text-sm mt-2">
+              <div className="text-red-500 text-sm">
                 {error}
               </div>
             )}
 
+            {/* Quote Display */}
             {amount && (
-              <div className="space-y-2 p-4 bg-green-500/5 rounded-lg">
+              <div className="space-y-2 p-3 md:p-4 bg-green-500/5 rounded-lg text-sm">
                 <div className="flex justify-between text-sm">
                   <span>{isBuying ? "You'll Pay" : "You'll Receive"}</span>
                   <span>
@@ -537,7 +559,7 @@ export default function TokenPage() {
                 !isQuoteAvailable ||
                 (currentQuote && parseFloat(formatEther(currentQuote)) < parseFloat(MIN_ETH_AMOUNT))
               }
-              className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
+              className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors text-sm md:text-base"
             >
               {isLoading 
                 ? (isBuying ? "Buying..." : "Selling...") 
@@ -550,8 +572,46 @@ export default function TokenPage() {
           </div>
         </div>
 
-        {/* Levels Table */}
-        <div className="border border-green-500/30 rounded-lg overflow-hidden">
+        {/* Levels Table - Mobile Version */}
+        <div className="md:hidden space-y-3">
+          <h3 className="text-lg font-bold">Price Levels</h3>
+          {tokenState.priceLevels.map((level, index) => {
+            const levelUsdPrice = parseFloat(level.price) * ethPrice;
+            const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
+            const isCurrentLevel = level.name === tokenState.currentName;
+            const currentLevelIndex = tokenState.priceLevels.findIndex(l => l.name === tokenState.currentName);
+            const isAchieved = index <= currentLevelIndex;
+
+            return (
+              <div 
+                key={index}
+                className={`p-3 rounded border border-green-500/30 ${
+                  isCurrentLevel ? 'bg-green-500/10' : ''
+                }`}
+              >
+                <div className="flex justify-between mb-1">
+                  <span className="font-bold">{level.name}</span>
+                  <span className="text-sm">Level {index + 1}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>${formatUsdPrice(levelUsdPrice)}</span>
+                  <span className={
+                    isCurrentLevel ? "text-green-500" :
+                    isAchieved ? "text-green-500/50" :
+                    "text-green-500/30"
+                  }>
+                    {isCurrentLevel ? "Current" :
+                     isAchieved ? "Achieved" :
+                     "Locked"}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Levels Table - Desktop Version */}
+        <div className="hidden md:block border border-green-500/30 rounded-lg overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-green-500/30">
