@@ -9,4 +9,5 @@ class Config:
     CONTRACT_ADDRESS = os.getenv('CONTRACT_ADDRESS')
     HIGHLIGHTED_TOKEN = os.getenv('HIGHLIGHTED_TOKEN')
     RPC_URL = os.getenv('RPC_URL', 'https://mainnet.base.org')
+    TOKENS_SUBGRAPH_URL = os.getenv('TOKENS_SUBGRAPH_URL')
 
