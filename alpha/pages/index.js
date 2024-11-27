@@ -1,5 +1,5 @@
-import Launch from './launch';
+import Gallery from './gallery';
 
 export default function Home() {
-  return <Launch />;
+  return <Gallery />;
 }
