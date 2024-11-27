@@ -208,13 +208,6 @@ export async function getUniswapQuote(
 ): Promise<bigint> {
   try {
     console.log('Getting quote for amount:', tokenAmount.toString());
-
-    // Validate amount isn't too large
-    const MAX_AMOUNT = BigInt('1000000000000000000000000'); // 1M tokens
-    if (tokenAmount > MAX_AMOUNT) {
-      throw new Error('Amount too large');
-    }
-    
     // Get current price from pool
     const slot0 = await publicClient.readContract({
       address: poolAddress as `0x${string}`,
