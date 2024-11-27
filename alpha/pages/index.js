@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { getHighlightedToken } from '../api/tokens';
 import { getLatestTokens } from '../api/contract';
-import { getTokenState, getProgressToNextLevel } from '../onchain/tokenState';
+import { getTokenState, getTokenStates } from '../onchain/tokenState';
 import Link from 'next/link';
 
 export default function TokensList() {
@@ -12,27 +12,21 @@ export default function TokensList() {
   const [tokenStates, setTokenStates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  // Function to refresh a single token's state
-  const refreshTokenState = async (tokenAddress) => {
+  // Function to refresh token states in parallel batches
+  const refreshTokenStates = async (tokens) => {
     try {
-      const state = await getTokenState(tokenAddress);
+      const addresses = tokens.map(t => t.address);
+      console.log('Fetching states for tokens:', addresses);
+      const states = await getTokenStates(addresses);
+      console.log('Received states:', states);
       setTokenStates(prev => ({
         ...prev,
-        [tokenAddress]: state
+        ...states
       }));
-      return state;
+      return states; // Return states for immediate use
     } catch (error) {
-      console.error(`Failed to fetch state for token ${tokenAddress}:`, error);
-    }
-  };
-
-  // Function to refresh all token states
-  const refreshAllTokenStates = async () => {
-    for (const token of latestTokens) {
-      await refreshTokenState(token.address);
-    }
-    if (highlightedToken) {
-      await refreshTokenState(highlightedToken.address);
+      console.error('Failed to fetch token states:', error);
+      return null;
     }
   };
 
@@ -42,28 +36,44 @@ export default function TokensList() {
       try {
         console.log('Fetching token data...');
         
+        // Fetch tokens and highlighted token in parallel
         const [highlighted, latest] = await Promise.all([
           getHighlightedToken(),
-          getLatestTokens(100)
+          getLatestTokens(25)
         ]);
+
+        console.log('Highlighted token:', highlighted);
         
         setLatestTokens(latest.tokens || []);
         
-        if (highlighted && highlighted.address) {
-          const highlightedState = await getTokenState(highlighted.address);
+        // Start loading states immediately
+        const allTokens = [...(latest.tokens || [])];
+        if (highlighted?.address) {
+          allTokens.push(highlighted);
+        }
+
+        // Set loading false after we have the token list
+        setIsLoading(false);
+
+        // Load states and immediately use them
+        const states = await refreshTokenStates(allTokens);
+        
+        // Set highlighted token with its state
+        if (highlighted?.address && states) {
+          const highlightedState = states[highlighted.address];
+          console.log('Setting highlighted token with state:', {
+            highlighted,
+            state: highlightedState
+          });
           setHighlightedToken({
             ...highlighted,
             ...highlightedState,
             address: highlighted.address
           });
         }
-
-        // Initial token states fetch
-        await refreshAllTokenStates();
         
       } catch (error) {
         console.error('Failed to fetch tokens:', error);
-      } finally {
         setIsLoading(false);
       }
     };
@@ -71,7 +81,22 @@ export default function TokensList() {
     fetchData();
 
     // Set up periodic refresh
-    const refreshTimer = setInterval(refreshAllTokenStates, 15000); // Every 15 seconds
+    const refreshTimer = setInterval(() => {
+      const allTokens = [...latestTokens];
+      if (highlightedToken) {
+        allTokens.push(highlightedToken);
+      }
+      refreshTokenStates(allTokens).then(states => {
+        // Update highlighted token with new state
+        if (highlightedToken?.address && states) {
+          const newHighlightedState = states[highlightedToken.address];
+          setHighlightedToken(prev => ({
+            ...prev,
+            ...newHighlightedState
+          }));
+        }
+      });
+    }, 15000);
 
     return () => clearInterval(refreshTimer);
   }, []);
