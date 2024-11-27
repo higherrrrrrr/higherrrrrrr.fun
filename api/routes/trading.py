@@ -43,93 +43,57 @@ token_cache = TokenCache()
 CACHE_DURATION = 3600  # 1 minute in seconds
 
 def get_latest_tokens(limit=10):
-    global token_cache
-    current_time = time.time()
-    
     try:
-        print("\n=== Starting get_latest_tokens ===")
-        print(f"Using RPC URL: {Config.RPC_URL}")
+        print("\n=== Starting get_latest_tokens from subgraph ===")
         
-        # Check cache first
-        if token_cache.tokens and current_time - token_cache.timestamp < CACHE_DURATION:
-            print("✅ Returning cached tokens")
-            return token_cache.tokens[:limit]
+        # GraphQL query
+        query = """
+        {
+          newTokenEvents(first: %d, orderBy: timestamp, orderDirection: desc) {
+            id
+            token
+            conviction
+            blockNumber
+            timestamp
+            transactionHash
+          }
+        }
+        """ % limit
+
+        # Make request to subgraph
+        response = requests.post(
+            Config.TOKENS_SUBGRAPH_URL,
+            json={'query': query}
+        )
+
+        if response.status_code != 200:
+            print(f"❌ Subgraph request failed: {response.status_code}")
+            print(response.text)
+            return []
+
+        data = response.json()
+        if 'errors' in data:
+            print(f"❌ GraphQL errors: {data['errors']}")
+            return []
+
+        tokens = data.get('data', {}).get('newTokenEvents', [])
+        print(f"✅ Found {len(tokens)} tokens from subgraph")
         
-        # Initialize Web3 with RPC from config
-        w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
-        
-        if not w3.is_connected():
-            print("❌ Failed to connect to RPC endpoint")
-            return token_cache.tokens[:limit] if token_cache.tokens else []
-            
-        print("✅ Connected to RPC endpoint")
-        
-        # Get latest block and calculate range (last 2 hours of blocks)
-        latest_block = w3.eth.block_number
-        blocks_to_search = 200000  # About 1 hour of blocks on Base
-        from_block = max(0, latest_block - blocks_to_search)
-        
-        print(f"Searching blocks {from_block} to {latest_block}")
-        
-        try:
-            factory_address = Web3.to_checksum_address(Config.CONTRACT_ADDRESS)
-            event_signature = '0x46960970e01c8cbebf9e58299b0acf8137b299ef06eb6c4f5be2c0443d5e5f22'
-            
-            # Get logs in smaller chunks to avoid timeout
-            chunk_size = 1000
-            all_logs = []
-            
-            for chunk_start in range(from_block, latest_block + 1, chunk_size):
-                chunk_end = min(chunk_start + chunk_size - 1, latest_block)
-                logs = w3.eth.get_logs({
-                    'fromBlock': chunk_start,
-                    'toBlock': chunk_end,
-                    'address': factory_address,
-                    'topics': [event_signature]
-                })
-                all_logs.extend(logs)
-            
-            print(f"✅ Found {len(all_logs)} NewToken events")
-            
-            # Process logs
-            tokens = []
-            for log in sorted(all_logs, key=lambda x: x['blockNumber'], reverse=True):
-                try:
-                    token_address = Web3.to_checksum_address('0x' + log['topics'][1].hex()[-40:])
-                    conviction_address = Web3.to_checksum_address('0x' + log['topics'][2].hex()[-40:])
-                    
-                    block = w3.eth.get_block(log['blockNumber'])
-                    
-                    token_data = {
-                        'address': token_address,
-                        'conviction': conviction_address,
-                        'block_number': log['blockNumber'],
-                        'timestamp': block['timestamp'],
-                        'transaction_hash': log['transactionHash'].hex()
-                    }
-                    
-                    print(f"✅ Found token: {token_address}")
-                    tokens.append(token_data)
-                    
-                except Exception as e:
-                    print(f"❌ Error processing event: {str(e)}")
-                    continue
-            
-            # Update cache
-            token_cache.tokens = tokens
-            token_cache.timestamp = current_time
-            
-            return tokens[:limit]
-            
-        except Exception as e:
-            print(f"❌ Error getting events: {str(e)}")
-            # Return cached data if available
-            return token_cache.tokens[:limit] if token_cache.tokens else []
-            
+        # Convert to our expected format
+        formatted_tokens = [{
+            'address': token['token'],
+            'conviction': token['conviction'],
+            'block_number': int(token['blockNumber']),
+            'timestamp': int(token['timestamp']),
+            'transaction_hash': token['transactionHash']
+        } for token in tokens]
+
+        return formatted_tokens
+
     except Exception as e:
-        print(f"❌ Fatal error in get_latest_tokens: {str(e)}")
+        print(f"❌ Error fetching from subgraph: {str(e)}")
         traceback.print_exc()
-        return token_cache.tokens[:limit] if token_cache.tokens else []
+        return []
 
 @trading.route('/tokens/latest', methods=['GET'])
 def get_latest_token_deploys():

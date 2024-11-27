@@ -88,14 +88,23 @@ export default function GalleryPage() {
   const [loadingLatest, setLoadingLatest] = useState(true);
   const [error, setError] = useState(null);
 
+  // Add version number and debug logging
+  const VERSION = "0.0.1";
+  console.log(`\n=== Gallery Page Initialized (v${VERSION}) ===`);
+
   // Separate effect for featured token and ETH price
   useEffect(() => {
     const fetchFeaturedToken = async () => {
+      console.log(`\n=== Fetching Featured Token (v${VERSION}) ===`);
       try {
+        console.log('Starting featured token fetch...');
         const [priceData, featuredState] = await Promise.all([
           getEthPrice(),
           getTokenStates([FEATURED_TOKEN])
         ]);
+        
+        console.log('ETH Price:', priceData);
+        console.log('Featured Token State:', featuredState);
         
         setEthPrice(priceData.price_usd);
         setFeaturedToken(featuredState[FEATURED_TOKEN]);
@@ -107,16 +116,19 @@ export default function GalleryPage() {
       }
     };
 
+    console.log('Starting featured token effect...');
     fetchFeaturedToken();
   }, []);
 
-  // Separate effect for latest tokens
+  // Separate effect for latest tokens with detailed logging
   useEffect(() => {
     const fetchLatestTokens = async () => {
+      console.log(`\n=== Fetching Latest Tokens (v${VERSION}) ===`);
       try {
         setLoadingLatest(true);
+        console.log('Getting latest tokens from API...');
         const tokens = await getLatestTokens(25);
-        console.log('Fetched latest tokens:', tokens);
+        console.log('Latest tokens response:', tokens);
         setLatestTokens(tokens);
 
         // Fetch states in batches
@@ -124,23 +136,38 @@ export default function GalleryPage() {
         for (let i = 0; i < tokens.length; i += batchSize) {
           const batch = tokens.slice(i, i + batchSize);
           const batchAddresses = batch.map(t => t.address.toLowerCase());
-          console.log('Fetching batch:', batchAddresses);
-          const states = await getTokenStates(batchAddresses);
+          console.log(`\nFetching batch ${i/batchSize + 1}:`, batchAddresses);
           
-          setTokenStates(prev => ({
-            ...prev,
-            ...states
-          }));
+          const states = await getTokenStates(batchAddresses);
+          console.log(`Got states for batch ${i/batchSize + 1}:`, states);
+          
+          setTokenStates(prev => {
+            const newStates = { ...prev, ...states };
+            console.log('Updated token states:', newStates);
+            return newStates;
+          });
         }
       } catch (error) {
         console.error('Failed to fetch latest tokens:', error);
       } finally {
+        console.log('Latest tokens fetch complete');
         setLoadingLatest(false);
       }
     };
 
+    console.log('Starting latest tokens effect...');
     fetchLatestTokens();
   }, []);
+
+  // Add render logging
+  console.log('Render state:', {
+    isLoadingFeatured,
+    loadingLatest,
+    featuredToken: !!featuredToken,
+    latestTokensCount: latestTokens.length,
+    tokenStatesCount: Object.keys(tokenStates).length,
+    ethPrice
+  });
 
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">

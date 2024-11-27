@@ -1,0 +1,8 @@
+type NewTokenEvent @entity {
+  id: ID!
+  token: String!
+  conviction: String!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  transactionHash: String!
+}
