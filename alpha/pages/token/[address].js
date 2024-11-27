@@ -205,53 +205,75 @@ export default function TokenPage() {
   const [uniswapSellQuote, setUniswapSellQuote] = useState(null);
   const [quoteError, setQuoteError] = useState(null);
 
-  // Update quotes when amount changes
+  // Add loading state for quotes
+  const [isQuoteLoading, setIsQuoteLoading] = useState(false);
+
+  // Add more detailed quote debugging
   useEffect(() => {
     if (!amount || !tokenState || !address) {
-      console.log('Quote Debug: Missing required data for quote', { amount, tokenState, address });
+      console.log('Quote Debug: Missing data', { 
+        hasAmount: Boolean(amount), 
+        amountValue: amount,
+        hasTokenState: Boolean(tokenState),
+        marketType: tokenState?.marketType,
+        hasAddress: Boolean(address),
+        addressValue: address
+      });
       return;
     }
 
-    const updateQuote = async () => {
+    // Only update quotes for valid amounts
+    if (isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      console.log('Quote Debug: Invalid amount', { amount });
+      return;
+    }
+
+    const timer = setTimeout(async () => {
       try {
-        console.log('Quote Debug: Updating quote', {
+        console.log('Quote Debug: Fetching quote', {
           marketType: tokenState.marketType,
           isBuying,
-          amount
+          amount,
+          poolAddress: tokenState.poolAddress
         });
         
         setQuoteError(null);
+        setIsQuoteLoading(true);
+
         if (tokenState.marketType === 1) {
-          // Uniswap market
-          const tokenAmount = parseEther(amount);
-          console.log('Quote Debug: Fetching Uniswap quote', {
-            address,
-            poolAddress: tokenState.poolAddress,
-            tokenAmount: tokenAmount.toString()
-          });
-          
-          const quote = await getUniswapQuote(
-            address,
-            tokenState.poolAddress,
-            tokenAmount,
-            isBuying
-          );
-          
-          console.log('Quote Debug: Got Uniswap quote', { quote: quote?.toString() });
-          
-          if (isBuying) {
-            setUniswapBuyQuote(quote);
+          if (parseFloat(amount) < 1e9) {
+            const tokenAmount = parseEther(amount);
+            
+            const quote = await getUniswapQuote(
+              address,
+              tokenState.poolAddress,
+              tokenAmount,
+              isBuying
+            );
+            
+            console.log('Quote Debug: Received quote', {
+              quote: formatEther(quote),
+              isBuying
+            });
+
+            if (isBuying) {
+              setUniswapBuyQuote(quote);
+            } else {
+              setUniswapSellQuote(quote);
+            }
           } else {
-            setUniswapSellQuote(quote);
+            setQuoteError('Amount too large');
           }
         }
       } catch (error) {
-        console.error('Quote Debug: Error getting quote:', error);
-        setQuoteError('Failed to get quote');
+        console.error('Quote Debug: Error', error);
+        setQuoteError(error.message || 'Failed to get quote');
+      } finally {
+        setIsQuoteLoading(false);
       }
-    };
+    }, 500);
 
-    updateQuote();
+    return () => clearTimeout(timer);
   }, [amount, tokenState, address, isBuying]);
 
   // Use appropriate quote based on market type
@@ -502,7 +524,8 @@ export default function TokenPage() {
                 <div className="flex justify-between text-sm">
                   <span>{isBuying ? "You'll Pay" : "You'll Receive"}</span>
                   <span>
-                    {!isQuoteAvailable ? 'Quote unavailable' : 
+                    {isQuoteLoading ? 'Loading...' :
+                     !isQuoteAvailable ? 'Quote unavailable' : 
                      currentQuote ? `${formatEther(currentQuote)} ETH` : '...'}
                   </span>
                 </div>

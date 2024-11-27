@@ -229,6 +229,7 @@ class StaticTickDataProvider implements TickDataProvider {
   }
 }
 
+// Simple price calculation without SDK
 export async function getUniswapQuote(
   tokenAddress: string,
   poolAddress: string,
@@ -245,65 +246,39 @@ export async function getUniswapQuote(
   const publicClient = getPublicClient();
 
   try {
-    // Get pool state
-    const [slot0, liquidity] = await Promise.all([
-      publicClient.readContract({
-        address: poolAddress as `0x${string}`,
-        abi: UniswapV3PoolABI,
-        functionName: 'slot0'
-      }),
-      publicClient.readContract({
-        address: poolAddress as `0x${string}`,
-        abi: UniswapV3PoolABI,
-        functionName: 'liquidity'
-      })
-    ]);
+    // Get pool state with proper typing
+    const slot0Result = await publicClient.readContract({
+      address: poolAddress as `0x${string}`,
+      abi: UniswapV3PoolABI,
+      functionName: 'slot0'
+    });
+
+    if (!slot0Result || !Array.isArray(slot0Result)) {
+      throw new Error('Invalid slot0 response');
+    }
+
+    const sqrtPriceX96 = slot0Result[0];
+    
+    if (!sqrtPriceX96) {
+      throw new Error('Invalid sqrtPriceX96');
+    }
 
     console.log('Pool state:', {
-      sqrtPriceX96: slot0[0].toString(),
-      tick: slot0[1],
-      liquidity: liquidity.toString()
+      sqrtPriceX96: sqrtPriceX96.toString()
     });
-
-    // Create SDK instances
-    const wethToken = new Token(base.id, WETH_ADDRESS, 18, 'WETH');
-    const token = new Token(base.id, tokenAddress, 18, 'TOKEN');
-
-    // Create tick data provider
-    const tickDataProvider = new StaticTickDataProvider();
-
-    // Create pool instance with tick data provider
-    const pool = new Pool(
-      wethToken,
-      token,
-      500, // 0.05% fee tier
-      slot0[0].toString(),
-      liquidity.toString(),
-      slot0[1],
-      tickDataProvider
-    );
-
-    // Convert tokenAmount to CurrencyAmount
-    const inputToken = isBuy ? wethToken : token;
-    const amount = CurrencyAmount.fromRawAmount(
-      inputToken,
-      tokenAmount.toString()
-    );
-
-    console.log('Calculating quote with:', {
-      inputToken: inputToken.address,
-      amount: amount.toExact(),
-      poolPrice: pool.token0Price.toSignificant(6)
-    });
-
-    // Get quote
+    
+    // Calculate price using multiplication instead of exponents
+    const Q96 = BigInt('79228162514264337593543950336'); // 2^96
+    const priceX96Squared = (sqrtPriceX96 * sqrtPriceX96);
+    
     if (isBuy) {
-      const [outputAmount] = await pool.getOutputAmount(amount);
-      return BigInt(outputAmount.quotient.toString());
+      // For buying tokens: multiply token amount by price
+      return (tokenAmount * priceX96Squared) / (Q96 * Q96);
     } else {
-      const [outputAmount] = await pool.getInputAmount(amount);
-      return BigInt(outputAmount.quotient.toString());
+      // For selling tokens: divide token amount by price
+      return (tokenAmount * (Q96 * Q96)) / priceX96Squared;
     }
+
   } catch (error) {
     console.error('Pool quote error:', error);
     throw error;

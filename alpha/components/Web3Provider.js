@@ -39,7 +39,6 @@ const wagmiConfig = createConfig(
     transports: {
       [baseChain.id]: http(ALCHEMY_RPC),
     },
-    walletConnectProjectId: "YOUR_PROJECT_ID", // Add if you have one
   }),
 );
 
