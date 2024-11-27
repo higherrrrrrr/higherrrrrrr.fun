@@ -8,6 +8,8 @@ import { http } from 'viem';
 export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
 
+const ALCHEMY_RPC = 'https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a';
+
 // Define Anvil chain as a fork of Base
 const anvil = {
   ...base,
@@ -31,18 +33,28 @@ const anvil = {
   }
 };
 
+// Override Base chain RPC
+const baseChain = {
+  ...base,
+  rpcUrls: {
+    ...base.rpcUrls,
+    default: { http: [ALCHEMY_RPC] },
+    public: { http: [ALCHEMY_RPC] },
+  }
+};
+
 // Create initial config
 const isLocal = typeof window !== 'undefined' && 
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-const chains = [isLocal ? anvil : base];
+const chains = [isLocal ? anvil : baseChain];
 
 const wagmiConfig = createConfig(
   getDefaultConfig({
     appName: "Higherrrrrrr",
     chains,
     transports: {
-      [base.id]: http('https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a'),
+      [base.id]: http(ALCHEMY_RPC),
       [anvil.id]: http('http://127.0.0.1:8545'),
     },
   }),
@@ -104,5 +116,5 @@ export function ConnectKitButton() {
 export const getCurrentChain = () => {
   const isLocal = typeof window !== 'undefined' && 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-  return isLocal ? anvil : base;
+  return isLocal ? anvil : baseChain;
 }; 

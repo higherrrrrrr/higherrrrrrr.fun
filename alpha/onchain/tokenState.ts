@@ -2,6 +2,8 @@ import { createPublicClient, http, formatEther } from 'viem';
 import { base } from 'wagmi/chains';
 import { getCurrentChain } from '../components/Web3Provider';
 import { higherrrrrrrAbi } from './generated';
+import { Pool } from '@uniswap/v3-sdk';
+import { Token } from '@uniswap/sdk-core';
 
 const getPublicClient = () => {
   const chain = getCurrentChain();
@@ -31,7 +33,11 @@ export interface TokenState {
   MIN_ORDER_SIZE: string;
   TOTAL_FEE_BPS: number;
   MAX_TOTAL_SUPPLY: string;
+  poolAddress: string;
 }
+
+// Add pool constants from contract
+const LP_FEE = 500; // 0.05%
 
 export async function getTokenState(tokenAddress: string): Promise<TokenState> {
   const publicClient = getPublicClient();
@@ -118,6 +124,11 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
         address: tokenAddress as `0x${string}`,
         abi: higherrrrrrrAbi,
         functionName: 'TOTAL_FEE_BPS'
+      },
+      {
+        address: tokenAddress as `0x${string}`,
+        abi: higherrrrrrrAbi,
+        functionName: 'poolAddress'
       }
     ]
   });
@@ -136,7 +147,8 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
     TOTAL_FEE_BPS: Number(results[10].result || 0),
     priceLevels,
     currentName: results[0].result?.toString() || '',
-    MAX_TOTAL_SUPPLY: formatEther(results[4].result || BigInt(0))
+    MAX_TOTAL_SUPPLY: formatEther(results[4].result || BigInt(0)),
+    poolAddress: results[11].result?.toString() || '',
   };
 }
 
@@ -149,4 +161,50 @@ export function getProgressToNextLevel(state: TokenState): number {
     return (totalSupply / maxBondingSupply) * 100;
   }
   return 0;
+}
+
+// Add function to get Uniswap quote
+export async function getUniswapQuote(
+  tokenAddress: string, 
+  poolAddress: string,
+  tokenAmount: bigint,
+  isBuy: boolean
+): Promise<bigint> {
+  const publicClient = getPublicClient();
+
+  // Get pool state
+  const [slot0, liquidity] = await Promise.all([
+    publicClient.readContract({
+      address: poolAddress as `0x${string}`,
+      abi: UniswapV3PoolABI,
+      functionName: 'slot0'
+    }),
+    publicClient.readContract({
+      address: poolAddress as `0x${string}`,
+      abi: UniswapV3PoolABI,
+      functionName: 'liquidity'
+    })
+  ]);
+
+  // Create SDK instances
+  const WETH = new Token(base.id, WETH_ADDRESS, 18, 'WETH');
+  const TOKEN = new Token(base.id, tokenAddress, 18);
+
+  const pool = new Pool(
+    WETH,
+    TOKEN,
+    LP_FEE,
+    slot0.sqrtPriceX96.toString(),
+    liquidity.toString(),
+    slot0.tick
+  );
+
+  // Get quote
+  if (isBuy) {
+    const quote = await pool.getOutputAmount(tokenAmount);
+    return quote[0].quotient;
+  } else {
+    const quote = await pool.getInputAmount(tokenAmount);
+    return quote[0].quotient;
+  }
 } 

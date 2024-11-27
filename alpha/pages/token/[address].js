@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { getTokenState, getProgressToNextLevel } from '../../onchain';
+import { getTokenState, getProgressToNextLevel, getUniswapQuote } from '../../onchain';
 import { useContractWrite, useWaitForTransaction, useContractRead, useAccount } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
@@ -198,6 +198,55 @@ export default function TokenPage() {
     }
   };
 
+  // Add state for Uniswap quotes
+  const [uniswapBuyQuote, setUniswapBuyQuote] = useState<bigint | null>(null);
+  const [uniswapSellQuote, setUniswapSellQuote] = useState<bigint | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+
+  // Update quotes when amount changes
+  useEffect(() => {
+    if (!amount || !tokenState || !address) return;
+
+    const updateQuote = async () => {
+      try {
+        setQuoteError(null);
+        if (tokenState.marketType === 1) {
+          // Uniswap market
+          const tokenAmount = parseEther(amount);
+          const quote = await getUniswapQuote(
+            address,
+            tokenState.poolAddress,
+            tokenAmount,
+            isBuying
+          );
+          if (isBuying) {
+            setUniswapBuyQuote(quote);
+          } else {
+            setUniswapSellQuote(quote);
+          }
+        }
+      } catch (error) {
+        console.error('Quote error:', error);
+        setQuoteError('Failed to get quote');
+      }
+    };
+
+    updateQuote();
+  }, [amount, tokenState, address, isBuying]);
+
+  // Use appropriate quote based on market type
+  const currentQuote = useMemo(() => {
+    if (!tokenState) return null;
+    
+    if (tokenState.marketType === 0) {
+      // Bonding curve market
+      return isBuying ? buyQuote : sellQuote;
+    } else {
+      // Uniswap market
+      return isBuying ? uniswapBuyQuote : uniswapSellQuote;
+    }
+  }, [tokenState, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
@@ -369,12 +418,8 @@ export default function TokenPage() {
                 <div className="flex justify-between text-sm">
                   <span>{isBuying ? "You'll Pay" : "You'll Receive"}</span>
                   <span>
-                    {isBuying 
-                      ? (buyQuoteError ? 'Quote unavailable' : 
-                         buyQuote ? `${formatEther(buyQuote)} ETH` : '...')
-                      : (sellQuoteError ? 'Quote unavailable' : 
-                         sellQuote ? `${formatEther(sellQuote)} ETH` : '...')
-                    }
+                    {quoteError ? 'Quote unavailable' : 
+                     currentQuote ? `${formatEther(currentQuote)} ETH` : '...'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-green-500/70">
