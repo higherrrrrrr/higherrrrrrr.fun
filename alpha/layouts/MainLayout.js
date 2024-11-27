@@ -36,6 +36,22 @@ export default function MainLayout({ children }) {
       return false;
     };
 
+    // Function to check contract address and set cookie
+    const checkContractAddress = async () => {
+      try {
+        const data = await getContractAddress();
+        if (data.factory_address) {
+          setShouldShowComingSoon(false);
+          // Set cookie with 7 day expiry
+          document.cookie = `factory_address=${data.factory_address};max-age=604800;path=/`;
+          return true;
+        }
+      } catch (error) {
+        console.error('Error fetching contract address:', error);
+      }
+      return false;
+    };
+
     // Initial check
     const isLaunched = checkLaunchStatus();
     
@@ -43,13 +59,15 @@ export default function MainLayout({ children }) {
     if (!isLaunched) {
       const storedAuthToken = localStorage.getItem('auth_token');
       if (storedAuthToken) {
-        getContractAddress()
-          .then(data => {
-            if (data.factory_address) {
-              setShouldShowComingSoon(false);
-            }
-          })
-          .catch(console.error);
+        // Check if we already have the address in cookie
+        const cookies = document.cookie.split(';');
+        const factoryAddressCookie = cookies.find(c => c.trim().startsWith('factory_address='));
+        
+        if (factoryAddressCookie) {
+          setShouldShowComingSoon(false);
+        } else {
+          checkContractAddress();
+        }
       }
       
       // Set up periodic check every 30 seconds
@@ -76,6 +94,8 @@ export default function MainLayout({ children }) {
           
           if (data.factory_address) {
             setShouldShowComingSoon(false);
+            // Set cookie with 7 day expiry
+            document.cookie = `factory_address=${data.factory_address};max-age=604800;path=/`;
           } else {
             localStorage.removeItem('auth_token');
           }
