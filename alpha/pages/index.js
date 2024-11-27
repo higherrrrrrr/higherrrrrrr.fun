@@ -12,6 +12,31 @@ export default function TokensList() {
   const [tokenStates, setTokenStates] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
+  // Function to refresh a single token's state
+  const refreshTokenState = async (tokenAddress) => {
+    try {
+      const state = await getTokenState(tokenAddress);
+      setTokenStates(prev => ({
+        ...prev,
+        [tokenAddress]: state
+      }));
+      return state;
+    } catch (error) {
+      console.error(`Failed to fetch state for token ${tokenAddress}:`, error);
+    }
+  };
+
+  // Function to refresh all token states
+  const refreshAllTokenStates = async () => {
+    for (const token of latestTokens) {
+      await refreshTokenState(token.address);
+    }
+    if (highlightedToken) {
+      await refreshTokenState(highlightedToken.address);
+    }
+  };
+
+  // Initial data load
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -22,6 +47,8 @@ export default function TokensList() {
           getLatestTokens(100)
         ]);
         
+        setLatestTokens(latest.tokens || []);
+        
         if (highlighted && highlighted.address) {
           const highlightedState = await getTokenState(highlighted.address);
           setHighlightedToken({
@@ -31,7 +58,8 @@ export default function TokensList() {
           });
         }
 
-        setLatestTokens(latest.tokens || []);
+        // Initial token states fetch
+        await refreshAllTokenStates();
         
       } catch (error) {
         console.error('Failed to fetch tokens:', error);
@@ -41,26 +69,12 @@ export default function TokensList() {
     };
 
     fetchData();
+
+    // Set up periodic refresh
+    const refreshTimer = setInterval(refreshAllTokenStates, 15000); // Every 15 seconds
+
+    return () => clearInterval(refreshTimer);
   }, []);
-
-  useEffect(() => {
-    const fetchTokenStates = async () => {
-      const states = {};
-      for (const token of latestTokens) {
-        try {
-          const state = await getTokenState(token.address);
-          states[token.address] = state;
-        } catch (error) {
-          console.error(`Failed to fetch state for token ${token.address}:`, error);
-        }
-      }
-      setTokenStates(states);
-    };
-
-    if (latestTokens.length > 0) {
-      fetchTokenStates();
-    }
-  }, [latestTokens]);
 
   if (isLoading) {
     return (

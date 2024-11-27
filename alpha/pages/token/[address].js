@@ -58,21 +58,27 @@ export default function TokenPage() {
     }
   }
 
+  // Add periodic refresh of token state
   useEffect(() => {
     if (address) {
+      // Initial load
       setLoading(true);
       Promise.all([
         refreshTokenState(),
         getEthPrice()
       ])
         .then(([_, priceData]) => {
-          console.log('Token state loaded:', tokenState);
-          console.log('Current name:', tokenState?.currentName);
-          console.log('ETH Price:', priceData.price_usd);
           setEthPrice(priceData.price_usd);
         })
         .catch(console.error)
         .finally(() => setLoading(false));
+
+      // Set up periodic refresh of token state
+      const tokenRefreshTimer = setInterval(() => {
+        refreshTokenState().catch(console.error);
+      }, 15000); // Every 15 seconds
+
+      return () => clearInterval(tokenRefreshTimer);
     }
   }, [address]);
 
@@ -278,64 +284,7 @@ export default function TokenPage() {
           </div>
         </div>
 
-        {/* Levels Table */}
-        <div className="border border-green-500/30 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-green-500/30">
-                <th className="p-4 text-left">Level</th>
-                <th className="p-4 text-left">Name</th>
-                <th className="p-4 text-right">Price</th>
-                <th className="p-4 text-right">Market Cap</th>
-                <th className="p-4 text-center">State</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tokenState.priceLevels.map((level, index) => {
-                const levelUsdPrice = parseFloat(level.price) * ethPrice;
-                const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
-                const isCurrentLevel = level.name === tokenState.currentName;
-                
-                // Find if this level is achieved (any level before current)
-                const currentLevelIndex = tokenState.priceLevels.findIndex(l => l.name === tokenState.currentName);
-                const isAchieved = index <= currentLevelIndex;
-
-                return (
-                  <tr 
-                    key={index}
-                    className={`
-                      border-b border-green-500/10 
-                      ${isCurrentLevel ? 'bg-green-500/10' : ''}
-                    `}
-                  >
-                    <td className="p-4">{index + 1}</td>
-                    <td className="p-4">{level.name}</td>
-                    <td className="p-4 text-right">
-                      ${formatUsdPrice(levelUsdPrice)}
-                    </td>
-                    <td className="p-4 text-right">
-                      {formatMarketCap(levelMarketCap)}
-                    </td>
-                    <td className="p-4 text-center">
-                      {isCurrentLevel ? (
-                        <span className="text-green-500">Current</span>
-                      ) : isAchieved ? (
-                        <span className="text-green-500/50">Achieved</span>
-                      ) : (
-                        <span className="text-green-500/30">Locked</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Buy/Sell Section */}
-      <div className="max-w-4xl mx-auto p-8 space-y-8">
-        {/* Trading Interface */}
+        {/* Trading Interface - Moved up */}
         <div className="border border-green-500/30 rounded-lg p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Trade Token</h2>
@@ -428,6 +377,60 @@ export default function TokenPage() {
               }
             </button>
           </div>
+        </div>
+
+        {/* Levels Table */}
+        <div className="border border-green-500/30 rounded-lg overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-green-500/30">
+                <th className="p-4 text-left">Level</th>
+                <th className="p-4 text-left">Name</th>
+                <th className="p-4 text-right">Price</th>
+                <th className="p-4 text-right">Market Cap</th>
+                <th className="p-4 text-center">State</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tokenState.priceLevels.map((level, index) => {
+                const levelUsdPrice = parseFloat(level.price) * ethPrice;
+                const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
+                const isCurrentLevel = level.name === tokenState.currentName;
+                
+                // Find if this level is achieved (any level before current)
+                const currentLevelIndex = tokenState.priceLevels.findIndex(l => l.name === tokenState.currentName);
+                const isAchieved = index <= currentLevelIndex;
+
+                return (
+                  <tr 
+                    key={index}
+                    className={`
+                      border-b border-green-500/10 
+                      ${isCurrentLevel ? 'bg-green-500/10' : ''}
+                    `}
+                  >
+                    <td className="p-4">{index + 1}</td>
+                    <td className="p-4">{level.name}</td>
+                    <td className="p-4 text-right">
+                      ${formatUsdPrice(levelUsdPrice)}
+                    </td>
+                    <td className="p-4 text-right">
+                      {formatMarketCap(levelMarketCap)}
+                    </td>
+                    <td className="p-4 text-center">
+                      {isCurrentLevel ? (
+                        <span className="text-green-500">Current</span>
+                      ) : isAchieved ? (
+                        <span className="text-green-500/50">Achieved</span>
+                      ) : (
+                        <span className="text-green-500/30">Locked</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
