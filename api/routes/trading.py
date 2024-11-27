@@ -230,7 +230,6 @@ def get_eth_price():
     })
 
 @trading.route('/highlighted-token', methods=['GET'])
-@require_auth
 def get_highlighted_token():
     highlighted_address = Config.HIGHLIGHTED_TOKEN
     print("Config values:", {
