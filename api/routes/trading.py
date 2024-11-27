@@ -221,7 +221,6 @@ def get_eth_price():
         return jsonify({'error': str(e)}), 500
 
 @trading.route('/eth/price', methods=['GET'])
-@require_auth
 def get_eth_price():
     price_data = PriceService.get_eth_price()
     return jsonify({
