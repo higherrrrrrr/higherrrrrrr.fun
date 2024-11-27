@@ -48,47 +48,52 @@ def get_latest_tokens(limit=10):
     
     try:
         print("\n=== Starting get_latest_tokens ===")
-        print(f"RPC URL: {Config.RPC_URL}")
-        print(f"Factory Address: {Config.CONTRACT_ADDRESS}")
+        print(f"Using RPC URL: {Config.RPC_URL}")
         
-        # Check cache
+        # Check cache first
         if token_cache.tokens and current_time - token_cache.timestamp < CACHE_DURATION:
-            print("Returning cached tokens")
+            print("✅ Returning cached tokens")
             return token_cache.tokens[:limit]
         
-        # Initialize Web3
+        # Initialize Web3 with RPC from config
         w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
         
         if not w3.is_connected():
             print("❌ Failed to connect to RPC endpoint")
-            return []
+            return token_cache.tokens[:limit] if token_cache.tokens else []
             
         print("✅ Connected to RPC endpoint")
         
-        # Get latest block and calculate range
+        # Get latest block and calculate range (last 2 hours of blocks)
         latest_block = w3.eth.block_number
-        blocks_to_search = 1000  # About 30 minutes of blocks
+        blocks_to_search = 2000  # About 1 hour of blocks on Base
         from_block = max(0, latest_block - blocks_to_search)
         
         print(f"Searching blocks {from_block} to {latest_block}")
         
         try:
-            # Use the correct event signature
             factory_address = Web3.to_checksum_address(Config.CONTRACT_ADDRESS)
             event_signature = '0x46960970e01c8cbebf9e58299b0acf8137b299ef06eb6c4f5be2c0443d5e5f22'
             
-            logs = w3.eth.get_logs({
-                'fromBlock': from_block,
-                'toBlock': latest_block,
-                'address': factory_address,
-                'topics': [event_signature]
-            })
+            # Get logs in smaller chunks to avoid timeout
+            chunk_size = 1000
+            all_logs = []
             
-            print(f"✅ Found {len(logs)} NewToken events")
+            for chunk_start in range(from_block, latest_block + 1, chunk_size):
+                chunk_end = min(chunk_start + chunk_size - 1, latest_block)
+                logs = w3.eth.get_logs({
+                    'fromBlock': chunk_start,
+                    'toBlock': chunk_end,
+                    'address': factory_address,
+                    'topics': [event_signature]
+                })
+                all_logs.extend(logs)
+            
+            print(f"✅ Found {len(all_logs)} NewToken events")
             
             # Process logs
             tokens = []
-            for log in sorted(logs, key=lambda x: x['blockNumber'], reverse=True):
+            for log in sorted(all_logs, key=lambda x: x['blockNumber'], reverse=True):
                 try:
                     token_address = Web3.to_checksum_address('0x' + log['topics'][1].hex()[-40:])
                     conviction_address = Web3.to_checksum_address('0x' + log['topics'][2].hex()[-40:])
@@ -118,15 +123,13 @@ def get_latest_tokens(limit=10):
             
         except Exception as e:
             print(f"❌ Error getting events: {str(e)}")
-            raise
+            # Return cached data if available
+            return token_cache.tokens[:limit] if token_cache.tokens else []
             
     except Exception as e:
         print(f"❌ Fatal error in get_latest_tokens: {str(e)}")
         traceback.print_exc()
-        if token_cache.tokens:
-            print("Returning cached tokens due to error")
-            return token_cache.tokens[:limit]
-        return []
+        return token_cache.tokens[:limit] if token_cache.tokens else []
 
 @trading.route('/tokens/latest', methods=['GET'])
 def get_latest_token_deploys():
