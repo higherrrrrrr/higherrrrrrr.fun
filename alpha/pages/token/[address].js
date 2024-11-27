@@ -166,13 +166,7 @@ export default function TokenPage() {
 
     if (isBuying) {
       const quote = currentQuote;
-      if (!quote || quoteError) return;
-      
-      // Check minimum amount for buying
-      if (parseFloat(formatEther(quote)) < parseFloat(MIN_ETH_AMOUNT)) {
-        setError(`Minimum trade amount is ${MIN_ETH_AMOUNT} ETH`);
-        return;
-      }
+      if (!quote) return;
       
       buyToken({
         value: quote,
@@ -186,14 +180,7 @@ export default function TokenPage() {
         ]
       });
     } else {
-      if (!amount || quoteError) return;
-      
-      // Check minimum amount for selling
-      const quote = currentQuote;
-      if (parseFloat(formatEther(quote)) < parseFloat(MIN_ETH_AMOUNT)) {
-        setError(`Minimum trade amount is ${MIN_ETH_AMOUNT} ETH`);
-        return;
-      }
+      if (!amount) return;
       
       sellToken({
         args: [
@@ -485,9 +472,7 @@ export default function TokenPage() {
                 disabled={
                   tokenState.paused || 
                   isLoading || 
-                  !amount || 
-                  !isQuoteAvailable ||
-                  (currentQuote && parseFloat(formatEther(currentQuote)) < parseFloat(MIN_ETH_AMOUNT))
+                  !amount // Only require an amount
                 }
                 className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
               >
