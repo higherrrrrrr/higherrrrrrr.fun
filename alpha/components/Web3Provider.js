@@ -9,6 +9,7 @@ export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
 
 const ALCHEMY_RPC = 'https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a';
+const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
 
 // Completely override Base chain with our RPC
 const baseChain = {
@@ -39,6 +40,7 @@ const wagmiConfig = createConfig(
     transports: {
       [baseChain.id]: http(ALCHEMY_RPC),
     },
+    walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
   }),
 );
 

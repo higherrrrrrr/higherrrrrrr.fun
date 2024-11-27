@@ -452,20 +452,6 @@ export default function TokenPage() {
           </div>
         )}
 
-        {/* Level Progress */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Progress to Next Level</span>
-            <span>{getProgressToNextLevel(tokenState).toFixed(2)}%</span>
-          </div>
-          <div className="w-full bg-green-500/20 rounded-full h-4">
-            <div 
-              className="bg-green-500 h-4 rounded-full transition-all"
-              style={{ width: `${getProgressToNextLevel(tokenState)}%` }}
-            />
-          </div>
-        </div>
-
         {/* Trading Interface - Moved up */}
         <div className="border border-green-500/30 rounded-lg p-6 space-y-6">
           <div className="flex justify-between items-center">

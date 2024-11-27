@@ -47,7 +47,6 @@ def get_latest_tokens(limit=10):
     current_time = time.time()
     
     try:
-        # Debug connection info
         print("\n=== Starting get_latest_tokens ===")
         print(f"RPC URL: {Config.RPC_URL}")
         print(f"Factory Address: {Config.CONTRACT_ADDRESS}")
@@ -63,102 +62,71 @@ def get_latest_tokens(limit=10):
         if not w3.is_connected():
             print("❌ Failed to connect to RPC endpoint")
             return []
-        
+            
         print("✅ Connected to RPC endpoint")
-            
-        # Setup contract
-        try:
-            contract_address = Web3.to_checksum_address(Config.CONTRACT_ADDRESS)
-            factory_contract = w3.eth.contract(
-                address=contract_address, 
-                abi=FACTORY_ABI
-            )
-            print("✅ Contract initialized")
-        except Exception as e:
-            print("❌ Failed to initialize contract:", str(e))
-            traceback.print_exc()
-            return []
         
-        # Get latest block
+        # Get latest block and calculate range
         latest_block = w3.eth.block_number
-        from_block = max(0, latest_block - 10000)
-        print(f"Scanning blocks {from_block} to {latest_block}")
+        # Look back ~2 hours of blocks (assuming 2s block time)
+        blocks_to_search = 3600
+        from_block = max(0, latest_block - blocks_to_search)
         
-        # Get events
+        print(f"Searching blocks {from_block} to {latest_block}")
+        
         try:
-            print("Attempting to get events using create_filter...")
-            event_filter = factory_contract.events.NewToken.create_filter(
-                fromBlock=from_block
-            )
-            events = event_filter.get_all_entries()
-            print(f"✅ Found {len(events)} events using create_filter")
-        except Exception as filter_error:
-            print(f"❌ Filter method failed: {str(filter_error)}")
-            print("Falling back to get_logs...")
+            # Get logs directly without using contract events
+            event_signature = w3.keccak(text='NewToken(address,address)').hex()
             
-            try:
-                event_signature_hash = Web3.keccak(text='NewToken(address,address)').hex()
-                events = w3.eth.get_logs({
-                    'address': contract_address,
-                    'fromBlock': from_block,
-                    'toBlock': 'latest',
-                    'topics': [event_signature_hash]
-                })
-                print(f"✅ Found {len(events)} events using get_logs")
-            except Exception as logs_error:
-                print(f"❌ get_logs failed: {str(logs_error)}")
-                traceback.print_exc()
-                return []
-        
-        # Process events
-        tokens = []
-        for event in sorted(events, key=lambda x: x['blockNumber'], reverse=True):
-            try:
-                print(f"\nProcessing event from block {event['blockNumber']}")
-                
-                if hasattr(event, 'args'):
-                    print("Event has args - using direct access")
-                    token_address = event.args.token
-                    conviction_address = event.args.conviction
-                else:
-                    print("Event is raw log - decoding manually")
-                    topics = event['topics']
-                    token_address = Web3.to_checksum_address('0x' + topics[1].hex()[-40:])
-                    conviction_address = Web3.to_checksum_address('0x' + topics[2].hex()[-40:])
-                
-                print(f"Token Address: {token_address}")
-                print(f"Conviction Address: {conviction_address}")
-                
-                block = w3.eth.get_block(event['blockNumber'])
-                
-                token_data = {
-                    'address': token_address,
-                    'conviction': conviction_address,
-                    'timestamp': block['timestamp'],
-                    'block_number': event['blockNumber'],
-                    'transaction_hash': event['transactionHash'].hex()
-                }
-                print(f"✅ Successfully processed token: {token_data}")
-                tokens.append(token_data)
-                
-            except Exception as e:
-                print(f"❌ Error processing event: {str(e)}")
-                traceback.print_exc()
-                continue
-        
-        print(f"\n=== Found {len(tokens)} total tokens ===")
-        
-        # Update cache
-        token_cache.tokens = tokens
-        token_cache.timestamp = current_time
-        
-        return tokens[:limit]
-        
+            logs = w3.eth.get_logs({
+                'fromBlock': hex(from_block),  # Use hex format
+                'toBlock': hex(latest_block),  # Use hex format
+                'address': Web3.to_checksum_address(Config.CONTRACT_ADDRESS),
+                'topics': [event_signature]
+            })
+            
+            print(f"✅ Found {len(logs)} logs")
+            
+            # Process logs
+            tokens = []
+            for log in sorted(logs, key=lambda x: x['blockNumber'], reverse=True):
+                try:
+                    # Extract token address from the first topic (index 1)
+                    token_address = Web3.to_checksum_address('0x' + log['topics'][1].hex()[-40:])
+                    conviction_address = Web3.to_checksum_address('0x' + log['topics'][2].hex()[-40:])
+                    
+                    # Get block timestamp
+                    block = w3.eth.get_block(log['blockNumber'])
+                    
+                    token_data = {
+                        'address': token_address,
+                        'conviction': conviction_address,
+                        'timestamp': block['timestamp'],
+                        'block_number': log['blockNumber'],
+                        'transaction_hash': log['transactionHash'].hex()
+                    }
+                    
+                    print(f"✅ Processed token: {token_address}")
+                    tokens.append(token_data)
+                    
+                except Exception as e:
+                    print(f"❌ Error processing log: {str(e)}")
+                    continue
+            
+            # Update cache
+            token_cache.tokens = tokens
+            token_cache.timestamp = current_time
+            
+            return tokens[:limit]
+            
+        except Exception as e:
+            print(f"❌ Error getting logs: {str(e)}")
+            raise
+            
     except Exception as e:
         print(f"❌ Fatal error in get_latest_tokens: {str(e)}")
         traceback.print_exc()
         if token_cache.tokens:
-            print("Returning expired cached tokens due to error")
+            print("Returning cached tokens due to error")
             return token_cache.tokens[:limit]
         return []
 
