@@ -40,7 +40,7 @@ class TokenCache:
         self.timestamp = 0
 
 token_cache = TokenCache()
-CACHE_DURATION = 60  # 1 minute in seconds
+CACHE_DURATION = 360  # 1 minute in seconds
 
 def get_latest_tokens(limit=10):
     global token_cache
@@ -66,7 +66,7 @@ def get_latest_tokens(limit=10):
         
         # Get latest block and calculate range (last 2 hours of blocks)
         latest_block = w3.eth.block_number
-        blocks_to_search = 2000  # About 1 hour of blocks on Base
+        blocks_to_search = 200000  # About 1 hour of blocks on Base
         from_block = max(0, latest_block - blocks_to_search)
         
         print(f"Searching blocks {from_block} to {latest_block}")
