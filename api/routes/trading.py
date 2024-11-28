@@ -42,23 +42,31 @@ class TokenCache:
 token_cache = TokenCache()
 CACHE_DURATION = 3600  # 1 minute in seconds
 
-def get_latest_tokens(limit=10):
+def get_latest_tokens(limit=10, sort_by='timestamp'):
     try:
-        print("\n=== Starting get_latest_tokens from subgraph ===")
+        print(f"\n=== Starting get_latest_tokens from subgraph (sort: {sort_by}) ===")
         
-        # GraphQL query
+        # GraphQL query with dynamic sorting
+        sort_field = 'timestamp' if sort_by == 'timestamp' else 'volumeETH'
         query = """
         {
-          newTokenEvents(first: %d, orderBy: timestamp, orderDirection: desc) {
+          newTokenEvents(
+            first: %d, 
+            orderBy: %s, 
+            orderDirection: desc
+          ) {
             id
             token
             conviction
             blockNumber
             timestamp
             transactionHash
+            volumeETH
+            lastTradeTimestamp
+            tradeCount
           }
         }
-        """ % limit
+        """ % (limit, sort_field)
 
         # Make request to subgraph
         response = requests.post(
@@ -99,9 +107,10 @@ def get_latest_tokens(limit=10):
 def get_latest_token_deploys():
     try:
         limit = int(request.args.get('limit', 10))
-        print(f"\n=== GET /tokens/latest with limit={limit} ===")
+        sort_by = request.args.get('sort', 'timestamp') # Add sort parameter
+        print(f"\n=== GET /tokens/latest with limit={limit}, sort={sort_by} ===")
         
-        tokens = get_latest_tokens(limit)
+        tokens = get_latest_tokens(limit, sort_by)
         print(f"Returning {len(tokens)} tokens")
         
         return jsonify({
