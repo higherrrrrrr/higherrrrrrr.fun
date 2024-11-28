@@ -288,8 +288,8 @@ export async function getUniswapQuote(
         return quote;
       } else {
         // Selling token0 for token1 (ETH)
-        const numerator = tokenAmount * Q96 * Q96;
-        const denominator = sqrtPriceX96 * sqrtPriceX96;
+        const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
+        const denominator = Q96 * Q96;
         const quote = numerator / denominator;
         
         console.log('Sell token0 quote calculation:', {
@@ -315,8 +315,8 @@ export async function getUniswapQuote(
         return quote;
       } else {
         // Selling token1 for token0 (ETH)
-        const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
-        const denominator = Q96 * Q96;
+        const numerator = tokenAmount * Q96 * Q96;
+        const denominator = sqrtPriceX96 * sqrtPriceX96;
         const quote = numerator / denominator;
         
         console.log('Sell token1 quote calculation:', {

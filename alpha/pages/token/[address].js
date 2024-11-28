@@ -226,10 +226,12 @@ export default function TokenPage({ addressProp }) {
             tokenAmount,
             isBuying
           );
-          if (isBuying) {
-            setUniswapBuyQuote(quote);
-          } else {
-            setUniswapSellQuote(quote);
+          if (quote) {
+            if (isBuying) {
+              setUniswapBuyQuote(quote);
+            } else {
+              setUniswapSellQuote(quote);
+            }
           }
         }
       } catch (error) {
@@ -250,7 +252,7 @@ export default function TokenPage({ addressProp }) {
         // Bonding curve market
         return isBuying ? buyQuote : sellQuote;
       } else {
-        // Uniswap market
+        // Uniswap market - use the raw quotes directly
         return isBuying ? uniswapBuyQuote : uniswapSellQuote;
       }
     } catch (error) {
@@ -313,39 +315,23 @@ export default function TokenPage({ addressProp }) {
   });
 
   // Update handlePercentageClick function
-  const handlePercentageClick = async (percentage) => {
+  const handlePercentageClick = (percentage) => {
     if (!userAddress) return;
     
-    try {
-      if (isBuying) {
-        // For buying: calculate based on ETH balance
-        if (!ethBalance?.formatted) return;
-        const ethAmount = parseFloat(ethBalance.formatted) * percentage;
-        
-        // Get quote for this ETH amount
-        if (tokenState.marketType === 0) {
-          // Bonding curve
-          const quote = await getTokenBuyQuoteForEth(address, ethAmount);
-          setAmount(quote.toString());
-        } else {
-          // Uniswap
-          const quote = await getUniswapQuote(
-            address,
-            tokenState.poolAddress,
-            parseEther(ethAmount.toString()),
-            true
-          );
-          if (quote) {
-            setAmount(formatEther(quote));
-          }
-        }
-      } else {
-        // For selling: calculate percentage of token balance
-        const amount = (parseFloat(userBalance) * percentage).toFixed(6);
-        setAmount(amount.toString());
-      }
-    } catch (error) {
-      console.error('Error calculating percentage amount:', error);
+    if (isBuying) {
+      // For buying: calculate percentage of ETH balance
+      if (!ethBalance?.formatted) return;
+      // If it's 100% (APE), use 98% instead to leave room for gas
+      const actualPercentage = percentage === 1 ? 0.98 : percentage;
+      const maxEthToSpend = parseFloat(ethBalance.formatted) * actualPercentage;
+      // Estimate tokens based on current price
+      const estimatedTokens = maxEthToSpend / priceInEth;
+      setAmount(estimatedTokens.toFixed(6));
+    } else {
+      // For selling: calculate percentage of token balance
+      // For selling we can use full percentage since gas is paid in ETH
+      const amount = (parseFloat(userBalance) * percentage).toFixed(6);
+      setAmount(amount.toString());
     }
   };
 
