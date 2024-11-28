@@ -50,7 +50,7 @@ const wagmiConfig = createConfig({
       chains,
       walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
     }).connectors.filter(connector => 
-      connector.id !== 'rabby'
+     connector.id !== 'injected' && connector.id !== 'rabby'
     ),
     // Add our custom Rabby connector
     new InjectedConnector({
