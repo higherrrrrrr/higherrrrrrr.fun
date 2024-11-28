@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { getTokenState, getProgressToNextLevel, getUniswapQuote, getTokenBalance } from '../../onchain';
-import { useContractWrite, useWaitForTransaction, useContractRead, useAccount } from 'wagmi';
+import { useContractWrite, useWaitForTransaction, useContractRead, useAccount, useBalance } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
 import { higherrrrrrrAbi } from '../../onchain/generated';
@@ -307,6 +307,27 @@ export default function TokenPage({ addressProp }) {
     return () => clearInterval(balanceInterval);
   }, [userAddress, address]);
 
+  const { data: ethBalance } = useBalance({
+    address: userAddress,
+    watch: true,
+  });
+
+  const handlePercentageClick = (percentage) => {
+    if (!userAddress) return;
+    
+    if (isBuying) {
+      // For buying: calculate percentage of ETH balance
+      if (!ethBalance?.formatted) return;
+      const maxTokens = parseFloat(ethBalance.formatted) / priceInEth;
+      const amount = (maxTokens * percentage).toFixed(6);
+      setAmount(amount.toString());
+    } else {
+      // For selling: calculate percentage of token balance
+      const amount = (parseFloat(userBalance) * percentage).toFixed(6);
+      setAmount(amount.toString());
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
@@ -471,6 +492,41 @@ export default function TokenPage({ addressProp }) {
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <label className="text-sm text-green-500/70">Amount in Tokens</label>
+              {userAddress && (
+                <div className="text-sm text-green-500/50">
+                  {isBuying 
+                    ? `Available: ${parseFloat(ethBalance?.formatted || '0').toFixed(4)} ETH`
+                    : `Available: ${parseFloat(userBalance).toFixed(4)} ${tokenState.symbol}`
+                  }
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2 mb-2">
+              <button
+                onClick={() => handlePercentageClick(0.25)}
+                className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded"
+              >
+                25%
+              </button>
+              <button
+                onClick={() => handlePercentageClick(0.5)}
+                className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded"
+              >
+                50%
+              </button>
+              <button
+                onClick={() => handlePercentageClick(0.75)}
+                className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded"
+              >
+                75%
+              </button>
+              <button
+                onClick={() => handlePercentageClick(1)}
+                className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded bg-green-500/10"
+              >
+                APE 🦍
+              </button>
             </div>
 
             <input
