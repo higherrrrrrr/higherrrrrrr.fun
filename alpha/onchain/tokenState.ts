@@ -258,4 +258,20 @@ export async function getUniswapQuote(
   }
 }
 
+export async function getTokenBalance(tokenAddress: string, walletAddress: string): Promise<string> {
+  try {
+    const balance = await publicClient.readContract({
+      address: tokenAddress as `0x${string}`,
+      abi: higherrrrrrrAbi,
+      functionName: 'balanceOf',
+      args: [walletAddress as `0x${string}`]
+    });
+
+    return formatEther(balance || BigInt(0));
+  } catch (error) {
+    console.error('Error getting token balance:', error);
+    return '0';
+  }
+}
+
 // Rest of the file stays the same... 

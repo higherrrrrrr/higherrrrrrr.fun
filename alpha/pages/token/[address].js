@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { getTokenState, getProgressToNextLevel, getUniswapQuote } from '../../onchain';
+import { getTokenState, getProgressToNextLevel, getUniswapQuote, getTokenBalance } from '../../onchain';
 import { useContractWrite, useWaitForTransaction, useContractRead, useAccount } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
@@ -61,6 +61,12 @@ export default function TokenPage({ addressProp }) {
     if (typeof address === 'string') {
       const state = await getTokenState(address);
       setTokenState(state);
+      
+      // Also refresh balance if user is connected
+      if (userAddress) {
+        const balance = await getTokenBalance(address, userAddress);
+        setUserBalance(balance);
+      }
     }
   }
 
@@ -280,6 +286,27 @@ export default function TokenPage({ addressProp }) {
     }
   }, [tokenState, amount, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote, buyQuoteError, sellQuoteError, quoteError]);
 
+  // Add balance state inside the component
+  const [userBalance, setUserBalance] = useState('0');
+
+  // Add effect to fetch and update balance
+  useEffect(() => {
+    const updateBalance = async () => {
+      if (userAddress && address) {
+        const balance = await getTokenBalance(address, userAddress);
+        setUserBalance(balance);
+      } else {
+        setUserBalance('0');
+      }
+    };
+
+    updateBalance();
+    
+    // Set up periodic refresh
+    const balanceInterval = setInterval(updateBalance, 15000);
+    return () => clearInterval(balanceInterval);
+  }, [userAddress, address]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
@@ -402,6 +429,21 @@ export default function TokenPage({ addressProp }) {
         <div className="border border-green-500/30 rounded-lg p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold">Trade Token</h2>
+            <div className="flex flex-col items-end">
+              <div className="text-sm text-green-500/70">Your Balance</div>
+              <div className="text-lg">
+                {Number(userBalance).toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2
+                })} {tokenState.symbol}
+              </div>
+              <div className="text-sm text-green-500/50">
+                ${(Number(userBalance) * priceInEth * ethPrice).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </div>
+            </div>
             <div className="flex space-x-2">
               <button
                 onClick={() => setIsBuying(true)}
