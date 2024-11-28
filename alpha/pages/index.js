@@ -88,10 +88,19 @@ export default function Home() {
         {/* Divider */}
         <div className="border-b border-green-500/20 my-12"></div>
 
+        {/* Featured Token Section */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold mb-8">Featured Token</h2>
+          <TokenPage addressProp="0x17e1f08f8f80a07406d4f05420512ab5f2d7f56e" />
+        </div>
+
+        {/* Divider between sections */}
+        <div className="border-b border-green-500/20 my-12"></div>
+
         {/* Token Feed */}
         <div>
           <h2 className="text-3xl font-bold mb-8 flex items-center justify-between">
-            <span>Top Trading Tokens</span>
+            <span>Trending Tokens</span>
           </h2>
 
           <div>
