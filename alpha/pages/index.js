@@ -90,17 +90,20 @@ export default function Home() {
 
         {/* Token Feed */}
         <div>
-          <h2 className="text-xl font-bold mb-8 flex items-center justify-between">
+          <h2 className="text-3xl font-bold mb-8 flex items-center justify-between">
             <span>Top Trading Tokens</span>
           </h2>
 
-          <div className="space-y-12">
+          <div>
             {displayedTokens.map((token, index) => (
-              <div 
-                key={token.address} 
-                className="border-t border-green-500/10 pt-8 first:border-t-0 first:pt-0"
-              >
-                <TokenPage addressProp={token.address} />
+              <div key={token.address}>
+                {index > 0 && (
+                  <div className="my-12 border-t border-green-500/20" />
+                )}
+                
+                <div>
+                  <TokenPage addressProp={token.address} />
+                </div>
               </div>
             ))}
 
@@ -108,7 +111,7 @@ export default function Home() {
             {hasMore && (
               <div 
                 ref={loadingRef}
-                className="text-center py-8 text-green-500/50"
+                className="text-center py-12 text-green-500/50 border-t border-green-500/20 mt-12"
               >
                 {isLoadingFeed ? 'Loading more tokens...' : 'Scroll for more'}
               </div>
@@ -116,11 +119,14 @@ export default function Home() {
 
             {/* Initial loading state */}
             {isLoadingFeed && displayedTokens.length === 0 && (
-              <div className="space-y-8">
+              <div className="space-y-12">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse border border-green-500/20 rounded-lg p-6">
-                    <div className="h-4 bg-green-500/20 w-1/4 rounded mb-4" />
-                    <div className="h-8 bg-green-500/20 w-3/4 rounded" />
+                  <div key={i}>
+                    {i > 0 && <div className="my-12 border-t border-green-500/20" />}
+                    <div className="animate-pulse border border-green-500/20 rounded-lg p-6">
+                      <div className="h-4 bg-green-500/20 w-1/4 rounded mb-4" />
+                      <div className="h-8 bg-green-500/20 w-3/4 rounded" />
+                    </div>
                   </div>
                 ))}
               </div>
