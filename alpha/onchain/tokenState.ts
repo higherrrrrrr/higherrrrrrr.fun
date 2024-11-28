@@ -43,6 +43,24 @@ const PoolABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "token0",
+    "outputs": [
+      { "internalType": "address", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "token1",
+    "outputs": [
+      { "internalType": "address", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ] as const;
 
@@ -222,7 +240,15 @@ export async function getUniswapQuote(
   isBuy: boolean
 ): Promise<bigint> {
   try {
-    console.log('Getting quote for amount:', tokenAmount.toString());
+    console.log('Getting quote for amount:', tokenAmount.toString(), isBuy ? 'buy' : 'sell');
+    
+    // Get token0 to determine token order
+    const token0 = await publicClient.readContract({
+      address: poolAddress as `0x${string}`,
+      abi: PoolABI,
+      functionName: 'token0'
+    });
+
     // Get current price from pool
     const slot0 = await publicClient.readContract({
       address: poolAddress as `0x${string}`,
@@ -233,24 +259,74 @@ export async function getUniswapQuote(
     const sqrtPriceX96 = BigInt(slot0[0].toString());
     console.log('sqrtPriceX96:', sqrtPriceX96.toString());
 
+    // Sort addresses to determine which is token0
+    const [tokenA, tokenB] = [tokenAddress.toLowerCase(), token0.toLowerCase()].sort();
+    const isToken0 = tokenAddress.toLowerCase() === tokenA;
+    
+    console.log('Token order:', {
+      tokenAddress: tokenAddress.toLowerCase(),
+      token0: token0.toLowerCase(),
+      isToken0
+    });
+
     // Calculate price with proper scaling
     const Q96 = BigInt('79228162514264337593543950336'); // 2^96
 
-    const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
-      const denominator = Q96 * Q96;
-      const quote = numerator / denominator;
-      
-      console.log('Buy quote calculation:', {
-        numerator: numerator.toString(),
-        denominator: denominator.toString(),
-        quote: quote.toString()
-      });
-
-      if (quote <= 0n) {
-        throw new Error('Invalid quote calculation');
+    if (isToken0) {
+      // If our token is token0
+      if (isBuy) {
+        // Buying token0 with token1 (ETH)
+        const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
+        const denominator = Q96 * Q96;
+        const quote = numerator / denominator;
+        
+        console.log('Buy token0 quote calculation:', {
+          numerator: numerator.toString(),
+          denominator: denominator.toString(),
+          quote: quote.toString()
+        });
+        return quote;
+      } else {
+        // Selling token0 for token1 (ETH)
+        const numerator = tokenAmount * Q96 * Q96;
+        const denominator = sqrtPriceX96 * sqrtPriceX96;
+        const quote = numerator / denominator;
+        
+        console.log('Sell token0 quote calculation:', {
+          numerator: numerator.toString(),
+          denominator: denominator.toString(),
+          quote: quote.toString()
+        });
+        return quote;
       }
-
-      return quote;
+    } else {
+      // If our token is token1
+      if (isBuy) {
+        // Buying token1 with token0 (ETH)
+        const numerator = tokenAmount * Q96 * Q96;
+        const denominator = sqrtPriceX96 * sqrtPriceX96;
+        const quote = numerator / denominator;
+        
+        console.log('Buy token1 quote calculation:', {
+          numerator: numerator.toString(),
+          denominator: denominator.toString(),
+          quote: quote.toString()
+        });
+        return quote;
+      } else {
+        // Selling token1 for token0 (ETH)
+        const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
+        const denominator = Q96 * Q96;
+        const quote = numerator / denominator;
+        
+        console.log('Sell token1 quote calculation:', {
+          numerator: numerator.toString(),
+          denominator: denominator.toString(),
+          quote: quote.toString()
+        });
+        return quote;
+      }
+    }
 
   } catch (error) {
     console.error('Pool quote error:', error);
