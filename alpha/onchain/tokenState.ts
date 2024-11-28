@@ -235,11 +235,8 @@ export async function getUniswapQuote(
 
     // Calculate price with proper scaling
     const Q96 = BigInt('79228162514264337593543950336'); // 2^96
-    const PRECISION = BigInt('1000000000000000000'); // 10^18
 
-    if (isBuy) {
-      // For buying: amount * sqrtPrice^2 / 2^192
-      const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
+    const numerator = tokenAmount * sqrtPriceX96 * sqrtPriceX96;
       const denominator = Q96 * Q96;
       const quote = numerator / denominator;
       
@@ -254,24 +251,6 @@ export async function getUniswapQuote(
       }
 
       return quote;
-    } else {
-      // For selling: amount * 2^192 / sqrtPrice^2
-      const numerator = tokenAmount * Q96 * Q96;
-      const denominator = sqrtPriceX96 * sqrtPriceX96;
-      const quote = numerator / denominator;
-
-      console.log('Sell quote calculation:', {
-        numerator: numerator.toString(),
-        denominator: denominator.toString(),
-        quote: quote.toString()
-      });
-
-      if (quote <= 0n) {
-        throw new Error('Invalid quote calculation');
-      }
-
-      return quote;
-    }
 
   } catch (error) {
     console.error('Pool quote error:', error);
