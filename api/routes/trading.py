@@ -10,6 +10,7 @@ from functools import lru_cache
 import time
 import requests
 import traceback
+from dune_client.client import DuneClient
 
 trading = Blueprint('trading', __name__)
 
@@ -208,3 +209,81 @@ def get_contract_address():
     return jsonify({
         'factory_address': Config.CONTRACT_ADDRESS
     })
+
+# Add Dune cache
+class DuneCache:
+    def __init__(self):
+        self.data = None
+        self.timestamp = 0
+
+dune_cache = DuneCache()
+DUNE_CACHE_DURATION = 300  # 5 minutes
+
+@trading.route('/tokens/top-trading', methods=['GET'])
+def get_top_trading_tokens():
+    try:
+        print("\n=== Getting top trading tokens from Dune ===")
+        
+        # Check cache first
+        current_time = time.time()
+        if dune_cache.data and current_time - dune_cache.timestamp < DUNE_CACHE_DURATION:
+            print("✅ Returning cached Dune data")
+            return jsonify(dune_cache.data)
+
+        # Initialize Dune client
+        dune = DuneClient(Config.DUNE_API_KEY)
+        
+        # Fetch latest result for the volume query
+        print("Fetching from Dune query 4342388...")
+        query_result = dune.get_latest_result(4342388)
+        
+        # Poll until query is complete
+        max_attempts = 10
+        attempt = 0
+        while query_result.state == 'QUERY_STATE_EXECUTING' and attempt < max_attempts:
+            print(f"Query executing, attempt {attempt + 1}/{max_attempts}...")
+            time.sleep(3)  # Wait 3 seconds between checks
+            query_result = dune.get_latest_result(4342388)
+            attempt += 1
+            
+        print("Final Dune response:", query_result)
+        
+        if not query_result or not query_result.result or not query_result.result.rows:
+            print("❌ No data from Dune query")
+            return jsonify({'error': 'No data available'}), 404
+
+        # Format the response
+        tokens = [{
+            'address': row['token_address'],
+            'volume_24h': row['transfer_count'],  # Using transfer count as volume for now
+            'trades_24h': row['transfer_count'],
+            'creation_time': row['creation_time'],
+            'creation_tx': row['creation_tx']
+        } for row in query_result.result.rows]
+
+        response = {
+            'tokens': tokens,
+            'updated_at': int(current_time)
+        }
+
+        # Update cache
+        dune_cache.data = response
+        dune_cache.timestamp = current_time
+
+        print(f"✅ Returning {len(tokens)} top trading tokens")
+        return jsonify(response)
+
+    except Exception as e:
+        error_msg = f"Error fetching top trading tokens: {str(e)}"
+        print(f"❌ {error_msg}")
+        traceback.print_exc()
+        
+        # Return cached data if available
+        if dune_cache.data:
+            print("Returning cached data due to error")
+            return jsonify(dune_cache.data)
+            
+        return jsonify({
+            'error': error_msg,
+            'details': traceback.format_exc()
+        }), 500

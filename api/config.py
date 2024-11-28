@@ -10,4 +10,5 @@ class Config:
     HIGHLIGHTED_TOKEN = os.getenv('HIGHLIGHTED_TOKEN')
     RPC_URL = os.getenv('RPC_URL', 'https://mainnet.base.org')
     TOKENS_SUBGRAPH_URL = os.getenv('TOKENS_SUBGRAPH_URL')
+    DUNE_API_KEY = os.getenv('DUNE_API_KEY')
 
