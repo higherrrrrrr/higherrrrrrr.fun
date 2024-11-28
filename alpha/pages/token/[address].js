@@ -312,21 +312,63 @@ export default function TokenPage({ addressProp }) {
     watch: true,
   });
 
-  const handlePercentageClick = (percentage) => {
+  // Update handlePercentageClick function
+  const handlePercentageClick = async (percentage) => {
     if (!userAddress) return;
     
-    if (isBuying) {
-      // For buying: calculate percentage of ETH balance
-      if (!ethBalance?.formatted) return;
-      const maxTokens = parseFloat(ethBalance.formatted) / priceInEth;
-      const amount = (maxTokens * percentage).toFixed(6);
-      setAmount(amount.toString());
-    } else {
-      // For selling: calculate percentage of token balance
-      const amount = (parseFloat(userBalance) * percentage).toFixed(6);
-      setAmount(amount.toString());
+    try {
+      if (isBuying) {
+        // For buying: calculate based on ETH balance
+        if (!ethBalance?.formatted) return;
+        const ethAmount = parseFloat(ethBalance.formatted) * percentage;
+        
+        // Get quote for this ETH amount
+        if (tokenState.marketType === 0) {
+          // Bonding curve
+          const quote = await getTokenBuyQuoteForEth(address, ethAmount);
+          setAmount(quote.toString());
+        } else {
+          // Uniswap
+          const quote = await getUniswapQuote(
+            address,
+            tokenState.poolAddress,
+            parseEther(ethAmount.toString()),
+            true
+          );
+          if (quote) {
+            setAmount(formatEther(quote));
+          }
+        }
+      } else {
+        // For selling: calculate percentage of token balance
+        const amount = (parseFloat(userBalance) * percentage).toFixed(6);
+        setAmount(amount.toString());
+      }
+    } catch (error) {
+      console.error('Error calculating percentage amount:', error);
     }
   };
+
+  // Add this helper function at the top with other functions
+  async function getTokenBuyQuoteForEth(tokenAddress, ethAmount) {
+    try {
+      const contract = {
+        address: tokenAddress,
+        abi: higherrrrrrrAbi,
+      };
+      
+      const data = await readContract({
+        ...contract,
+        functionName: 'getTokensForEth',
+        args: [parseEther(ethAmount.toString())],
+      });
+      
+      return formatEther(data);
+    } catch (error) {
+      console.error('Error getting token buy quote:', error);
+      return '0';
+    }
+  }
 
   if (loading) {
     return (
@@ -375,7 +417,9 @@ export default function TokenPage({ addressProp }) {
         <div className="max-w-4xl mx-auto">
           {/* Stack vertically on mobile, horizontal on desktop */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <div className="text-2xl font-bold">{tokenState.symbol}</div>
+            <div className="flex items-center gap-3">
+              <div className="text-2xl font-bold">{tokenState.symbol}</div>
+            </div>
             
             {/* Grid for stats on mobile, flex on desktop */}
             <div className="grid grid-cols-2 md:flex md:space-x-8 gap-4">
@@ -391,11 +435,13 @@ export default function TokenPage({ addressProp }) {
                   {formatMarketCap(marketCapUsd)}
                 </div>
               </div>
-              <div className="col-span-2 md:col-span-1">
+              <div>
                 <div className="text-sm text-green-500/50">Supply</div>
-                <div className="flex flex-col">
-                  <span>{totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                  <span className="text-sm text-green-500/70">{((totalSupply / 1_000_000_000) * 100).toFixed(2)}%</span>
+                <div className="text-lg">
+                  {totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  <div className="text-sm text-green-500/70">
+                    {((totalSupply / 1_000_000_000) * 100).toFixed(2)}%
+                  </div>
                 </div>
               </div>
             </div>
@@ -404,7 +450,7 @@ export default function TokenPage({ addressProp }) {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto p-8 space-y-12">
+      <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
         {/* Current Level */}
         <div className="text-center py-12">
           <div className="text-sm text-green-500/50 mb-4">Current Name</div>
@@ -446,32 +492,34 @@ export default function TokenPage({ addressProp }) {
           </div>
         </div>
 
-        {/* Trading Interface - Moved up */}
-        <div className="border border-green-500/30 rounded-lg p-6 space-y-6">
-          <div className="flex justify-between items-center">
+        {/* Trading Interface - Fix balance display on mobile */}
+        <div className="border border-green-500/30 rounded-lg p-4 md:p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-bold">Trade Token</h2>
-            <div className="flex flex-col items-end">
+            <div className="w-full sm:w-auto flex flex-row sm:flex-col items-start sm:items-end justify-between sm:justify-start">
               <div className="text-sm text-green-500/70">Your Balance</div>
-              <div className="text-lg">
-                {Number(userBalance).toLocaleString(undefined, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2
-                })} {tokenState.symbol}
-              </div>
-              <div className="text-sm text-green-500/50">
-                ${(Number(userBalance) * priceInEth * ethPrice).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2
-                })}
+              <div>
+                <div className="text-lg text-right">
+                  {Number(userBalance).toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                  })} {tokenState.symbol}
+                </div>
+                <div className="text-sm text-green-500/50 text-right">
+                  ${(Number(userBalance) * priceInEth * ethPrice).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  })}
+                </div>
               </div>
             </div>
-            <div className="flex space-x-2">
+            <div className="w-full sm:w-auto flex space-x-2 justify-end">
               <button
                 onClick={() => {
                   setIsBuying(true);
-                  setAmount('');  // Reset amount when switching to buy
+                  setAmount('');
                 }}
-                className={`px-4 py-2 rounded ${
+                className={`px-4 py-2 rounded flex-1 sm:flex-none ${
                   isBuying 
                     ? 'bg-green-500 text-black' 
                     : 'border border-green-500 text-green-500'
@@ -482,9 +530,9 @@ export default function TokenPage({ addressProp }) {
               <button
                 onClick={() => {
                   setIsBuying(false);
-                  setAmount('');  // Reset amount when switching to sell
+                  setAmount('');
                 }}
-                className={`px-4 py-2 rounded ${
+                className={`px-4 py-2 rounded flex-1 sm:flex-none ${
                   !isBuying 
                     ? 'bg-green-500 text-black' 
                     : 'border border-green-500 text-green-500'
@@ -653,6 +701,46 @@ export default function TokenPage({ addressProp }) {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* External Links Section */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 justify-center">
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText(address);
+              // You could add a toast notification here
+            }}
+            className="px-4 py-2 text-sm border border-green-500/30 hover:border-green-500 rounded-lg flex items-center gap-2 w-full sm:w-auto justify-center"
+          >
+            <span>Copy Contract Address</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+
+          <a
+            href={`https://dexscreener.com/base/${address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 text-sm border border-green-500/30 hover:border-green-500 rounded-lg flex items-center gap-2 w-full sm:w-auto justify-center"
+          >
+            <span>DexScreener</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+
+          <a
+            href={`https://basescan.org/token/${address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 text-sm border border-green-500/30 hover:border-green-500 rounded-lg flex items-center gap-2 w-full sm:w-auto justify-center"
+          >
+            <span>Basescan</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         </div>
       </div>
     </div>
