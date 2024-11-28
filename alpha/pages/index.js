@@ -99,9 +99,12 @@ export default function Home() {
 
         {/* Token Feed */}
         <div>
-          <h2 className="text-3xl font-bold mb-8 flex items-center justify-between">
+          <h2 className="text-3xl font-bold mb-2 flex items-center justify-between">
             <span>Trending Tokens</span>
           </h2>
+          <p className="text-sm text-green-500/60 mb-8">
+            sorted by last 6hr volume
+          </p>
 
           <div>
             {displayedTokens.map((token, index) => (
