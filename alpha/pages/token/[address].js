@@ -467,7 +467,10 @@ export default function TokenPage({ addressProp }) {
             </div>
             <div className="flex space-x-2">
               <button
-                onClick={() => setIsBuying(true)}
+                onClick={() => {
+                  setIsBuying(true);
+                  setAmount('');  // Reset amount when switching to buy
+                }}
                 className={`px-4 py-2 rounded ${
                   isBuying 
                     ? 'bg-green-500 text-black' 
@@ -477,7 +480,10 @@ export default function TokenPage({ addressProp }) {
                 Buy
               </button>
               <button
-                onClick={() => setIsBuying(false)}
+                onClick={() => {
+                  setIsBuying(false);
+                  setAmount('');  // Reset amount when switching to sell
+                }}
                 className={`px-4 py-2 rounded ${
                   !isBuying 
                     ? 'bg-green-500 text-black' 
