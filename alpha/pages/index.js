@@ -1,6 +1,7 @@
 import TokenPage from './token/[address]';
 import { getTopTradingTokens } from '../api/tokens';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useBalance, useAccount } from 'wagmi';
 
 const TOKENS_PER_PAGE = 10;
 
