@@ -4,6 +4,7 @@ import { ConnectKitProvider, ConnectKitButton as DefaultConnectButton, getDefaul
 import { useEffect, useState, createContext, useContext } from 'react';
 import { getContractAddress } from '../api/contract';
 import { http } from 'viem';
+import { InjectedConnector } from 'wagmi/connectors/injected';
 
 export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
@@ -32,9 +33,9 @@ const baseChain = {
 
 const chains = [baseChain];
 
-// Create config outside of component to prevent recreation
-const wagmiConfig = createConfig(
-  getDefaultConfig({
+// Create config with Rabby support and default connectors
+const wagmiConfig = createConfig({
+  ...getDefaultConfig({
     appName: "Higherrrrrrr",
     chains,
     transports: {
@@ -42,7 +43,25 @@ const wagmiConfig = createConfig(
     },
     walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
   }),
-);
+  connectors: [
+    // Filter out any injected connectors from default config
+    ...getDefaultConfig({
+      appName: "Higherrrrrrr",
+      chains,
+      walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
+    }).connectors.filter(connector => 
+      connector.id !== 'injected' && connector.id !== 'rabby'
+    ),
+    // Add our custom Rabby connector
+    new InjectedConnector({
+      chains,
+      options: {
+        name: 'Rabby',
+        getProvider: () => typeof window !== 'undefined' ? window.ethereum : undefined,
+      },
+    }),
+  ],
+});
 
 function Web3ProviderInner({ children }) {
   const [factoryAddress, setFactoryAddress] = useState(null);
