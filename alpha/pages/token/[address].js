@@ -12,10 +12,14 @@ import { ConnectKitButton, useConnectModal } from '../../components/Web3Provider
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
-export default function TokenPage() {
+export default function TokenPage({ addressProp }) {
   const router = useRouter();
   const { openConnectModal } = useConnectModal();
-  const { address } = router.query;
+  const { address: routerAddress } = router.query;
+  
+  // Use prop address if provided, otherwise use router address
+  const address = addressProp || routerAddress;
+  
   const [tokenState, setTokenState] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ethPrice, setEthPrice] = useState(0);
@@ -60,7 +64,7 @@ export default function TokenPage() {
     }
   }
 
-  // Add periodic refresh of token state
+  // Update useEffect to use the new address variable
   useEffect(() => {
     if (address) {
       // Initial load
@@ -78,7 +82,7 @@ export default function TokenPage() {
       // Set up periodic refresh of token state
       const tokenRefreshTimer = setInterval(() => {
         refreshTokenState().catch(console.error);
-      }, 15000); // Every 15 seconds
+      }, 15000);
 
       return () => clearInterval(tokenRefreshTimer);
     }
