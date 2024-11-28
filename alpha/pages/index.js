@@ -7,46 +7,58 @@ const TOKENS_PER_PAGE = 10;
 
 export default function Home() {
   const [topTokens, setTopTokens] = useState([]);
+  const [displayedTokens, setDisplayedTokens] = useState([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
   const [hasMore, setHasMore] = useState(true);
-  const [displayCount, setDisplayCount] = useState(TOKENS_PER_PAGE);
-  const [allTokensFetched, setAllTokensFetched] = useState(false);
+  const [page, setPage] = useState(1);
+  const loadingRef = useRef(null);
 
-  // Intersection Observer ref
-  const observer = useRef();
-  const lastTokenRef = useCallback(node => {
-    if (isLoadingFeed) return;
-    if (observer.current) observer.current.disconnect();
-
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore && !allTokensFetched) {
-        setDisplayCount(prev => prev + TOKENS_PER_PAGE);
-      }
-    });
-
-    if (node) observer.current.observe(node);
-  }, [isLoadingFeed, hasMore, allTokensFetched]);
-
-  // Fetch top trading tokens
+  // Intersection Observer setup
   useEffect(() => {
-    const fetchTopTokens = async () => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingFeed) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingFeed]);
+
+  // Initial token fetch
+  useEffect(() => {
+    const fetchInitialTokens = async () => {
       try {
+        setIsLoadingFeed(true);
         const { tokens } = await getTopTradingTokens();
         setTopTokens(tokens);
+        setDisplayedTokens(tokens.slice(0, TOKENS_PER_PAGE));
         setHasMore(tokens.length > TOKENS_PER_PAGE);
-        setAllTokensFetched(true);
       } catch (error) {
-        console.error('Failed to fetch top tokens:', error);
+        console.error('Failed to fetch tokens:', error);
       } finally {
         setIsLoadingFeed(false);
       }
     };
 
-    fetchTopTokens();
-    // Refresh every 5 minutes
-    const interval = setInterval(fetchTopTokens, 5 * 60 * 1000);
-    return () => clearInterval(interval);
+    fetchInitialTokens();
   }, []);
+
+  // Handle pagination
+  useEffect(() => {
+    if (page > 1) {
+      const start = (page - 1) * TOKENS_PER_PAGE;
+      const newTokens = topTokens.slice(start, start + TOKENS_PER_PAGE);
+      setDisplayedTokens(prev => [...prev, ...newTokens]);
+      setHasMore(start + TOKENS_PER_PAGE < topTokens.length);
+    }
+  }, [page, topTokens]);
 
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
@@ -82,36 +94,38 @@ export default function Home() {
             <span>Top Trading Tokens</span>
           </h2>
 
-          {isLoadingFeed ? (
-            <div className="space-y-8">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="animate-pulse border border-green-500/20 rounded-lg p-6">
-                  <div className="h-4 bg-green-500/20 w-1/4 rounded mb-4" />
-                  <div className="h-8 bg-green-500/20 w-3/4 rounded" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-12">
-              {topTokens.slice(0, displayCount).map((token, index) => {
-                const isLastToken = index === displayCount - 1;
-                return (
-                  <div 
-                    key={token.address} 
-                    ref={isLastToken ? lastTokenRef : null}
-                    className="border-t border-green-500/10 pt-8 first:border-t-0 first:pt-0"
-                  >
-                    <TokenPage addressProp={token.address} />
+          <div className="space-y-12">
+            {displayedTokens.map((token, index) => (
+              <div 
+                key={token.address} 
+                className="border-t border-green-500/10 pt-8 first:border-t-0 first:pt-0"
+              >
+                <TokenPage addressProp={token.address} />
+              </div>
+            ))}
+
+            {/* Loading indicator */}
+            {hasMore && (
+              <div 
+                ref={loadingRef}
+                className="text-center py-8 text-green-500/50"
+              >
+                {isLoadingFeed ? 'Loading more tokens...' : 'Scroll for more'}
+              </div>
+            )}
+
+            {/* Initial loading state */}
+            {isLoadingFeed && displayedTokens.length === 0 && (
+              <div className="space-y-8">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse border border-green-500/20 rounded-lg p-6">
+                    <div className="h-4 bg-green-500/20 w-1/4 rounded mb-4" />
+                    <div className="h-8 bg-green-500/20 w-3/4 rounded" />
                   </div>
-                );
-              })}
-              {isLoadingFeed && (
-                <div className="text-center text-green-500/50 py-4">
-                  Loading more tokens...
-                </div>
-              )}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
