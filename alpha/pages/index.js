@@ -80,7 +80,7 @@ export default function Home() {
         {showIntro && (
           <>
             <h1 className="text-3xl md:text-4xl font-bold mb-8">
-            Evolutionary Meme Tokens
+            Evolutionary MemTokens
             </h1>
             <div className="space-y-6 text-lg text-green-500/80">
               <p>
