@@ -1,10 +1,15 @@
 import TokenPage from './token/[address]';
 import { getTopTradingTokens } from '../api/tokens';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useBalance, useAccount } from 'wagmi';
+import { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useContractRead } from 'wagmi';
+import { getTokenContract } from '../api/contract';
+import { getTokenState } from '../onchain/tokenState';
+import TokenCard from '../components/TokenCard';
 
-const TOKENS_PER_PAGE = 10;
+const TOKENS_PER_PAGE = 12;
 const VISIT_COOKIE_NAME = 'homepage_visits';
 
 export default function Home() {
@@ -15,6 +20,7 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const loadingRef = useRef(null);
   const [showIntro, setShowIntro] = useState(true);
+  const [tokenStates, setTokenStates] = useState({});
 
   useEffect(() => {
     // Handle visit counter cookie
@@ -43,17 +49,20 @@ export default function Home() {
     return () => observer.disconnect();
   }, [hasMore, isLoadingFeed]);
 
-  // Initial token fetch
+  // Initial token fetch - update to only show available tokens
   useEffect(() => {
     const fetchInitialTokens = async () => {
       try {
         setIsLoadingFeed(true);
         const { tokens } = await getTopTradingTokens();
-        setTopTokens(tokens);
-        setDisplayedTokens(tokens.slice(0, TOKENS_PER_PAGE));
-        setHasMore(tokens.length > TOKENS_PER_PAGE);
+        setTopTokens(tokens || []);
+        setDisplayedTokens((tokens || []).slice(0, TOKENS_PER_PAGE));
+        setHasMore((tokens || []).length > TOKENS_PER_PAGE);
       } catch (error) {
         console.error('Failed to fetch tokens:', error);
+        setTopTokens([]);
+        setDisplayedTokens([]);
+        setHasMore(false);
       } finally {
         setIsLoadingFeed(false);
       }
@@ -72,15 +81,58 @@ export default function Home() {
     }
   }, [page, topTokens]);
 
+  // Modified effect to fetch token states in parallel
+  useEffect(() => {
+    const fetchTokenStates = async () => {
+      if (!displayedTokens.length) return;
+      
+      try {
+        const statePromises = displayedTokens.map(async (token) => {
+          try {
+            const state = await getTokenState(token.address);
+            return { 
+              address: token.address, 
+              state: {
+                ...state,
+                // Calculate progress percentage if on bonding curve
+                progress: state.marketType === 'bonding_curve' ? 
+                  (state.currentPrice / state.priceLevels[state.priceLevels.length - 1]) * 100 : 
+                  null
+              }
+            };
+          } catch (error) {
+            console.error(`Error fetching state for ${token.address}:`, error);
+            return { address: token.address, state: null };
+          }
+        });
+
+        const results = await Promise.all(statePromises);
+        
+        const states = {};
+        results.forEach((result) => {
+          if (result.state) {
+            states[result.address] = result.state;
+          }
+        });
+        
+        setTokenStates(states);
+      } catch (error) {
+        console.error('Error fetching token states:', error);
+      }
+    };
+
+    fetchTokenStates();
+  }, [displayedTokens]);
+
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
-      <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
         
         
         {showIntro && (
           <>
             <h1 className="text-3xl md:text-4xl font-bold mb-8">
-            Evolutionary MemTokens
+            Evolutionary Meme Tokens
             </h1>
             <div className="space-y-6 text-lg text-green-500/80">
               <p>
@@ -127,13 +179,28 @@ export default function Home() {
         {/* Featured Token Section */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold mb-8">Featured Token</h2>
-          <TokenPage addressProp="0x17e1f08f8f80a07406d4f05420512ab5f2d7f56e" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isLoadingFeed ? (
+              <TokenCard isLoading />
+            ) : (
+              displayedTokens
+                .filter(token => token.address === "0x17e1f08f8f80a07406d4f05420512ab5f2d7f56e")
+                .map((token) => (
+                  <TokenCard 
+                    key={token.address} 
+                    token={token} 
+                    tokenState={tokenStates[token.address]}
+                    isLoading={!tokenStates[token.address]}
+                  />
+              ))
+            )}
+          </div>
         </div>
 
         {/* Divider between sections */}
         <div className="border-b border-green-500/20 my-12"></div>
 
-        {/* Token Feed */}
+        {/* Token Grid */}
         <div>
           <h2 className="text-3xl font-bold mb-2 flex items-center justify-between">
             <span>Trending Tokens</span>
@@ -142,44 +209,30 @@ export default function Home() {
             sorted by last 6hr volume
           </p>
 
-          <div>
-            {displayedTokens.map((token, index) => (
-              <div key={token.address}>
-                {index > 0 && (
-                  <div className="my-12 border-t border-green-500/20" />
-                )}
-                
-                <div>
-                  <TokenPage addressProp={token.address} />
-                </div>
-              </div>
-            ))}
-
-            {/* Loading indicator */}
-            {hasMore && (
-              <div 
-                ref={loadingRef}
-                className="text-center py-12 text-green-500/50 border-t border-green-500/20 mt-12"
-              >
-                {isLoadingFeed ? 'Loading more tokens...' : 'Scroll for more'}
-              </div>
-            )}
-
-            {/* Initial loading state */}
-            {isLoadingFeed && displayedTokens.length === 0 && (
-              <div className="space-y-12">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i}>
-                    {i > 0 && <div className="my-12 border-t border-green-500/20" />}
-                    <div className="animate-pulse border border-green-500/20 rounded-lg p-6">
-                      <div className="h-4 bg-green-500/20 w-1/4 rounded mb-4" />
-                      <div className="h-8 bg-green-500/20 w-3/4 rounded" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {isLoadingFeed ? (
+              [...Array(6)].map((_, i) => <TokenCard key={i} isLoading />)
+            ) : (
+              displayedTokens.map((token) => (
+                <TokenCard 
+                  key={token.address} 
+                  token={token} 
+                  tokenState={tokenStates[token.address]}
+                  isLoading={!tokenStates[token.address]}
+                />
+              ))
             )}
           </div>
+
+          {/* Loading indicator */}
+          {hasMore && (
+            <div 
+              ref={loadingRef}
+              className="text-center py-12 text-green-500/50"
+            >
+              {isLoadingFeed ? 'Loading more tokens...' : 'Scroll for more'}
+            </div>
+          )}
         </div>
       </div>
     </div>

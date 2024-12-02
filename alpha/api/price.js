@@ -1,23 +1,11 @@
 import { getApiUrl } from './getApiUrl';
 
 // Cache duration in milliseconds (5 minutes)
-const CACHE_DURATION = 5 * 60 * 1000;
+const CACHE_DURATION = 4 * 1000;
 let ethPriceCache = {
   price: null,
   timestamp: 0
 };
-
-export async function getTokenPrice(address) {
-  const response = await fetch(
-    `${getApiUrl()}/price/${address}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-      }
-    }
-  );
-  return response.json();
-}
 
 export async function getEthPrice() {
   // Return cached price if it's still valid
