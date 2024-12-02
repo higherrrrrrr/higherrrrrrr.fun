@@ -144,7 +144,7 @@ export default function MainLayout({ children }) {
         
         <div className="flex items-center space-x-2 md:space-x-4">
           <Link href="/launch">
-            <button className="px-3 md:px-4 py-2.5 text-sm md:text-base bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors whitespace-nowrap">
+            <button className="px-3 md:px-4 py-3 text-sm md:text-base bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors whitespace-nowrap">
               Launch Token
             </button>
           </Link>
