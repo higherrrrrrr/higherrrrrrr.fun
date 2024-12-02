@@ -404,7 +404,9 @@ export default function TokenPage({ addressProp }) {
           {/* Stack vertically on mobile, horizontal on desktop */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="text-2xl font-bold">{tokenState.symbol}</div>
+              <div className="text-2xl font-bold truncate max-w-[200px]">
+                {tokenState.symbol}
+              </div>
             </div>
             
             {/* Grid for stats on mobile, flex on desktop */}
@@ -440,7 +442,7 @@ export default function TokenPage({ addressProp }) {
         {/* Current Level */}
         <div className="text-center py-12">
           <div className="text-sm text-green-500/50 mb-4">Current Name</div>
-          <div className="text-7xl font-bold mb-6">
+          <div className="text-7xl font-bold mb-6 break-words max-w-[90vw] mx-auto">
             {tokenState.currentName || 'Loading...'}
           </div>
           <div className="text-xl text-green-500/70">
@@ -478,18 +480,33 @@ export default function TokenPage({ addressProp }) {
           </div>
         </div>
 
-        {/* Trading Interface - Fix balance display on mobile */}
+        {/* Trading Interface */}
         <div className="border border-green-500/30 rounded-lg p-4 md:p-6 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-xl font-bold">Trade Token</h2>
+            {/* Token Trade Header */}
+            <div className="flex-shrink-0">
+              <h2 className="text-xl font-bold">
+                <div className="flex items-center gap-2">
+                  <span>Trade</span>
+                  <span className="truncate max-w-[150px]" title={tokenState.symbol}>
+                    {tokenState.symbol}
+                  </span>
+                </div>
+              </h2>
+            </div>
+
+            {/* Balance Section - Improved layout */}
             <div className="w-full sm:w-auto flex flex-row sm:flex-col items-start sm:items-end justify-between sm:justify-start">
               <div className="text-sm text-green-500/70">Your Balance</div>
               <div>
-                <div className="text-lg text-right">
-                  {Number(userBalance).toLocaleString(undefined, {
+                <div className="text-lg text-right flex items-center justify-end gap-1">
+                  <span className="font-mono">{Number(userBalance).toLocaleString(undefined, {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 2
-                  })} {tokenState.symbol}
+                  })}</span>
+                  <span className="truncate max-w-[100px]" title={tokenState.symbol}>
+                    {tokenState.symbol}
+                  </span>
                 </div>
                 <div className="text-sm text-green-500/50 text-right">
                   ${(Number(userBalance) * priceInEth * ethPrice).toLocaleString(undefined, {
@@ -499,6 +516,8 @@ export default function TokenPage({ addressProp }) {
                 </div>
               </div>
             </div>
+
+            {/* Buy/Sell Buttons */}
             <div className="w-full sm:w-auto flex space-x-2 justify-end">
               <button
                 onClick={() => {
@@ -529,15 +548,24 @@ export default function TokenPage({ addressProp }) {
             </div>
           </div>
 
+          {/* Amount Input Section */}
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <label className="text-sm text-green-500/70">Amount in Tokens</label>
               {userAddress && (
-                <div className="text-sm text-green-500/50">
-                  {isBuying 
-                    ? `Available: ${parseFloat(ethBalance?.formatted || '0').toFixed(4)} ETH`
-                    : `Available: ${parseFloat(userBalance).toFixed(4)} ${tokenState.symbol}`
-                  }
+                <div className="text-sm text-green-500/50 flex items-center gap-1">
+                  <span>Available:</span>
+                  <span className="font-mono">
+                    {isBuying 
+                      ? `${parseFloat(ethBalance?.formatted || '0').toFixed(4)} ETH`
+                      : parseFloat(userBalance).toFixed(4)
+                    }
+                  </span>
+                  {!isBuying && (
+                    <span className="truncate max-w-[80px]" title={tokenState.symbol}>
+                      {tokenState.symbol}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -636,15 +664,17 @@ export default function TokenPage({ addressProp }) {
         </div>
 
         {/* Levels Table */}
-        <div className="border border-green-500/30 rounded-lg overflow-hidden">
+        <div className="border border-green-500/30 rounded-lg overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-green-500/30">
-                <th className="p-4 text-left">Level</th>
-                <th className="p-4 text-left">Name</th>
-                <th className="p-4 text-right">Price</th>
-                <th className="p-4 text-right">Market Cap</th>
-                <th className="p-4 text-center">State</th>
+                <th className="p-4 text-left whitespace-nowrap">Level</th>
+                <th className="p-4 text-left">
+                  <div className="max-w-[200px] truncate">Name</div>
+                </th>
+                <th className="p-4 text-right whitespace-nowrap">Price</th>
+                <th className="p-4 text-right whitespace-nowrap">Market Cap</th>
+                <th className="p-4 text-center whitespace-nowrap">State</th>
               </tr>
             </thead>
             <tbody>
@@ -658,22 +688,20 @@ export default function TokenPage({ addressProp }) {
                 const isAchieved = index <= currentLevelIndex;
 
                 return (
-                  <tr 
-                    key={index}
-                    className={`
-                      border-b border-green-500/10 
-                      ${isCurrentLevel ? 'bg-green-500/10' : ''}
-                    `}
-                  >
-                    <td className="p-4">{index + 1}</td>
-                    <td className="p-4">{level.name}</td>
-                    <td className="p-4 text-right">
+                  <tr key={index} className={`border-b border-green-500/10 ${isCurrentLevel ? 'bg-green-500/10' : ''}`}>
+                    <td className="p-4 whitespace-nowrap">{index + 1}</td>
+                    <td className="p-4">
+                      <div className="max-w-[200px] truncate" title={level.name}>
+                        {level.name}
+                      </div>
+                    </td>
+                    <td className="p-4 text-right whitespace-nowrap">
                       ${formatUsdPrice(levelUsdPrice)}
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="p-4 text-right whitespace-nowrap">
                       {formatMarketCap(levelMarketCap)}
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="p-4 text-center whitespace-nowrap">
                       {isCurrentLevel ? (
                         <span className="text-green-500">Current</span>
                       ) : isAchieved ? (

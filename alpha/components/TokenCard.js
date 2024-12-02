@@ -132,18 +132,18 @@ export default function TokenCard({ token, tokenState, isLoading }) {
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <p className="text-2xl font-mono text-green-500 mb-1">
+          <p className="text-2xl font-mono text-green-500 mb-1 truncate">
             ${tokenState?.symbol || token.symbol}
           </p>
           <div className="text-sm text-green-500/60 mb-4">
             {tokenState?.marketType === 'bonding_curve' && (
-              <div className="flex items-center space-x-2">
-                <span>{tokenState?.priceLevels[tokenState?.currentLevel - 1]?.name}</span>
-                <span className="text-green-500/40">→</span>
-                <span className="text-green-500/40">
+              <div className="flex items-center space-x-2 overflow-hidden">
+                <span className="truncate">{tokenState?.priceLevels[tokenState?.currentLevel - 1]?.name}</span>
+                <span className="text-green-500/40 flex-shrink-0">→</span>
+                <span className="text-green-500/40 truncate">
                   {tokenState?.priceLevels[tokenState?.currentLevel]?.name || 'FINAL FORM'}
                 </span>
-                <span className="text-green-500/40 ml-2">
+                <span className="text-green-500/40 ml-2 flex-shrink-0">
                   ({tokenState?.currentLevel}/{tokenState?.priceLevels?.length})
                 </span>
               </div>
@@ -153,15 +153,15 @@ export default function TokenCard({ token, tokenState, isLoading }) {
             <>
               <div className="mt-4">
                 <p className="text-xs text-green-500/40 mb-1">Market Cap</p>
-                <p className="text-sm font-mono">
+                <p className="text-sm font-mono truncate">
                   ${marketCap}
                 </p>
               </div>
               <>
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-green-500/40 mb-1">
-                      <span>Progress to {stateInfo.next}</span>
-                      <span>{Math.round(getProgress(tokenState))}%</span>
+                      <span className="truncate">Progress to {stateInfo.next}</span>
+                      <span className="flex-shrink-0">{Math.round(getProgress(tokenState))}%</span>
                     </div>
                     <div className="h-1.5 bg-green-500/10 rounded-full overflow-hidden">
                       <div 
@@ -170,10 +170,10 @@ export default function TokenCard({ token, tokenState, isLoading }) {
                       />
                     </div>
                   </div>
-                  <div className="mt-3 py-1 px-2 bg-green-500/10 rounded text-xs inline-block flex items-center space-x-2">
-                    <span>{stateInfo.current}</span>
-                    <span className="text-green-500/40">→</span>
-                    <span className="text-green-500/40">{stateInfo.next}</span>
+                  <div className="mt-3 py-1 px-2 bg-green-500/10 rounded text-xs inline-flex items-center space-x-2 max-w-full">
+                    <span className="truncate">{stateInfo.current}</span>
+                    <span className="text-green-500/40 flex-shrink-0">→</span>
+                    <span className="text-green-500/40 truncate">{stateInfo.next}</span>
                   </div>
                 </>
             </>

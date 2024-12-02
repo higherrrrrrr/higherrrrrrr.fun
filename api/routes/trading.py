@@ -14,6 +14,20 @@ from dune_client.client import DuneClient
 
 trading = Blueprint('trading', __name__)
 
+# Add Dune cache
+class DuneCache:
+    def __init__(self):
+        self.data = None
+        self.timestamp = 0
+
+# Add latest tokens cache
+latest_tokens_cache = DuneCache()
+LATEST_TOKENS_CACHE_DURATION = 300  # 5 minutes
+
+# Add trading tokens cache
+dune_cache = DuneCache()
+DUNE_CACHE_DURATION = 300  # 5 minutes
+
 # Add ABI for NewToken event
 FACTORY_ABI = [
     {
@@ -43,11 +57,21 @@ class TokenCache:
 token_cache = TokenCache()
 CACHE_DURATION = 3600  # 1 minute in seconds
 
-def get_latest_tokens(limit = 2000):
+@trading.route('/tokens/latest', methods=['GET'])
+def get_latest_token_deploys():
     try:
         print("\n=== Getting latest tokens from Dune ===")
         
+        # Check cache first
+        current_time = time.time()
+        if latest_tokens_cache.data and current_time - latest_tokens_cache.timestamp < LATEST_TOKENS_CACHE_DURATION:
+            print("✅ Returning cached latest tokens data")
+            return jsonify(latest_tokens_cache.data)
+
+        # Initialize Dune client
         dune = DuneClient(Config.DUNE_API_KEY)
+        
+        # Fetch latest result for the deploys query
         print("Fetching from Dune query 4360134...")
         query_result = dune.get_latest_result(4360134)
         
@@ -56,7 +80,7 @@ def get_latest_tokens(limit = 2000):
         attempt = 0
         while query_result.state == 'QUERY_STATE_EXECUTING' and attempt < max_attempts:
             print(f"Query executing, attempt {attempt + 1}/{max_attempts}...")
-            time.sleep(3)
+            time.sleep(3)  # Wait 3 seconds between checks
             query_result = dune.get_latest_result(4360134)
             attempt += 1
             
@@ -64,44 +88,39 @@ def get_latest_tokens(limit = 2000):
         
         if not query_result or not query_result.result or not query_result.result.rows:
             print("❌ No data from Dune query")
-            return []
+            return jsonify({'error': 'No data available'}), 404
 
-        # Format the response to match what frontend expects
+        # Format the response
         tokens = [{
             'address': row['token_address'],
             'volume_24h': 0,  # New tokens won't have volume yet
             'trades_24h': 0,
             'creation_time': row['creation_time'],
             'creation_tx': row['creation_tx']
-        } for row in query_result.result.rows[:limit]]
+        } for row in query_result.result.rows]
 
-        print(f"✅ Found {len(tokens)} latest tokens")
-        return tokens
-
-    except Exception as e:
-        print(f"❌ Error fetching latest tokens: {str(e)}")
-        traceback.print_exc()
-        return []
-
-@trading.route('/tokens/latest', methods=['GET'])
-def get_latest_token_deploys():
-    try:
-        limit = int(request.args.get('limit', 1000))
-        print(f"\n=== GET /tokens/latest with limit={limit} ===")
-        
-        tokens = get_latest_tokens(limit)
-        
-        # Match the format of /tokens/top-trading endpoint
         response = {
             'tokens': tokens,
-            'updated_at': int(time.time())
+            'updated_at': int(current_time)
         }
-        
+
+        # Update cache
+        latest_tokens_cache.data = response
+        latest_tokens_cache.timestamp = current_time
+
+        print(f"✅ Returning {len(tokens)} latest tokens")
         return jsonify(response)
+
     except Exception as e:
-        error_msg = f"Error getting latest tokens: {str(e)}"
+        error_msg = f"Error fetching latest tokens: {str(e)}"
         print(f"❌ {error_msg}")
         traceback.print_exc()
+        
+        # Return cached data if available
+        if latest_tokens_cache.data:
+            print("Returning cached data due to error")
+            return jsonify(latest_tokens_cache.data)
+            
         return jsonify({
             'error': error_msg,
             'details': traceback.format_exc()
@@ -190,15 +209,6 @@ def get_contract_address():
     return jsonify({
         'factory_address': Config.CONTRACT_ADDRESS
     })
-
-# Add Dune cache
-class DuneCache:
-    def __init__(self):
-        self.data = None
-        self.timestamp = 0
-
-dune_cache = DuneCache()
-DUNE_CACHE_DURATION = 300  # 5 minutes
 
 @trading.route('/tokens/top-trading', methods=['GET'])
 def get_top_trading_tokens():

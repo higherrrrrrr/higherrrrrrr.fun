@@ -58,9 +58,10 @@ export default function Home() {
     const fetchTokens = async () => {
       try {
         setIsLoadingFeed(true);
+        setPage(1); // Reset page when switching modes
         
         if (viewMode === 'latest') {
-          const { tokens: latestTokens } = await getLatestTokens(2000);
+          const { tokens: latestTokens } = await getLatestTokens();
           setTopTokens(latestTokens || []);
           setDisplayedTokens((latestTokens || []).slice(0, TOKENS_PER_PAGE));
           setHasMore((latestTokens || []).length > TOKENS_PER_PAGE);
@@ -70,7 +71,7 @@ export default function Home() {
           setDisplayedTokens((trendingTokens || []).slice(0, TOKENS_PER_PAGE));
           setHasMore((trendingTokens || []).length > TOKENS_PER_PAGE);
         }
-      } catch (error) { 
+      } catch (error) {
         console.error(`Failed to fetch ${viewMode} tokens:`, error);
         setTopTokens([]);
         setDisplayedTokens([]);
@@ -86,37 +87,15 @@ export default function Home() {
   // Handle pagination for both modes
   useEffect(() => {
     if (page > 1) {
-      const fetchMoreTokens = async () => {
-        try {
-          const start = (page - 1) * TOKENS_PER_PAGE;
-          
-          if (viewMode === 'latest') {
-            const { tokens: latestTokens } = await getLatestTokens(TOKENS_PER_PAGE * page);
-            setTopTokens(latestTokens || []);
-            setDisplayedTokens(prev => [...prev, ...(latestTokens || []).slice(start, start + TOKENS_PER_PAGE)]);
-            setHasMore((latestTokens || []).length > start + TOKENS_PER_PAGE);
-          } else {
-            const { tokens: trendingTokens } = await getTopTradingTokens();
-            setTopTokens(trendingTokens || []);
-            setDisplayedTokens(prev => [...prev, ...(trendingTokens || []).slice(start, start + TOKENS_PER_PAGE)]);
-            setHasMore((trendingTokens || []).length > start + TOKENS_PER_PAGE);
-          }
-        } catch (error) {
-          console.error(`Failed to fetch more ${viewMode} tokens:`, error);
-          setHasMore(false);
-        }
-      };
-
-      fetchMoreTokens();
+      const start = (page - 1) * TOKENS_PER_PAGE;
+      const end = start + TOKENS_PER_PAGE;
+      
+      // Use the tokens we already have in topTokens
+      const newTokens = topTokens.slice(start, end);
+      setDisplayedTokens(prev => [...prev, ...newTokens]);
+      setHasMore(end < topTokens.length);
     }
-  }, [page, viewMode]);
-
-  // Reset pagination when switching modes
-  useEffect(() => {
-    setPage(1);
-    setDisplayedTokens([]);
-    setHasMore(true);
-  }, [viewMode]);
+  }, [page, topTokens]);
 
   // Modified effect to fetch token states in parallel
   useEffect(() => {
@@ -273,7 +252,9 @@ export default function Home() {
         {/* Token Grid */}
         <div>
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold">Tokens</h2>
+            <h2 className="text-3xl font-bold">
+              {viewMode === 'latest' ? 'Latest Tokens' : 'Trending Tokens'}
+            </h2>
             <select 
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value)}
@@ -283,6 +264,12 @@ export default function Home() {
               <option value="trending">Trending</option>
             </select>
           </div>
+          <p className="text-sm text-green-500/60 mb-8">
+            {viewMode === 'latest' 
+              ? 'newest token launches'
+              : 'sorted by last 6hr volume'
+            }
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoadingFeed ? (
