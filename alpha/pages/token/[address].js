@@ -404,7 +404,7 @@ export default function TokenPage({ addressProp }) {
           {/* Stack vertically on mobile, horizontal on desktop */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="text-2xl font-bold truncate max-w-[200px]">
+              <div className="text-2xl font-bold truncate max-w-[260px]">
                 {tokenState.symbol}
               </div>
             </div>
@@ -488,7 +488,7 @@ export default function TokenPage({ addressProp }) {
               <h2 className="text-xl font-bold">
                 <div className="flex items-center gap-2">
                   <span>Trade</span>
-                  <span className="truncate max-w-[150px]" title={tokenState.symbol}>
+                  <span className="truncate max-w-[195px]" title={tokenState.symbol}>
                     {tokenState.symbol}
                   </span>
                 </div>
@@ -504,7 +504,7 @@ export default function TokenPage({ addressProp }) {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 2
                   })}</span>
-                  <span className="truncate max-w-[100px]" title={tokenState.symbol}>
+                  <span className="truncate max-w-[130px]" title={tokenState.symbol}>
                     {tokenState.symbol}
                   </span>
                 </div>
@@ -562,7 +562,7 @@ export default function TokenPage({ addressProp }) {
                     }
                   </span>
                   {!isBuying && (
-                    <span className="truncate max-w-[80px]" title={tokenState.symbol}>
+                    <span className="truncate max-w-[104px]" title={tokenState.symbol}>
                       {tokenState.symbol}
                     </span>
                   )}
@@ -670,7 +670,7 @@ export default function TokenPage({ addressProp }) {
               <tr className="border-b border-green-500/30">
                 <th className="p-4 text-left whitespace-nowrap">Level</th>
                 <th className="p-4 text-left">
-                  <div className="max-w-[200px] truncate">Name</div>
+                  <div className="max-w-[260px] truncate">Name</div>
                 </th>
                 <th className="p-4 text-right whitespace-nowrap">Price</th>
                 <th className="p-4 text-right whitespace-nowrap">Market Cap</th>
@@ -691,7 +691,7 @@ export default function TokenPage({ addressProp }) {
                   <tr key={index} className={`border-b border-green-500/10 ${isCurrentLevel ? 'bg-green-500/10' : ''}`}>
                     <td className="p-4 whitespace-nowrap">{index + 1}</td>
                     <td className="p-4">
-                      <div className="max-w-[200px] truncate" title={level.name}>
+                      <div className="max-w-[260px] truncate" title={level.name}>
                         {level.name}
                       </div>
                     </td>
