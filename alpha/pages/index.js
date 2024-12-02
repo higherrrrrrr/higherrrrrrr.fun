@@ -1,5 +1,5 @@
 import TokenPage from './token/[address]';
-import { getTopTradingTokens } from '../api/tokens';
+import { getTopTradingTokens, getHighlightedTokens } from '../api/tokens';
 import { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ export default function Home() {
   const loadingRef = useRef(null);
   const [showIntro, setShowIntro] = useState(true);
   const [tokenStates, setTokenStates] = useState({});
+  const [highlightedTokens, setHighlightedTokens] = useState([]);
 
   useEffect(() => {
     // Handle visit counter cookie
@@ -124,6 +125,16 @@ export default function Home() {
     fetchTokenStates();
   }, [displayedTokens]);
 
+  // Add effect to fetch highlighted tokens
+  useEffect(() => {
+    const fetchHighlightedTokens = async () => {
+      const tokens = await getHighlightedTokens();
+      setHighlightedTokens(tokens);
+    };
+
+    fetchHighlightedTokens();
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
       <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
@@ -178,13 +189,13 @@ export default function Home() {
 
         {/* Featured Token Section */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">Featured Token</h2>
+          <h2 className="text-3xl font-bold mb-8">Featured Tokens</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoadingFeed ? (
               <TokenCard isLoading />
             ) : (
               displayedTokens
-                .filter(token => token.address === "0x17e1f08f8f80a07406d4f05420512ab5f2d7f56e")
+                .filter(token => highlightedTokens.some(ht => ht.address === token.address))
                 .map((token) => (
                   <TokenCard 
                     key={token.address} 

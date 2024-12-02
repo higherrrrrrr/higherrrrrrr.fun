@@ -173,33 +173,33 @@ def get_eth_price():
 
 @trading.route('/highlighted-token', methods=['GET'])
 def get_highlighted_token():
-    highlighted_address = Config.HIGHLIGHTED_TOKEN
+    highlighted_addresses = Config.HIGHLIGHTED_TOKENS.split(',') if Config.HIGHLIGHTED_TOKENS else []
     print("Config values:", {
-        "HIGHLIGHTED_TOKEN": Config.HIGHLIGHTED_TOKEN,
+        "HIGHLIGHTED_TOKENS": highlighted_addresses,
         "CONTRACT_ADDRESS": Config.CONTRACT_ADDRESS,
         "RPC_URL": Config.RPC_URL
     })
     
-    if not highlighted_address:
-        print("No highlighted token found in config")
-        return jsonify({'error': 'No highlighted token configured'}), 404
+    if not highlighted_addresses:
+        print("No highlighted tokens found in config")
+        return jsonify({'tokens': []})
         
     try:
-        print(f"Returning highlighted token with address: {highlighted_address}")
-        # Create a token object with the address
-        token = {
-            'address': highlighted_address.strip(),  # Clean any whitespace
-        }
+        print(f"Returning highlighted tokens: {highlighted_addresses}")
+        # Create token objects for each address
+        tokens = [
+            {'address': address.strip()}  # Clean any whitespace
+            for address in highlighted_addresses
+        ]
         
-        print(f"Returning highlighted token: {token}")
-        return jsonify(token)  # Make sure we're returning valid JSON
+        return jsonify({'tokens': tokens})
         
     except Exception as e:
-        print(f"Error getting highlighted token: {str(e)}")
+        print(f"Error getting highlighted tokens: {str(e)}")
         import traceback
-        traceback.print_exc()  # Print full stack trace
+        traceback.print_exc()
         return jsonify({
-            'error': 'Failed to get highlighted token',
+            'error': 'Failed to get highlighted tokens',
             'details': str(e)
         }), 500
 

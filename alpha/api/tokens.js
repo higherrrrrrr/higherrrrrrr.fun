@@ -6,8 +6,8 @@ const getAuthHeader = () => {
   return token ? `Bearer ${token}` : '';
 };
 
-export async function getHighlightedToken() {
-  console.log('Fetching highlighted token...');
+export async function getHighlightedTokens() {
+  console.log('Fetching highlighted tokens...');
   try {
     const response = await fetch(
       `${getApiUrl()}/highlighted-token`,
@@ -18,22 +18,12 @@ export async function getHighlightedToken() {
       }
     );
     
-    // Log the raw response for debugging
-    const text = await response.text();
-    console.log('Raw API response:', text);
-    
-    try {
-      const data = JSON.parse(text);
-      console.log('Parsed highlighted token:', data);
-      return data;
-    } catch (parseError) {
-      console.error('Failed to parse response:', parseError);
-      console.error('Raw response was:', text);
-      throw parseError;
-    }
+    const data = await response.json();
+    console.log('Highlighted tokens:', data);
+    return data.tokens || [];
   } catch (error) {
-    console.error('Highlighted token fetch failed:', error);
-    throw error;
+    console.error('Highlighted tokens fetch failed:', error);
+    return [];
   }
 }
 
