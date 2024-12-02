@@ -22,6 +22,7 @@ export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
   const [tokenStates, setTokenStates] = useState({});
   const [highlightedTokens, setHighlightedTokens] = useState([]);
+  const [highlightedTokenStates, setHighlightedTokenStates] = useState({});
 
   useEffect(() => {
     // Handle visit counter cookie
@@ -125,11 +126,40 @@ export default function Home() {
     fetchTokenStates();
   }, [displayedTokens]);
 
-  // Add effect to fetch highlighted tokens
+  // Add effect to fetch highlighted tokens and their states
   useEffect(() => {
     const fetchHighlightedTokens = async () => {
       const tokens = await getHighlightedTokens();
       setHighlightedTokens(tokens);
+
+      // Fetch states for highlighted tokens
+      const statePromises = tokens.map(async (token) => {
+        try {
+          const state = await getTokenState(token.address);
+          return { 
+            address: token.address, 
+            state: {
+              ...state,
+              progress: state.marketType === 'bonding_curve' ? 
+                (state.currentPrice / state.priceLevels[state.priceLevels.length - 1]) * 100 : 
+                null
+            }
+          };
+        } catch (error) {
+          console.error(`Error fetching state for ${token.address}:`, error);
+          return { address: token.address, state: null };
+        }
+      });
+
+      const results = await Promise.all(statePromises);
+      const states = {};
+      results.forEach((result) => {
+        if (result.state) {
+          states[result.address] = result.state;
+        }
+      });
+      
+      setHighlightedTokenStates(states);
     };
 
     fetchHighlightedTokens();
@@ -191,20 +221,14 @@ export default function Home() {
         <div className="mb-16">
           <h2 className="text-3xl font-bold mb-8">Featured Tokens</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isLoadingFeed ? (
-              <TokenCard isLoading />
-            ) : (
-              displayedTokens
-                .filter(token => highlightedTokens.some(ht => ht.address === token.address))
-                .map((token) => (
-                  <TokenCard 
-                    key={token.address} 
-                    token={token} 
-                    tokenState={tokenStates[token.address]}
-                    isLoading={!tokenStates[token.address]}
-                  />
-              ))
-            )}
+            {highlightedTokens.map((token) => (
+              <TokenCard 
+                key={token.address} 
+                token={token} 
+                tokenState={highlightedTokenStates[token.address]}
+                isLoading={!highlightedTokenStates[token.address]}
+              />
+            ))}
           </div>
         </div>
 
