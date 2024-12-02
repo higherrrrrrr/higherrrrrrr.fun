@@ -696,10 +696,18 @@ export default function TokenPage({ addressProp }) {
                       </div>
                     </td>
                     <td className="p-4 text-right whitespace-nowrap">
-                      ${formatUsdPrice(levelUsdPrice)}
+                      {index === 0 ? (
+                        'Free'
+                      ) : (
+                        `$${formatUsdPrice(levelUsdPrice)}`
+                      )}
                     </td>
                     <td className="p-4 text-right whitespace-nowrap">
-                      {formatMarketCap(levelMarketCap)}
+                      {index === 0 ? (
+                        '-'
+                      ) : (
+                        formatMarketCap(levelMarketCap)
+                      )}
                     </td>
                     <td className="p-4 text-center whitespace-nowrap">
                       {isCurrentLevel ? (

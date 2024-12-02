@@ -138,7 +138,8 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
     // Get price levels
     const priceLevels: PriceLevel[] = [];
     let levelIndex = 0;
-    while (levelIndex < 20) {
+    const MAX_LEVELS = 420;
+    while (levelIndex < MAX_LEVELS) {
       try {
         const level = await publicClient.readContract({
           address: tokenAddress as `0x${string}`,
@@ -148,7 +149,7 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
         });
         if (!level || !level[1]) break;
         priceLevels.push({
-          price: formatEther(level[0]),
+          price: levelIndex === 0 ? '0' : formatEther(level[0]),
           name: level[1]
         });
         levelIndex++;
