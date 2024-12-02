@@ -43,80 +43,61 @@ class TokenCache:
 token_cache = TokenCache()
 CACHE_DURATION = 3600  # 1 minute in seconds
 
-def get_latest_tokens(limit=10, sort_by='timestamp'):
+def get_latest_tokens(limit = 2000):
     try:
-        print(f"\n=== Starting get_latest_tokens from subgraph (sort: {sort_by}) ===")
+        print("\n=== Getting latest tokens from Dune ===")
         
-        # GraphQL query with dynamic sorting
-        sort_field = 'timestamp' if sort_by == 'timestamp' else 'volumeETH'
-        query = """
-        {
-          newTokenEvents(
-            first: %d, 
-            orderBy: %s, 
-            orderDirection: desc
-          ) {
-            id
-            token
-            conviction
-            blockNumber
-            timestamp
-            transactionHash
-            volumeETH
-            lastTradeTimestamp
-            tradeCount
-          }
-        }
-        """ % (limit, sort_field)
-
-        # Make request to subgraph
-        response = requests.post(
-            Config.TOKENS_SUBGRAPH_URL,
-            json={'query': query}
-        )
-
-        if response.status_code != 200:
-            print(f"❌ Subgraph request failed: {response.status_code}")
-            print(response.text)
+        dune = DuneClient(Config.DUNE_API_KEY)
+        print("Fetching from Dune query 4360134...")
+        query_result = dune.get_latest_result(4360134)
+        
+        # Poll until query is complete
+        max_attempts = 10
+        attempt = 0
+        while query_result.state == 'QUERY_STATE_EXECUTING' and attempt < max_attempts:
+            print(f"Query executing, attempt {attempt + 1}/{max_attempts}...")
+            time.sleep(3)
+            query_result = dune.get_latest_result(4360134)
+            attempt += 1
+            
+        print("Final Dune response:", query_result)
+        
+        if not query_result or not query_result.result or not query_result.result.rows:
+            print("❌ No data from Dune query")
             return []
 
-        data = response.json()
-        if 'errors' in data:
-            print(f"❌ GraphQL errors: {data['errors']}")
-            return []
+        # Format the response to match what frontend expects
+        tokens = [{
+            'address': row['token_address'],
+            'volume_24h': 0,  # New tokens won't have volume yet
+            'trades_24h': 0,
+            'creation_time': row['creation_time'],
+            'creation_tx': row['creation_tx']
+        } for row in query_result.result.rows[:limit]]
 
-        tokens = data.get('data', {}).get('newTokenEvents', [])
-        print(f"✅ Found {len(tokens)} tokens from subgraph")
-        
-        # Convert to our expected format
-        formatted_tokens = [{
-            'address': token['token'],
-            'conviction': token['conviction'],
-            'block_number': int(token['blockNumber']),
-            'timestamp': int(token['timestamp']),
-            'transaction_hash': token['transactionHash']
-        } for token in tokens]
-
-        return formatted_tokens
+        print(f"✅ Found {len(tokens)} latest tokens")
+        return tokens
 
     except Exception as e:
-        print(f"❌ Error fetching from subgraph: {str(e)}")
+        print(f"❌ Error fetching latest tokens: {str(e)}")
         traceback.print_exc()
         return []
 
 @trading.route('/tokens/latest', methods=['GET'])
 def get_latest_token_deploys():
     try:
-        limit = int(request.args.get('limit', 10))
-        sort_by = request.args.get('sort', 'timestamp') # Add sort parameter
-        print(f"\n=== GET /tokens/latest with limit={limit}, sort={sort_by} ===")
+        limit = int(request.args.get('limit', 1000))
+        print(f"\n=== GET /tokens/latest with limit={limit} ===")
         
-        tokens = get_latest_tokens(limit, sort_by)
-        print(f"Returning {len(tokens)} tokens")
+        tokens = get_latest_tokens(limit)
         
-        return jsonify({
-            'tokens': tokens
-        })
+        # Match the format of /tokens/top-trading endpoint
+        response = {
+            'tokens': tokens,
+            'updated_at': int(time.time())
+        }
+        
+        return jsonify(response)
     except Exception as e:
         error_msg = f"Error getting latest tokens: {str(e)}"
         print(f"❌ {error_msg}")

@@ -27,11 +27,11 @@ export async function getHighlightedTokens() {
   }
 }
 
-export async function getLatestTokens(limit = 10) {
+export async function getLatestTokens() {
   console.log('Fetching latest tokens...');
   try {
     const response = await fetch(
-      `${getApiUrl()}/tokens/latest?limit=${limit}`,
+      `${getApiUrl()}/tokens/latest`,
       {
         headers: {
           'Authorization': getAuthHeader()
@@ -39,24 +39,17 @@ export async function getLatestTokens(limit = 10) {
       }
     );
     
-    // Log the raw response for debugging
-    const text = await response.text();
-    console.log('Raw API response:', text);
+    const data = await response.json();
+    console.log('Parsed latest tokens:', data);
     
-    try {
-      const data = JSON.parse(text);
-      console.log('Parsed latest tokens:', data);
-      
-      if (!data.tokens) {
-        throw new Error('No tokens array in response');
-      }
-      
-      return data.tokens;
-    } catch (parseError) {
-      console.error('Failed to parse response:', parseError);
-      console.error('Raw response was:', text);
-      throw parseError;
+    if (!data.tokens) {
+      throw new Error('No tokens array in response');
     }
+    
+    return {
+      tokens: data.tokens,
+      updatedAt: data.updated_at
+    };
   } catch (error) {
     console.error('Latest tokens fetch failed:', error);
     throw error;

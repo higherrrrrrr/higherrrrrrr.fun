@@ -8,8 +8,9 @@ import { useContractRead } from 'wagmi';
 import { getTokenContract } from '../api/contract';
 import { getTokenState } from '../onchain/tokenState';
 import TokenCard from '../components/TokenCard';
+import { getLatestTokens } from '../api/tokens';
 
-const TOKENS_PER_PAGE = 12;
+const TOKENS_PER_PAGE = 24;
 const VISIT_COOKIE_NAME = 'homepage_visits';
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
   const [tokenStates, setTokenStates] = useState({});
   const [highlightedTokens, setHighlightedTokens] = useState([]);
   const [highlightedTokenStates, setHighlightedTokenStates] = useState({});
+  const [viewMode, setViewMode] = useState('latest'); // 'latest' or 'trending'
 
   useEffect(() => {
     // Handle visit counter cookie
@@ -51,17 +53,25 @@ export default function Home() {
     return () => observer.disconnect();
   }, [hasMore, isLoadingFeed]);
 
-  // Initial token fetch - update to only show available tokens
+  // Initial token fetch - update to handle both modes
   useEffect(() => {
-    const fetchInitialTokens = async () => {
+    const fetchTokens = async () => {
       try {
         setIsLoadingFeed(true);
-        const { tokens } = await getTopTradingTokens();
-        setTopTokens(tokens || []);
-        setDisplayedTokens((tokens || []).slice(0, TOKENS_PER_PAGE));
-        setHasMore((tokens || []).length > TOKENS_PER_PAGE);
-      } catch (error) {
-        console.error('Failed to fetch tokens:', error);
+        
+        if (viewMode === 'latest') {
+          const { tokens: latestTokens } = await getLatestTokens(2000);
+          setTopTokens(latestTokens || []);
+          setDisplayedTokens((latestTokens || []).slice(0, TOKENS_PER_PAGE));
+          setHasMore((latestTokens || []).length > TOKENS_PER_PAGE);
+        } else {
+          const { tokens: trendingTokens } = await getTopTradingTokens();
+          setTopTokens(trendingTokens || []);
+          setDisplayedTokens((trendingTokens || []).slice(0, TOKENS_PER_PAGE));
+          setHasMore((trendingTokens || []).length > TOKENS_PER_PAGE);
+        }
+      } catch (error) { 
+        console.error(`Failed to fetch ${viewMode} tokens:`, error);
         setTopTokens([]);
         setDisplayedTokens([]);
         setHasMore(false);
@@ -70,18 +80,43 @@ export default function Home() {
       }
     };
 
-    fetchInitialTokens();
-  }, []);
+    fetchTokens();
+  }, [viewMode]);
 
-  // Handle pagination
+  // Handle pagination for both modes
   useEffect(() => {
     if (page > 1) {
-      const start = (page - 1) * TOKENS_PER_PAGE;
-      const newTokens = topTokens.slice(start, start + TOKENS_PER_PAGE);
-      setDisplayedTokens(prev => [...prev, ...newTokens]);
-      setHasMore(start + TOKENS_PER_PAGE < topTokens.length);
+      const fetchMoreTokens = async () => {
+        try {
+          const start = (page - 1) * TOKENS_PER_PAGE;
+          
+          if (viewMode === 'latest') {
+            const { tokens: latestTokens } = await getLatestTokens(TOKENS_PER_PAGE * page);
+            setTopTokens(latestTokens || []);
+            setDisplayedTokens(prev => [...prev, ...(latestTokens || []).slice(start, start + TOKENS_PER_PAGE)]);
+            setHasMore((latestTokens || []).length > start + TOKENS_PER_PAGE);
+          } else {
+            const { tokens: trendingTokens } = await getTopTradingTokens();
+            setTopTokens(trendingTokens || []);
+            setDisplayedTokens(prev => [...prev, ...(trendingTokens || []).slice(start, start + TOKENS_PER_PAGE)]);
+            setHasMore((trendingTokens || []).length > start + TOKENS_PER_PAGE);
+          }
+        } catch (error) {
+          console.error(`Failed to fetch more ${viewMode} tokens:`, error);
+          setHasMore(false);
+        }
+      };
+
+      fetchMoreTokens();
     }
-  }, [page, topTokens]);
+  }, [page, viewMode]);
+
+  // Reset pagination when switching modes
+  useEffect(() => {
+    setPage(1);
+    setDisplayedTokens([]);
+    setHasMore(true);
+  }, [viewMode]);
 
   // Modified effect to fetch token states in parallel
   useEffect(() => {
@@ -237,12 +272,17 @@ export default function Home() {
 
         {/* Token Grid */}
         <div>
-          <h2 className="text-3xl font-bold mb-2 flex items-center justify-between">
-            <span>Trending Tokens</span>
-          </h2>
-          <p className="text-sm text-green-500/60 mb-8">
-            sorted by last 6hr volume
-          </p>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">Tokens</h2>
+            <select 
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value)}
+              className="bg-black border border-green-500/20 text-green-500 px-4 py-2 rounded-lg focus:outline-none focus:border-green-500/40"
+            >
+              <option value="latest">Latest</option>
+              <option value="trending">Trending</option>
+            </select>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoadingFeed ? (
