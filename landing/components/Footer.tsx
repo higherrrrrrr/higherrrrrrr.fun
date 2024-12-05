@@ -43,6 +43,13 @@ export const Footer = () => {
         >
           Roadmap
         </Link>
+        <Link
+          href="https://warpcast.com/~/channel/higherrrrrrr"
+          target="_blank"
+          className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
+        >
+          Warpcast
+        </Link>
       </div>
     </footer>
   );
