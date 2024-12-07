@@ -11,6 +11,7 @@ import time
 import requests
 import traceback
 from dune_client.client import DuneClient
+from typing import List
 
 trading = Blueprint('trading', __name__)
 
@@ -57,6 +58,14 @@ class TokenCache:
 token_cache = TokenCache()
 CACHE_DURATION = 3600  # 1 minute in seconds
 
+def filter_blacklisted_tokens(tokens: List[dict]) -> List[dict]:
+    """Filter out any blacklisted tokens from the list"""
+    blacklisted_addresses = set(addr.lower() for addr in Config.BLACKLISTED_TOKENS.split(',') if addr)
+    return [
+        token for token in tokens 
+        if token['address'].lower() not in blacklisted_addresses
+    ]
+
 @trading.route('/tokens/latest', methods=['GET'])
 def get_latest_token_deploys():
     try:
@@ -99,8 +108,11 @@ def get_latest_token_deploys():
             'creation_tx': row['creation_tx']
         } for row in query_result.result.rows]
 
+        # Add filtering before creating the response
+        filtered_tokens = filter_blacklisted_tokens(tokens)
+
         response = {
-            'tokens': tokens,
+            'tokens': filtered_tokens,
             'updated_at': int(current_time)
         }
 
@@ -108,7 +120,7 @@ def get_latest_token_deploys():
         latest_tokens_cache.data = response
         latest_tokens_cache.timestamp = current_time
 
-        print(f"✅ Returning {len(tokens)} latest tokens")
+        print(f"✅ Returning {len(filtered_tokens)} latest tokens")
         return jsonify(response)
 
     except Exception as e:
@@ -246,14 +258,17 @@ def get_top_trading_tokens():
         # Format the response
         tokens = [{
             'address': row['token_address'],
-            'volume_24h': row['transfer_count'],  # Using transfer count as volume for now
+            'volume_24h': row['transfer_count'],
             'trades_24h': row['transfer_count'],
             'creation_time': row['creation_time'],
             'creation_tx': row['creation_tx']
         } for row in query_result.result.rows]
 
+        # Add filtering before creating the response
+        filtered_tokens = filter_blacklisted_tokens(tokens)
+
         response = {
-            'tokens': tokens,
+            'tokens': filtered_tokens,
             'updated_at': int(current_time)
         }
 
@@ -261,7 +276,7 @@ def get_top_trading_tokens():
         dune_cache.data = response
         dune_cache.timestamp = current_time
 
-        print(f"✅ Returning {len(tokens)} top trading tokens")
+        print(f"✅ Returning {len(filtered_tokens)} top trading tokens")
         return jsonify(response)
 
     except Exception as e:

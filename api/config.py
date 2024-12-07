@@ -11,4 +11,7 @@ class Config:
     RPC_URL = os.getenv('RPC_URL', 'https://mainnet.base.org')
     TOKENS_SUBGRAPH_URL = os.getenv('TOKENS_SUBGRAPH_URL')
     DUNE_API_KEY = os.getenv('DUNE_API_KEY')
+    TOKEN_BLACKLIST = os.getenv('TOKEN_BLACKLIST')
+    BLACKLISTED_TOKENS = os.getenv('BLACKLISTED_TOKENS', '')  # Comma-separated list of token addresses
+
 
