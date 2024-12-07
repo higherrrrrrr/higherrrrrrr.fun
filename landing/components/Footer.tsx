@@ -18,12 +18,12 @@ export const Footer = () => {
         >
           Discord
         </Link>
-        <Link
+        {/* <Link
           href="/faq"
           className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
         >
           FAQ
-        </Link>
+        </Link> */}
         <Link
           href="/theology"
           className="text-green-500 hover:text-green-400 text-sm whitespace-nowrap"
