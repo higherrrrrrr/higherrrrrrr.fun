@@ -1,13 +1,29 @@
 from flask import Flask, jsonify, url_for
 from flask_cors import CORS
-from routes import all_blueprints
+from routes import blueprints
 from config import Config
 import os
 from routes.trading import get_eth_price
+from models.token import db
+from flask_migrate import Migrate
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
+    app.config.from_object('config.Config')
+
+    # Initialize SQLAlchemy
+    db.init_app(app)
+
+    # Initialize Flask-Migrate
+    migrate = Migrate(app, db)
+
+    # Create all database tables
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            print(f"Database initialization error: {e}")
 
     # Root endpoint without authentication
     @app.route('/', methods=['GET'])
@@ -23,8 +39,8 @@ def create_app():
         return {'status': 'healthy'}
 
     # Register blueprints
-    for blueprint in all_blueprints:
-        app.register_blueprint(blueprint, url_prefix='/api')
+    for blueprint, url_prefix in blueprints:
+        app.register_blueprint(blueprint, url_prefix=url_prefix)
 
     @app.route('/api/endpoints', methods=['GET'])
     def list_endpoints():

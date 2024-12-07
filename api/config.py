@@ -12,6 +12,10 @@ class Config:
     TOKENS_SUBGRAPH_URL = os.getenv('TOKENS_SUBGRAPH_URL')
     DUNE_API_KEY = os.getenv('DUNE_API_KEY')
     TOKEN_BLACKLIST = os.getenv('TOKEN_BLACKLIST')
-    BLACKLISTED_TOKENS = os.getenv('BLACKLISTED_TOKENS', '')  # Comma-separated list of token addresses
+    BLACKLISTED_TOKENS = os.getenv('BLACKLISTED_TOKENS', '')
+    
+    # Database configuration
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres@localhost:5432/tokens_db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
