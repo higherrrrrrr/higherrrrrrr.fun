@@ -19,6 +19,9 @@ def create_token():
     if not data or 'address' not in data:
         return jsonify({'error': 'Address is required'}), 400
         
+    # Add creator address to token data
+    creator_address = request.eth_address
+    
     # Check if token already exists
     existing_token = Token.query.filter_by(address=data['address'].lower()).first()
     if existing_token:
@@ -28,7 +31,8 @@ def create_token():
         address=data['address'],
         twitter_url=data.get('twitter_url'),
         telegram_url=data.get('telegram_url'),
-        website=data.get('website')
+        website=data.get('website'),
+        creator=creator_address
     )
     
     try:
