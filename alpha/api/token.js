@@ -39,13 +39,13 @@ export async function getTokenCreator(address) {
  * @param {string} authHeader The signed authorization header
  * @returns {Promise<Object>} Updated token details
  */
-export async function upsertToken(address, data, authHeader) {
+export async function upsertToken(address, data, signature) {
   try {
     const response = await fetch(`${getApiUrl()}/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': authHeader
+        'Authorization': `Bearer ${address}:${signature}`
       },
       body: JSON.stringify({
         address,
@@ -80,6 +80,38 @@ export async function listTokens(page = 1, perPage = 10) {
     return await response.json();
   } catch (error) {
     console.error('Failed to list tokens:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update token details
+ * @param {string} address Token address
+ * @param {Object} data Token data (website, twitter, telegram, description, warpcast, systemPrompt, warpcastAppKey)
+ * @returns {Promise<Object>} Updated token details
+ */
+export async function updateToken(address, data) {
+  try {
+    const response = await fetch(`${getApiUrl()}/token/${address}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        website: data.website,
+        twitter: data.twitter,
+        telegram: data.telegram,
+        description: data.description,
+        warpcast_url: data.warpcast,
+        character_prompt: data.systemPrompt,
+        warpcast_app_key: data.warpcastAppKey,
+      }),
+    });
+    
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to update token:', error);
     throw error;
   }
 }

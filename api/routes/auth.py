@@ -12,15 +12,15 @@ w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
 # Token creation bytecode signature
 TOKEN_CREATION_SIGNATURE = "0x60806040"  # Standard ERC20 creation bytecode prefix
 
-def verify_ethereum_signature(message, signature, address):
+def recover_address(message, signature):
     """Verify that the signature was signed by the address"""
     try:
         # Recover the message hash that was signed
         message_hash = encode_defunct(text=message)
         # Recover the address that signed the message
         recovered_address = Account.recover_message(message_hash, signature=signature)
-        # Compare recovered address with claimed address (case-insensitive)
-        return recovered_address.lower() == address.lower()
+
+        return str(recovered_address).lower()
     except Exception as e:
         print(f"Signature verification error: {e}")
         return False
@@ -43,12 +43,11 @@ def require_auth(f):
             message = "we're going higherrrrrrr"
             
             # Verify the signature
-            if not verify_ethereum_signature(message, signature, address):
-                return jsonify({'error': 'Invalid signature'}), 401
+            recovered = recover_address(message, signature)
             
             # Add the verified address to the request context
-            request.eth_address = address.lower()
-            
+            request.eth_address = recovered
+
             return f(*args, **kwargs)
             
         except Exception as e:
@@ -117,20 +116,24 @@ def require_token_creator(f):
     """
     @wraps(f)
     def decorated(*args, **kwargs):
-        token_address = kwargs.get('address')
-        if not token_address:
+        data = request.get_json()
+        if not data or 'address' not in data:
             return jsonify({'error': 'Token address required'}), 400
             
+        token_address = data['address'].lower()
+            
         # Get authenticated wallet
-        auth_wallet = request.eth_address
+        auth_wallet = request.eth_address.lower()
+        print(f"Authenticated wallet: {auth_wallet}")
         
-        # Get token creator
-        creator = get_token_creator(token_address)
-        if not creator:
-            return jsonify({'error': 'Could not verify token creator'}), 400
+        # Get token from database
+        from models.token import Token
+        token = Token.query.filter_by(address=token_address).first()
+        if not token:
+            return jsonify({'error': 'Token not found'}), 404
             
         # Verify authenticated wallet is creator
-        if auth_wallet != creator:
+        if auth_wallet != token.creator.lower():
             return jsonify({'error': 'Not authorized - must be token creator'}), 403
             
         return f(*args, **kwargs)

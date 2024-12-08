@@ -9,6 +9,7 @@ import { getEthPrice } from '../../api/price';
 import { getLatestTokens } from '../../api/contract';
 import Link from 'next/link';
 import { ConnectKitButton, useConnectModal } from '../../components/Web3Provider';
+import { getTokenCreator, getToken } from '../../api/token';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
@@ -25,10 +26,54 @@ export default function TokenPage({ addressProp }) {
   const [ethPrice, setEthPrice] = useState(0);
   const [amount, setAmount] = useState('');
   const [isBuying, setIsBuying] = useState(true);
-  const [latestTokens, setLatestTokens] = useState([]);
+  const [token, setToken] = useState(null);
+  const [isCreator, setIsCreator] = useState(false);
+  const [creator, setCreator] = useState(null);
 
   // Get the user's address
   const { address: userAddress } = useAccount();
+
+  // Add token details state
+  const [tokenDetails, setTokenDetails] = useState(null);
+
+  useEffect(() => {
+    const checkCreator = async () => {
+      if (userAddress) {
+        try {
+          const creatorData = await getTokenCreator(address);
+          console.log('Creator data:', creatorData);
+          console.log('Creator check:', {
+            creatorAddress: creatorData.creator,
+            userAddress: userAddress,
+          });
+          setCreator(creatorData);
+          setIsCreator(
+            creatorData.creator.toLowerCase() === userAddress.toLowerCase()
+          );
+        } catch (error) {
+          console.error('Failed to check creator status:', error);
+          setIsCreator(false);
+        } 
+      } else {
+        console.log('Missing required data:', { address, userAddress });
+      }
+    };
+    checkCreator();
+  }, [address]);
+
+  // Add effect to fetch token details
+  useEffect(() => {
+    const fetchTokenDetails = async () => {
+      if (!address) return;
+      try {
+        const details = await getToken(address);
+        setTokenDetails(details);
+      } catch (error) {
+        console.error('Failed to fetch token details:', error);
+      }
+    };
+    fetchTokenDetails();
+  }, [address]);
 
   // Buy contract interaction
   const { write: buyToken, data: buyData } = useContractWrite({
@@ -396,16 +441,32 @@ export default function TokenPage({ addressProp }) {
     return tokenState.priceLevels.findIndex(level => level.name === tokenState.currentName);
   };
 
+  // Add this somewhere in the render to see the current state
+  console.log('Render state:', { isCreator, userAddress, address });
+
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
       {/* Ticker Bar */}
-      <div className="border-b border-green-500/30 p-4">
+      <div className="p-4">
         <div className="max-w-4xl mx-auto">
           {/* Stack vertically on mobile, horizontal on desktop */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="text-2xl font-bold truncate max-w-[260px]">
-                {tokenState.symbol}
+              <div className="flex items-center gap-4">
+                <div className="text-2xl font-bold truncate max-w-[260px]">
+                  {tokenState.symbol}
+                </div>
+                {isCreator && (
+                  <Link 
+                    href={`/token/${address}/edit`}
+                    className="inline-flex items-center px-3 py-1 border border-green-500 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors text-sm"
+                  >
+                    <span>Edit</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </Link>
+                )}
               </div>
             </div>
             
@@ -436,6 +497,90 @@ export default function TokenPage({ addressProp }) {
           </div>
         </div>
       </div>
+
+      {/* Description & Links Section */}
+      <div className="max-w-4xl mx-auto px-4 pb-6">
+        <div className="flex flex-col gap-6">
+          {/* Social Links */}
+          {(tokenDetails?.website || tokenDetails?.twitter || tokenDetails?.telegram || tokenDetails?.warpcast_url) && (
+            <div>
+              <div className="text-sm text-green-500/50 mb-3">Socials</div>
+              <div className="flex gap-4">
+                {tokenDetails?.website && (
+                  <a
+                    href={tokenDetails.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-500/70 hover:text-green-500 transition-colors"
+                    title="Website"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                  </a>
+                )}
+                
+                {tokenDetails?.twitter && (
+                  <a
+                    href={tokenDetails.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-500/70 hover:text-green-500 transition-colors"
+                    title="Twitter"
+                  >
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </a>
+                )}
+                
+                {tokenDetails?.telegram && (
+                  <a
+                    href={tokenDetails.telegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-500/70 hover:text-green-500 transition-colors"
+                    title="Telegram"
+                  >
+                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                  </a>
+                )}
+                
+                {tokenDetails?.warpcast_url && (
+                  <a
+                    href={tokenDetails.warpcast_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-500/70 hover:text-green-500 transition-colors"
+                    title="Warpcast"
+                  >
+                    <img 
+                      src="/warpcast.png" 
+                      alt="Warpcast"
+                      className="h-5 w-5 opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Description */}
+          {tokenDetails?.description && (
+            <div>
+              <div className="text-sm text-green-500/50 mb-3">Description</div>
+              <p className="text-green-500/80 leading-relaxed">
+                {tokenDetails.description}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Green divider moved here */}
+      <div className="border-b border-green-500/30" />
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
@@ -762,16 +907,6 @@ export default function TokenPage({ addressProp }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
           </a>
-
-          <Link
-            href={`/token/${address}`}
-            className="px-4 py-2 text-sm border border-green-500/30 hover:border-green-500 rounded-lg flex items-center gap-2 w-full sm:w-auto justify-center"
-          >
-            <span>Token Page</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
         </div>
       </div>
     </div>

@@ -8,29 +8,35 @@ class Token(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(42), unique=True, nullable=False)
-    creator = db.Column(db.String(42), nullable=False)
-    verified_creator = db.Column(db.String(42), nullable=True)  # Cached from subgraph
-    twitter_url = db.Column(db.String(255))
-    telegram_url = db.Column(db.String(255))
-    website = db.Column(db.String(255))
+    symbol = db.Column(db.String(255))
+    name = db.Column(db.String(255))
+    creator = db.Column(db.String(42))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    website = db.Column(db.String(255))
+    twitter = db.Column(db.String(255))
+    telegram = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    warpcast_url = db.Column(db.String(255))
+    character_prompt = db.Column(db.Text)
+    warpcast_app_key = db.Column(db.Text)
 
-    def __init__(self, address, creator, twitter_url=None, telegram_url=None, website=None):
+    def __init__(self, address, creator, **kwargs):
         self.address = address.lower()
         self.creator = creator.lower()
-        self.twitter_url = twitter_url
-        self.telegram_url = telegram_url
-        self.website = website
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def to_dict(self):
         return {
             'address': self.address,
             'creator': self.creator,
-            'verified_creator': self.verified_creator,
-            'twitter_url': self.twitter_url,
-            'telegram_url': self.telegram_url,
+            'symbol': self.symbol,
+            'name': self.name,
+            'twitter': self.twitter,
+            'telegram': self.telegram,
             'website': self.website,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
+            'description': self.description,
+            'warpcast_url': self.warpcast_url,
+            'character_prompt': self.character_prompt,
+            'created_at': self.created_at.isoformat() if self.created_at else None
         } 
