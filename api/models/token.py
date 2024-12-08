@@ -8,10 +8,11 @@ class Token(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(42), unique=True, nullable=False)
+    creator = db.Column(db.String(42), nullable=False)
+    verified_creator = db.Column(db.String(42), nullable=True)  # Cached from subgraph
     twitter_url = db.Column(db.String(255))
     telegram_url = db.Column(db.String(255))
     website = db.Column(db.String(255))
-    creator = db.Column(db.String(42), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -26,6 +27,7 @@ class Token(db.Model):
         return {
             'address': self.address,
             'creator': self.creator,
+            'verified_creator': self.verified_creator,
             'twitter_url': self.twitter_url,
             'telegram_url': self.telegram_url,
             'website': self.website,

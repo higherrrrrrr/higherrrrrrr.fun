@@ -2,6 +2,15 @@ from functools import wraps
 from flask import request, jsonify
 from eth_account.messages import encode_defunct
 from eth_account import Account
+from web3 import Web3
+from config import Config
+import requests
+
+# Initialize Web3
+w3 = Web3(Web3.HTTPProvider(Config.RPC_URL))
+
+# Token creation bytecode signature
+TOKEN_CREATION_SIGNATURE = "0x60806040"  # Standard ERC20 creation bytecode prefix
 
 def verify_ethereum_signature(message, signature, address):
     """Verify that the signature was signed by the address"""
@@ -46,4 +55,83 @@ def require_auth(f):
             print(f"Authentication error: {e}")
             return jsonify({'error': 'Invalid authorization format'}), 401
             
+    return decorated
+
+def get_token_creation_tx(token_address: str) -> str:
+    """Get the creation transaction hash from the subgraph"""
+    query = """
+    query GetTokenCreation($token: String!) {
+        newTokenEvents(where: {token: $token}, first: 1) {
+            transactionHash
+        }
+    }
+    """
+    
+    try:
+        response = requests.post(
+            Config.TOKENS_SUBGRAPH_URL,
+            json={
+                'query': query,
+                'variables': {
+                    'token': token_address.lower()
+                }
+            }
+        )
+        
+        data = response.json()
+        events = data.get('data', {}).get('newTokenEvents', [])
+        
+        if events:
+            return events[0]['transactionHash']
+        return None
+        
+    except Exception as e:
+        print(f"Subgraph query error: {e}")
+        return None
+
+def get_token_creator(token_address: str) -> str:
+    """
+    Get the creator (deployer) address of a token contract
+    Returns lowercase creator address or None if not found
+    """
+    try:
+        # Get creation transaction hash from subgraph
+        tx_hash = get_token_creation_tx(token_address)
+        if not tx_hash:
+            return None
+            
+        # Get transaction details from RPC
+        tx = w3.eth.get_transaction(tx_hash)
+        
+        return tx['from'].lower()
+        
+        return None
+    except Exception as e:
+        print(f"Error getting token creator: {e}")
+        return None
+
+def require_token_creator(f):
+    """
+    Decorator that requires the authenticated wallet to be the token creator
+    Must be used after @require_auth
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token_address = kwargs.get('address')
+        if not token_address:
+            return jsonify({'error': 'Token address required'}), 400
+            
+        # Get authenticated wallet
+        auth_wallet = request.eth_address
+        
+        # Get token creator
+        creator = get_token_creator(token_address)
+        if not creator:
+            return jsonify({'error': 'Could not verify token creator'}), 400
+            
+        # Verify authenticated wallet is creator
+        if auth_wallet != creator:
+            return jsonify({'error': 'Not authorized - must be token creator'}), 403
+            
+        return f(*args, **kwargs)
     return decorated
