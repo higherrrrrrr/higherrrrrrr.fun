@@ -131,8 +131,6 @@ def require_token_creator(f):
             
         # Get authenticated wallet
         auth_wallet = request.eth_address.lower()
-        print(f"Authenticated wallet: {auth_wallet}")
-        
         # Get token from database
         creator = get_token_creator(token_address)
             

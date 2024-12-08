@@ -1,7 +1,6 @@
 import urllib.parse
 import random
 from flask import Blueprint, jsonify, current_app, request
-from .auth import require_auth
 from config import Config
 from services.price_service import PriceService
 from web3 import Web3
@@ -216,7 +215,6 @@ def get_highlighted_token():
         }), 500
 
 @trading.route('/contract-address', methods=['GET'])
-@require_auth
 def get_contract_address():
     return jsonify({
         'factory_address': Config.CONTRACT_ADDRESS
