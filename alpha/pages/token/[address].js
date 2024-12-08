@@ -667,14 +667,19 @@ export default function TokenPage({ addressProp }) {
 
         {/* Chart Section - Only show for graduated tokens */}
         {tokenState?.marketType === 1 && tokenState?.poolAddress && (
-          <div className="border border-green-500/30 rounded-lg overflow-hidden">
+          <div className="relative border border-green-500/30 rounded-lg overflow-hidden">
+            {/* Chart iframe */}
             <iframe
               src={`https://www.geckoterminal.com/base/pools/${tokenState.poolAddress}?embed=1&info=0&swaps=0&chart=1`}
               width="100%"
               height="400px"
               frameBorder="0"
-              className="bg-transparent"
+              className="relative z-0 bg-black"
               title="Price Chart"
+              style={{
+                filter: 'brightness(90%) grayscale(100%) sepia(100%) hue-rotate(70deg) saturate(150%) contrast(150%)',
+                backgroundColor: 'black',
+              }}
             />
           </div>
         )}
