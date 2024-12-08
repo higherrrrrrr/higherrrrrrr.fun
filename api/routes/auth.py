@@ -94,6 +94,13 @@ def get_token_creator(token_address: str) -> str:
     Returns lowercase creator address or None if not found
     """
     try:
+
+        from models.token import Token
+        token = Token.query.filter_by(address=token_address).first()
+        if token:
+            return token.creator.lower()
+
+    
         # Get creation transaction hash from subgraph
         tx_hash = get_token_creation_tx(token_address)
         if not tx_hash:
@@ -127,13 +134,10 @@ def require_token_creator(f):
         print(f"Authenticated wallet: {auth_wallet}")
         
         # Get token from database
-        from models.token import Token
-        token = Token.query.filter_by(address=token_address).first()
-        if not token:
-            return jsonify({'error': 'Token not found'}), 404
+        creator = get_token_creator(token_address)
             
         # Verify authenticated wallet is creator
-        if auth_wallet != token.creator.lower():
+        if auth_wallet != creator:
             return jsonify({'error': 'Not authorized - must be token creator'}), 403
             
         return f(*args, **kwargs)

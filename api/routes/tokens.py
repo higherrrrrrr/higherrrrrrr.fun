@@ -11,12 +11,10 @@ def get_token_creator_endpoint(address):
     token_address = address.lower()
     
     # Get from database
-    token = Token.query.filter_by(address=token_address).first()
-    if not token:
-        return jsonify({'error': 'Token not found'}), 404
+    creator = get_token_creator(token_address)
         
     return jsonify({
-        'creator': token.creator,
+        'creator': creator,
         'source': 'database'
     })
 
