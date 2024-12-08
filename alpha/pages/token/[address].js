@@ -574,21 +574,26 @@ export default function TokenPage({ addressProp }) {
               <p className="text-green-500/80 leading-relaxed mb-4">
                 {tokenDetails.description}
               </p>
+            </div>
+          )}
 
-              {/* External Links - Moved here and made smaller */}
-              <div className="flex flex-wrap gap-2">
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(address);
-                  }}
-                  className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
-                >
-                  <span>Copy Address</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </button>
+          {/* External Links - Always show, separate section */}
+          <div>
+            <div className="flex flex-wrap gap-2">
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(address);
+                }}
+                className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
+              >
+                <span>Copy Address</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
 
+              {/* Only show DexScreener for Uniswap tokens */}
+              {tokenState?.marketType === 1 && (
                 <a
                   href={`https://dexscreener.com/base/${address}`}
                   target="_blank"
@@ -600,21 +605,21 @@ export default function TokenPage({ addressProp }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
+              )}
 
-                <a
-                  href={`https://basescan.org/token/${address}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
-                >
-                  <span>Basescan</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </div>
+              <a
+                href={`https://basescan.org/token/${address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
+              >
+                <span>Basescan</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
