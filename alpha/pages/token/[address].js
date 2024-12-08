@@ -665,6 +665,20 @@ export default function TokenPage({ addressProp }) {
           </div>
         </div>
 
+        {/* Chart Section - Only show for graduated tokens */}
+        {tokenState?.marketType === 1 && tokenState?.poolAddress && (
+          <div className="border border-green-500/30 rounded-lg overflow-hidden">
+            <iframe
+              src={`https://www.geckoterminal.com/base/pools/${tokenState.poolAddress}?embed=1&info=0&swaps=0&chart=1`}
+              width="100%"
+              height="400px"
+              frameBorder="0"
+              className="bg-transparent"
+              title="Price Chart"
+            />
+          </div>
+        )}
+
         {/* Trading Interface */}
         <div className="border border-green-500/30 rounded-lg p-4 md:p-6 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
