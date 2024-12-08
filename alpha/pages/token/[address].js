@@ -449,11 +449,10 @@ export default function TokenPage({ addressProp }) {
       {/* Ticker Bar */}
       <div className="p-4">
         <div className="max-w-4xl mx-auto">
-          {/* Stack vertically on mobile, horizontal on desktop */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-4">
-                <div className="text-2xl font-bold truncate max-w-[260px]">
+                <div className="text-xl md:text-2xl font-bold truncate max-w-[200px] md:max-w-[260px]">
                   {tokenState.symbol}
                 </div>
                 {isCreator && (
@@ -499,13 +498,13 @@ export default function TokenPage({ addressProp }) {
       </div>
 
       {/* Description & Links Section */}
-      <div className="max-w-4xl mx-auto px-4 pb-6">
-        <div className="flex flex-col gap-6">
+      <div className="max-w-4xl mx-auto px-4 pb-4">
+        <div className="flex flex-col gap-4">
           {/* Social Links */}
           {(tokenDetails?.website || tokenDetails?.twitter || tokenDetails?.telegram || tokenDetails?.warpcast_url) && (
             <div>
-              <div className="text-sm text-green-500/50 mb-3">Socials</div>
-              <div className="flex gap-4">
+              <div className="text-sm text-green-500/50 mb-2">Socials</div>
+              <div className="flex gap-3">
                 {tokenDetails?.website && (
                   <a
                     href={tokenDetails.website}
@@ -570,55 +569,52 @@ export default function TokenPage({ addressProp }) {
           {/* Description */}
           {tokenDetails?.description && (
             <div>
-              <div className="text-sm text-green-500/50 mb-3">Description</div>
-              <p className="text-green-500/80 leading-relaxed mb-4">
+              <div className="text-sm text-green-500/50 mb-2">Description</div>
+              <p className="text-green-500/80 leading-relaxed mb-3">
                 {tokenDetails.description}
               </p>
             </div>
           )}
 
-          {/* External Links - Always show, separate section */}
-          <div>
-            <div className="flex flex-wrap gap-2">
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(address);
-                }}
-                className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
-              >
-                <span>Copy Address</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </button>
+          {/* External Links - Always show */}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(address);
+              }}
+              className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
+            >
+              <span>Copy Address</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
 
-              {/* Only show DexScreener for Uniswap tokens */}
-              {tokenState?.marketType === 1 && (
-                <a
-                  href={`https://dexscreener.com/base/${address}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
-                >
-                  <span>DexScreener</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              )}
-
+            {tokenState?.marketType === 1 && (
               <a
-                href={`https://basescan.org/token/${address}`}
+                href={`https://dexscreener.com/base/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
               >
-                <span>Basescan</span>
+                <span>DexScreener</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </a>
-            </div>
+            )}
+
+            <a
+              href={`https://basescan.org/token/${address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
+            >
+              <span>Basescan</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>
@@ -631,10 +627,10 @@ export default function TokenPage({ addressProp }) {
         {/* Current Level */}
         <div className="text-center py-12">
           <div className="text-sm text-green-500/50 mb-4">Current Name</div>
-          <div className="text-7xl font-bold mb-6 break-words max-w-[90vw] mx-auto">
+          <div className="text-xl md:text-7xl font-bold mb-6 break-words max-w-[90vw] mx-auto">
             {tokenState.currentName || 'Loading...'}
           </div>
-          <div className="text-xl text-green-500/70">
+          <div className="text-lg md:text-xl text-green-500/70">
             Level {getCurrentLevelIndex(tokenState) + 1} of {tokenState.priceLevels?.length || 0}
           </div>
         </div>
