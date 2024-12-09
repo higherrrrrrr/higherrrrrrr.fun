@@ -1,5 +1,8 @@
 FROM nginx:alpine
 
+# Install headers-more-nginx-module
+RUN apk add --no-cache nginx-mod-http-headers-more
+
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
