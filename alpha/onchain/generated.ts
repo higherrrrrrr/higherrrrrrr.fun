@@ -171,6 +171,23 @@ export const higherrrrrrrAbi = [
   },
   {
     type: 'function',
+    inputs: [],
+    name: 'getPriceLevels',
+    outputs: [
+      {
+        name: '',
+        internalType: 'struct IHigherrrrrrr.PriceLevel[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'price', internalType: 'uint256', type: 'uint256' },
+          { name: 'name', internalType: 'string', type: 'string' },
+        ],
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     inputs: [
       { name: 'tokenOrderSize', internalType: 'uint256', type: 'uint256' },
     ],
@@ -715,6 +732,10 @@ export const higherrrrrrrAbi = [
 // HigherrrrrrrFactory
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
+ * -
+ */
 export const higherrrrrrrFactoryAbi = [
   {
     type: 'constructor',
@@ -827,3 +848,21 @@ export const higherrrrrrrFactoryAbi = [
   { type: 'error', inputs: [], name: 'Unauthorized' },
   { type: 'error', inputs: [], name: 'ZeroAddress' },
 ] as const
+
+/**
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
+ * -
+ */
+export const higherrrrrrrFactoryAddress = {
+  8453: '0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1',
+  31337: '0x158d291D8b47F056751cfF47d1eEcd19FDF9B6f8',
+} as const
+
+/**
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
+ * -
+ */
+export const higherrrrrrrFactoryConfig = {
+  address: higherrrrrrrFactoryAddress,
+  abi: higherrrrrrrFactoryAbi,
+} as const

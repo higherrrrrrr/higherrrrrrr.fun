@@ -6,7 +6,7 @@ import { higherrrrrrrAbi } from './generated';
 // Create public client
 const publicClient = createPublicClient({
   chain: base,
-  transport: http('https://rpc-proxy-588022212596.us-central1.run.app')
+  transport: http('https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a')
 });
 
 export interface PriceLevel {
@@ -70,7 +70,7 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
   try {
     // Get token data
     const [name, symbol, totalSupply, currentPrice, maxSupply, marketType, bondingCurve, convictionNFT, 
-           convictionThreshold, minOrderSize, totalFeeBps, poolAddress] = await publicClient.multicall({
+           convictionThreshold, minOrderSize, totalFeeBps, poolAddress, priceLevels] = await publicClient.multicall({
       contracts: [
         {
           address: tokenAddress as `0x${string}`,
@@ -131,36 +131,24 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
           address: tokenAddress as `0x${string}`,
           abi: higherrrrrrrAbi,
           functionName: 'poolAddress'
+        },
+        {
+          address: tokenAddress as `0x${string}`,
+          abi: higherrrrrrrAbi,
+          functionName: 'getPriceLevels'
         }
       ]
     });
 
-    // Get price levels
-    const priceLevels: PriceLevel[] = [];
-    let levelIndex = 0;
-    const MAX_LEVELS = 420;
-    while (levelIndex < MAX_LEVELS) {
-      try {
-        const level = await publicClient.readContract({
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'priceLevels',
-          args: [BigInt(levelIndex)]
-        });
-        if (!level || !level[1]) break;
-        priceLevels.push({
-          price: levelIndex === 0 ? '0' : formatEther(level[0]),
-          name: level[1]
-        });
-        levelIndex++;
-      } catch {
-        break;
-      }
-    }
+    // Remove the old price levels loop and use the returned data
+    const formattedPriceLevels = priceLevels.result?.map((level, index) => ({
+      price: index === 0 ? '0' : formatEther(level.price),
+      name: level.name
+    }));
 
     return {
-      name: name.result?.toString() || '',
-      symbol: symbol.result?.toString() || '',
+      name: name.result,
+      symbol: symbol.result,
       totalSupply: formatEther(totalSupply.result || BigInt(0)),
       currentPrice: formatEther(currentPrice.result || BigInt(0)),
       maxSupply: formatEther(maxSupply.result || BigInt(0)),
@@ -171,7 +159,7 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
       MIN_ORDER_SIZE: formatEther(minOrderSize.result || BigInt(0)),
       TOTAL_FEE_BPS: Number(totalFeeBps.result || 0),
       poolAddress: poolAddress.result?.toString() || '',
-      priceLevels,
+      priceLevels: formattedPriceLevels,
       currentName: name.result?.toString() || '',
       MAX_TOTAL_SUPPLY: formatEther(maxSupply.result || BigInt(0))
     };

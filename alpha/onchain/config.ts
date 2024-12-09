@@ -2,7 +2,7 @@ import { getCurrentChain } from '../components/Web3Provider';
 
 export const RPC_URLS = {
   development: 'http://127.0.0.1:8545',
-  production: 'https://rpc-proxy-588022212596.us-central1.run.app'
+  production: 'https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a'
 };
 
 export const CURRENT_RPC_URL = typeof window !== 'undefined' && 
