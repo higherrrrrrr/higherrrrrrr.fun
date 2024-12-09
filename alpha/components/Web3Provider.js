@@ -9,7 +9,7 @@ import { InjectedConnector } from 'wagmi/connectors/injected';
 export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
 
-const ALCHEMY_RPC = 'https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a';
+const ALCHEMY_RPC = 'https://rpc-proxy-588022212596.us-central1.run.app';
 const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
 
 // Completely override Base chain with our RPC
