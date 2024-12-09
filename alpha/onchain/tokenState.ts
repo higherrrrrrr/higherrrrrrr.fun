@@ -6,7 +6,7 @@ import { higherrrrrrrAbi } from './generated';
 // Create public client
 const publicClient = createPublicClient({
   chain: base,
-  transport: http('https://base-mainnet.g.alchemy.com/v2/l0XzuD715Z-zd21ie5dbpLKrptTuq07a')
+  transport: http('https://rpc.higherrrrrrr.fun/')
 });
 
 export interface PriceLevel {
