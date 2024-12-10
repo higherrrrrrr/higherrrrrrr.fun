@@ -20,18 +20,8 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const loadingRef = useRef(null);
-  const [showIntro, setShowIntro] = useState(true);
   const [tokenStates, setTokenStates] = useState({});
   const [viewMode, setViewMode] = useState('trending'); // 'latest' or 'trending'
-
-  useEffect(() => {
-    // Handle visit counter cookie
-    const visits = parseInt(Cookies.get(VISIT_COOKIE_NAME) || '0');
-    if (visits >= 2) {
-      setShowIntro(false);
-    }
-    Cookies.set(VISIT_COOKIE_NAME, (visits + 1).toString(), { expires: 30 });
-  }, []);
 
   // Intersection Observer setup
   useEffect(() => {
@@ -140,57 +130,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
-      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        
-        
-        {showIntro && (
-          <>
-            <h1 className="text-3xl md:text-4xl font-bold mb-8">
-            Evolutionary Meme Tokens
-            </h1>
-            <div className="space-y-6 text-lg text-green-500/80">
-              <p>
-                Tokens shouldn't be static. They should evolve with their communities, 
-                growing and transforming as they achieve new milestones.
-              </p>
-              <p>
-                Higherrrrrrr Protocol introduces evolutionary tokens - a new primitive where 
-                a token's identity, name, and metadata autonomously evolve on-chain based on 
-                its market performance and community growth.
-              </p>
-              <p>
-                Each price milestone unlocks a new evolution, creating natural momentum and shared 
-                achievements for holders. No team intervention, no off-chain voting - just pure 
-                market-driven evolution.
-              </p>
-            </div>
-
-            {/* NFT Section */}
-            <div className="mt-12 space-y-6 text-lg text-green-500/80">
-              <h2 className="text-2xl font-bold mb-4">Conviction NFTs</h2>
-              <p>
-                Every evolution deserves its historians. Our Conviction NFTs automatically mint 
-                for significant holders, capturing the living history of each token's journey.
-              </p>
-              <div className="pl-6 space-y-2">
-                <p>• Dynamic SVG art that evolves with each milestone</p>
-                <p>• On-chain proof of early conviction</p>
-                <p>• Historical achievement timestamps</p>
-                <p>• Exclusive access to future evolutions</p>
-              </div>
-              <p>
-                These aren't just badges - they're living artifacts of your belief in 
-                evolution. Each NFT grows in power as its token achieves new heights, 
-                creating a permanent on-chain record of your conviction.
-              </p>
-            </div>
-
-            {/* Divider */}
-            <div className="border-b border-green-500/20 my-12"></div>
-          </>
-        )}
-
-        {/* Token Grid */}
+      <div className="max-w-7xl mx-auto px-4 pt-8">
         <div>
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold">

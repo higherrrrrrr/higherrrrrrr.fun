@@ -135,21 +135,33 @@ export default function MainLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
-      <header className="flex flex-col md:flex-row md:justify-between items-center p-3 md:p-6 max-w-7xl mx-auto w-full gap-3 md:gap-0">
+      <header className="flex flex-col md:flex-row md:justify-between items-center p-3 md:p-6 max-w-7xl mx-auto w-full gap-4 md:gap-0">
         <Link href="/">
-          <h1 className="text-2xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
+          <h1 className="text-5xl md:text-3xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
             {isMobile ? "Higherrrrrrr" : animatedLogoText}
           </h1>
         </Link>
         
-        <div className="flex items-center space-x-2 md:space-x-4">
-          <Link href="/launch">
-            <button className="px-3 md:px-4 py-3 text-sm md:text-base bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors whitespace-nowrap">
-              Launch Token
-            </button>
-          </Link>
-          <div className="w-auto">
-            <ConnectKitButton />
+        <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 w-full md:w-auto">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full md:w-auto items-center">
+            <Link 
+              href="/how-it-works" 
+              className="text-green-500 hover:text-green-400 transition-colors w-full md:w-auto text-center order-last md:order-first"
+            >
+              [How it Works]
+            </Link>
+            <div className="flex gap-3 md:gap-4 w-full md:w-auto">
+              <div className="flex-1 md:w-[180px]">
+                <Link href="/launch" className="w-full">
+                  <button className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors whitespace-nowrap text-base">
+                    Launch Token
+                  </button>
+                </Link>
+              </div>
+              <div className="flex-1 md:w-[180px] h-12">
+                <ConnectKitButton />
+              </div>
+            </div>
           </div>
         </div>
       </header>
