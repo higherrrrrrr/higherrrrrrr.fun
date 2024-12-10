@@ -153,7 +153,7 @@ export default function MainLayout({ children }) {
             <div className="flex gap-3 md:gap-4 w-full md:w-auto">
               <div className="flex-1 md:w-[180px]">
                 <Link href="/launch" className="w-full">
-                  <button className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono rounded transition-colors whitespace-nowrap text-base">
+                  <button className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors whitespace-nowrap text-base">
                     Launch Token
                   </button>
                 </Link>
