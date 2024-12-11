@@ -98,6 +98,15 @@ export default function HowItWorks() {
           </section>
 
           <section>
+            <h2 className="text-2xl font-mono font-bold text-green-500 mb-4">NFT Rewards</h2>
+            <p className="text-green-500/80 font-mono">
+              To be eligible for NFT rewards, you must purchase tokens directly through our protocol - either through the buy function onchain or through the interface. 
+              Trades made on external exchanges or through other means will not count towards NFT eligibility. 
+              This ensures fair distribution and rewards for our direct platform users.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-2xl font-mono text-green-500">FAQ</h2>
             
             <h3 className="text-xl font-mono text-green-500 mt-6">How much does it cost to launch a token?</h3>
