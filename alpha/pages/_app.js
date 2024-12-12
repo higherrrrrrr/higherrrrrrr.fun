@@ -1,11 +1,26 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Web3Provider } from '../components/Web3Provider';
-import MainLayout from '../layouts/MainLayout';
-import '../styles/globals.css';
-import Launch from './launch';
+import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
 import posthog from 'posthog-js';
 import { useRouter } from 'next/router';
+import '../styles/globals.css';
+import '@usecapsule/react-sdk/styles.css';
+
+// Dynamically import components with SSR disabled
+const Web3Provider = dynamic(
+  () => import('../components/Web3Provider').then(mod => mod.Web3Provider),
+  { ssr: false }
+);
+
+const MainLayout = dynamic(
+  () => import('../layouts/MainLayout'),
+  { ssr: false }
+);
+
+const Launch = dynamic(
+  () => import('./launch'),
+  { ssr: false }
+);
 
 const queryClient = new QueryClient();
 
@@ -17,17 +32,15 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export default function App({ Component, pageProps }) {
+function App({ Component, pageProps }) {
   const router = useRouter();
   
   useEffect(() => {
-    // Track page views
     const handleRouteChange = () => {
       posthog.capture('$pageview');
     };
 
     router.events.on('routeChangeComplete', handleRouteChange);
-
     return () => {
       router.events.off('routeChangeComplete', handleRouteChange);
     };
@@ -46,3 +59,8 @@ export default function App({ Component, pageProps }) {
     </QueryClientProvider>
   );
 }
+
+// Use noSSR wrapper
+export default dynamic(() => Promise.resolve(App), {
+  ssr: false
+});

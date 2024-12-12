@@ -1,18 +1,27 @@
-import { WagmiConfig, createConfig } from 'wagmi';
-import { base } from 'wagmi/chains';
-import { ConnectKitProvider, ConnectKitButton as DefaultConnectButton, getDefaultConfig, useModal } from 'connectkit';
+import { WagmiConfig, createConfig, useAccount } from 'wagmi';
+import { base } from 'viem/chains';
 import { useEffect, useState, createContext, useContext } from 'react';
 import { getContractAddress } from '../api/contract';
-import { http } from 'viem';
-import { InjectedConnector } from 'wagmi/connectors/injected';
+import { http, createWalletClient, custom } from 'viem';
+import { injected } from 'wagmi/connectors';
+import dynamic from 'next/dynamic';
+import evmWalletConnectors from '@usecapsule/evm-wallet-connectors';
+import { switchChain } from 'wagmi/actions';
+import Capsule, { Environment, CapsuleModal } from "@usecapsule/react-sdk";
 
+// Import styles in _app.js instead
 export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
 
 const ALCHEMY_RPC = 'https://rpc.higherrrrrrr.fun/';
-const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
+const CAPSULE_API_KEY = '196c6fd5269e56bdcca8929272bf1e9c';
 
-// Completely override Base chain with our RPC
+// Initialize Capsule directly
+const capsule = new Capsule(Environment.PROD, CAPSULE_API_KEY, {
+  evmWalletConnectors
+});
+
+// Base chain config remains the same
 const baseChain = {
   ...base,
   rpcUrls: {
@@ -33,34 +42,17 @@ const baseChain = {
 
 const chains = [baseChain];
 
-// Create config with Rabby support and default connectors
+// Updated wagmi config for v2
 const wagmiConfig = createConfig({
-  ...getDefaultConfig({
-    appName: "Higherrrrrrr",
-    chains,
-    transports: {
-      [baseChain.id]: http(ALCHEMY_RPC),
-    },
-    walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
-  }),
+  chains: [baseChain],
+  transports: {
+    [baseChain.id]: http(ALCHEMY_RPC)
+  },
   connectors: [
-    // Filter out any injected connectors from default config
-    ...getDefaultConfig({
-      appName: "Higherrrrrrr",
-      chains,
-      walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
-    }).connectors.filter(connector => 
-     connector.id !== 'injected' && connector.id !== 'rabby'
-    ),
-    // Add our custom Rabby connector
-    new InjectedConnector({
-      chains,
-      options: {
-        name: 'Rabby',
-        getProvider: () => typeof window !== 'undefined' ? window.ethereum : undefined,
-      },
-    }),
-  ],
+    injected({
+      target: 'metaMask'
+    })
+  ]
 });
 
 function Web3ProviderInner({ children }) {
@@ -150,86 +142,46 @@ function Web3ProviderInner({ children }) {
 export function Web3Provider({ children }) {
   return (
     <WagmiConfig config={wagmiConfig}>
-      <ConnectKitProvider
-        theme="minimal"
-        mode="dark"
-        customTheme={{
-          "--ck-font-family": "monospace",
-          "--ck-accent-color": "#22c55e",
-          "--ck-accent-text-color": "#000000",
-          
-          // Modal background
-          "--ck-body-background": "#000000",
-          "--ck-body-color": "#22c55e",
-          "--ck-body-color-muted": "rgba(34, 197, 94, 0.6)",
-          "--ck-body-action-color": "#22c55e",
-          
-          // Buttons
-          "--ck-primary-button-background": "#22c55e",
-          "--ck-primary-button-color": "#000000",
-          "--ck-primary-button-hover-background": "#16a34a",
-          
-          // Secondary buttons
-          "--ck-secondary-button-background": "transparent",
-          "--ck-secondary-button-border": "1px solid #22c55e",
-          "--ck-secondary-button-color": "#22c55e",
-          
-          // Borders and overlay
-          "--ck-body-border": "1px solid rgba(34, 197, 94, 0.2)",
-          "--ck-body-border-radius": "4px",
-          "--ck-overlay-background": "rgba(0, 0, 0, 0.95)",
-          
-          // Focus and hover states
-          "--ck-button-hover-opacity": "0.8",
-          "--ck-focus-color": "#22c55e",
-          
-          // QR code
-          "--ck-qr-border-radius": "4px",
-          "--ck-qr-dot-color": "#22c55e",
-          "--ck-qr-background": "#000000",
-          
-          // Dropdown
-          "--ck-dropdown-button-background": "#000000",
-          "--ck-dropdown-button-hover-background": "rgba(34, 197, 94, 0.1)",
-          "--ck-dropdown-button-color": "#22c55e",
-          
-          // Misc
-          "--ck-tooltip-background": "#000000",
-          "--ck-tooltip-color": "#22c55e",
-          "--ck-spinner-color": "#22c55e"
-        }}
-        options={{
-          initialChainId: baseChain.id,
-          hideQuestionMarkCTA: true,
-          hideTooltips: true,
-          embedGoogleFonts: false,
-          walletConnectName: "More Wallets"
-        }}
-      >
-        <Web3ProviderInner>{children}</Web3ProviderInner>
-      </ConnectKitProvider>
+      <Web3ProviderInner>{children}</Web3ProviderInner>
     </WagmiConfig>
   );
 }
 
 export function ConnectKitButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  
   return (
-    <DefaultConnectButton.Custom>
-      {({ isConnected, show, truncatedAddress, ensName }) => {
-        return (
-          <button
-            onClick={show}
-            className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors"
-          >
-            {isConnected ? (ensName ?? truncatedAddress) : "Connect Wallet"}
-          </button>
-        );
-      }}
-    </DefaultConnectButton.Custom>
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors"
+      >
+        Connect Wallet
+      </button>
+      <CapsuleModal
+        capsule={capsule}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        logo={"https://pbs.twimg.com/profile_images/1864470786381369345/GuAosjLh_400x400.png"}
+        theme={{
+          backgroundColor: "#000000",
+          font: "Inter",
+          borderRadius: "md",
+          accentColor: "#4ade80",
+          foregroundColor: "#4ade80"
+        }}
+        oAuthMethods={["GOOGLE", "TWITTER", "FARCASTER"]}
+        disableEmailLogin={false}
+        disablePhoneLogin={false}
+        authLayout={["AUTH:FULL", "EXTERNAL:FULL"]}
+        externalWallets={["METAMASK", "COINBASE", "WALLETCONNECT", "PHANTOM"]}
+        twoFactorAuthEnabled={false}
+        recoverySecretStepEnabled={true}
+        onRampTestMode
+      />
+    </>
   );
 }
 
 export const getCurrentChain = () => baseChain;
-
-export const useConnectModal = useModal;
   

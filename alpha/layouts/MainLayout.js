@@ -4,6 +4,7 @@ import { ConnectKitButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import { useTypewriter } from '../hooks/useTypewriter';
 import { getContractAddress } from '../api/contract';
+import LoadingState from '../components/LoadingState';
 
 const LAUNCH_DATE = new Date("2024-11-25T17:00:00-08:00");
 
@@ -12,6 +13,7 @@ export default function MainLayout({ children }) {
   const [shouldShowComingSoon, setShouldShowComingSoon] = useState(true);
   const [keySequence, setKeySequence] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const animatedLogoText = useTypewriter("Higherrrrrrr", {
     minRs: 3,
@@ -124,9 +126,17 @@ export default function MainLayout({ children }) {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [keySequence]);
 
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
   // Don't render anything until client-side
   if (!mounted) {
     return null;
+  }
+
+  if (isLoading) {
+    return <LoadingState />;
   }
 
   if (shouldShowComingSoon) {
