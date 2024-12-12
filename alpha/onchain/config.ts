@@ -17,3 +17,6 @@ export const getCurrentRpcUrl = () => {
 
 // Add Uniswap V3 Quoter contract address
 export const UNISWAP_QUOTER_ADDRESS = '0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a';
+
+export const UNISWAP_V3_FACTORY = '0x33128a8fC17869897dcE68Ed026d694621f6FDfD';
+export const WETH = '0x4200000000000000000000000000000000000006';

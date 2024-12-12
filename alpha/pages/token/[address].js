@@ -1,6 +1,8 @@
+'use client';
+
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { getTokenState, getProgressToNextLevel, getUniswapQuote, getTokenBalance } from '../../onchain';
+import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../onchain';
 import { useContractWrite, useWaitForTransaction, useContractRead, useAccount, useBalance } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
@@ -10,6 +12,8 @@ import { getLatestTokens } from '../../api/contract';
 import Link from 'next/link';
 import { ConnectKitButton, useConnectModal } from '../../components/Web3Provider';
 import { getTokenCreator, getToken } from '../../api/token';
+import { getBuyQuote, getSellQuote } from '../../onchain/quotes';
+import { ethers } from 'ethers';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
@@ -29,6 +33,9 @@ export default function TokenPage({ addressProp }) {
   const [token, setToken] = useState(null);
   const [isCreator, setIsCreator] = useState(false);
   const [creator, setCreator] = useState(null);
+  const [quote, setQuote] = useState(null);
+  const [error, setError] = useState('');
+  const [userBalance, setUserBalance] = useState('0');
 
   // Get the user's address
   const { address: userAddress } = useAccount();
@@ -36,16 +43,35 @@ export default function TokenPage({ addressProp }) {
   // Add token details state
   const [tokenDetails, setTokenDetails] = useState(null);
 
+  // Add the balance effect
+  useEffect(() => {
+    const updateBalance = async () => {
+      if (userAddress && address) {
+        const balance = await getTokenBalance(address, userAddress);
+        setUserBalance(balance);
+      } else {
+        setUserBalance('0');
+      }
+    };
+
+    updateBalance();
+    
+    // Set up periodic refresh
+    const balanceInterval = setInterval(updateBalance, 15000);
+    return () => clearInterval(balanceInterval);
+  }, [userAddress, address]);
+
+  // Add back ethBalance hook
+  const { data: ethBalance } = useBalance({
+    address: userAddress,
+    watch: true,
+  });
+
   useEffect(() => {
     const checkCreator = async () => {
       if (userAddress) {
         try {
           const creatorData = await getTokenCreator(address);
-          console.log('Creator data:', creatorData);
-          console.log('Creator check:', {
-            creatorAddress: creatorData.creator,
-            userAddress: userAddress,
-          });
           setCreator(creatorData);
           setIsCreator(
             creatorData.creator.toLowerCase() === userAddress.toLowerCase()
@@ -54,8 +80,6 @@ export default function TokenPage({ addressProp }) {
           console.error('Failed to check creator status:', error);
           setIsCreator(false);
         } 
-      } else {
-        console.log('Missing required data:', { address, userAddress });
       }
     };
     checkCreator();
@@ -144,220 +168,111 @@ export default function TokenPage({ addressProp }) {
     const interval = setInterval(() => {
       getEthPrice()
         .then(priceData => {
-          console.log('Updated ETH Price:', priceData.price_usd);
           setEthPrice(priceData.price_usd);
         })
         .catch(console.error);
-    }, 30000); // Every 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Update quote reads to handle errors and invalid states
-  const { data: buyQuote, isError: buyQuoteError } = useContractRead({
-    address: address ? `0x${address.replace('0x', '')}` : undefined,
-    abi: higherrrrrrrAbi,
-    functionName: 'getTokenBuyQuote',
-    args: [parseEther(
-      amount && 
-      !isNaN(amount) && 
-      isFinite(parseFloat(amount)) ? 
-      amount : 
-      '0'
-    )],
-    enabled: Boolean(amount && isBuying && address && tokenState?.marketType === 0), // Only for bonding curve
-    watch: true,
-  });
-
-  const { data: sellQuote, isError: sellQuoteError } = useContractRead({
-    address: address ? `0x${address.replace('0x', '')}` : undefined,
-    abi: higherrrrrrrAbi,
-    functionName: 'getTokenSellQuote',
-    args: [parseEther(
-      amount && 
-      !isNaN(amount) && 
-      isFinite(parseFloat(amount)) ? 
-      amount : 
-      '0'
-    )],
-    enabled: Boolean(amount && !isBuying && address && tokenState?.marketType === 0), // Only for bonding curve
-    watch: true,
-  });
-
-  const handleAmountChange = (value) => {
-    // Allow empty input
-    if (value === '') {
-      setAmount('');
-      return;
-    }
-
-    // Parse the input value
-    const numValue = value.replace(/,/g, ''); // Remove commas
-    if (isNaN(numValue) || !isFinite(parseFloat(numValue))) {
-      return;
-    }
-
-    setAmount(numValue);
-  };
-
-  // Define MIN_ETH_AMOUNT as a string instead of bigint
-  const MIN_ETH_AMOUNT = "0.0000001";
-
-  // Add error state
-  const [error, setError] = useState("");
-
-  // Update handleTransaction
-  const handleTransaction = () => {
-    console.log('Transaction button clicked', { userAddress });
-    
-    if (!userAddress) {
-      console.log('Opening connect modal');
-      openConnectModal();
-      return;
-    }
-
-    setError(""); // Clear previous errors
-    const marketType = tokenState?.marketType || 0;
-
-    if (isBuying) {
-      const quote = currentQuote;
-      if (!quote) return;
-      
-      buyToken({
-        value: quote,
-        args: [
-          userAddress,
-          userAddress,
-          "",
-          marketType,
-          parseEther(MIN_ETH_AMOUNT),
-          0
-        ]
-      });
-    } else {
-      if (!amount) return;
-      
-      sellToken({
-        args: [
-          parseEther(amount),
-          userAddress,
-          "",
-          marketType,
-          parseEther(MIN_ETH_AMOUNT),
-          0
-        ]
-      });
-    }
-  };
-
-  // Add state for Uniswap quotes
-  const [uniswapBuyQuote, setUniswapBuyQuote] = useState(null);
-  const [uniswapSellQuote, setUniswapSellQuote] = useState(null);
-  const [quoteError, setQuoteError] = useState(null);
-
-  // Update quotes when amount changes
+  // Clean up quote effect
   useEffect(() => {
-    if (!amount || !tokenState || !address) return;
+    if (!amount || !address) {
+      setQuote(null);
+      return;
+    }
 
     const updateQuote = async () => {
       try {
-        setQuoteError(null);
-        if (tokenState.marketType === 1) {
-          // Uniswap market
-          const tokenAmount = parseEther(amount);
-          const quote = await getUniswapQuote(
-            address,
-            tokenState.poolAddress,
-            tokenAmount,
-            isBuying
-          );
-          if (quote) {
-            if (isBuying) {
-              setUniswapBuyQuote(quote);
-            } else {
-              setUniswapSellQuote(quote);
-            }
+        const amountWei = ethers.parseEther(amount);
+
+        if (isBuying) {
+          // For buys, input is ETH amount, quote will be token amount
+          const quoteWei = await getBuyQuote(address, amountWei);
+          if (quoteWei === BigInt(0)) {
+            console.error('Got zero buy quote');
+            setQuote(null);
+            setError('Failed to get quote');
+            return;
           }
+          setQuote(quoteWei);
+        } else {
+          // For sells, input is token amount, quote will be ETH amount
+          const quoteWei = await getSellQuote(address, amountWei);
+          if (quoteWei === BigInt(0)) {
+            console.error('Got zero sell quote');
+            setQuote(null);
+            setError('Failed to get quote');
+            return;
+          }
+          setQuote(quoteWei);
         }
+
+        setError('');
       } catch (error) {
-        console.error('Quote error:', error);
-        setQuoteError('Failed to get quote');
+        console.error('Error in quote effect:', {
+          error,
+          address,
+          amount,
+          isBuying
+        });
+        setQuote(null);
+        setError('Failed to get quote');
       }
     };
 
     updateQuote();
-  }, [amount, tokenState, address, isBuying]);
+  }, [amount, address, isBuying]);
 
-  // Use appropriate quote based on market type
-  const currentQuote = useMemo(() => {
-    if (!tokenState || !amount) return null;
-    
-    try {
-      if (tokenState.marketType === 0) {
-        // Bonding curve market
-        return isBuying ? buyQuote : sellQuote;
-      } else {
-        // Uniswap market - use the raw quotes directly
-        return isBuying ? uniswapBuyQuote : uniswapSellQuote;
-      }
-    } catch (error) {
-      console.error('Quote calculation error:', error);
-      return null;
-    }
-  }, [tokenState, amount, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote]);
-
-  // Update error display
-  const quoteErrorState = useMemo(() => {
-    if (!tokenState) return false;
-    if (tokenState.marketType === 0) {
-      return isBuying ? buyQuoteError : sellQuoteError;
-    } else {
-      return quoteError;
-    }
-  }, [tokenState, isBuying, buyQuoteError, sellQuoteError, quoteError]);
-
-  // Update button disabled state
+  // Update the isQuoteAvailable check
   const isQuoteAvailable = useMemo(() => {
-    if (!tokenState || !amount) return false;
-    
-    if (tokenState.marketType === 0) {
-      // Bonding curve market
-      return isBuying ? 
-        (buyQuote !== null && !buyQuoteError) : 
-        (sellQuote !== null && !sellQuoteError);
-    } else {
-      // Uniswap market
-      return isBuying ? 
-        (uniswapBuyQuote !== null && !quoteError) : 
-        (uniswapSellQuote !== null && !quoteError);
+    if (!amount || !quote) return false;
+    return true;
+  }, [amount, quote]);
+
+  // Update the transaction handler to use the correct amounts
+  const handleTransaction = () => {
+    if (!userAddress) {
+      openConnectModal();
+      return;
     }
-  }, [tokenState, amount, isBuying, buyQuote, sellQuote, uniswapBuyQuote, uniswapSellQuote, buyQuoteError, sellQuoteError, quoteError]);
 
-  // Add balance state inside the component
-  const [userBalance, setUserBalance] = useState('0');
+    setError(''); // Clear previous errors
+    const marketType = tokenState?.marketType || 0;
 
-  // Add effect to fetch and update balance
-  useEffect(() => {
-    const updateBalance = async () => {
-      if (userAddress && address) {
-        const balance = await getTokenBalance(address, userAddress);
-        setUserBalance(balance);
-      } else {
-        setUserBalance('0');
-      }
-    };
+    if (isBuying) {
+      // For buys: amount is in ETH, use it directly as value
+      if (!amount) return;
+      buyToken({
+        value: ethers.parseEther(amount), // Use input amount as ETH value
+        args: [
+          userAddress,
+          userAddress,
+          '',
+          marketType,
+          parseEther(MIN_ETH_AMOUNT),
+          0
+        ]
+      });
+    } else {
+      // For sells: amount is in tokens, use it as token amount
+      if (!amount) return;
+      sellToken({
+        args: [
+          parseEther(amount), // Use input amount as token amount
+          userAddress,
+          '',
+          marketType,
+          parseEther(MIN_ETH_AMOUNT),
+          0
+        ]
+      });
+    }
+  };
 
-    updateBalance();
-    
-    // Set up periodic refresh
-    const balanceInterval = setInterval(updateBalance, 15000);
-    return () => clearInterval(balanceInterval);
-  }, [userAddress, address]);
-
-  const { data: ethBalance } = useBalance({
-    address: userAddress,
-    watch: true,
-  });
+  // Define MIN_ETH_AMOUNT as a string instead of bigint
+  const MIN_ETH_AMOUNT = "0.0000001";
 
   // Update handlePercentageClick function
   const handlePercentageClick = (percentage) => {
@@ -369,9 +284,8 @@ export default function TokenPage({ addressProp }) {
       // If it's 100% (APE), use 98% instead to leave room for gas
       const actualPercentage = percentage === 1 ? 0.98 : percentage;
       const maxEthToSpend = parseFloat(ethBalance.formatted) * actualPercentage;
-      // Estimate tokens based on current price
-      const estimatedTokens = maxEthToSpend / priceInEth;
-      setAmount(estimatedTokens.toFixed(6));
+      // For buys, we input ETH amount directly
+      setAmount(maxEthToSpend.toFixed(6));
     } else {
       // For selling: calculate percentage of token balance
       // For selling we can use full percentage since gas is paid in ETH
@@ -400,6 +314,33 @@ export default function TokenPage({ addressProp }) {
       return '0';
     }
   }
+
+  // Add this with the other handlers
+  const handleAmountChange = (value) => {
+    // Allow empty input
+    if (value === '') {
+      setAmount('');
+      return;
+    }
+
+    // Parse the input value
+    const numValue = value.replace(/,/g, ''); // Remove commas
+    if (isNaN(numValue) || !isFinite(parseFloat(numValue))) {
+      return;
+    }
+
+    setAmount(numValue);
+  };
+
+  // Add this helper function near the other formatting functions
+  const formatTokenAmount = (amount) => {
+    const num = parseFloat(amount);
+    if (num < 0.000001) return num.toExponential(2);
+    return num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 6
+    });
+  };
 
   if (loading) {
     return (
@@ -440,9 +381,6 @@ export default function TokenPage({ addressProp }) {
     if (!tokenState?.priceLevels || !tokenState?.currentName) return 0;
     return tokenState.priceLevels.findIndex(level => level.name === tokenState.currentName);
   };
-
-  // Add this somewhere in the render to see the current state
-  console.log('Render state:', { isCreator, userAddress, address });
 
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
@@ -640,12 +578,12 @@ export default function TokenPage({ addressProp }) {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Bonding Curve Progress</span>
-              <span>{(parseFloat(tokenState.totalSupply) / 8000000).toFixed(2)}%</span>
+              <span>{(parseFloat(tokenState.totalSupply) / 800000).toFixed(2)}%</span>
             </div>
             <div className="w-full bg-green-500/20 rounded-full h-4">
               <div 
                 className="bg-green-500 h-4 rounded-full transition-all"
-                style={{ width: `${(parseFloat(tokenState.totalSupply) / 8000000)}%` }}
+                style={{ width: `${(parseFloat(tokenState.totalSupply) / 800000)}%` }}
               />
             </div>
           </div>
@@ -704,10 +642,9 @@ export default function TokenPage({ addressProp }) {
               <div className="text-sm text-green-500/70">Your Balance</div>
               <div>
                 <div className="text-lg text-right flex items-center justify-end gap-1">
-                  <span className="font-mono">{Number(userBalance).toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2
-                  })}</span>
+                  <span className="font-mono">
+                    {formatTokenAmount(userBalance)}
+                  </span>
                   <span className="truncate max-w-[130px]" title={tokenState.symbol}>
                     {tokenState.symbol}
                   </span>
@@ -755,14 +692,16 @@ export default function TokenPage({ addressProp }) {
           {/* Amount Input Section */}
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
-              <label className="text-sm text-green-500/70">Amount in Tokens</label>
+              <label className="text-sm text-green-500/70">
+                {isBuying ? "Amount in ETH" : "Amount in Tokens"}
+              </label>
               {userAddress && (
                 <div className="text-sm text-green-500/50 flex items-center gap-1">
                   <span>Available:</span>
                   <span className="font-mono">
                     {isBuying 
-                      ? `${parseFloat(ethBalance?.formatted || '0').toFixed(4)} ETH`
-                      : parseFloat(userBalance).toFixed(4)
+                      ? `${parseFloat(ethBalance?.formatted || '0').toFixed(6)} ETH`
+                      : `${formatTokenAmount(userBalance)} ${tokenState.symbol}`
                     }
                   </span>
                   {!isBuying && (
@@ -807,7 +746,7 @@ export default function TokenPage({ addressProp }) {
               value={amount}
               onChange={(e) => handleAmountChange(e.target.value)}
               className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
-              placeholder="Enter amount of tokens..."
+              placeholder={isBuying ? "Enter amount in ETH..." : "Enter amount in tokens..."}
             />
 
             <div className="flex justify-between text-sm">
@@ -824,17 +763,20 @@ export default function TokenPage({ addressProp }) {
             {amount && (
               <div className="space-y-2 p-4 bg-green-500/5 rounded-lg">
                 <div className="flex justify-between text-sm">
-                  <span>{isBuying ? "You'll Pay" : "You'll Receive"}</span>
+                  <span>{isBuying ? "You'll Get" : "You'll Receive"}</span>
                   <span>
                     {!isQuoteAvailable ? 'Quote unavailable' : 
-                     currentQuote ? `${formatEther(currentQuote)} ETH` : '...'}
+                     quote ? (isBuying 
+                       ? `${formatTokenAmount(formatEther(quote))} ${tokenState.symbol}` // For buys, format token amount
+                       : `${parseFloat(formatEther(quote)).toFixed(6)} ETH` // For sells, keep ETH precision
+                     ) : '...'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-green-500/70">
                   <span>USD Value</span>
                   <span>
                     {!isQuoteAvailable ? '-' :
-                     currentQuote ? `$${(parseFloat(formatEther(currentQuote)) * ethPrice).toFixed(2)}` : '...'}
+                     quote ? `$${(parseFloat(formatEther(quote)) * (isBuying ? usdPrice : ethPrice)).toFixed(2)}` : '...'}
                   </span>
                 </div>
                 <div className="text-xs text-green-500/50 mt-2">

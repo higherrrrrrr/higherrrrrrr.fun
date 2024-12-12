@@ -2,8 +2,43 @@ from flask import Blueprint, jsonify, request
 from models.token import db, Token
 from .auth import require_auth, require_token_creator, get_token_creator
 from sqlalchemy import or_
+from web3 import Web3
+from config import Config
+from eth_defi.uniswap_v3.price import estimate_buy_received_amount, estimate_sell_received_amount
+from eth_defi.provider.multi_provider import create_multi_provider_web3
+from eth_defi.uniswap_v3.deployment import fetch_deployment
+import logging
+import json
+import os
 
 tokens = Blueprint('tokens', __name__)
+
+# Constants - Base Mainnet addresses
+WETH = "0x4200000000000000000000000000000000000006"  # WETH on Base
+FEE_TIER = 500  # 0.05% fee tier
+UNISWAP_V3_FACTORY = "0x33128a8fC17869897dcE68Ed026d694621f6FDfD"
+POSITION_MANAGER = "0x03a520b32C04BF3bEEf7BEb72E919cf822Ed34f1"
+QUOTER_V2 = "0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a"
+SWAP_ROUTER = "0x2626664c2603336E57B271c5C0b26F421741e481"  # SwapRouter02
+
+# Initialize Web3
+w3 = create_multi_provider_web3(Config.RPC_URL)
+
+ABI_PATH = os.path.join(os.path.dirname(__file__), '../abi/UniswapV3Pool.json')
+
+with open(ABI_PATH) as f:
+    UNISWAP_V3_POOL_ABI = json.load(f)
+
+def get_uniswap_deployment(token_address, pool_address):
+    """Create Uniswap deployment for a specific token pair"""
+    return fetch_deployment(
+        web3=w3,
+        factory_address=UNISWAP_V3_FACTORY,
+        router_address=SWAP_ROUTER,
+        position_manager_address=POSITION_MANAGER,
+        quoter_address=QUOTER_V2,
+        quoter_v2=True  # Since V1 is not deployed on Base
+    )
 
 @tokens.route('/token/<address>/creator', methods=['GET'])
 def get_token_creator_endpoint(address):
@@ -96,3 +131,117 @@ def list_tokens():
         'pages': tokens.pages,
         'current_page': tokens.page
     }) 
+
+@tokens.route('/token/<address>/quote/buy', methods=['GET'])
+def get_buy_quote(address):
+    try:
+        amount = request.args.get('amount')
+        pool_address = request.args.get('pool')
+        
+        if not amount:
+            return jsonify({'error': 'Amount parameter is required'}), 400
+        if not pool_address:
+            return jsonify({'error': 'Pool address is required'}), 400
+            
+        # Validate addresses format
+        if not Web3.is_address(address):
+            return jsonify({'error': 'Invalid token address'}), 400
+        if not Web3.is_address(pool_address):
+            return jsonify({'error': 'Invalid pool address'}), 400
+
+        # Get token from database
+        token = Token.query.filter_by(address=address.lower()).first()
+        if not token:
+            return jsonify({'error': 'Token not found'}), 404
+
+        # Convert amount to integer
+        amount_wei = int(amount)
+
+        try:
+            # Get Uniswap deployment for this token
+            uniswap = get_uniswap_deployment(address, pool_address)
+            
+            # Get quote using UniswapV3
+            amount_out = estimate_buy_received_amount(
+                uniswap,
+                address,  # Base token (token we want to buy)
+                WETH,    # Quote token (token we're paying with)
+                amount_wei,
+                FEE_TIER,
+                slippage=50  # 0.5% slippage
+            )
+            
+            quote_response = {
+                'inputAmount': str(amount_wei),
+                'outputAmount': str(amount_out),
+                'priceImpact': "0.03",  # TODO: Calculate actual price impact
+                'fee': str(int(amount_wei * (FEE_TIER / 1000000)))
+            }
+        except Exception as e:
+            logging.error(f"Uniswap quote error: {str(e)}")
+            return jsonify({'error': 'Failed to get quote from Uniswap'}), 500
+
+        return jsonify(quote_response)
+
+    except ValueError as e:
+        return jsonify({'error': f'Invalid amount format: {str(e)}'}), 400
+    except Exception as e:
+        logging.error(f"Quote error: {str(e)}")
+        return jsonify({'error': f'Failed to get buy quote: {str(e)}'}), 500
+
+@tokens.route('/token/<address>/quote/sell', methods=['GET'])
+def get_sell_quote(address):
+    try:
+        amount = request.args.get('amount')
+        pool_address = request.args.get('pool')
+        
+        if not amount:
+            return jsonify({'error': 'Amount parameter is required'}), 400
+        if not pool_address:
+            return jsonify({'error': 'Pool address is required'}), 400
+            
+        # Validate addresses format
+        if not Web3.is_address(address):
+            return jsonify({'error': 'Invalid token address'}), 400
+        if not Web3.is_address(pool_address):
+            return jsonify({'error': 'Invalid pool address'}), 400
+
+        # Get token from database
+        token = Token.query.filter_by(address=address.lower()).first()
+        if not token:
+            return jsonify({'error': 'Token not found'}), 404
+
+        # Convert amount to integer
+        amount_wei = int(amount)
+
+        try:
+            # Get Uniswap deployment for this token
+            uniswap = get_uniswap_deployment(address, pool_address)
+            
+            # Get quote using UniswapV3
+            amount_out = estimate_sell_received_amount(
+                uniswap,
+                address,  # Base token (token we're selling)
+                WETH,    # Quote token (token we want to receive)
+                amount_wei,
+                FEE_TIER,
+                slippage=50  # 0.5% slippage
+            )
+            
+            quote_response = {
+                'inputAmount': str(amount_wei),
+                'outputAmount': str(amount_out),
+                'priceImpact': "0.03",  # TODO: Calculate actual price impact
+                'fee': str(int(amount_wei * (FEE_TIER / 1000000)))  # Convert fee tier to actual fee
+            }
+        except Exception as e:
+            logging.error(f"Uniswap quote error: {str(e)}")
+            return jsonify({'error': 'Failed to get quote from Uniswap'}), 500
+
+        return jsonify(quote_response)
+
+    except ValueError as e:
+        return jsonify({'error': f'Invalid amount format: {str(e)}'}), 400
+    except Exception as e:
+        logging.error(f"Quote error: {str(e)}")
+        return jsonify({'error': f'Failed to get sell quote: {str(e)}'}), 500 

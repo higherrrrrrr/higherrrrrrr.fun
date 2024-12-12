@@ -115,3 +115,43 @@ export async function updateToken(address, data) {
     throw error;
   }
 }
+
+/**
+ * Get quote for buying tokens
+ * @param {string} address Token address
+ * @param {string} amount Amount of tokens to buy in wei
+ * @param {string} poolAddress Uniswap V3 pool address
+ * @returns {Promise<Object>} Quote details including price, fees, etc.
+ */
+export async function getBuyQuote(address, amount, poolAddress) {
+  try {
+    const response = await fetch(
+      `${getApiUrl()}/token/${address}/quote/buy?amount=${amount}&pool=${poolAddress}`
+    );
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to get buy quote:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get quote for selling tokens
+ * @param {string} address Token address
+ * @param {string} amount Amount of tokens to sell in wei
+ * @param {string} poolAddress Uniswap V3 pool address
+ * @returns {Promise<Object>} Quote details including price, fees, etc.
+ */
+export async function getSellQuote(address, amount, poolAddress) {
+  try {
+    const response = await fetch(
+      `${getApiUrl()}/token/${address}/quote/sell?amount=${amount}&pool=${poolAddress}`
+    );
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to get sell quote:', error);
+    throw error;
+  }
+}
