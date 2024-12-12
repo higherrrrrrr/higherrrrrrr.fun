@@ -14,6 +14,10 @@ import { ConnectKitButton, useConnectModal } from '../../components/Web3Provider
 import { getTokenCreator, getToken } from '../../api/token';
 import { getBuyQuote, getSellQuote } from '../../onchain/quotes';
 import { ethers } from 'ethers';
+import { useCapsuleAccount, useCapsuleContract } from '@usecapsule/react-sdk';
+import { CapsuleConnectButton } from '../../components/CapsuleConnectButton';
+import { CapsuleBalance } from '../../components/CapsuleBalance';
+import { tokenAbi } from '../../onchain/abis';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
@@ -21,9 +25,11 @@ export default function TokenPage({ addressProp }) {
   const router = useRouter();
   const { openConnectModal } = useConnectModal();
   const { address: routerAddress } = router.query;
+  const { address: userAddress } = useCapsuleAccount();
+  const contract = useCapsuleContract(addressProp, tokenAbi);
   
   // Use prop address if provided, otherwise use router address
-  const address = addressProp || routerAddress;
+  const tokenAddress = addressProp || routerAddress;
   
   const [tokenState, setTokenState] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,17 +43,14 @@ export default function TokenPage({ addressProp }) {
   const [error, setError] = useState('');
   const [userBalance, setUserBalance] = useState('0');
 
-  // Get the user's address
-  const { address: userAddress } = useAccount();
-
   // Add token details state
   const [tokenDetails, setTokenDetails] = useState(null);
 
   // Add the balance effect
   useEffect(() => {
     const updateBalance = async () => {
-      if (userAddress && address) {
-        const balance = await getTokenBalance(address, userAddress);
+      if (userAddress && tokenAddress) {
+        const balance = await getTokenBalance(tokenAddress, userAddress);
         setUserBalance(balance);
       } else {
         setUserBalance('0');
@@ -59,7 +62,7 @@ export default function TokenPage({ addressProp }) {
     // Set up periodic refresh
     const balanceInterval = setInterval(updateBalance, 15000);
     return () => clearInterval(balanceInterval);
-  }, [userAddress, address]);
+  }, [userAddress, tokenAddress]);
 
   // Add back ethBalance hook
   const { data: ethBalance } = useBalance({
@@ -71,7 +74,7 @@ export default function TokenPage({ addressProp }) {
     const checkCreator = async () => {
       if (userAddress) {
         try {
-          const creatorData = await getTokenCreator(address);
+          const creatorData = await getTokenCreator(tokenAddress);
           setCreator(creatorData);
           setIsCreator(
             creatorData.creator.toLowerCase() === userAddress.toLowerCase()
@@ -83,32 +86,32 @@ export default function TokenPage({ addressProp }) {
       }
     };
     checkCreator();
-  }, [address]);
+  }, [tokenAddress]);
 
   // Add effect to fetch token details
   useEffect(() => {
     const fetchTokenDetails = async () => {
-      if (!address) return;
+      if (!tokenAddress) return;
       try {
-        const details = await getToken(address);
+        const details = await getToken(tokenAddress);
         setTokenDetails(details);
       } catch (error) {
         console.error('Failed to fetch token details:', error);
       }
     };
     fetchTokenDetails();
-  }, [address]);
+  }, [tokenAddress]);
 
   // Buy contract interaction
   const { write: buyToken, data: buyData } = useContractWrite({
-    address: address,
+    address: tokenAddress,
     abi: higherrrrrrrAbi,
     functionName: 'buy'
   });
 
   // Sell contract interaction
   const { write: sellToken, data: sellData } = useContractWrite({
-    address: address,
+    address: tokenAddress,
     abi: higherrrrrrrAbi,
     functionName: 'sell'
   });
@@ -127,13 +130,13 @@ export default function TokenPage({ addressProp }) {
   const isLoading = isBuyLoading || isSellLoading;
 
   async function refreshTokenState() {
-    if (typeof address === 'string') {
-      const state = await getTokenState(address);
+    if (typeof tokenAddress === 'string') {
+      const state = await getTokenState(tokenAddress);
       setTokenState(state);
       
       // Also refresh balance if user is connected
       if (userAddress) {
-        const balance = await getTokenBalance(address, userAddress);
+        const balance = await getTokenBalance(tokenAddress, userAddress);
         setUserBalance(balance);
       }
     }
@@ -141,7 +144,7 @@ export default function TokenPage({ addressProp }) {
 
   // Update useEffect to use the new address variable
   useEffect(() => {
-    if (address) {
+    if (tokenAddress) {
       // Initial load
       setLoading(true);
       Promise.all([
@@ -161,7 +164,7 @@ export default function TokenPage({ addressProp }) {
 
       return () => clearInterval(tokenRefreshTimer);
     }
-  }, [address]);
+  }, [tokenAddress]);
 
   // Refresh ETH price periodically
   useEffect(() => {
@@ -178,7 +181,7 @@ export default function TokenPage({ addressProp }) {
 
   // Clean up quote effect
   useEffect(() => {
-    if (!amount || !address) {
+    if (!amount || !tokenAddress) {
       setQuote(null);
       return;
     }
@@ -189,7 +192,7 @@ export default function TokenPage({ addressProp }) {
 
         if (isBuying) {
           // For buys, input is ETH amount, quote will be token amount
-          const quoteWei = await getBuyQuote(address, amountWei);
+          const quoteWei = await getBuyQuote(tokenAddress, amountWei);
           if (quoteWei === BigInt(0)) {
             console.error('Got zero buy quote');
             setQuote(null);
@@ -199,7 +202,7 @@ export default function TokenPage({ addressProp }) {
           setQuote(quoteWei);
         } else {
           // For sells, input is token amount, quote will be ETH amount
-          const quoteWei = await getSellQuote(address, amountWei);
+          const quoteWei = await getSellQuote(tokenAddress, amountWei);
           if (quoteWei === BigInt(0)) {
             console.error('Got zero sell quote');
             setQuote(null);
@@ -213,7 +216,7 @@ export default function TokenPage({ addressProp }) {
       } catch (error) {
         console.error('Error in quote effect:', {
           error,
-          address,
+          tokenAddress,
           amount,
           isBuying
         });
@@ -223,7 +226,7 @@ export default function TokenPage({ addressProp }) {
     };
 
     updateQuote();
-  }, [amount, address, isBuying]);
+  }, [amount, tokenAddress, isBuying]);
 
   // Update the isQuoteAvailable check
   const isQuoteAvailable = useMemo(() => {
@@ -447,7 +450,7 @@ export default function TokenPage({ addressProp }) {
                 </div>
                 {isCreator && (
                   <Link 
-                    href={`/token/${address}/edit`}
+                    href={`/token/${tokenAddress}/edit`}
                     className="inline-flex items-center px-3 py-1 border border-green-500 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors text-sm"
                   >
                     <span>Edit</span>
@@ -570,7 +573,7 @@ export default function TokenPage({ addressProp }) {
           <div className="flex flex-wrap gap-2 pt-1">
             <button 
               onClick={() => {
-                navigator.clipboard.writeText(address);
+                navigator.clipboard.writeText(tokenAddress);
               }}
               className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
             >
@@ -582,7 +585,7 @@ export default function TokenPage({ addressProp }) {
 
             {tokenState?.marketType === 1 && (
               <a
-                href={`https://dexscreener.com/base/${address}`}
+                href={`https://dexscreener.com/base/${tokenAddress}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
@@ -595,7 +598,7 @@ export default function TokenPage({ addressProp }) {
             )}
 
             <a
-              href={`https://basescan.org/token/${address}`}
+              href={`https://basescan.org/token/${tokenAddress}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
@@ -794,7 +797,7 @@ export default function TokenPage({ addressProp }) {
               {/* NFT Buy Button */}
               <button
                 onClick={async () => {
-                  const ethAmount = await calculateEthForTokenAmount(address, 1_001_001);
+                  const ethAmount = await calculateEthForTokenAmount(tokenAddress, 1_001_001);
                   if (ethAmount) {
                     setIsBuying(true); // Ensure we're in buy mode
                     handleAmountChange(ethAmount);
