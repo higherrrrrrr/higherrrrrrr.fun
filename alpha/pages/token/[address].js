@@ -350,23 +350,29 @@ export default function TokenPage({ addressProp }) {
   const calculateEthForTokenAmount = async (tokenAddress, targetTokens) => {
     try {
       setIsCalculatingNft(true);
-      // Add 5% to target amount to account for market movements
-      const TARGET = parseEther((targetTokens * 1.05).toString());
+      const TARGET = parseEther((targetTokens).toString());
       
-      // Initial bounds - start very small and very large
-      let low = parseEther("0.0000000001");  // 0.000001 ETH
-      let high = parseEther("100000");     // 1000 ETH
+      // First get a sell quote for this amount to approximate the range
+      const sellQuote = await getSellQuote(tokenAddress, TARGET);
+      if (!sellQuote || sellQuote === BigInt(0)) {
+        throw new Error("Could not get initial sell quote");
+      }
       
-      // Binary search - limit iterations to prevent infinite loops
-      for (let i = 0; i < 420; i++) {
+      // Use sell quote to establish reasonable bounds
+      // Start with ±20% of the sell quote for the search range
+      let low = (sellQuote * BigInt(1)) / BigInt(100);   // 1% of sell quote
+      let high = (sellQuote * BigInt(420)) / BigInt(100); // 420% of sell quote
+      
+      // Binary search with tighter bounds
+      for (let i = 0; i < 20; i++) { // Fewer iterations needed now
         const mid = (low + high) / BigInt(2);
         const quote = await getBuyQuote(tokenAddress, mid);
         
-        // If we're within 0.1% of target, this is good enough
-        if (quote > TARGET * BigInt(999) / BigInt(1000) && 
-            quote < TARGET * BigInt(1001) / BigInt(1000)) {
-          // Add 2% slippage buffer to final amount
-          const withSlippage = (mid * BigInt(102)) / BigInt(100);
+        // If we're within 1% of target, this is good enough
+        if (quote > TARGET * BigInt(990) / BigInt(1000) && 
+            quote < TARGET * BigInt(1010) / BigInt(1000)) {
+          // Add 5% slippage buffer to final amount
+          const withSlippage = (mid * BigInt(105)) / BigInt(100);
           return formatEther(withSlippage);
         }
         
