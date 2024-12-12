@@ -4,6 +4,8 @@ FROM python:3.11.11-alpine
 # Set working directory
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y git
+
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 
