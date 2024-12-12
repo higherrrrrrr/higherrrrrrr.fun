@@ -335,10 +335,14 @@ export default function TokenPage({ addressProp }) {
   // Add this helper function near the other formatting functions
   const formatTokenAmount = (amount) => {
     const num = parseFloat(amount);
-    if (num < 0.000001) return num.toExponential(2);
+    if (isNaN(num)) return '0';
+    
+    // Always use regular decimal notation
     return num.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 6
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 6,
+      useGrouping: true,
+      notation: 'standard'
     });
   };
 
@@ -846,6 +850,25 @@ export default function TokenPage({ addressProp }) {
                      quote ? `$${(parseFloat(formatEther(quote)) * (isBuying ? usdPrice : ethPrice)).toFixed(2)}` : '...'}
                   </span>
                 </div>
+                
+                {/* Add balance warnings */}
+                {isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0') && (
+                  <div className="text-red-500 text-sm mt-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>Insufficient ETH balance</span>
+                  </div>
+                )}
+                {!isBuying && parseFloat(amount) > parseFloat(userBalance) && (
+                  <div className="text-red-500 text-sm mt-2 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>Insufficient token balance</span>
+                  </div>
+                )}
+
                 <div className="text-xs text-green-500/50 mt-2">
                   Minimum trade amount: {MIN_ETH_AMOUNT} ETH
                 </div>
@@ -860,15 +883,19 @@ export default function TokenPage({ addressProp }) {
                 disabled={
                   tokenState.paused || 
                   isLoading || 
-                  !amount // Only require an amount
+                  !amount || // require amount
+                  (isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0')) || // check ETH balance
+                  (!isBuying && parseFloat(amount) > parseFloat(userBalance)) // check token balance
                 }
                 className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
               >
                 {isLoading 
                   ? (isBuying ? "Buying..." : "Selling...") 
                   : (isBuying 
-                      ? `Buy ${Number(amount).toLocaleString()} Tokens` 
-                      : `Sell ${Number(amount).toLocaleString()} Tokens`
+                      ? quote 
+                        ? `Buy ~${formatTokenAmount(formatEther(quote))} ${tokenState.symbol}` 
+                        : `Buy ${tokenState.symbol}`
+                      : `Sell ${formatTokenAmount(amount)} ${tokenState.symbol}`
                     )
                 }
               </button>
