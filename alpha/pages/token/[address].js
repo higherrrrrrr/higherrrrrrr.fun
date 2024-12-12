@@ -342,6 +342,48 @@ export default function TokenPage({ addressProp }) {
     });
   };
 
+  // Add this helper function near the other calculation functions
+  const calculateEthForTokenAmount = async (tokenAddress, targetTokens) => {
+    try {
+      setIsCalculatingNft(true);
+      // Add 5% to target amount to account for market movements
+      const TARGET = parseEther((targetTokens * 1.05).toString());
+      
+      // Initial bounds - start very small and very large
+      let low = parseEther("0.0000000001");  // 0.000001 ETH
+      let high = parseEther("100000");     // 1000 ETH
+      
+      // Binary search - limit iterations to prevent infinite loops
+      for (let i = 0; i < 420; i++) {
+        const mid = (low + high) / BigInt(2);
+        const quote = await getBuyQuote(tokenAddress, mid);
+        
+        // If we're within 0.1% of target, this is good enough
+        if (quote > TARGET * BigInt(999) / BigInt(1000) && 
+            quote < TARGET * BigInt(1001) / BigInt(1000)) {
+          // Add 2% slippage buffer to final amount
+          const withSlippage = (mid * BigInt(102)) / BigInt(100);
+          return formatEther(withSlippage);
+        }
+        
+        if (quote < TARGET) {
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+      throw new Error("Could not converge on exact amount");
+    } catch (error) {
+      console.error('Error calculating ETH for tokens:', error);
+      return null;
+    } finally {
+      setIsCalculatingNft(false);
+    }
+  };
+
+  // Add these to your state declarations at the top
+  const [isCalculatingNft, setIsCalculatingNft] = useState(false);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
@@ -737,6 +779,31 @@ export default function TokenPage({ addressProp }) {
                 className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded bg-green-500/10"
               >
                 APE 🦍
+              </button>
+              
+              {/* NFT Buy Button */}
+              <button
+                onClick={async () => {
+                  const ethAmount = await calculateEthForTokenAmount(address, 1_001_001);
+                  if (ethAmount) {
+                    setIsBuying(true); // Ensure we're in buy mode
+                    handleAmountChange(ethAmount);
+                  }
+                }}
+                disabled={isCalculatingNft}
+                className="px-3 py-1 text-xs border border-green-500/30 hover:border-green-500 hover:bg-green-500/10 rounded transition-all flex items-center gap-2"
+              >
+                {isCalculatingNft ? (
+                  <>
+                    <span className="animate-pulse">Calculating...</span>
+                    <div className="w-3 h-3 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                  </>
+                ) : (
+                  <>
+                    <span>NFT 🎨</span>
+                    <span className="text-green-500/50">(1M)</span>
+                  </>
+                )}
               </button>
             </div>
 
