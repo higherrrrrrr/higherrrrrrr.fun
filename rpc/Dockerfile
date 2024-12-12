@@ -35,8 +35,13 @@ RUN apt-get remove -y wget build-essential && \
     rm -rf /nginx-1.25.3* && \
     rm -rf /headers-more-nginx-module
 
-# Load the module in nginx.conf
-RUN echo "load_module modules/ngx_http_headers_more_filter_module.so;" > /etc/nginx/modules-enabled/headers-more.conf
+# Create modules-enabled directory and load the module
+RUN mkdir -p /etc/nginx/modules-enabled && \
+    echo "load_module modules/ngx_http_headers_more_filter_module.so;" > /etc/nginx/modules-enabled/headers-more.conf
+
+# Create cache directory
+RUN mkdir -p /tmp/nginx_cache && \
+    chmod 777 /tmp/nginx_cache
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
