@@ -1,13 +1,19 @@
-import { WagmiConfig, createConfig } from 'wagmi';
-import { base } from 'wagmi/chains';
-import { ConnectKitProvider, ConnectKitButton as DefaultConnectButton, getDefaultConfig, useModal } from 'connectkit';
-import { useEffect, useState, createContext, useContext } from 'react';
-import { getContractAddress } from '../api/contract';
-import { http } from 'viem';
-import { InjectedConnector } from 'wagmi/connectors/injected';
+"use client";
 
-export const FactoryContext = createContext(null);
-export const useFactory = () => useContext(FactoryContext);
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { 
+  CapsuleEvmProvider, 
+  metaMaskWallet, 
+  coinbaseWallet,
+  phantomWallet,
+  walletConnectWallet 
+} from "@usecapsule/evm-wallet-connectors";
+import { base } from "viem/chains";
+import { createContext, useContext, useState } from "react";
+import { CapsuleModal, AuthLayout, ExternalWallet, OAuthMethod } from "@usecapsule/react-sdk";
+import { capsuleClient } from "../client/capsule";
+
+const queryClient = new QueryClient();
 
 const ALCHEMY_RPC = 'https://rpc.higherrrrrrr.fun/';
 const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
@@ -31,205 +37,88 @@ const baseChain = {
   }
 };
 
-const chains = [baseChain];
-
-// Create config with Rabby support and default connectors
-const wagmiConfig = createConfig({
-  ...getDefaultConfig({
-    appName: "Higherrrrrrr",
-    chains,
-    transports: {
-      [baseChain.id]: http(ALCHEMY_RPC),
-    },
-    walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
-  }),
-  connectors: [
-    // Filter out any injected connectors from default config
-    ...getDefaultConfig({
-      appName: "Higherrrrrrr",
-      chains,
-      walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
-    }).connectors.filter(connector => 
-     connector.id !== 'injected' && connector.id !== 'rabby'
-    ),
-    // Add our custom Rabby connector
-    new InjectedConnector({
-      chains,
-      options: {
-        name: 'Rabby',
-        getProvider: () => typeof window !== 'undefined' ? window.ethereum : undefined,
-      },
-    }),
-  ],
+// Create context for the connect modal
+const ConnectModalContext = createContext({
+  openConnectModal: () => {},
+  closeConnectModal: () => {},
 });
 
-function Web3ProviderInner({ children }) {
-  const [factoryAddress, setFactoryAddress] = useState(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function init() {
-      try {
-        const { factory_address } = await getContractAddress();
-        console.log('Factory address:', factory_address);
-        
-        if (mounted) {
-          setFactoryAddress(factory_address);
-          setIsInitialized(true);
-        }
-      } catch (error) {
-        console.error('Failed to initialize Web3Provider:', error);
-        if (mounted) {
-          setError(error);
-          setIsInitialized(true); // Still mark as initialized even on error
-        }
-      }
-    }
-
-    init();
-
-    // Cleanup function
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Show loading state
-  if (!isInitialized) {
-    return (
-      <div className="min-h-screen bg-black">
-        <div className="text-green-500/50 p-4 font-mono">Initializing Web3...</div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-black">
-        <div className="text-red-500 p-4 font-mono">
-          Failed to initialize: {error.message}
-          <button 
-            onClick={() => window.location.reload()}
-            className="ml-2 underline"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Only render children when we have the factory address
-  if (!factoryAddress) {
-    return (
-      <div className="min-h-screen bg-black">
-        <div className="text-red-500 p-4 font-mono">
-          No factory address found
-          <button 
-            onClick={() => window.location.reload()}
-            className="ml-2 underline"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <FactoryContext.Provider value={factoryAddress}>
-      {children}
-    </FactoryContext.Provider>
-  );
-}
+// Custom hook to use the connect modal
+export const useConnectModal = () => useContext(ConnectModalContext);
 
 export function Web3Provider({ children }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openConnectModal = () => setIsOpen(true);
+  const closeConnectModal = () => setIsOpen(false);
+
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <ConnectKitProvider
-        theme="minimal"
-        mode="dark"
-        customTheme={{
-          "--ck-font-family": "monospace",
-          "--ck-accent-color": "#22c55e",
-          "--ck-accent-text-color": "#000000",
-          
-          // Modal background
-          "--ck-body-background": "#000000",
-          "--ck-body-color": "#22c55e",
-          "--ck-body-color-muted": "rgba(34, 197, 94, 0.6)",
-          "--ck-body-action-color": "#22c55e",
-          
-          // Buttons
-          "--ck-primary-button-background": "#22c55e",
-          "--ck-primary-button-color": "#000000",
-          "--ck-primary-button-hover-background": "#16a34a",
-          
-          // Secondary buttons
-          "--ck-secondary-button-background": "transparent",
-          "--ck-secondary-button-border": "1px solid #22c55e",
-          "--ck-secondary-button-color": "#22c55e",
-          
-          // Borders and overlay
-          "--ck-body-border": "1px solid rgba(34, 197, 94, 0.2)",
-          "--ck-body-border-radius": "4px",
-          "--ck-overlay-background": "rgba(0, 0, 0, 0.95)",
-          
-          // Focus and hover states
-          "--ck-button-hover-opacity": "0.8",
-          "--ck-focus-color": "#22c55e",
-          
-          // QR code
-          "--ck-qr-border-radius": "4px",
-          "--ck-qr-dot-color": "#22c55e",
-          "--ck-qr-background": "#000000",
-          
-          // Dropdown
-          "--ck-dropdown-button-background": "#000000",
-          "--ck-dropdown-button-hover-background": "rgba(34, 197, 94, 0.1)",
-          "--ck-dropdown-button-color": "#22c55e",
-          
-          // Misc
-          "--ck-tooltip-background": "#000000",
-          "--ck-tooltip-color": "#22c55e",
-          "--ck-spinner-color": "#22c55e"
-        }}
-        options={{
-          initialChainId: baseChain.id,
-          hideQuestionMarkCTA: true,
-          hideTooltips: true,
-          embedGoogleFonts: false,
-          walletConnectName: "More Wallets"
+    <QueryClientProvider client={queryClient}>
+      <CapsuleEvmProvider
+        config={{
+          appName: "higherrrrrrr",
+          chains: [baseChain],
+          projectId: WALLETCONNECT_PROJECT_ID,
+          ssr: false,
+          transports: {
+            [baseChain.id]: ALCHEMY_RPC,
+          },
+          wallets: [
+            metaMaskWallet(),
+            coinbaseWallet(),
+            phantomWallet(),
+            walletConnectWallet()
+          ]
         }}
       >
-        <Web3ProviderInner>{children}</Web3ProviderInner>
-      </ConnectKitProvider>
-    </WagmiConfig>
+        <ConnectModalContext.Provider value={{ openConnectModal, closeConnectModal }}>
+          {children}
+          <CapsuleModal
+            capsule={capsuleClient}
+            isOpen={isOpen}
+            onClose={closeConnectModal}
+            logo={"https://pbs.twimg.com/profile_images/1864470786381369345/GuAosjLh_400x400.png"}
+            theme={{
+              backgroundColor: "#000000",
+              font: "Inter",
+              borderRadius: "md",
+              accentColor: "#4ade80",
+              foregroundColor: "#4ade80"
+            }}
+            oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.TWITTER, OAuthMethod.FARCASTER]}
+            disableEmailLogin={false}
+            disablePhoneLogin={false}
+            authLayout={[AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL]}
+            externalWallets={[
+              ExternalWallet.METAMASK,
+              ExternalWallet.COINBASE,
+              ExternalWallet.WALLETCONNECT,
+              ExternalWallet.PHANTOM
+            ]}
+            twoFactorAuthEnabled={false}
+            recoverySecretStepEnabled={true}
+            onRampTestMode
+          />
+        </ConnectModalContext.Provider>
+      </CapsuleEvmProvider>
+    </QueryClientProvider>
   );
 }
 
+// Export a ConnectKitButton component that uses the modal
 export function ConnectKitButton() {
+  const { openConnectModal } = useConnectModal();
+
   return (
-    <DefaultConnectButton.Custom>
-      {({ isConnected, show, truncatedAddress, ensName }) => {
-        return (
-          <button
-            onClick={show}
-            className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors"
-          >
-            {isConnected ? (ensName ?? truncatedAddress) : "Connect Wallet"}
-          </button>
-        );
-      }}
-    </DefaultConnectButton.Custom>
+    <button
+      onClick={openConnectModal}
+      className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors"
+    >
+      Connect Wallet
+    </button>
   );
 }
 
+// Export the chain config for use elsewhere
 export const getCurrentChain = () => baseChain;
-
-export const useConnectModal = useModal;
   
