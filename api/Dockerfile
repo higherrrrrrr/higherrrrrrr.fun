@@ -1,17 +1,16 @@
-
 FROM python:3.11.11-alpine
 
 # Set working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y git
+# Update package index and install git
+RUN apk update && apk add --no-cache git
 
 # Copy requirements first to leverage Docker cache
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install -r requirements.txt
-
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
@@ -20,4 +19,4 @@ COPY . .
 ENV PORT=5000
 
 # Run gunicorn
-CMD exec gunicorn --bind :$PORT app:app
+CMD ["gunicorn", "--bind", ":$PORT", "app:app"]
