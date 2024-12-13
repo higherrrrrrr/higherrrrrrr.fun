@@ -630,12 +630,20 @@ export default function TokenPage({ addressProp }) {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Bonding Curve Progress</span>
-              <span>{(parseFloat(tokenState.totalSupply) / 800000).toFixed(2)}%</span>
+              <span>
+                {(() => {
+                  const supply = parseFloat(tokenState.totalSupply);
+                  const target = 800_000_000;
+                  return ((supply / target) * 100).toFixed(2);
+                })()}%
+              </span>
             </div>
             <div className="w-full bg-green-500/20 rounded-full h-4">
               <div 
                 className="bg-green-500 h-4 rounded-full transition-all"
-                style={{ width: `${(parseFloat(tokenState.totalSupply) / 800000)}%` }}
+                style={{ 
+                  width: `${(parseFloat(tokenState.totalSupply) / 800_000_000 * 100)}%`
+                }}
               />
             </div>
           </div>
