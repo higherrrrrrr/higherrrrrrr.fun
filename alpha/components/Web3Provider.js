@@ -8,6 +8,7 @@ import {
   walletConnectWallet,
   zerionWallet,
 } from "@usecapsule/evm-wallet-connectors";
+import { rabbyWallet } from "./RabbyWallet";
 import { base } from "viem/chains";
 import { CapsuleModal, AuthLayout, ExternalWallet } from "@usecapsule/react-sdk";
 import { capsuleClient } from "../client/capsule";
@@ -86,8 +87,16 @@ function Web3Provider({ children }) {
             transports: {
               [baseChain.id]: http(ALCHEMY_RPC),
             },
-            wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet, rainbowWallet, zerionWallet],
-          }}>
+            wallets: [
+              metaMaskWallet,
+              coinbaseWallet,
+              rainbowWallet,
+              walletConnectWallet,
+              zerionWallet,
+              rabbyWallet,
+            ],
+          }}
+        >
           {children}
           <CapsuleModal
             capsule={capsuleClient}
@@ -113,6 +122,7 @@ function Web3Provider({ children }) {
               ExternalWallet.WALLETCONNECT,
               ExternalWallet.RAINBOW,
               ExternalWallet.ZERION,
+              ExternalWallet.RABBY,
             ]}
             twoFactorAuthEnabled={false}
             recoverySecretStepEnabled={true}
