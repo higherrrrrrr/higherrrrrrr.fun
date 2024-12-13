@@ -164,11 +164,6 @@ def get_buy_quote(address):
         if not Web3.is_address(pool_address):
             return jsonify({'error': 'Invalid pool address'}), 400
 
-        # Get token from database
-        token = Token.query.filter_by(address=address.lower()).first()
-        if not token:
-            return jsonify({'error': 'Token not found'}), 404
-
         # Convert amount to integer
         amount_wei = int(amount)
 
@@ -235,11 +230,6 @@ def get_sell_quote(address):
             return jsonify({'error': 'Invalid token address'}), 400
         if not Web3.is_address(pool_address):
             return jsonify({'error': 'Invalid pool address'}), 400
-
-        # Get token from database
-        token = Token.query.filter_by(address=address.lower()).first()
-        if not token:
-            return jsonify({'error': 'Token not found'}), 404
 
         # Convert amount to integer
         amount_wei = int(amount)
