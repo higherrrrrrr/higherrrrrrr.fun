@@ -9,7 +9,7 @@ import {
   zerionWallet,
 } from "@usecapsule/evm-wallet-connectors";
 import { base } from "viem/chains";
-import { CapsuleModal, AuthLayout, ExternalWallet, OAuthMethod } from "@usecapsule/react-sdk";
+import { CapsuleModal, AuthLayout, ExternalWallet } from "@usecapsule/react-sdk";
 import { capsuleClient } from "../client/capsule";
 
 const CapsuleContext = createContext();

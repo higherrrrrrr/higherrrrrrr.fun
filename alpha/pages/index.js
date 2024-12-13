@@ -1,11 +1,11 @@
-import TokenPage from './token/[address]';
+// import TokenPage from './token/[address]';
 import { getTopTradingTokens } from '../api/tokens';
 import { useState, useEffect, useRef } from 'react';
-import Cookies from 'js-cookie';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useReadContract } from 'wagmi';
-import { getTokenContract } from '../api/contract';
+// import Cookies from 'js-cookie';
+// import Link from 'next/link';
+// import Image from 'next/image';
+// import { useReadContract } from 'wagmi';
+// import { getTokenContract } from '../api/contract';
 import { getTokenState } from '../onchain/tokenState';
 import TokenCard from '../components/TokenCard';
 import { getLatestTokens } from '../api/tokens';

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../onchain';
+import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../onchain/tokenState';
 import { useWriteContract, useWaitForTransactionReceipt, useReadContract, useAccount, useBalance } from "wagmi";
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
@@ -13,7 +13,8 @@ import Link from 'next/link';
 import { getTokenCreator, getToken } from '../../api/token';
 import { getBuyQuote, getSellQuote } from '../../onchain/quotes';
 import { ethers } from 'ethers';
-import { useCapsule } from "@/components/Web3Provider";
+// import { useCapsule } from "@/components/Web3Provider";
+import dynamic from 'next/dynamic';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
@@ -26,7 +27,7 @@ const ConnectCapsuleButton = dynamic(
 
 export default function TokenPage({ addressProp }) {
   const router = useRouter();
-  const { openModal } = useCapsule();
+  // const { openModal } = useCapsule();
   const { address: routerAddress } = router.query;
 
   
@@ -242,7 +243,7 @@ export default function TokenPage({ addressProp }) {
   // Update the transaction handler to use the correct amounts
   const handleTransaction = () => {
     if (!userAddress) {
-      openModal();
+      // openModal();
       return;
     }
 

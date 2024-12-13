@@ -7,7 +7,7 @@ import { getEthPrice } from '../api/price';
 import { getContractAddress } from '../api/contract';
 import { ethers } from 'ethers';
 import { useAccount } from 'wagmi';
-import { useCapsule } from '@/components/Web3Provider';
+// import { useCapsule } from '../components/Web3Provider';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 const DEFAULT_PRICE_LEVELS = [
@@ -58,7 +58,7 @@ const NEW_TOKEN_EVENT_SIGNATURE = "0x46960970e01c8cbebf9e58299b0acf8137b299ef06e
 
 export default function LaunchPage() {
   const router = useRouter();
-  const { openModal } = useCapsule();
+  // const { openModal } = useCapsule();
   const { address: userAddress } = useAccount();
   const [factoryAddress, setFactoryAddress] = useState('');
   const [ethPrice, setEthPrice] = useState(0);
@@ -156,7 +156,7 @@ export default function LaunchPage() {
     
     // Check for wallet connection first
     if (!userAddress) {
-      openModal();
+      // openModal();
       return;
     }
     
