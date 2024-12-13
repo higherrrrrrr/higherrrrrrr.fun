@@ -11,7 +11,7 @@ import {
 import { base } from "viem/chains";
 import { CapsuleModal, AuthLayout, ExternalWallet } from "@usecapsule/react-sdk";
 import { capsuleClient } from "../client/capsule";
-import { useAccount } from 'wagmi';
+import { useAccount, http } from "wagmi";
 
 const CapsuleContext = createContext();
 const queryClient = new QueryClient();
@@ -81,7 +81,7 @@ function Web3Provider({ children }) {
             projectId: "a893723ca57a205513119f91ba5c09c8",
             ssr: false,
             transports: {
-              [baseChain.id]: ALCHEMY_RPC,
+              [baseChain.id]: http(ALCHEMY_RPC),
             },
             wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet, rainbowWallet, zerionWallet],
           }}>
