@@ -1,0 +1,33 @@
+diff --git a/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.d.ts b/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.d.ts
+index ab52d3d..af8067c 100644
+--- a/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.d.ts
++++ b/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.d.ts
+@@ -3,7 +3,8 @@ export declare enum EvmWallet {
+     RAINBOW = "RAINBOW",
+     COINBASE = "COINBASE",
+     WALLETCONNECT = "WALLETCONNECT",
+-    ZERION = "ZERION"
++    ZERION = "ZERION",
++    RABBY = "RABBY"
+ }
+ export declare enum SolanaWallet {
+     PHANTOM = "PHANTOM",
+@@ -19,5 +20,6 @@ export declare const ExternalWallet: {
+     COINBASE: EvmWallet.COINBASE;
+     WALLETCONNECT: EvmWallet.WALLETCONNECT;
+     ZERION: EvmWallet.ZERION;
++    RABBY: EvmWallet.RABBY;
+ };
+ export type TExternalWallet = keyof typeof ExternalWallet;
+diff --git a/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.js b/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.js
+index d393a84..a37f3d8 100644
+--- a/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.js
++++ b/node_modules/@usecapsule/react-sdk/dist/modal/types/externalWallets.js
+@@ -5,6 +5,7 @@ export var EvmWallet;
+     EvmWallet["COINBASE"] = "COINBASE";
+     EvmWallet["WALLETCONNECT"] = "WALLETCONNECT";
+     EvmWallet["ZERION"] = "ZERION";
++    EvmWallet["RABBY"] = "RABBY";
+ })(EvmWallet || (EvmWallet = {}));
+ export var SolanaWallet;
+ (function (SolanaWallet) {
