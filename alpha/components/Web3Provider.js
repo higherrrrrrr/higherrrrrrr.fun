@@ -1,124 +1,115 @@
-"use client";
-
+import { createContext, useContext, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { 
-  CapsuleEvmProvider, 
-  metaMaskWallet, 
+import {
+  CapsuleEvmProvider,
   coinbaseWallet,
-  phantomWallet,
-  walletConnectWallet 
+  metaMaskWallet,
+  rainbowWallet,
+  walletConnectWallet,
+  zerionWallet,
 } from "@usecapsule/evm-wallet-connectors";
 import { base } from "viem/chains";
-import { createContext, useContext, useState } from "react";
 import { CapsuleModal, AuthLayout, ExternalWallet, OAuthMethod } from "@usecapsule/react-sdk";
 import { capsuleClient } from "../client/capsule";
 
+const CapsuleContext = createContext();
 const queryClient = new QueryClient();
 
-const ALCHEMY_RPC = 'https://rpc.higherrrrrrr.fun/';
-const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
+const ALCHEMY_RPC = "https://rpc.higherrrrrrr.fun/";
 
-// Completely override Base chain with our RPC
 const baseChain = {
   ...base,
   rpcUrls: {
-    default: {
-      http: [ALCHEMY_RPC],
-      webSocket: []
-    },
-    public: {
-      http: [ALCHEMY_RPC],
-      webSocket: []
-    },
-    alchemy: {
-      http: [ALCHEMY_RPC],
-      webSocket: []
-    }
-  }
+    default: { http: [ALCHEMY_RPC], webSocket: [] },
+    public: { http: [ALCHEMY_RPC], webSocket: [] },
+    alchemy: { http: [ALCHEMY_RPC], webSocket: [] },
+  },
 };
 
-// Create context for the connect modal
-const ConnectModalContext = createContext({
-  openConnectModal: () => {},
-  closeConnectModal: () => {},
-});
-
-// Custom hook to use the connect modal
-export const useConnectModal = () => useContext(ConnectModalContext);
-
-export function Web3Provider({ children }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const openConnectModal = () => setIsOpen(true);
-  const closeConnectModal = () => setIsOpen(false);
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <CapsuleEvmProvider
-        config={{
-          appName: "higherrrrrrr",
-          chains: [baseChain],
-          projectId: WALLETCONNECT_PROJECT_ID,
-          ssr: false,
-          transports: {
-            [baseChain.id]: ALCHEMY_RPC,
-          },
-          wallets: [
-            metaMaskWallet(),
-            coinbaseWallet(),
-            phantomWallet(),
-            walletConnectWallet()
-          ]
-        }}
-      >
-        <ConnectModalContext.Provider value={{ openConnectModal, closeConnectModal }}>
-          {children}
-          <CapsuleModal
-            capsule={capsuleClient}
-            isOpen={isOpen}
-            onClose={closeConnectModal}
-            logo={"https://pbs.twimg.com/profile_images/1864470786381369345/GuAosjLh_400x400.png"}
-            theme={{
-              backgroundColor: "#000000",
-              font: "Inter",
-              borderRadius: "md",
-              accentColor: "#4ade80",
-              foregroundColor: "#4ade80"
-            }}
-            oAuthMethods={[OAuthMethod.GOOGLE, OAuthMethod.TWITTER, OAuthMethod.FARCASTER]}
-            disableEmailLogin={false}
-            disablePhoneLogin={false}
-            authLayout={[AuthLayout.AUTH_FULL, AuthLayout.EXTERNAL_FULL]}
-            externalWallets={[
-              ExternalWallet.METAMASK,
-              ExternalWallet.COINBASE,
-              ExternalWallet.WALLETCONNECT,
-              ExternalWallet.PHANTOM
-            ]}
-            twoFactorAuthEnabled={false}
-            recoverySecretStepEnabled={true}
-            onRampTestMode
-          />
-        </ConnectModalContext.Provider>
-      </CapsuleEvmProvider>
-    </QueryClientProvider>
-  );
+export function useCapsule() {
+  const context = useContext(CapsuleContext);
+  if (!context) {
+    throw new Error("useCapsule must be used within Web3Provider");
+  }
+  return context;
 }
 
-// Export a ConnectKitButton component that uses the modal
-export function ConnectKitButton() {
-  const { openConnectModal } = useConnectModal();
-
+export function ConnectCapsuleButton() {
+  const { openModal } = useCapsule();
   return (
     <button
-      onClick={openConnectModal}
-      className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors"
-    >
+      onClick={openModal}
+      className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors">
       Connect Wallet
     </button>
   );
 }
 
+function Web3Provider({ children }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const value = {
+    isModalOpen,
+    openModal,
+    closeModal,
+  };
+
+  return (
+    <CapsuleContext.Provider value={value}>
+      <QueryClientProvider client={queryClient}>
+        <CapsuleEvmProvider
+          config={{
+            appName: "Higherrrrrrr",
+            appDescription: "Launch tokens that evolve and grow with their community.",
+            appIcon: "https://pbs.twimg.com/profile_images/1864470786381369345/GuAosjLh_400x400.png",
+            appUrl: "https://alpha.higherrrrrrr.fun/",
+            chains: [baseChain],
+            projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
+            ssr: false,
+            transports: {
+              [baseChain.id]: ALCHEMY_RPC,
+            },
+            wallets: [metaMaskWallet, coinbaseWallet, walletConnectWallet, rainbowWallet, zerionWallet],
+          }}>
+          {children}
+          <CapsuleModal
+            capsule={capsuleClient}
+            appName="Higherrrrrrr"
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            logo={"https://pbs.twimg.com/profile_images/1864470786381369345/GuAosjLh_400x400.png"}
+            theme={{
+              mode: "dark",
+              backgroundColor: "#010101",
+              font: "Inter",
+              borderRadius: "md",
+              accentColor: "#4ade80",
+              foregroundColor: "#4ade80",
+            }}
+            disableEmailLogin={true}
+            disablePhoneLogin={true}
+            authLayout={[AuthLayout.EXTERNAL_FULL]}
+            externalWallets={[
+              ExternalWallet.METAMASK,
+              ExternalWallet.COINBASE,
+              ExternalWallet.WALLETCONNECT,
+              ExternalWallet.RAINBOW,
+              ExternalWallet.ZERION,
+            ]}
+            twoFactorAuthEnabled={false}
+            recoverySecretStepEnabled={true}
+            onRampTestMode
+          />
+        </CapsuleEvmProvider>
+      </QueryClientProvider>
+    </CapsuleContext.Provider>
+  );
+}
+
 // Export the chain config for use elsewhere
 export const getCurrentChain = () => baseChain;
-  
+
+export default Web3Provider;
