@@ -145,7 +145,7 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
       price: index === 0 ? '0' : formatEther(level.price),
       name: level.name
     }));
-
+    
     return {
       name: name.result,
       symbol: symbol.result,
