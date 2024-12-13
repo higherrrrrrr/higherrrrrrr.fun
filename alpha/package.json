@@ -17,6 +17,7 @@
     "@uniswap/v3-periphery": "^1.4.4",
     "@uniswap/v3-sdk": "^3.19.0",
     "@wagmi/cli": "^2.1.18",
+    "call-bind": "^1.0.8",
     "clsx": "^2.0.0",
     "connectkit": "1.5.3",
     "date-fns": "^2.30.0",

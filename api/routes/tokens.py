@@ -7,9 +7,12 @@ from config import Config
 from eth_defi.uniswap_v3.price import estimate_buy_received_amount, estimate_sell_received_amount
 from eth_defi.provider.multi_provider import create_multi_provider_web3
 from eth_defi.uniswap_v3.deployment import fetch_deployment
+from eth_abi import decode
+from decimal import Decimal
 import logging
 import json
 import os
+from eth_defi.uniswap_v3.pool import fetch_pool_details
 
 tokens = Blueprint('tokens', __name__)
 
@@ -39,6 +42,18 @@ def get_uniswap_deployment(token_address, pool_address):
         quoter_address=QUOTER_V2,
         quoter_v2=True  # Since V1 is not deployed on Base
     )
+
+def get_pool_price(pool_address):
+    """Get the current price from a Uniswap V3 pool using eth_defi"""
+    try:
+        pool = fetch_pool_details(
+            w3,
+            Web3.to_checksum_address(pool_address)
+        )
+        return Decimal(str(pool.current_price))
+    except Exception as e:
+        logging.error(f"Failed to get pool price: {str(e)}")
+        return None
 
 @tokens.route('/token/<address>/creator', methods=['GET'])
 def get_token_creator_endpoint(address):
@@ -158,28 +173,43 @@ def get_buy_quote(address):
         amount_wei = int(amount)
 
         try:
-            # Get Uniswap deployment for this token
+            # Try Uniswap quote first
             uniswap = get_uniswap_deployment(address, pool_address)
-            
-            # Get quote using UniswapV3
             amount_out = estimate_buy_received_amount(
                 uniswap,
-                address,  # Base token (token we want to buy)
-                WETH,    # Quote token (token we're paying with)
+                address,
+                WETH,
                 amount_wei,
                 FEE_TIER,
-                slippage=50  # 0.5% slippage
+                slippage=50
             )
             
             quote_response = {
                 'inputAmount': str(amount_wei),
                 'outputAmount': str(amount_out),
-                'priceImpact': "0.03",  # TODO: Calculate actual price impact
-                'fee': str(int(amount_wei * (FEE_TIER / 1000000)))
+                'priceImpact': "0.03",
+                'fee': str(int(amount_wei * (FEE_TIER / 1000000))),
+                'source': 'uniswap'
             }
         except Exception as e:
-            logging.error(f"Uniswap quote error: {str(e)}")
-            return jsonify({'error': 'Failed to get quote from Uniswap'}), 500
+            logging.warning(f"Uniswap quote failed, falling back to pool price: {str(e)}")
+            
+            # Fallback to pool price calculation
+            price = get_pool_price(pool_address)
+            if price is None:
+                return jsonify({'error': 'Failed to get price from pool'}), 400
+                
+            # Calculate simple price * quantity
+            output_amount = int(Decimal(str(amount_wei)) / price)
+            fee = int(amount_wei * (FEE_TIER / 1000000))
+            
+            quote_response = {
+                'inputAmount': str(amount_wei),
+                'outputAmount': str(output_amount),
+                'priceImpact': "0.03",
+                'fee': str(fee),
+                'source': 'pool_price'
+            }
 
         return jsonify(quote_response)
 
@@ -215,28 +245,43 @@ def get_sell_quote(address):
         amount_wei = int(amount)
 
         try:
-            # Get Uniswap deployment for this token
+            # Try Uniswap quote first
             uniswap = get_uniswap_deployment(address, pool_address)
-            
-            # Get quote using UniswapV3
             amount_out = estimate_sell_received_amount(
                 uniswap,
-                address,  # Base token (token we're selling)
-                WETH,    # Quote token (token we want to receive)
+                address,
+                WETH,
                 amount_wei,
                 FEE_TIER,
-                slippage=50  # 0.5% slippage
+                slippage=50
             )
             
             quote_response = {
                 'inputAmount': str(amount_wei),
                 'outputAmount': str(amount_out),
-                'priceImpact': "0.03",  # TODO: Calculate actual price impact
-                'fee': str(int(amount_wei * (FEE_TIER / 1000000)))  # Convert fee tier to actual fee
+                'priceImpact': "0.03",
+                'fee': str(int(amount_wei * (FEE_TIER / 1000000))),
+                'source': 'uniswap'
             }
         except Exception as e:
-            logging.error(f"Uniswap quote error: {str(e)}")
-            return jsonify({'error': 'Failed to get quote from Uniswap'}), 500
+            logging.warning(f"Uniswap quote failed, falling back to pool price: {str(e)}")
+            
+            # Fallback to pool price calculation
+            price = get_pool_price(pool_address)
+            if price is None:
+                return jsonify({'error': 'Failed to get price from pool'}), 400
+                
+            # Calculate simple price * quantity
+            output_amount = int(Decimal(str(amount_wei)) * price)
+            fee = int(amount_wei * (FEE_TIER / 1000000))
+            
+            quote_response = {
+                'inputAmount': str(amount_wei),
+                'outputAmount': str(output_amount),
+                'priceImpact': "0.03",
+                'fee': str(fee),
+                'source': 'pool_price'
+            }
 
         return jsonify(quote_response)
 
