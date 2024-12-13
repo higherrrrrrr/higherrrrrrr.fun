@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AuthLayout,
   CapsuleModal,
@@ -22,12 +22,32 @@ export function Button({ children, className = "", ...props }) {
 }
 
 export function ConnectWalletButton() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
   const [isOpen, setIsOpen] = useState(false);
 
-  if (address) {
+  // Add polling effect
+  useEffect(() => {
+    const checkWallet = setInterval(() => {
+      const ethereum = window?.ethereum;
+      if (ethereum) {
+        ethereum.request({ method: 'eth_accounts' })
+          .then(accounts => {
+            if (accounts.length > 0 && isOpen) {
+              setIsOpen(false);
+            }
+          })
+          .catch(console.error);
+      }
+    }, 100);
+
+    return () => clearInterval(checkWallet);
+  }, [isOpen]);
+
+  console.log('Wallet state:', { address, isConnected, ensName });
+
+  if (isConnected && address) {
     return (
       <Menu>
         <MenuButton as={Button}>
@@ -58,7 +78,7 @@ export function ConnectWalletButton() {
   return (
     <Menu>
       <MenuButton as={Button} onClick={() => setIsOpen(true)}>
-        Connect Wallet
+        Sign In
       </MenuButton>
 
       <CapsuleModal

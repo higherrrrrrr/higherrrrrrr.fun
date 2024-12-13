@@ -11,6 +11,7 @@ import {
 import { base } from "viem/chains";
 import { CapsuleModal, AuthLayout, ExternalWallet } from "@usecapsule/react-sdk";
 import { capsuleClient } from "../client/capsule";
+import { useAccount } from 'wagmi';
 
 const CapsuleContext = createContext();
 const queryClient = new QueryClient();
@@ -36,11 +37,21 @@ export function useCapsule() {
 
 export function ConnectCapsuleButton() {
   const { openModal } = useCapsule();
+  const { address, isConnected } = useAccount();
+
+  if (isConnected && address) {
+    return (
+      <button className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors">
+        {`${address.slice(0, 6)}...${address.slice(-4)}`}
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={openModal}
       className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors">
-      Connect Wallet
+      Sign In
     </button>
   );
 }
@@ -67,7 +78,7 @@ function Web3Provider({ children }) {
             appIcon: "https://pbs.twimg.com/profile_images/1864470786381369345/GuAosjLh_400x400.png",
             appUrl: "https://alpha.higherrrrrrr.fun/",
             chains: [baseChain],
-            projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "",
+            projectId: "a893723ca57a205513119f91ba5c09c8",
             ssr: false,
             transports: {
               [baseChain.id]: ALCHEMY_RPC,
@@ -89,9 +100,10 @@ function Web3Provider({ children }) {
               accentColor: "#4ade80",
               foregroundColor: "#4ade80",
             }}
-            disableEmailLogin={true}
-            disablePhoneLogin={true}
-            authLayout={[AuthLayout.EXTERNAL_FULL]}
+            oAuthMethods={["GOOGLE","TWITTER","FARCASTER"]}
+            disableEmailLogin={false}
+            disablePhoneLogin={false}
+            authLayout={["AUTH:FULL","EXTERNAL:FULL"]}
             externalWallets={[
               ExternalWallet.METAMASK,
               ExternalWallet.COINBASE,
