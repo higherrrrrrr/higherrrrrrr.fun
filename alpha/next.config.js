@@ -1,6 +1,10 @@
 const path = require('path');
 
 const nextConfig = {
+  compiler: {
+    styledComponents: true,
+  },
+  transpilePackages: ["@usecapsule/evm-wallet-connectors", "@usecapsule/react-sdk", "@usecapsule/react-common"],
   output: 'standalone',
   reactStrictMode: false,
   images: {
