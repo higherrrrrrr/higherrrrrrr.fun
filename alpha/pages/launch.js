@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useContractWrite, useWaitForTransaction } from 'wagmi';
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther, decodeEventLog } from 'viem';
 import { higherrrrrrrFactoryAbi, higherrrrrrrFactoryAddress } from '../onchain/generated';
 import { getEthPrice } from '../api/price';
 import { getContractAddress } from '../api/contract';
 import { ethers } from 'ethers';
-import { useConnectModal } from '../components/Web3Provider';
 import { useAccount } from 'wagmi';
+import { useCapsule } from '@/components/Web3Provider';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 const DEFAULT_PRICE_LEVELS = [
@@ -58,7 +58,7 @@ const NEW_TOKEN_EVENT_SIGNATURE = "0x46960970e01c8cbebf9e58299b0acf8137b299ef06e
 
 export default function LaunchPage() {
   const router = useRouter();
-  const { openConnectModal } = useConnectModal();
+  const { openModal } = useCapsule();
   const { address: userAddress } = useAccount();
   const [factoryAddress, setFactoryAddress] = useState('');
   const [ethPrice, setEthPrice] = useState(0);
@@ -106,7 +106,7 @@ export default function LaunchPage() {
 
   
 
-  const { write: createToken, data: createData } = useContractWrite({
+  const { write: createToken, data: createData } = useWriteContract({
     address: factoryAddress,
     abi: higherrrrrrrFactoryAbi,
     functionName: 'createHigherrrrrrr'
@@ -114,7 +114,7 @@ export default function LaunchPage() {
 
   console.log(createData?.hash)
 
-  const { isLoading } = useWaitForTransaction({
+  const { isLoading } = useWaitForTransactionReceipt({
     hash: createData?.hash,
     onSuccess: (data) => {
       console.log('Transaction successful, looking for NewToken event in logs:', data.logs);
@@ -156,7 +156,7 @@ export default function LaunchPage() {
     
     // Check for wallet connection first
     if (!userAddress) {
-      openConnectModal();
+      openModal();
       return;
     }
     

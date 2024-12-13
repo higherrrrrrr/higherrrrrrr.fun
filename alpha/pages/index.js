@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useContractRead } from 'wagmi';
+import { useReadContract } from 'wagmi';
 import { getTokenContract } from '../api/contract';
 import { getTokenState } from '../onchain/tokenState';
 import TokenCard from '../components/TokenCard';
@@ -77,7 +77,7 @@ export default function Home() {
     if (page > 1) {
       const start = (page - 1) * TOKENS_PER_PAGE;
       const end = start + TOKENS_PER_PAGE;
-      
+
       // Use the tokens we already have in topTokens
       const newTokens = topTokens.slice(start, end);
       setDisplayedTokens(prev => [...prev, ...newTokens]);
@@ -89,13 +89,13 @@ export default function Home() {
   useEffect(() => {
     const fetchTokenStates = async () => {
       if (!displayedTokens.length) return;
-      
+
       try {
         const statePromises = displayedTokens.map(async (token) => {
           try {
             const state = await getTokenState(token.address);
-            return { 
-              address: token.address, 
+            return {
+              address: token.address,
               state: {
                 ...state,
                 // Calculate progress percentage if on bonding curve
@@ -111,14 +111,14 @@ export default function Home() {
         });
 
         const results = await Promise.all(statePromises);
-        
+
         const states = {};
         results.forEach((result) => {
           if (result.state) {
             states[result.address] = result.state;
           }
         });
-        
+
         setTokenStates(states);
       } catch (error) {
         console.error('Error fetching token states:', error);

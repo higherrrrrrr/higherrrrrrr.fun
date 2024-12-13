@@ -3,24 +3,32 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../onchain';
-import { useContractWrite, useWaitForTransaction, useContractRead, useAccount, useBalance } from 'wagmi';
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract, useAccount, useBalance } from "wagmi";
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
 import { higherrrrrrrAbi } from '../../onchain/generated';
 import { getEthPrice } from '../../api/price';
 import { getLatestTokens } from '../../api/contract';
 import Link from 'next/link';
-import { ConnectKitButton, useConnectModal } from '../../components/Web3Provider';
 import { getTokenCreator, getToken } from '../../api/token';
 import { getBuyQuote, getSellQuote } from '../../onchain/quotes';
 import { ethers } from 'ethers';
+import { useCapsule } from "@/components/Web3Provider";
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
+const ConnectCapsuleButton = dynamic(
+  () => import("../components/Web3Provider").then((mod) => mod.ConnectCapsuleButton),
+  {
+    ssr: false,
+  }
+);
+
 export default function TokenPage({ addressProp }) {
   const router = useRouter();
-  const { openConnectModal } = useConnectModal();
+  const { openModal } = useCapsule();
   const { address: routerAddress } = router.query;
+
   
   // Use prop address if provided, otherwise use router address
   const address = addressProp || routerAddress;
@@ -100,26 +108,26 @@ export default function TokenPage({ addressProp }) {
   }, [address]);
 
   // Buy contract interaction
-  const { write: buyToken, data: buyData } = useContractWrite({
+  const { write: buyToken, data: buyData } = useWriteContract({
     address: address,
     abi: higherrrrrrrAbi,
     functionName: 'buy'
   });
 
   // Sell contract interaction
-  const { write: sellToken, data: sellData } = useContractWrite({
+  const { write: sellToken, data: sellData } = useWriteContract({
     address: address,
     abi: higherrrrrrrAbi,
     functionName: 'sell'
   });
 
   // Handle transaction states
-  const { isLoading: isBuyLoading } = useWaitForTransaction({
+  const { isLoading: isBuyLoading } = useWaitForTransactionReceipt({
     hash: buyData?.hash,
     onSuccess: () => refreshTokenState()
   });
 
-  const { isLoading: isSellLoading } = useWaitForTransaction({
+  const { isLoading: isSellLoading } = useWaitForTransactionReceipt({
     hash: sellData?.hash,
     onSuccess: () => refreshTokenState()
   });
@@ -234,7 +242,7 @@ export default function TokenPage({ addressProp }) {
   // Update the transaction handler to use the correct amounts
   const handleTransaction = () => {
     if (!userAddress) {
-      openConnectModal();
+      openModal();
       return;
     }
 
@@ -882,7 +890,7 @@ export default function TokenPage({ addressProp }) {
             )}
 
             {!userAddress ? (
-              <ConnectKitButton />
+              <ConnectCapsuleButton />
             ) : (
               <button
                 onClick={handleTransaction}

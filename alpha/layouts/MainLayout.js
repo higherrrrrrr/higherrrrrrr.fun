@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react';
 import ComingSoon from '../pages/coming-soon';
-import { ConnectKitButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import { useTypewriter } from '../hooks/useTypewriter';
 import { getContractAddress } from '../api/contract';
+import dynamic from "next/dynamic";
+
+const ConnectCapsuleButton = dynamic(
+  () => import("../components/Web3Provider").then((mod) => mod.ConnectCapsuleButton),
+  {
+    ssr: false,
+  }
+);
 
 const LAUNCH_DATE = new Date("2024-11-25T17:00:00-08:00");
 
@@ -12,7 +19,7 @@ export default function MainLayout({ children }) {
   const [shouldShowComingSoon, setShouldShowComingSoon] = useState(true);
   const [keySequence, setKeySequence] = useState("");
   const [isMobile, setIsMobile] = useState(false);
-  
+
   const animatedLogoText = useTypewriter("Higherrrrrrr", {
     minRs: 3,
     maxRs: 8,
@@ -35,12 +42,12 @@ export default function MainLayout({ children }) {
   // Force client-side rendering and check launch status
   useEffect(() => {
     setMounted(true);
-    
+
     // Function to check launch status
     const checkLaunchStatus = () => {
       const now = new Date().getTime();
       const isAfterLaunch = now >= LAUNCH_DATE.getTime();
-      
+
       if (isAfterLaunch) {
         setShouldShowComingSoon(false);
         localStorage.setItem('auth_token', 'LAUNCHED');
@@ -67,7 +74,7 @@ export default function MainLayout({ children }) {
 
     // Initial check
     const isLaunched = checkLaunchStatus();
-    
+
     // If not launched, check for auth token and set up timer
     if (!isLaunched) {
       const storedAuthToken = localStorage.getItem('auth_token');
@@ -82,7 +89,7 @@ export default function MainLayout({ children }) {
           checkContractAddress();
         }
       }
-      
+
       // Set up periodic check every 30 seconds
       const timer = setInterval(checkLaunchStatus, 30000);
       return () => clearInterval(timer);
@@ -104,7 +111,7 @@ export default function MainLayout({ children }) {
         try {
           localStorage.setItem('auth_token', newSequence);
           const data = await getContractAddress();
-          
+
           if (data.factory_address) {
             setShouldShowComingSoon(false);
             // Set cookie with 7 day expiry
@@ -141,25 +148,25 @@ export default function MainLayout({ children }) {
             {isMobile ? "Higherrrrrrr" : animatedLogoText}
           </h1>
         </Link>
-        
+
         <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4 w-full md:w-auto">
           <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full md:w-auto items-center">
-            <Link 
+          <Link 
               href="/how-it-works" 
               className="text-green-500 hover:text-green-400 transition-colors w-full md:w-auto text-center order-last md:order-first"
-            >
-              [How it Works]
+            >              
+            [How it Works]
             </Link>
             <div className="flex gap-3 md:gap-4 w-full md:w-auto">
               <div className="flex-1 md:w-[180px]">
-                <Link href="/launch" className="w-full">
+              <Link href="/launch" className="w-full">
                   <button className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors whitespace-nowrap text-base">
                     Launch Token
                   </button>
                 </Link>
               </div>
               <div className="flex-1 md:w-[180px] h-12">
-                <ConnectKitButton />
+                <ConnectCapsuleButton />
               </div>
             </div>
           </div>
@@ -172,13 +179,13 @@ export default function MainLayout({ children }) {
 
       <footer className="border-t border-green-500/20 mt-auto">
         <div className="max-w-7xl mx-auto px-3 md:px-6 py-3 md:py-4 flex justify-center items-center">
-          <a 
-            href="https://base.org" 
-            target="_blank" 
+          <a
+            href="https://base.org"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
-          >
-            Built on Base
+          >         
+          Built on Base
           </a>
         </div>
       </footer>

@@ -1,13 +1,16 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Web3Provider } from '../components/Web3Provider';
-import MainLayout from '../layouts/MainLayout';
-import '../styles/globals.css';
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import posthog from "posthog-js";
+import "../styles/globals.css";
+import "@usecapsule/react-sdk/styles.css";
 import Launch from './launch';
-import { useEffect } from 'react';
-import posthog from 'posthog-js';
-import { useRouter } from 'next/router';
-
-const queryClient = new QueryClient();
+const Web3Provider = dynamic(() => import("../components/Web3Provider"), {
+  ssr: false,
+});
+const MainLayout = dynamic(() => import("../layouts/MainLayout"), {
+  ssr: false,
+});
 
 // PostHog initialization
 if (typeof window !== 'undefined') {
@@ -33,16 +36,14 @@ export default function App({ Component, pageProps }) {
     };
   }, [router.events]);
 
-  // If we're on the index page, show Launch instead
-  const ShowComponent = Component.name === 'TokensList' ? Launch : Component;
+    // If we're on the index page, show Launch instead
+    const ShowComponent = Component.name === 'TokensList' ? Launch : Component;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Web3Provider>
-        <MainLayout>
-          <ShowComponent {...pageProps} />
-        </MainLayout>
-      </Web3Provider>
-    </QueryClientProvider>
+    <Web3Provider>
+      <MainLayout>
+        <ShowComponent {...pageProps} />
+      </MainLayout>
+    </Web3Provider>
   );
 }
