@@ -18,7 +18,7 @@ import { useCapsule } from "@/components/Web3Provider";
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
 const ConnectCapsuleButton = dynamic(
-  () => import("../components/Web3Provider").then((mod) => mod.ConnectCapsuleButton),
+  () => import("../../components/Web3Provider").then((mod) => mod.ConnectCapsuleButton),
   {
     ssr: false,
   }
