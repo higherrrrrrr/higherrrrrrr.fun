@@ -9,29 +9,19 @@
     "generate": "wagmi generate"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.17",
     "@tailwindcss/typography": "^0.5.15",
     "@tanstack/react-query": "latest",
-    "@uniswap/sdk-core": "^6.1.0",
-    "@uniswap/v3-core": "^1.0.1",
-    "@uniswap/v3-periphery": "^1.4.4",
-    "@uniswap/v3-sdk": "^3.19.0",
     "@usecapsule/evm-wallet-connectors": "latest",
     "@usecapsule/react-sdk": "latest",
     "@wagmi/cli": "^2.1.18",
-    "clsx": "^2.0.0",
-    "connectkit": "1.5.3",
     "date-fns": "^2.30.0",
     "ethers": "6.9.0",
-    "framer-motion": "^10.16.16",
-    "js-cookie": "^3.0.5",
-    "next": "14.0.4",
+    "next": "14.2.20",
     "posthog-js": "^1.195.0",
     "react": "^18",
-    "react-7-segment-display": "^1.1.2",
     "react-dom": "^18",
     "viem": "latest",
-    "wagmi": "2.12.32"
+    "wagmi": "latest"
   },
   "devDependencies": {
     "@typechain/ethers-v6": "^0.5.1",
