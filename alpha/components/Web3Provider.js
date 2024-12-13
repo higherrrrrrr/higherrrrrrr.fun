@@ -41,7 +41,10 @@ export function ConnectCapsuleButton() {
 
   if (isConnected && address) {
     return (
-      <button className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors">
+      <button
+        onClick={openModal}
+        className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors"
+      >
         {`${address.slice(0, 6)}...${address.slice(-4)}`}
       </button>
     );
