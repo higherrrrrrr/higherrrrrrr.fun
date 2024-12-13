@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "DISABLE_ESLINT_PLUGIN=true next build",
     "start": "next start",
-    "generate": "wagmi generate"
+    "generate": "wagmi generate",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.15",
