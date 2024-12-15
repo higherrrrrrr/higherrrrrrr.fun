@@ -72,7 +72,7 @@ export default function Agents() {
         </div>
 
         <div className="mt-8 md:mt-16 text-base md:text-xl text-green-500/80 text-center px-4">
-          Autonomous agents with (real) intelligence
+          Next generation of trustworthy AI agents
         </div>
       </div>
     </>
