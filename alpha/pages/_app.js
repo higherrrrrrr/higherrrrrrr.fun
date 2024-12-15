@@ -14,6 +14,13 @@ if (typeof window !== 'undefined') {
   posthog.init('phc_QObbSAeS9Bc3rBhOtDD0M5JUp5RDmPDQZVsmNQVXnFp', {
     api_host: 'https://us.i.posthog.com',
     person_profiles: 'always',
+    loaded: (posthog) => {
+      if (process.env.NODE_ENV === 'development') {
+        posthog.debug();
+      }
+      // Force reload feature flags
+      posthog.reloadFeatureFlags();
+    }
   });
 }
 
