@@ -21,7 +21,7 @@ def twitter_connect(token_address):
         state = data.get('state')
         
         oauth = get_twitter_oauth()
-        auth_url = oauth.get_authorization_url(state=state)
+        auth_url = oauth.get_authorization_url()
         
         # Store request token in session - we still need this for OAuth1
         session['request_token'] = oauth.request_token

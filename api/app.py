@@ -4,11 +4,12 @@ from routes import blueprints
 from config import Config
 import os
 from routes.trading import get_eth_price
-from models.token import db
+from models.token import db, Token
 from flask_migrate import Migrate
 from routes.tokens import tokens
 from routes.trading import trading
 from routes.twitter import twitter
+from models.tweet import Tweet
 
 def create_app():
     app = Flask(__name__)

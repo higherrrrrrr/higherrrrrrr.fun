@@ -143,7 +143,8 @@ export default function EditTokenPage() {
         post: ['']
       },
       includeMarketData: false,
-      tweetsPerDay: 7
+      tweetsPerDay: 7,
+      model: 'llama-3'
     }
   });
   const [error, setError] = useState('');
@@ -207,7 +208,8 @@ export default function EditTokenPage() {
             includeMarketData: tokenData.ai_character?.include_market_data || false,
             tweetsPerDay: tokenData.ai_character?.tweets_per_day !== undefined 
               ? tokenData.ai_character.tweets_per_day 
-              : 7
+              : 7,
+            model: tokenData.ai_character?.model || 'llama-3',
           }
         });
       } catch (error) {
@@ -257,7 +259,8 @@ export default function EditTokenPage() {
             post: formData.aiCharacter.style.post
           },
           include_market_data: formData.aiCharacter.includeMarketData,
-          tweets_per_day: formData.aiCharacter.tweetsPerDay
+          tweets_per_day: formData.aiCharacter.tweetsPerDay,
+          model: formData.aiCharacter.model,
         }
       }, signature);
 
@@ -501,6 +504,31 @@ export default function EditTokenPage() {
                     className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
                     placeholder="Character name..."
                   />
+                </div>
+
+                {/* Model Selection */}
+                <div>
+                  <label className="block text-sm text-green-500/70 mb-2">
+                    AI Model
+                  </label>
+                  <p className="text-sm text-green-500/50 mb-2">
+                    Select the AI model that will power your character
+                  </p>
+                  <select
+                    value={formData.aiCharacter.model}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      aiCharacter: {
+                        ...formData.aiCharacter,
+                        model: e.target.value
+                      }
+                    })}
+                    className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
+                  >
+                    <option value="claude-3-sonnet">Claude 3.5 Sonnet</option>
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="llama-3">Llama 3.1</option>
+                  </select>
                 </div>
 
                 {/* Bio Input */}
