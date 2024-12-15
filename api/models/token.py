@@ -62,5 +62,4 @@ class Token(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'ai_character': self.ai_character,
             'twitter_username': self.twitter_username,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         } 
