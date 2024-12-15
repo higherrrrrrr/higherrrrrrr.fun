@@ -13,7 +13,7 @@ import logging
 import json
 import os
 from eth_defi.uniswap_v3.pool import fetch_pool_details
-from .openrouter import get_openrouter_client
+from clients.openrouter import get_openrouter_client
 
 tokens = Blueprint('tokens', __name__)
 
