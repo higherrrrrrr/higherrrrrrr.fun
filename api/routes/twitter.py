@@ -17,17 +17,11 @@ def get_twitter_oauth():
 def twitter_connect(token_address):
     """Start Twitter OAuth flow for a token"""
     try:
-        data = request.get_json()
-        state = data.get('state')
-        
         oauth = get_twitter_oauth()
         auth_url = oauth.get_authorization_url()
         
-        # Store oauth_token in token record
-        token = Token.query.filter_by(address=token_address.lower()).first()
-        if not token:
-            return jsonify({'error': 'Token not found'}), 404
-            
+        # Get or create token record
+        token = Token.create_if_not_exists(token_address)
         token.temp_request_token = oauth.request_token['oauth_token']
         db.session.commit()
         

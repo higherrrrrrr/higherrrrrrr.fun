@@ -97,7 +97,7 @@ def get_token_creator(token_address: str) -> str:
 
         from models.token import Token
         token = Token.query.filter_by(address=token_address).first()
-        if token:
+        if token and token.creator:
             return token.creator.lower()
 
     
