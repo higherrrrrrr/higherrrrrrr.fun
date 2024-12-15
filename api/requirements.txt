@@ -8,6 +8,7 @@ appnope==0.1.4
 argon2-cffi==23.1.0
 argon2-cffi-bindings==21.2.0
 arrow==1.3.0
+asgiref==3.8.1
 asttokens==3.0.0
 async-lru==2.0.4
 attrs==24.2.0
@@ -111,7 +112,7 @@ nest-asyncio==1.6.0
 notebook==7.3.1
 notebook_shim==0.2.4
 numpy==1.26.4
-openai==1.12.0
+openai==1.57.4
 overrides==7.7.0
 packaging==24.2
 pandas==2.2.3

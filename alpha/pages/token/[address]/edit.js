@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAccount, useSignMessage } from 'wagmi';
-import { getTokenCreator, getToken, updateToken, upsertToken } from '../../../api/token';
+import { getTokenCreator, getToken, updateToken, upsertToken, generateExampleTweet } from '../../../api/token';
 import Link from 'next/link';
 import posthog from 'posthog-js'
 
@@ -51,13 +51,6 @@ function usePostHogFeatureFlag(flagName, defaultValue = false) {
     if (posthog) {
       posthog.onFeatureFlags(handleFlagChange);
     }
-
-    return () => {
-      if (posthog) {
-        posthog.off('featureFlags', handleFlagChange);
-        posthog.off('featureFlags', handleFlagsLoaded);
-      }
-    };
   }, [flagName, defaultValue]);
 
   return isLoaded ? enabled : defaultValue;
@@ -154,6 +147,8 @@ export default function EditTokenPage() {
   });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [exampleTweet, setExampleTweet] = useState('');
+  const [isGeneratingTweet, setIsGeneratingTweet] = useState(false);
 
   const { signMessageAsync } = useSignMessage();
 
@@ -244,24 +239,22 @@ export default function EditTokenPage() {
         telegram: formData.telegram,
         description: formData.description,
         warpcast_url: formData.warpcast,
-        ...(agentsEnabled && formData.aiCharacter ? {
-          ai_character: {
-            name: formData.aiCharacter.name,
-            bio: formData.aiCharacter.bio,
-            lore: formData.aiCharacter.lore,
-            message_examples: formData.aiCharacter.messageExamples,
-            post_examples: formData.aiCharacter.postExamples,
-            adjectives: formData.aiCharacter.adjectives,
-            topics: formData.aiCharacter.topics,
-            style: {
-              all: formData.aiCharacter.style.all,
-              chat: formData.aiCharacter.style.chat,
-              post: formData.aiCharacter.style.post
-            },
-            include_market_data: formData.aiCharacter.includeMarketData,
-            tweets_per_day: formData.aiCharacter.tweetsPerDay
-          }
-        } : {})
+        ai_character: {
+          name: formData.aiCharacter.name,
+          bio: formData.aiCharacter.bio,
+          lore: formData.aiCharacter.lore,
+          message_examples: formData.aiCharacter.messageExamples,
+          post_examples: formData.aiCharacter.postExamples,
+          adjectives: formData.aiCharacter.adjectives,
+          topics: formData.aiCharacter.topics,
+          style: {
+            all: formData.aiCharacter.style.all,
+            chat: formData.aiCharacter.style.chat,
+            post: formData.aiCharacter.style.post
+          },
+          include_market_data: formData.aiCharacter.includeMarketData,
+          tweets_per_day: formData.aiCharacter.tweetsPerDay
+        }
       }, signature);
 
       // Redirect back to token page on success
@@ -309,25 +302,17 @@ export default function EditTokenPage() {
     }
   };
 
-  const generateTestTweet = async () => {
+  const handleGenerateExample = async () => {
+    setIsGeneratingTweet(true);
+    setError('');
     try {
-      // TODO: Implement API endpoint for test tweet generation
-      const response = await fetch('/api/generate-test-tweet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          character: formData.aiCharacter
-        })
-      });
-      
-      const data = await response.json();
-      // Show the generated tweet in a modal or alert
-      alert(data.tweet); // Replace with better UI
+      const tweet = await generateExampleTweet(formData.aiCharacter);
+      setExampleTweet(tweet);
     } catch (error) {
-      setError('Failed to generate test tweet');
-      console.error('Failed to generate test tweet:', error);
+      setError('Failed to generate example tweet');
+      console.error('Failed to generate example tweet:', error);
+    } finally {
+      setIsGeneratingTweet(false);
     }
   };
 
@@ -679,14 +664,26 @@ export default function EditTokenPage() {
                 </div>
 
                 {/* Generate Test Tweet Button */}
-                <div className="mt-8 border-t border-green-500/30 pt-6 flex justify-start">
+                <div className="mt-8 border-t border-green-500/30 pt-6">
                   <button
                     type="button"
-                    onClick={generateTestTweet}
-                    className="px-4 py-2 bg-black border border-green-500 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors text-sm"
+                    onClick={handleGenerateExample}
+                    disabled={isGeneratingTweet}
+                    className="px-4 py-2 bg-black border border-green-500 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Generate Test Tweet
+                    {isGeneratingTweet ? 'Generating...' : 'Generate Test Tweet'}
                   </button>
+
+                  {exampleTweet && (
+                    <div className="mt-4 p-4 bg-green-500/5 border border-green-500/30 rounded-lg">
+                      <div className="font-bold text-green-500 mb-2">
+                        Example Tweet:
+                      </div>
+                      <div className="text-green-500">
+                        {exampleTweet}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Connect to X Button */}

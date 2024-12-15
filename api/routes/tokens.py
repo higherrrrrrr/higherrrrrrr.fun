@@ -13,6 +13,7 @@ import logging
 import json
 import os
 from eth_defi.uniswap_v3.pool import fetch_pool_details
+from api.clients.openrouter import get_openrouter_client
 
 tokens = Blueprint('tokens', __name__)
 
@@ -119,8 +120,8 @@ def upsert_token():
             token.character_prompt = data['character_prompt']
         if 'warpcast_app_key' in data:
             token.warpcast_app_key = data['warpcast_app_key']
-        if 'ai_character_json' in data:
-            token.ai_character_json = data['ai_character_json']
+        if 'ai_character' in data:
+            token.ai_character = data['ai_character']
     
     try:
         db.session.commit()
@@ -283,3 +284,34 @@ def get_sell_quote(address):
     except Exception as e:
         logging.error(f"Quote error: {str(e)}")
         return jsonify({'error': f'Failed to get sell quote: {str(e)}'}), 500 
+
+@tokens.route('/generate-example-tweet', methods=['POST'])
+def generate_example_tweet():
+    """
+    Generate an example tweet based on provided character JSON
+    
+    Request body:
+        ai_character (dict): Character configuration including name, bio, style, etc.
+        
+    Returns:
+        JSON response containing the generated tweet
+    """
+    data = request.get_json()
+    
+    if not data or 'ai_character' not in data:
+        return jsonify({
+            'error': 'Request must include ai_character configuration'
+        }), 400
+        
+    try:
+        client = get_openrouter_client()
+        example_tweet = client.generate_example_tweet(data['ai_character'])
+        
+        return jsonify({
+            'tweet': example_tweet
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to generate tweet: {str(e)}'
+        }), 500 

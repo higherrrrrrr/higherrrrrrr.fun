@@ -155,3 +155,37 @@ export async function getSellQuote(address, amount, poolAddress) {
     throw error;
   }
 }
+
+/**
+ * Generate example tweet for a token
+ * @param {string} aiCharacter AI character
+ * @returns {Promise<string>} Generated tweet
+ */
+export async function generateExampleTweet(aiCharacter) {
+  try {
+    const response = await fetch(
+      `${getApiUrl()}/generate-example-tweet`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ai_character: aiCharacter
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to generate example tweet');
+    }
+
+    const data = await response.json();
+    return data.tweet;
+    
+  } catch (error) {
+    console.error('Error generating example tweet:', error);
+    throw error;
+  }
+}
