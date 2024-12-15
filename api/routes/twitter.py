@@ -67,6 +67,7 @@ def twitter_callback():
         }), 500
 
 @twitter.route('/twitter/complete', methods=['POST'])
+@require_auth
 @require_token_creator
 def twitter_complete():
     """Complete Twitter connection with signature"""
