@@ -3,7 +3,7 @@ from models.token import Token, db
 from config import Config
 import tweepy
 from .auth import require_token_creator, require_auth
-
+import json
 twitter = Blueprint('twitter', __name__)
 
 def get_twitter_oauth():
@@ -22,8 +22,7 @@ def twitter_connect(token_address):
         
         # Get or create token record
         token = Token.create_if_not_exists(token_address)
-        token.temp_request_token = oauth.request_token
-        print(token.temp_request_token)
+        token.temp_request_token = json.dumps(oauth.request_token)
         db.session.commit()
         
         return jsonify({
@@ -85,7 +84,7 @@ def twitter_complete():
             }), 400
         
         oauth = get_twitter_oauth()
-        oauth.request_token = token.temp_request_token
+        oauth.request_token = json.loads(token.temp_request_token)
         
         access_token, access_token_secret = oauth.get_access_token(verifier)
         
