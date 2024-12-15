@@ -17,5 +17,8 @@ class Config:
     # Database configuration
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres@localhost:5432/tokens_db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # OpenRouter API configuration
+    OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
 
 
