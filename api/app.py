@@ -13,7 +13,19 @@ from models.tweet import Tweet
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    
+    # Configure CORS with more specific settings
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": [
+                "http://localhost:3000",
+                "https://alpha.higherrrrrrr.fun"
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
+    })
+    
     app.config.from_object('config.Config')
 
     # Set up session secret key

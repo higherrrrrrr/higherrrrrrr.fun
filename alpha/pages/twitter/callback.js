@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useAccount, useSignMessage } from 'wagmi';
 import Cookies from 'js-cookie';
 import { getApiUrl } from '@/api';
+import { completeTwitterConnect } from '@/api/token';
 
 export default function TwitterCallback() {
   const router = useRouter();
@@ -26,31 +27,17 @@ export default function TwitterCallback() {
       }
 
       try {
-        // Sign message to authenticate
         const message = `we're going higherrrrrrr`;
         const signature = await signMessageAsync({ message });
 
-        // Complete the Twitter connection
-        const response = await fetch(`${getApiUrl()}/twitter/complete`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${address}:${signature}`
-          },
-          body: JSON.stringify({
-            verifier: oauth_verifier,
-            address: token_address,
-            token_address,
-            oauth_token
-          })
-        });
+        await completeTwitterConnect(
+          token_address,
+          oauth_verifier,
+          oauth_token,
+          address,
+          signature
+        );
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || 'Failed to complete Twitter connection');
-        }
-
-        // Redirect back to token edit page
         router.push(`/token/${token_address}/edit`);
       } catch (error) {
         console.error('Failed to complete Twitter connection:', error);

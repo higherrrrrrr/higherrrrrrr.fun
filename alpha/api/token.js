@@ -239,3 +239,34 @@ export async function disconnectTwitter(address, signature) {
     throw error;
   }
 }
+
+/**
+ * Complete Twitter connection flow
+ * @param {string} token_address Token address
+ * @param {string} verifier OAuth verifier
+ * @param {string} oauth_token OAuth token
+ * @param {string} signature Auth signature
+ * @param {string} address User's wallet address
+ * @returns {Promise<Object>} Response with username
+ */
+export async function completeTwitterConnect(token_address, verifier, oauth_token, address, signature) {
+  const response = await fetch(`${getApiUrl()}/twitter/complete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${address}:${signature}`
+    },
+    body: JSON.stringify({
+      verifier,
+      token_address,
+      oauth_token
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to complete Twitter connection');
+  }
+
+  return await response.json();
+}
