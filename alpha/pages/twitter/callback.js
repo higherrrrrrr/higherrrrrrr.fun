@@ -35,7 +35,7 @@ export default function TwitterCallback() {
           oauth_verifier,
           oauth_token,
           address,
-          signature
+          signature,
         );
 
         router.push(`/token/${token_address}/edit`);

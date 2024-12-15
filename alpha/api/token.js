@@ -1,3 +1,4 @@
+import { add } from 'date-fns';
 import { getApiUrl } from './getApiUrl';
 
 /**
@@ -259,7 +260,8 @@ export async function completeTwitterConnect(token_address, verifier, oauth_toke
     body: JSON.stringify({
       verifier,
       token_address,
-      oauth_token
+      oauth_token, 
+      address: token_address,
     })
   });
 
