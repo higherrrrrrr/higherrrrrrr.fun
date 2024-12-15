@@ -37,7 +37,7 @@ export default function Agents() {
   return (
     <>
       <Head>
-        <title>AGENTS ARIVING IN</title>
+        <title>AGENTS ARRIVING IN</title>
       </Head>
       <div className="min-h-screen bg-black text-green-500 font-mono flex flex-col items-center justify-center p-4">
         <h1 className="text-3xl md:text-6xl font-bold mb-8 md:mb-12 text-center">AGENTS ARRIVING IN</h1>
@@ -73,14 +73,14 @@ export default function Agents() {
         </div>
 
         <div className="mt-8 md:mt-16 text-base md:text-xl text-green-500/80 text-center px-4">
-          The next evolution in autonomous trading
+          Autonomous agents with (real) intelligence
         </div>
         
         <Link 
           href="https://alpha.higherrrrrrr.fun/token/0x17e1f08f8f80a07406d4f05420512ab5f2d7f56e"
           className="mt-6 md:mt-8 text-lg md:text-xl border border-green-500/20 rounded-lg px-4 md:px-6 py-2 md:py-3 hover:bg-green-500/10 transition-colors text-center"
         >
-          BUY $HARDER FOR EARLY ACCESS
+          ACCESS (REAL) AI
         </Link>
       </div>
     </>

@@ -13,13 +13,16 @@ export default function TwitterCallback() {
     const completeTwitterAuth = async () => {
       if (!router.isReady || !address) return;
 
-      const { oauth_verifier, token_address } = router.query;
+      // Get oauth_verifier and token_address from session instead of URL query
+      const session = await getSession();
       
-      if (!oauth_verifier || !token_address) {
-        setError('Missing required parameters');
+      if (!session?.oauth_verifier || !session?.token_address) {
+        setError('Missing required session parameters');
         setLoading(false);
         return;
       }
+
+      const { oauth_verifier, token_address } = session;
 
       try {
         // Sign message to authenticate
