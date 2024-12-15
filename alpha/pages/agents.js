@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 
 // Add getLayout property to disable default layout
 Agents.getLayout = (page) => page;
@@ -14,8 +13,8 @@ export default function Agents() {
   });
 
   useEffect(() => {
-    // Set target date to December 14, 2024 5:00 PM PST
-    const targetDate = new Date('2024-12-14T17:00:00-08:00').getTime();
+    // Set target date to December 18, 2024 5:00 PM PST
+    const targetDate = new Date('2024-12-18T17:00:00-08:00').getTime();
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
@@ -37,10 +36,10 @@ export default function Agents() {
   return (
     <>
       <Head>
-        <title>AGENTS ARRIVING IN</title>
+        <title>TRUSTWORTHY AI ARRIVING IN</title>
       </Head>
       <div className="min-h-screen bg-black text-green-500 font-mono flex flex-col items-center justify-center p-4">
-        <h1 className="text-3xl md:text-6xl font-bold mb-8 md:mb-12 text-center">AGENTS ARRIVING IN</h1>
+        <h1 className="text-3xl md:text-6xl font-bold mb-8 md:mb-12 text-center">TRUSTWORTHY AI ARRIVING IN</h1>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-8 text-center w-full max-w-[600px] md:max-w-none">
           <div className="flex flex-col">
@@ -75,13 +74,6 @@ export default function Agents() {
         <div className="mt-8 md:mt-16 text-base md:text-xl text-green-500/80 text-center px-4">
           Autonomous agents with (real) intelligence
         </div>
-        
-        <Link 
-          href="https://alpha.higherrrrrrr.fun/token/0x17e1f08f8f80a07406d4f05420512ab5f2d7f56e"
-          className="mt-6 md:mt-8 text-lg md:text-xl border border-green-500/20 rounded-lg px-4 md:px-6 py-2 md:py-3 hover:bg-green-500/10 transition-colors text-center"
-        >
-          ACCESS (REAL) AI
-        </Link>
       </div>
     </>
   );
