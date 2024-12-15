@@ -6,11 +6,17 @@ import os
 from routes.trading import get_eth_price
 from models.token import db
 from flask_migrate import Migrate
+from routes.tokens import tokens
+from routes.trading import trading
+from routes.twitter import twitter
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
     app.config.from_object('config.Config')
+
+    # Set up session secret key
+    app.secret_key = Config.SECRET_KEY
 
     # Initialize SQLAlchemy
     db.init_app(app)
@@ -41,6 +47,7 @@ def create_app():
     # Register blueprints
     for blueprint, url_prefix in blueprints:
         app.register_blueprint(blueprint, url_prefix=url_prefix)
+    app.register_blueprint(twitter, url_prefix='/api')
 
     @app.route('/api/endpoints', methods=['GET'])
     def list_endpoints():

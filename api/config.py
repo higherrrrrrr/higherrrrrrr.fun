@@ -20,5 +20,11 @@ class Config:
     
     # OpenRouter API configuration
     OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+    TWITTER_API_KEY = os.getenv('TWITTER_API_KEY')
+    TWITTER_API_SECRET = os.getenv('TWITTER_API_SECRET')
+    TWITTER_CALLBACK_URL = os.getenv('TWITTER_CALLBACK_URL', 'https://higherrrrrrr.fun/twitter/callback')
+    API_URL = os.getenv('API_URL', 'http://localhost:5000')
+
+    SECRET_KEY = os.getenv('SECRET_KEY', 'asdlfgasdkjlhgasdfg')
 
 

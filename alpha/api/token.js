@@ -189,3 +189,60 @@ export async function generateExampleTweet(aiCharacter) {
     throw error;
   }
 }
+
+/**
+ * Start Twitter connection flow for a token
+ * @param {string} address Token address
+ * @returns {Promise<string>} Twitter auth URL
+ */
+export async function connectTwitter(address) {
+  try {
+    const response = await fetch(
+      `${getApiUrl()}/twitter/connect/${address}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to start Twitter connection');
+    }
+
+    const data = await response.json();
+    return data.auth_url;
+  } catch (error) {
+    console.error('Failed to connect Twitter:', error);
+    throw error;
+  }
+}
+
+/**
+ * Disconnect Twitter from a token
+ * @param {string} address Token address
+ * @param {string} signature Auth signature
+ */
+export async function disconnectTwitter(address, signature) {
+  try {
+    const response = await fetch(
+      `${getApiUrl()}/twitter/disconnect/${address}`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${address}:${signature}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to disconnect Twitter');
+    }
+  } catch (error) {
+    console.error('Failed to disconnect Twitter:', error);
+    throw error;
+  }
+}

@@ -21,6 +21,10 @@ class Token(db.Model):
     character_prompt = db.Column(db.Text)
     warpcast_app_key = db.Column(db.Text)
     ai_character = db.Column(JSON, nullable=True)
+    twitter_oauth_token = db.Column(db.String(255))
+    twitter_oauth_secret = db.Column(db.String(255))
+    twitter_user_id = db.Column(db.String(255))
+    twitter_username = db.Column(db.String(255))
 
     def __init__(self, address, creator, **kwargs):
         self.address = address.lower()
@@ -42,4 +46,5 @@ class Token(db.Model):
             'character_prompt': self.character_prompt,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'ai_character': self.ai_character,
+            'twitter_username': self.twitter_username,
         } 

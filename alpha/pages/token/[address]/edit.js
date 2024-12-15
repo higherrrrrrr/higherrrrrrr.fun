@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAccount, useSignMessage } from 'wagmi';
-import { getTokenCreator, getToken, updateToken, upsertToken, generateExampleTweet } from '../../../api/token';
+import { getTokenCreator, getToken, updateToken, upsertToken, generateExampleTweet, connectTwitter, disconnectTwitter } from '../../../api/token';
 import Link from 'next/link';
 import posthog from 'posthog-js'
 
@@ -149,6 +149,8 @@ export default function EditTokenPage() {
   const [saving, setSaving] = useState(false);
   const [exampleTweet, setExampleTweet] = useState('');
   const [isGeneratingTweet, setIsGeneratingTweet] = useState(false);
+  const [isConnectingTwitter, setIsConnectingTwitter] = useState(false);
+  const [twitterUsername, setTwitterUsername] = useState('');
 
   const { signMessageAsync } = useSignMessage();
 
@@ -181,6 +183,7 @@ export default function EditTokenPage() {
       if (!address) return;
       try {
         const tokenData = await getToken(address);
+        setTwitterUsername(tokenData.twitter_username || '');
         setFormData({
           description: tokenData.description || '',
           website: tokenData.website || '',
@@ -313,6 +316,29 @@ export default function EditTokenPage() {
       console.error('Failed to generate example tweet:', error);
     } finally {
       setIsGeneratingTweet(false);
+    }
+  };
+
+  const handleTwitterConnect = async () => {
+    setIsConnectingTwitter(true);
+    setError('');
+    try {
+      if (twitterUsername) {
+        // For disconnect, we still need signature
+        const message = `we're going higherrrrrrr`;
+        const signature = await signMessageAsync({ message });
+        await disconnectTwitter(address, signature);
+        setTwitterUsername('');
+      } else {
+        // For connect, just get the auth URL and redirect
+        const authUrl = await connectTwitter(address);
+        window.location.href = authUrl;
+      }
+    } catch (error) {
+      console.error('Twitter connection error:', error);
+      setError(error.message || 'Failed to connect Twitter');
+    } finally {
+      setIsConnectingTwitter(false);
     }
   };
 
@@ -690,11 +716,9 @@ export default function EditTokenPage() {
                 <div className="mt-8 border-t border-green-500/30 pt-6">
                   <button
                     type="button"
-                    onClick={() => {
-                      // Implement Twitter connection logic here
-                      console.log('Connect to Twitter clicked');
-                    }}
-                    className="w-full px-6 py-3 bg-black border border-green-500 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                    onClick={handleTwitterConnect}
+                    disabled={isConnectingTwitter}
+                    className="w-full px-6 py-3 bg-black border border-green-500 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -703,8 +727,19 @@ export default function EditTokenPage() {
                     >
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                     </svg>
-                    <span>Connect to X (Twitter)</span>
+                    <span>
+                      {isConnectingTwitter 
+                        ? 'Connecting...' 
+                        : twitterUsername 
+                          ? `Disconnect @${twitterUsername}` 
+                          : 'Connect to X (Twitter)'}
+                    </span>
                   </button>
+                  {twitterUsername && (
+                    <p className="mt-2 text-sm text-green-500/70 text-center">
+                      Connected as @{twitterUsername}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
