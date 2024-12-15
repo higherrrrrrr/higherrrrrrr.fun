@@ -22,7 +22,8 @@ def twitter_connect(token_address):
         
         # Get or create token record
         token = Token.create_if_not_exists(token_address)
-        token.temp_request_token = oauth.request_token['oauth_token']
+        token.temp_request_token = oauth.request_token
+        print(token.temp_request_token)
         db.session.commit()
         
         return jsonify({
