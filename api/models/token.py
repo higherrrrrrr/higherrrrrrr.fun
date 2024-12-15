@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, String, JSON
 
 db = SQLAlchemy()
 
@@ -19,6 +20,7 @@ class Token(db.Model):
     warpcast_url = db.Column(db.String(255))
     character_prompt = db.Column(db.Text)
     warpcast_app_key = db.Column(db.Text)
+    ai_character = db.Column(JSON, nullable=True)
 
     def __init__(self, address, creator, **kwargs):
         self.address = address.lower()
@@ -38,5 +40,6 @@ class Token(db.Model):
             'description': self.description,
             'warpcast_url': self.warpcast_url,
             'character_prompt': self.character_prompt,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'ai_character': self.ai_character,
         } 

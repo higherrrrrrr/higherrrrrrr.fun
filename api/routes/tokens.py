@@ -95,7 +95,8 @@ def upsert_token():
             description=data.get('description'),
             warpcast_url=data.get('warpcast_url'),
             character_prompt=data.get('character_prompt'),
-            warpcast_app_key=data.get('warpcast_app_key')
+            warpcast_app_key=data.get('warpcast_app_key'),
+            ai_character=data.get('ai_character')
         )
         db.session.add(token)
     else:
@@ -118,6 +119,8 @@ def upsert_token():
             token.character_prompt = data['character_prompt']
         if 'warpcast_app_key' in data:
             token.warpcast_app_key = data['warpcast_app_key']
+        if 'ai_character_json' in data:
+            token.ai_character_json = data['ai_character_json']
     
     try:
         db.session.commit()
