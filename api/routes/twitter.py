@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, session, url_for, render_template
 from models.token import Token, db
 from config import Config
 import tweepy
-from .auth import require_token_creator
+from .auth import require_token_creator, require_auth
 
 twitter = Blueprint('twitter', __name__)
 

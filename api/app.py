@@ -13,19 +13,7 @@ from models.tweet import Tweet
 
 def create_app():
     app = Flask(__name__)
-    
-    # Configure CORS with more specific settings
-    CORS(app, resources={
-        r"/api/*": {
-            "origins": [
-                "http://localhost:3000",
-                "https://alpha.higherrrrrrr.fun"
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization"]
-        }
-    })
-    
+    CORS(app)
     app.config.from_object('config.Config')
 
     # Set up session secret key
@@ -87,6 +75,9 @@ def create_app():
     @app.route('/eth/price', methods=['GET'])
     def eth_price():
         return get_eth_price()
+
+    app.config['SESSION_TYPE'] = 'filesystem'  # or 'redis' if you prefer
+    app.config['SECRET_KEY'] = Config.SECRET_KEY  # Make sure this is set
 
     return app
 
