@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAccount, useSignMessage } from 'wagmi';
+import Cookies from 'js-cookie';
+import { getApiUrl } from '@/api';
 
 export default function TwitterCallback() {
   const router = useRouter();
@@ -13,16 +15,18 @@ export default function TwitterCallback() {
     const completeTwitterAuth = async () => {
       if (!router.isReady || !address) return;
 
-      // Get oauth_verifier and token_address from session instead of URL query
-      const session = await getSession();
+      // Log all query parameters to see what we're getting
+      console.log('Query parameters:', router.query);
+
+      // Get parameters from Twitter callback
+      const { oauth_token, oauth_verifier } = router.query;
+      const token_address = router.query.state;
       
-      if (!session?.oauth_verifier || !session?.token_address) {
-        setError('Missing required session parameters');
+      if (!oauth_token || !oauth_verifier || !token_address) {
+        setError('Missing required OAuth parameters');
         setLoading(false);
         return;
       }
-
-      const { oauth_verifier, token_address } = session;
 
       try {
         // Sign message to authenticate
@@ -30,15 +34,16 @@ export default function TwitterCallback() {
         const signature = await signMessageAsync({ message });
 
         // Complete the Twitter connection
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/twitter/complete`, {
+        const response = await fetch(`${getApiUrl()}/twitter/complete`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${address}:${signature}`
           },
           body: JSON.stringify({
-            verifier: oauth_verifier,
-            token_address: token_address
+            verifier: oauth_verifier,  // Changed back to match backend expectation
+            token_address,
+            oauth_token
           })
         });
 

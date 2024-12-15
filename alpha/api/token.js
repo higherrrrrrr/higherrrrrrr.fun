@@ -195,29 +195,22 @@ export async function generateExampleTweet(aiCharacter) {
  * @param {string} address Token address
  * @returns {Promise<string>} Twitter auth URL
  */
-export async function connectTwitter(address) {
-  try {
-    const response = await fetch(
-      `${getApiUrl()}/twitter/connect/${address}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+export async function connectTwitter(token_address, state) {
+  const response = await fetch(`${getApiUrl()}/twitter/connect/${token_address}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ state })
+  });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to start Twitter connection');
-    }
-
-    const data = await response.json();
-    return data.auth_url;
-  } catch (error) {
-    console.error('Failed to connect Twitter:', error);
-    throw error;
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to start Twitter connection');
   }
+
+  const data = await response.json();
+  return data.auth_url;
 }
 
 /**

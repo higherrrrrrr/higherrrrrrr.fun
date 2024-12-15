@@ -4,6 +4,7 @@ import { useAccount, useSignMessage } from 'wagmi';
 import { getTokenCreator, getToken, updateToken, upsertToken, generateExampleTweet, connectTwitter, disconnectTwitter } from '../../../api/token';
 import Link from 'next/link';
 import posthog from 'posthog-js'
+import Cookies from 'js-cookie';
 
 function usePostHogFeatureFlag(flagName, defaultValue = false) {
   const [enabled, setEnabled] = useState(defaultValue);
@@ -330,8 +331,9 @@ export default function EditTokenPage() {
         await disconnectTwitter(address, signature);
         setTwitterUsername('');
       } else {
-        // For connect, just get the auth URL and redirect
-        const authUrl = await connectTwitter(address);
+        // Include token_address in state parameter
+        const state = encodeURIComponent(address); // token address
+        const authUrl = await connectTwitter(address, state);
         window.location.href = authUrl;
       }
     } catch (error) {
@@ -346,6 +348,13 @@ export default function EditTokenPage() {
   useEffect(() => {
     console.log('Agents feature flag status in component:', agentsEnabled);
   }, [agentsEnabled]);
+
+  useEffect(() => {
+    // Store the token address in a cookie whenever this page is visited
+    if (address) {
+      Cookies.set('last_token_address', address, { expires: 7 }); // Expires in 7 days
+    }
+  }, [address]);
 
   if (loading) {
     return (

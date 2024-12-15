@@ -17,12 +17,14 @@ def get_twitter_oauth():
 def twitter_connect(token_address):
     """Start Twitter OAuth flow for a token"""
     try:
-        oauth = get_twitter_oauth()
-        auth_url = oauth.get_authorization_url()
+        data = request.get_json()
+        state = data.get('state')
         
-        # Store request token in session
+        oauth = get_twitter_oauth()
+        auth_url = oauth.get_authorization_url(state=state)
+        
+        # Store request token in session - we still need this for OAuth1
         session['request_token'] = oauth.request_token
-        session['token_address'] = token_address.lower()
         
         return jsonify({
             'auth_url': auth_url
@@ -38,19 +40,24 @@ def twitter_callback():
     """Handle Twitter OAuth callback"""
     try:
         verifier = request.args.get('oauth_verifier')
-        token_address = session.get('token_address')
-        request_token = session.get('request_token')
+        oauth_token = request.args.get('oauth_token')  # Twitter returns this
+        state = request.args.get('state')  # Our token_address
         
-        if not all([verifier, token_address, request_token]):
+        if not all([verifier, oauth_token, state]):
             return jsonify({
-                'error': 'Invalid OAuth callback'
+                'error': 'Invalid OAuth callback parameters'
             }), 400
             
-        # Get access token
-        oauth = get_twitter_oauth()
-        oauth.request_token = request_token
+        # Get request token from session and verify it matches
+        request_token = session.get('request_token')
+        if not request_token or request_token['oauth_token'] != oauth_token:
+            return jsonify({
+                'error': 'Invalid OAuth token'
+            }), 400
+            
+        token_address = state
         
-        # Here we'll show a page that requests signature before completing connection
+        # Render the page that will complete the connection with signature
         return render_template('twitter_callback.html', 
                             token_address=token_address,
                             verifier=verifier)
@@ -68,9 +75,17 @@ def twitter_complete():
         data = request.get_json()
         verifier = data.get('verifier')
         token_address = data.get('token_address')
+        oauth_token = data.get('oauth_token')
+        
+        # Get the request token from session and verify it matches
+        request_token = session.get('request_token')
+        if not request_token:
+            return jsonify({
+                'error': 'Invalid OAuth token'
+            }), 400
         
         oauth = get_twitter_oauth()
-        oauth.request_token = session.get('request_token')
+        oauth.request_token = request_token
         
         access_token, access_token_secret = oauth.get_access_token(verifier)
         
