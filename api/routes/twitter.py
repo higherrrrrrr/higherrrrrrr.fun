@@ -23,8 +23,13 @@ def twitter_connect(token_address):
         oauth = get_twitter_oauth()
         auth_url = oauth.get_authorization_url()
         
-        # Store request token in session - we still need this for OAuth1
-        session['request_token'] = oauth.request_token
+        # Store oauth_token in token record
+        token = Token.query.filter_by(address=token_address.lower()).first()
+        if not token:
+            return jsonify({'error': 'Token not found'}), 404
+            
+        token.temp_request_token = oauth.request_token['oauth_token']
+        db.session.commit()
         
         return jsonify({
             'auth_url': auth_url
@@ -75,17 +80,16 @@ def twitter_complete():
         data = request.get_json()
         verifier = data.get('verifier')
         token_address = data.get('token_address')
-        oauth_token = data.get('oauth_token')
         
-        # Get the request token from session and verify it matches
-        request_token = session.get('request_token')
-        if not request_token:
+        # Get token and its stored request token
+        token = Token.query.filter_by(address=token_address.lower()).first()
+        if not token or not token.temp_request_token:
             return jsonify({
-                'error': 'Invalid OAuth token'
+                'error': 'Invalid token or missing request token'
             }), 400
         
         oauth = get_twitter_oauth()
-        oauth.request_token = request_token
+        oauth.request_token = {'oauth_token': token.temp_request_token}
         
         access_token, access_token_secret = oauth.get_access_token(verifier)
         
@@ -100,23 +104,18 @@ def twitter_complete():
         # Get user info
         user = client.get_me()
         
-        # Update token with Twitter credentials
-        token = Token.query.filter_by(address=token_address).first()
-        if token:
-            token.twitter_oauth_token = access_token
-            token.twitter_oauth_secret = access_token_secret
-            token.twitter_user_id = user.data.id
-            token.twitter_username = user.data.username
-            db.session.commit()
-            
-            return jsonify({
-                'success': True,
-                'username': user.data.username
-            })
-            
+        # Update token with Twitter credentials and clear temp token
+        token.twitter_oauth_token = access_token
+        token.twitter_oauth_secret = access_token_secret
+        token.twitter_user_id = user.data.id
+        token.twitter_username = user.data.username
+        token.temp_request_token = None  # Clear the temporary token
+        db.session.commit()
+        
         return jsonify({
-            'error': 'Token not found'
-        }), 404
+            'success': True,
+            'username': user.data.username
+        })
         
     except Exception as e:
         return jsonify({
