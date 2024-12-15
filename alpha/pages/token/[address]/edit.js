@@ -331,9 +331,8 @@ export default function EditTokenPage() {
         await disconnectTwitter(address, signature);
         setTwitterUsername('');
       } else {
-        // Include token_address in state parameter
-        const state = encodeURIComponent(address); // token address
-        const authUrl = await connectTwitter(address, state);
+        // Just get the auth URL and redirect - we'll use the cookie in the callback
+        const authUrl = await connectTwitter(address);
         window.location.href = authUrl;
       }
     } catch (error) {
@@ -349,8 +348,8 @@ export default function EditTokenPage() {
     console.log('Agents feature flag status in component:', agentsEnabled);
   }, [agentsEnabled]);
 
+  // Store token address in cookie whenever the page loads
   useEffect(() => {
-    // Store the token address in a cookie whenever this page is visited
     if (address) {
       Cookies.set('last_token_address', address, { expires: 7 }); // Expires in 7 days
     }

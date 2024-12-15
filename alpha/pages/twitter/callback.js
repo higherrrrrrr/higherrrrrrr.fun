@@ -15,12 +15,9 @@ export default function TwitterCallback() {
     const completeTwitterAuth = async () => {
       if (!router.isReady || !address) return;
 
-      // Log all query parameters to see what we're getting
-      console.log('Query parameters:', router.query);
-
-      // Get parameters from Twitter callback
+      // Get oauth params from URL and token_address from cookie
       const { oauth_token, oauth_verifier } = router.query;
-      const token_address = router.query.state;
+      const token_address = Cookies.get('last_token_address');
       
       if (!oauth_token || !oauth_verifier || !token_address) {
         setError('Missing required OAuth parameters');
@@ -41,7 +38,7 @@ export default function TwitterCallback() {
             'Authorization': `Bearer ${address}:${signature}`
           },
           body: JSON.stringify({
-            verifier: oauth_verifier,  // Changed back to match backend expectation
+            verifier: oauth_verifier,
             token_address,
             oauth_token
           })
