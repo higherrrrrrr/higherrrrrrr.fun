@@ -39,6 +39,7 @@ export default function TwitterCallback() {
           },
           body: JSON.stringify({
             verifier: oauth_verifier,
+            address: token_address,
             token_address,
             oauth_token
           })
