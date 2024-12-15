@@ -118,6 +118,7 @@ def twitter_complete():
         }), 500
 
 @twitter.route('/twitter/disconnect/<token_address>', methods=['POST'])
+@require_auth
 @require_token_creator
 def twitter_disconnect(token_address):
     """Remove Twitter connection from a token"""
