@@ -85,7 +85,7 @@ def twitter_complete():
             }), 400
         
         oauth = get_twitter_oauth()
-        oauth.request_token = {'oauth_token': token.temp_request_token}
+        oauth.request_token = token.temp_request_token
         
         access_token, access_token_secret = oauth.get_access_token(verifier)
         
