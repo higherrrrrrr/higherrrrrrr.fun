@@ -117,13 +117,13 @@ def twitter_complete():
             'error': f'Failed to complete Twitter authorization: {str(e)}'
         }), 500
 
-@twitter.route('/twitter/disconnect/<token_address>', methods=['POST'])
+@twitter.route('/twitter/disconnect/<address>', methods=['POST'])
 @require_auth
 @require_token_creator
-def twitter_disconnect(token_address):
+def twitter_disconnect(address):
     """Remove Twitter connection from a token"""
     try:
-        token = Token.query.filter_by(address=token_address.lower()).first()
+        token = Token.query.filter_by(address=address.lower()).first()
         if token:
             token.twitter_oauth_token = None
             token.twitter_oauth_secret = None

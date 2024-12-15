@@ -226,6 +226,7 @@ export async function disconnectTwitter(address, signature) {
       {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${address}:${signature}`
         }
       }

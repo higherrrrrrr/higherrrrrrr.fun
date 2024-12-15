@@ -45,13 +45,15 @@ def require_auth(f):
             # Verify the signature
             recovered = recover_address(message, signature)
             
+            if not recovered:
+                return jsonify({'error': 'Invalid signature'}), 401
+
             # Add the verified address to the request context
             request.eth_address = recovered
 
             return f(*args, **kwargs)
             
         except Exception as e:
-            print(f"Authentication error: {e}")
             return jsonify({'error': 'Invalid authorization format'}), 401
             
     return decorated
@@ -120,23 +122,37 @@ def require_token_creator(f):
     """
     Decorator that requires the authenticated wallet to be the token creator
     Must be used after @require_auth
+    Checks for token address in path parameters first, then request body
     """
     @wraps(f)
     def decorated(*args, **kwargs):
-        data = request.get_json()
-        if not data or 'address' not in data:
-            return jsonify({'error': 'Token address required'}), 400
+        try:
+            # First check path parameters
+            token_address = kwargs.get('address')  # Use pop instead of get to remove it from kwargs
             
-        token_address = data['address'].lower()
+            # If not in path, check request body
+            if not token_address:
+                data = request.get_json()
+                if not data or 'address' not in data:
+                    return jsonify({'error': 'Token address required'}), 400
+                token_address = data['address']
+                
+            token_address = token_address.lower()
+                
+            # Get authenticated wallet
+            auth_wallet = request.eth_address.lower()
             
-        # Get authenticated wallet
-        auth_wallet = request.eth_address.lower()
-        # Get token from database
-        creator = get_token_creator(token_address)
+            # Get token from database
+            creator = get_token_creator(token_address)
+                
+            # Verify authenticated wallet is creator
+            if auth_wallet != creator:
+                return jsonify({'error': 'Not authorized - must be token creator'}), 403
+                
+            return f(*args, **kwargs)
             
-        # Verify authenticated wallet is creator
-        if auth_wallet != creator:
-            return jsonify({'error': 'Not authorized - must be token creator'}), 403
+        except Exception as e:
+            print(f"Error checking token creator authorization: {e}")
+            return jsonify({'error': 'Error checking token creator authorization'}), 500
             
-        return f(*args, **kwargs)
     return decorated
