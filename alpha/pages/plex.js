@@ -11,6 +11,7 @@ export default function TrustScorePage() {
       content: 'Who was the creator of Bitcoin?' 
     }
   ])
+  const [tweetId, setTweetId] = useState('')
   const [output, setOutput] = useState(
     'Bitcoin was introduced in a white paper titled "Bitcoin: A Peer-to-Peer Electronic Cash System," published on October 31, 2008. The author of this paper used the pseudonym "Satoshi Nakamoto." Despite extensive research and speculation, the true identity behind this name remains unknown. Over the years, various individuals have been proposed as Satoshi Nakamoto—some by investigators, some through their own claims—but conclusive proof has never been provided to the satisfaction of the broader community or independent experts.\n\n' +
     'Satoshi Nakamoto, under this pseudonym, released the first version of the Bitcoin software in January 2009. He continued to contribute to the project\'s development and communicate through emails and online forums until around 2010. After that time, his direct involvement ceased, and control of the code repository and project leadership passed to other contributors. Since then, the Bitcoin community and its ecosystem have grown substantially, but the mystery of Satoshi Nakamoto\'s true identity endures.'
@@ -74,6 +75,10 @@ export default function TrustScorePage() {
     }
   }
 
+  const importFromTweet = () => {
+    console.log('Importing from tweet:', tweetId)
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <main className="max-w-4xl mx-auto px-4 py-16">
@@ -121,6 +126,28 @@ export default function TrustScorePage() {
           </div>
         </div>
         
+        <div className="border border-[#2FE878]/20 rounded-lg p-6 mb-8">
+          <h2 className="text-[#2FE878] text-xl font-mono mb-6">Import from Tweet</h2>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              value={tweetId}
+              onChange={(e) => setTweetId(e.target.value)}
+              placeholder="Enter Tweet ID..."
+              className="flex-1 bg-black border border-[#2FE878]/20 rounded px-3 py-2 font-mono focus:border-[#2FE878] focus:outline-none"
+            />
+            <button
+              onClick={importFromTweet}
+              className="bg-black hover:bg-[#2FE878]/10 border border-[#2FE878]/20 text-[#2FE878] rounded px-4 transition-colors font-mono"
+            >
+              Import
+            </button>
+          </div>
+          <p className="mt-2 text-[#2FE878]/60 text-sm">
+            Import conversation from Higherrrrrrr agents (coming when agents launch)
+          </p>
+        </div>
+
         <div className="border border-[#2FE878]/20 rounded-lg p-6 mb-8">
           <h2 className="text-[#2FE878] text-xl font-mono mb-6">Messages</h2>
           
