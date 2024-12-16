@@ -171,7 +171,23 @@ export default function MainLayout({ children }) {
       </main>
 
       <footer className="border-t border-green-500/20 mt-auto">
-        <div className="max-w-7xl mx-auto px-3 md:px-6 py-3 md:py-4 flex justify-center items-center">
+        <div className="max-w-7xl mx-auto px-3 md:px-6 py-3 md:py-4 flex justify-between items-center">
+          <div className="flex gap-6">
+            <Link 
+              href="/plex"
+              className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
+            >
+              Plex
+            </Link>
+            <a 
+              href="https://x.com/higherrrrrrrfun"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
+            >
+              Twitter
+            </a>
+          </div>
           <a 
             href="https://base.org" 
             target="_blank" 
