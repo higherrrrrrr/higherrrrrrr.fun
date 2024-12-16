@@ -96,7 +96,7 @@ export default function TrustScorePage() {
           <div className="border-l-2 border-[#2FE878]/20 pl-4">
             <p className="text-[#2FE878] text-sm leading-relaxed opacity-80">
               <span className="text-[#2FE878] opacity-100 font-bold">Important:</span> For accurate results, 
-              include the complete conversation context leading up to the output you want to verify. 
+              include the complete conversation context leading up to the output you want to verify, *including the system prompt*. 
               The system relies on the full context to properly analyze response patterns and determine authenticity.
             </p>
           </div>
