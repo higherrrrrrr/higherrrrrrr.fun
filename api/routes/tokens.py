@@ -4,7 +4,7 @@ from .auth import require_auth, require_token_creator, get_token_creator
 from sqlalchemy import or_
 from web3 import Web3
 from config import Config
-from eth_defi.uniswap_v3.price import estimate_buy_received_amount, estimate_sell_received_amount
+from eth_defi.uniswap_v3.price import estimate_buy_received_amount, estimate_sell_received_amount, get_onchain_price
 from eth_defi.provider.multi_provider import create_multi_provider_web3
 from eth_defi.uniswap_v3.deployment import fetch_deployment
 from eth_abi import decode
@@ -12,7 +12,6 @@ from decimal import Decimal
 import logging
 import json
 import os
-from eth_defi.uniswap_v3.pool import fetch_pool_details
 from clients.openrouter import get_openrouter_client
 
 tokens = Blueprint('tokens', __name__)
@@ -47,11 +46,13 @@ def get_uniswap_deployment(token_address, pool_address):
 def get_pool_price(pool_address):
     """Get the current price from a Uniswap V3 pool using eth_defi"""
     try:
-        pool = fetch_pool_details(
+        # Get price directly using get_onchain_price
+        price = get_onchain_price(
             w3,
-            Web3.to_checksum_address(pool_address)
+            Web3.to_checksum_address(pool_address),
+            reverse_token_order=True  # Assuming we want token1/token0 price
         )
-        return Decimal(str(pool.current_price))
+        return Decimal(str(price))
     except Exception as e:
         logging.error(f"Failed to get pool price: {str(e)}")
         return None

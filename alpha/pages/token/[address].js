@@ -184,41 +184,58 @@ export default function TokenPage({ addressProp }) {
     }
 
     const updateQuote = async () => {
-      try {
-        const amountWei = ethers.parseEther(amount);
+      const MAX_RETRIES = 5;
+      
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          const amountWei = ethers.parseEther(amount);
 
-        if (isBuying) {
-          // For buys, input is ETH amount, quote will be token amount
-          const quoteWei = await getBuyQuote(address, amountWei);
-          if (quoteWei === BigInt(0)) {
-            console.error('Got zero buy quote');
+          if (isBuying) {
+            // For buys, input is ETH amount, quote will be token amount
+            const quoteWei = await getBuyQuote(address, amountWei);
+            if (quoteWei === BigInt(0)) {
+              if (attempt === MAX_RETRIES) {
+                console.error('Got zero buy quote after all retries');
+                setQuote(null);
+                setError('Failed to get quote');
+                return;
+              }
+              continue;
+            }
+            setQuote(quoteWei);
+            setError('');
+            return; // Success - exit retry loop
+          } else {
+            // For sells, input is token amount, quote will be ETH amount
+            const quoteWei = await getSellQuote(address, amountWei);
+            if (quoteWei === BigInt(0)) {
+              if (attempt === MAX_RETRIES) {
+                console.error('Got zero sell quote after all retries');
+                setQuote(null);
+                setError('Failed to get quote');
+                return;
+              }
+              continue;
+            }
+            setQuote(quoteWei);
+            setError('');
+            return; // Success - exit retry loop
+          }
+        } catch (error) {
+          if (attempt === MAX_RETRIES) {
+            console.error('Error in quote effect after all retries:', {
+              error,
+              address,
+              amount,
+              isBuying,
+              attempt
+            });
             setQuote(null);
             setError('Failed to get quote');
             return;
           }
-          setQuote(quoteWei);
-        } else {
-          // For sells, input is token amount, quote will be ETH amount
-          const quoteWei = await getSellQuote(address, amountWei);
-          if (quoteWei === BigInt(0)) {
-            console.error('Got zero sell quote');
-            setQuote(null);
-            setError('Failed to get quote');
-            return;
-          }
-          setQuote(quoteWei);
+          continue;
         }
-
-        setError('');
-      } catch (error) {
-        console.error('Error in quote effect:', {
-          error,
-          address,
-          amount,
-          isBuying
-        });
-        setQuote(null);
-        setError('Failed to get quote');
       }
     };
 
