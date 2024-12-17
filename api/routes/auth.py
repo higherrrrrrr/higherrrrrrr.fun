@@ -90,32 +90,40 @@ def get_token_creation_tx(token_address: str) -> str:
         print(f"Subgraph query error: {e}")
         return None
 
-def get_token_creator(token_address: str) -> str:
+def get_and_set_token_creator(token_address: str) -> str:
     """
-    Get the creator (deployer) address of a token contract
+    Get the creator address from database or fetch and save it if not found
     Returns lowercase creator address or None if not found
     """
     try:
-
-        from models.token import Token
-        token = Token.query.filter_by(address=token_address).first()
-        if token and token.creator:
+        from models.token import Token, db
+        
+        # Get token from database
+        token = Token.query.filter_by(address=token_address.lower()).first()
+        if not token:
+            return None
+            
+        # Return cached creator if exists and isn't same as token address
+        if token.creator and token.creator.lower() != token.address.lower():
             return token.creator.lower()
-
-    
-        # Get creation transaction hash from subgraph
+            
+        # Fetch creator from chain
         tx_hash = get_token_creation_tx(token_address)
         if not tx_hash:
             return None
             
         # Get transaction details from RPC
         tx = w3.eth.get_transaction(tx_hash)
+        creator = tx['from'].lower()
         
-        return tx['from'].lower()
+        # Save creator to database
+        token.creator = creator
+        db.session.commit()
         
-        return None
+        return creator
+        
     except Exception as e:
-        print(f"Error getting token creator: {e}")
+        print(f"Error getting/setting token creator: {e}")
         return None
 
 def require_token_creator(f):
@@ -128,7 +136,7 @@ def require_token_creator(f):
     def decorated(*args, **kwargs):
         try:
             # First check path parameters
-            token_address = kwargs.get('address')  # Use pop instead of get to remove it from kwargs
+            token_address = kwargs.get('address')
             
             # If not in path, check request body
             if not token_address:
@@ -142,8 +150,8 @@ def require_token_creator(f):
             # Get authenticated wallet
             auth_wallet = request.eth_address.lower()
             
-            # Get token from database
-            creator = get_token_creator(token_address)
+            # Get and set token creator
+            creator = get_and_set_token_creator(token_address)
                 
             # Verify authenticated wallet is creator
             if auth_wallet != creator:

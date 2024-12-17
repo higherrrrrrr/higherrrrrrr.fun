@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models.token import db, Token
-from .auth import require_auth, require_token_creator, get_token_creator
+from .auth import require_auth, require_token_creator, get_and_set_token_creator
 from sqlalchemy import or_
 from web3 import Web3
 from config import Config
@@ -62,8 +62,8 @@ def get_token_creator_endpoint(address):
     """Get the creator of a token"""
     token_address = address.lower()
     
-    # Get from database
-    creator = get_token_creator(token_address)
+    # Get and set creator in database
+    creator = get_and_set_token_creator(token_address)
         
     return jsonify({
         'creator': creator,
