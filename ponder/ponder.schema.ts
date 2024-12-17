@@ -1,10 +1,10 @@
 import { index, onchainTable, primaryKey, relations } from "ponder";
 
-type TokenType = "REGULAR" | "TEXT_EVOLUTION" | "IMAGE_EVOLUTION";
+export type TokenType = "REGULAR" | "TEXT_EVOLUTION" | "IMAGE_EVOLUTION";
 
-type ProtocolVersion = "v0" | "v1";
+export type ProtocolVersion = "v0" | "v1";
 
-type MarketType = "BONDING_CURVE" | "UNISWAP_POOL";
+export type MarketType = "BONDING_CURVE" | "UNISWAP_POOL";
 
 export const token = onchainTable(
   "token",
