@@ -9,24 +9,22 @@ from functools import lru_cache
 import time
 import requests
 import traceback
-from dune_client.client import DuneClient
 from typing import List
 
 trading = Blueprint('trading', __name__)
 
-# Add Dune cache
-class DuneCache:
+class DataCache:
     def __init__(self):
         self.data = None
         self.timestamp = 0
 
 # Add latest tokens cache
-latest_tokens_cache = DuneCache()
-LATEST_TOKENS_CACHE_DURATION = 300  # 5 minutes
+latest_tokens_cache = DataCache()
+LATEST_TOKENS_CACHE_DURATION = 5  # 5 seconds
 
 # Add trading tokens cache
-dune_cache = DuneCache()
-DUNE_CACHE_DURATION = 300  # 5 minutes
+top_trading_cache = DataCache()
+TOP_TRADING_CACHE_DURATION = 300  # 5 seconds
 
 # Add ABI for NewToken event
 FACTORY_ABI = [
@@ -68,7 +66,7 @@ def filter_blacklisted_tokens(tokens: List[dict]) -> List[dict]:
 @trading.route('/tokens/latest', methods=['GET'])
 def get_latest_token_deploys():
     try:
-        print("\n=== Getting latest tokens from Dune ===")
+        print("\n=== Getting latest tokens from ponder ===")
         
         # Check cache first
         current_time = time.time()
@@ -76,36 +74,32 @@ def get_latest_token_deploys():
             print("✅ Returning cached latest tokens data")
             return jsonify(latest_tokens_cache.data)
 
-        # Initialize Dune client
-        dune = DuneClient(Config.DUNE_API_KEY)
-        
-        # Fetch latest result for the deploys query
-        print("Fetching from Dune query 4360134...")
-        query_result = dune.get_latest_result(4360134)
-        
-        # Poll until query is complete
-        max_attempts = 10
-        attempt = 0
-        while query_result.state == 'QUERY_STATE_EXECUTING' and attempt < max_attempts:
-            print(f"Query executing, attempt {attempt + 1}/{max_attempts}...")
-            time.sleep(3)  # Wait 3 seconds between checks
-            query_result = dune.get_latest_result(4360134)
-            attempt += 1
-            
-        print("Final Dune response:", query_result)
-        
-        if not query_result or not query_result.result or not query_result.result.rows:
-            print("❌ No data from Dune query")
+        query_result = requests.get(f'{Config.PONDER_API_URL}/tokens/latest')
+
+        query_result.raise_for_status()
+
+        rows = query_result.json()
+
+        if not rows:
+            print("❌ No data from ponder query")
             return jsonify({'error': 'No data available'}), 404
 
         # Format the response
         tokens = [{
-            'address': row['token_address'],
+            'address': row['address'],
             'volume_24h': 0,  # New tokens won't have volume yet
             'trades_24h': 0,
-            'creation_time': row['creation_time'],
-            'creation_tx': row['creation_tx']
-        } for row in query_result.result.rows]
+            'name': row['name'],
+            'symbol': row['symbol'],
+            'protocol_version': row['protocolVersion'],
+            'token_type': row['tokenType'],
+            'market_type': row['marketType'],
+            'pool_address': row['poolAddress'],
+            'conviction_address': row['convictionAddress'],
+            'creator_address': row['creatorAddress'],
+            'creation_time': row['blockTimestamp'],
+            'creation_tx': row['txHash']
+        } for row in rows]
 
         # Add filtering before creating the response
         filtered_tokens = filter_blacklisted_tokens(tokens)
@@ -223,44 +217,33 @@ def get_contract_address():
 @trading.route('/tokens/top-trading', methods=['GET'])
 def get_top_trading_tokens():
     try:
-        print("\n=== Getting top trading tokens from Dune ===")
+        print("\n=== Getting top trading tokens from ponder ===")
         
         # Check cache first
         current_time = time.time()
-        if dune_cache.data and current_time - dune_cache.timestamp < DUNE_CACHE_DURATION:
-            print("✅ Returning cached Dune data")
-            return jsonify(dune_cache.data)
+        if top_trading_cache.data and current_time - top_trading_cache.timestamp < TOP_TRADING_CACHE_DURATION:
+            print("✅ Returning cached top trading tokens data")
+            return jsonify(top_trading_cache.data)
 
-        # Initialize Dune client
-        dune = DuneClient(Config.DUNE_API_KEY)
         
-        # Fetch latest result for the volume query
-        print("Fetching from Dune query 4342388...")
-        query_result = dune.get_latest_result(4342388)
-        
-        # Poll until query is complete
-        max_attempts = 10
-        attempt = 0
-        while query_result.state == 'QUERY_STATE_EXECUTING' and attempt < max_attempts:
-            print(f"Query executing, attempt {attempt + 1}/{max_attempts}...")
-            time.sleep(3)  # Wait 3 seconds between checks
-            query_result = dune.get_latest_result(4342388)
-            attempt += 1
-            
-        print("Final Dune response:", query_result)
-        
-        if not query_result or not query_result.result or not query_result.result.rows:
-            print("❌ No data from Dune query")
+        query_result = requests.get(f'{Config.PONDER_API_URL}/tokens/top-trading')
+
+        query_result.raise_for_status()
+
+        rows = query_result.json()
+
+        if not rows:
+            print("❌ No data from ponder query")
             return jsonify({'error': 'No data available'}), 404
 
         # Format the response
         tokens = [{
-            'address': row['token_address'],
-            'volume_24h': row['transfer_count'],
-            'trades_24h': row['transfer_count'],
-            'creation_time': row['creation_time'],
-            'creation_tx': row['creation_tx']
-        } for row in query_result.result.rows]
+            'address': row['tokenAddress'],
+            'volume_24h': row['transferCount'],
+            'trades_24h': row['transferCount'],
+            'creation_time': row['creationTime'],
+            'creation_tx': row['creationTx']
+        } for row in rows]
 
         # Add filtering before creating the response
         filtered_tokens = filter_blacklisted_tokens(tokens)
@@ -271,8 +254,8 @@ def get_top_trading_tokens():
         }
 
         # Update cache
-        dune_cache.data = response
-        dune_cache.timestamp = current_time
+        top_trading_cache.data = response
+        top_trading_cache.timestamp = current_time
 
         print(f"✅ Returning {len(filtered_tokens)} top trading tokens")
         return jsonify(response)
@@ -283,9 +266,9 @@ def get_top_trading_tokens():
         traceback.print_exc()
         
         # Return cached data if available
-        if dune_cache.data:
+        if top_trading_cache.data:
             print("Returning cached data due to error")
-            return jsonify(dune_cache.data)
+            return jsonify(top_trading_cache.data)
             
         return jsonify({
             'error': error_msg,

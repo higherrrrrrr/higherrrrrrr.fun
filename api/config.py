@@ -13,6 +13,7 @@ class Config:
     DUNE_API_KEY = os.getenv('DUNE_API_KEY')
     TOKEN_BLACKLIST = os.getenv('TOKEN_BLACKLIST')
     BLACKLISTED_TOKENS = os.getenv('BLACKLISTED_TOKENS', '')
+    PONDER_API_URL=os.getenv('PONDER_API_URL', 'http://host.docker.internal:42069')
     
     # Database configuration
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://postgres@localhost:5432/tokens_db')
