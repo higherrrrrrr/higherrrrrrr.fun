@@ -187,6 +187,14 @@ export default function MainLayout({ children }) {
             >
               Twitter
             </a>
+            <a
+              href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-500 hover:text-green-400"
+            >
+              GitHub
+            </a>
           </div>
           <a 
             href="https://base.org" 

@@ -114,6 +114,13 @@ export default function HowItWorks() {
               Launching a token is completely free - you only pay the network's gas fees.
             </p>
 
+            <h3 className="text-xl font-mono text-green-500 mt-6">How does the initial bonding curve work?</h3>
+            <p className="text-green-500">
+              The bonding curve raises 8 ETH to establish initial liquidity, reaching approximately a $120,000 market cap. 
+              After the raise, 200 million tokens and 8 ETH are permanently locked in the Uniswap liquidity pools, 
+              ensuring sustainable trading for the community.
+            </p>
+
             <h3 className="text-xl font-mono text-green-500 mt-6">When do I get my Conviction NFT?</h3>
             <p className="text-green-500">
               NFTs are automatically minted when you purchase more than 1,001,001 tokens in a single transaction.
@@ -129,6 +136,19 @@ export default function HowItWorks() {
             <p className="text-green-500">
               The token maintains its final form but continues trading freely on the market. The achievement of reaching
               the final evolution is permanently recorded in its history.
+            </p>
+
+            <h3 className="text-xl font-mono text-green-500 mt-6">Can I see the code?</h3>
+            <p className="text-green-500">
+              Yes! Our protocol is fully open source and available for review on{' '}
+              <a 
+                href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline hover:text-green-400"
+              >
+                GitHub
+              </a>.
             </p>
           </section>
         </div>
