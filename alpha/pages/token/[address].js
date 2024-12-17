@@ -457,10 +457,16 @@ export default function TokenPage({ addressProp }) {
   const totalSupply = parseFloat(tokenState.totalSupply);
   const marketCapUsd = usdPrice * totalSupply;
 
-  // Helper function to get current level index
+  // Update the getCurrentLevelIndex function to use price
   const getCurrentLevelIndex = (tokenState) => {
-    if (!tokenState?.priceLevels || !tokenState?.currentName) return 0;
-    return tokenState.priceLevels.findIndex(level => level.name === tokenState.currentName);
+    if (!tokenState?.priceLevels || !tokenState?.currentPrice) return -1;
+    const currentPriceEth = parseFloat(tokenState.currentPrice);
+    
+    // Find the highest level where the current price meets or exceeds the level price
+    return tokenState.priceLevels.reduce((highestIndex, level, index) => {
+      const levelPrice = parseFloat(level.price);
+      return currentPriceEth >= levelPrice ? index : highestIndex;
+    }, -1);
   };
 
   return (
@@ -964,11 +970,15 @@ export default function TokenPage({ addressProp }) {
               {tokenState.priceLevels.map((level, index) => {
                 const levelUsdPrice = parseFloat(level.price) * ethPrice;
                 const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
-                const isCurrentLevel = level.name === tokenState.currentName;
+                const currentPriceEth = parseFloat(tokenState.currentPrice);
                 
-                // Find if this level is achieved (any level before current)
-                const currentLevelIndex = tokenState.priceLevels.findIndex(l => l.name === tokenState.currentName);
-                const isAchieved = index <= currentLevelIndex;
+                // Current level is the one where price >= this level's price but < next level's price
+                const nextLevel = tokenState.priceLevels[index + 1];
+                const nextLevelPrice = nextLevel ? parseFloat(nextLevel.price) : Infinity;
+                const isCurrentLevel = currentPriceEth >= parseFloat(level.price) && currentPriceEth < nextLevelPrice;
+                
+                // A level is achieved if the current price is higher than its price
+                const isAchieved = currentPriceEth >= parseFloat(level.price) && !isCurrentLevel;
 
                 return (
                   <tr key={index} className={`border-b border-green-500/10 ${isCurrentLevel ? 'bg-green-500/10' : ''}`}>
