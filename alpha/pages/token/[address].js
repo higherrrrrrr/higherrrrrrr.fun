@@ -471,7 +471,7 @@ export default function TokenPage({ addressProp }) {
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-4">
-                <div className="text-xl md:text-2xl font-bold truncate max-w-[200px] md:max-w-[260px]">
+                <div className="text-xl md:text-2xl font-bold truncate max-w-[300px] md:max-w-[300px]">
                   {tokenState.symbol}
                 </div>
                 {isCreator && (
