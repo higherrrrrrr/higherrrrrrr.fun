@@ -4,6 +4,8 @@ type TokenType = "REGULAR" | "TEXT_EVOLUTION" | "IMAGE_EVOLUTION";
 
 type ProtocolVersion = "v0" | "v1";
 
+type MarketType = "BONDING_CURVE" | "UNISWAP_POOL";
+
 export const token = onchainTable(
   "token",
   (t) => ({
@@ -12,6 +14,8 @@ export const token = onchainTable(
     symbol: t.text(),
     protocolVersion: t.text().notNull().$type<ProtocolVersion>(),
     tokenType: t.text().notNull().$type<TokenType>(),
+    marketType: t.text().notNull().$type<MarketType>(),
+    poolAddress: t.hex(),
     convictionAddress: t.hex().notNull(),
     creatorAddress: t.hex().notNull(),
     txHash: t.hex().notNull(),

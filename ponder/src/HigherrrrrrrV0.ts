@@ -25,6 +25,7 @@ ponder.on("HigherrrrrrrFactoryV0:NewToken", async ({ event, context }) => {
     tokenType: "TEXT_EVOLUTION",
     name,
     symbol,
+    marketType: "BONDING_CURVE",
     address: event.args.token,
     convictionAddress: event.args.conviction,
     creatorAddress: event.transaction.from,
@@ -33,6 +34,16 @@ ponder.on("HigherrrrrrrFactoryV0:NewToken", async ({ event, context }) => {
     blockTimestamp: event.block.timestamp,
   });
 });
+
+ponder.on(
+  "HigherrrrrrrV0:HigherrrrrrMarketGraduated",
+  async ({ event, context }) => {
+    await context.db.update(token, { address: event.args.tokenAddress }).set({
+      marketType: "UNISWAP_POOL",
+      poolAddress: event.args.poolAddress,
+    });
+  }
+);
 
 ponder.on("HigherrrrrrrV0:Transfer", async ({ event, context }) => {
   await context.db.insert(tokenTransfer).values({
