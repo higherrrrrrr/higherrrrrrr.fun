@@ -116,12 +116,24 @@ export default function TokenPage({ addressProp }) {
   // Handle transaction states
   const { isLoading: isBuyLoading } = useWaitForTransaction({
     hash: buyData?.hash,
-    onSuccess: () => refreshTokenState()
+    onSuccess: () => {
+      refreshTokenState();
+      // Clear trade state
+      setAmount('');
+      setQuote(null);
+      setError('');
+    }
   });
 
   const { isLoading: isSellLoading } = useWaitForTransaction({
     hash: sellData?.hash,
-    onSuccess: () => refreshTokenState()
+    onSuccess: () => {
+      refreshTokenState();
+      // Clear trade state
+      setAmount('');
+      setQuote(null);
+      setError('');
+    }
   });
 
   const isLoading = isBuyLoading || isSellLoading;
