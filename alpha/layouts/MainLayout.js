@@ -191,7 +191,7 @@ export default function MainLayout({ children }) {
               href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-green-500 hover:text-green-400"
+              className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
             >
               GitHub
             </a>
