@@ -26,35 +26,6 @@ LATEST_TOKENS_CACHE_DURATION = 5  # 5 seconds
 top_trading_cache = DataCache()
 TOP_TRADING_CACHE_DURATION = 300  # 5 seconds
 
-# Add ABI for NewToken event
-FACTORY_ABI = [
-    {
-        "anonymous": False,
-        "inputs": [
-            {
-                "indexed": True,
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "indexed": True,
-                "name": "conviction",
-                "type": "address"
-            }
-        ],
-        "name": "NewToken",
-        "type": "event"
-    }
-]
-
-class TokenCache:
-    def __init__(self):
-        self.tokens = []
-        self.timestamp = 0
-
-token_cache = TokenCache()
-CACHE_DURATION = 3600  # 1 minute in seconds
-
 def filter_blacklisted_tokens(tokens: List[dict]) -> List[dict]:
     """Filter out any blacklisted tokens from the list"""
     blacklisted_addresses = set(addr.lower() for addr in Config.BLACKLISTED_TOKENS.split(',') if addr)
