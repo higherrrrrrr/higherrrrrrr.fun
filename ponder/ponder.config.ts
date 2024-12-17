@@ -3,9 +3,15 @@ import { http } from "viem";
 import { parseAbiItem } from "abitype";
 import { HigherrrrrrrFactoryAbi as HigherrrrrrrFactoryAbiV0 } from "./abis/v0/HigherrrrrrrFactory";
 import { HigherrrrrrrAbi as HigherrrrrrrAbiV0 } from "./abis/v0/Higherrrrrrr";
+import { HigherrrrrrrFactoryAbi as HigherrrrrrrFactoryAbiV1 } from "./abis/v1/HigherrrrrrrFactory";
+import { HigherrrrrrrAbi as HigherrrrrrrAbiV1 } from "./abis/v1/Higherrrrrrr";
 
 const newTokenV0Event = parseAbiItem(
   "event NewToken(address indexed token, address indexed conviction)"
+);
+
+const newTokenV1Event = parseAbiItem(
+  "event NewToken(address indexed token, address indexed conviction, string name, string symbol, uint8 marketType)"
 );
 
 const HIGHERRRRRRR_FACTORY_V0_ADDRESS = process.env
@@ -36,6 +42,34 @@ if (
   throw new Error("HIGHERRRRRRR_V0_INDEXING_START_BLOCK is not set");
 }
 
+const HIGHERRRRRRR_FACTORY_V1_ADDRESS = process.env
+  .HIGHERRRRRRR_FACTORY_V1_ADDRESS as `0x${string}`;
+if (!HIGHERRRRRRR_FACTORY_V1_ADDRESS) {
+  throw new Error("HIGHERRRRRRR_FACTORY_V1_ADDRESS is not set");
+}
+
+const HIGHERRRRRRR_FACTORY_V1_INDEXING_START_BLOCK = parseInt(
+  process.env.HIGHERRRRRRR_FACTORY_V1_INDEXING_START_BLOCK ?? "",
+  10
+);
+if (
+  isNaN(HIGHERRRRRRR_FACTORY_V1_INDEXING_START_BLOCK) ||
+  !HIGHERRRRRRR_FACTORY_V1_INDEXING_START_BLOCK
+) {
+  throw new Error("HIGHERRRRRRR_FACTORY_V0_INDEXING_START_BLOCK is not set");
+}
+
+const HIGHERRRRRRR_V1_INDEXING_START_BLOCK = parseInt(
+  process.env.HIGHERRRRRRR_V1_INDEXING_START_BLOCK ?? "",
+  10
+);
+if (
+  isNaN(HIGHERRRRRRR_V1_INDEXING_START_BLOCK) ||
+  !HIGHERRRRRRR_V1_INDEXING_START_BLOCK
+) {
+  throw new Error("HIGHERRRRRRR_V1_INDEXING_START_BLOCK is not set");
+}
+
 export default createConfig({
   networks: {
     base: {
@@ -60,5 +94,21 @@ export default createConfig({
       }),
       startBlock: HIGHERRRRRRR_V0_INDEXING_START_BLOCK,
     },
-  },
+    HigherrrrrrrFactoryV1: {
+      network: "base",
+      abi: HigherrrrrrrFactoryAbiV1,
+      address: HIGHERRRRRRR_FACTORY_V1_ADDRESS,
+      startBlock: HIGHERRRRRRR_FACTORY_V1_INDEXING_START_BLOCK,
+    },
+    HigherrrrrrrV1: {
+      network: "base",
+      abi: HigherrrrrrrAbiV1,
+      address: factory({
+        address: HIGHERRRRRRR_FACTORY_V1_ADDRESS,
+        event: newTokenV1Event,
+        parameter: "token",
+      }),
+      startBlock: HIGHERRRRRRR_V1_INDEXING_START_BLOCK,
+    },
+  }
 });
