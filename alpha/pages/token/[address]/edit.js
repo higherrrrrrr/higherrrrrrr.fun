@@ -6,7 +6,7 @@ import Link from 'next/link';
 import posthog from 'posthog-js'
 import Cookies from 'js-cookie';
 
-function usePostHogFeatureFlag(flagName, defaultValue = false) {
+function usePostHogFeatureFlag(flagName, defaultValue = true) {
   const [enabled, setEnabled] = useState(defaultValue);
   const [isLoaded, setIsLoaded] = useState(false);
 
