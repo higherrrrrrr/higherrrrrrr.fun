@@ -1,8 +1,8 @@
 import { createConfig, factory } from "ponder";
 import { http } from "viem";
 import { parseAbiItem } from "abitype";
-import { HigherrrrrrrFactoryAbi as HigherrrrrrrFactoryAbiV0 } from "./abis/HigherrrrrrrFactoryV0";
-import { HigherrrrrrrAbi as HigherrrrrrrAbiV0 } from "./abis/HigherrrrrrrV0";
+import { HigherrrrrrrFactoryAbi as HigherrrrrrrFactoryAbiV0 } from "./abis/v0/HigherrrrrrrFactory";
+import { HigherrrrrrrAbi as HigherrrrrrrAbiV0 } from "./abis/v0/Higherrrrrrr";
 
 const newTokenV0Event = parseAbiItem(
   "event NewToken(address indexed token, address indexed conviction)"
