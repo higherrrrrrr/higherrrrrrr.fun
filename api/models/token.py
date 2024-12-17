@@ -12,7 +12,7 @@ class Token(db.Model):
     address = db.Column(db.String(42), unique=True, nullable=False)
     symbol = db.Column(db.String(255))
     name = db.Column(db.String(255))
-    creator = db.Column(db.String(42))
+    creator = db.Column(db.String(42), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     website = db.Column(db.String(255))
     twitter = db.Column(db.String(255))
@@ -35,15 +35,15 @@ class Token(db.Model):
         if not token:
             token = cls(
                 address=address,
-                creator=address,  # Default to self as creator initially
             )
             db.session.add(token)
             db.session.commit()
         return token
 
-    def __init__(self, address, creator, **kwargs):
+    def __init__(self, address, creator=None, **kwargs):
         self.address = address.lower()
-        self.creator = creator.lower()
+        if creator:
+            self.creator = creator.lower()
         for key, value in kwargs.items():
             setattr(self, key, value)
 
