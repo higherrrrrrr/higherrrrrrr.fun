@@ -405,3 +405,57 @@ def get_tweet(tweet_id):
             'status': 'error',
             'message': str(e)
         }), 500
+
+
+@jobs.route('/jobs/pull-all-tokens', methods=['GET'])
+@require_jobs_auth
+def pull_all_tokens():
+    """
+    Pull all tokens that have Twitter OAuth credentials and create Cloud Tasks for each
+    """
+    print("🔵 Starting pull_all_tokens...")
+    try:
+        # Query tokens with Twitter OAuth credentials
+        tokens = Token.query.filter(
+            Token.twitter_oauth_token.isnot(None),
+            Token.twitter_oauth_secret.isnot(None)
+        ).all()
+        print(f"📊 Found {len(tokens)} tokens with Twitter credentials")
+        
+        # Create Cloud Tasks client
+        client = create_cloud_tasks_client()
+        
+        tasks_created = []
+        failed_tokens = []
+        
+        # Create a task for each token
+        for token in tokens:
+            try:
+                print(f"🎯 Processing token: {token.address}")
+                task = create_task_for_token(client, token.address)
+                tasks_created.append({
+                    'token_address': token.address,
+                    'task_name': task.name
+                })
+                print(f"✅ Successfully created task for token: {token.address}")
+            except Exception as e:
+                print(f"❌ Failed to create task for token {token.address}: {str(e)}")
+                failed_tokens.append({
+                    'token_address': token.address,
+                    'error': str(e)
+                })
+        
+        print(f"📈 Task creation complete. Success: {len(tasks_created)}, Failed: {len(failed_tokens)}")
+        return jsonify({
+            'status': 'success',
+            'total_tokens': len(tokens),
+            'tasks_created': tasks_created,
+            'failed_tokens': failed_tokens
+        })
+        
+    except Exception as e:
+        print(f"❌ Error in pull_all_tokens: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
