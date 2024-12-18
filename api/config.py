@@ -42,4 +42,7 @@ class Config:
         'https://api.higherrrrrrr.fun/api/jobs/handle-token'
     )
 
+    # Add this to your existing Config class
+    JOBS_TOKEN_WHITELIST = os.getenv('JOBS_TOKEN_WHITELIST', '*').split(',')
+
 
