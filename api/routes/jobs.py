@@ -234,6 +234,7 @@ def handle_mentions(token):
     """Handle mentions for the token's Twitter account"""
     try:
         print(f"debug mention: starting mention handling for token {token.address}")
+        print(f"debug mention: checking Twitter credentials - oauth token exists: {bool(token.twitter_oauth_token)}, oauth secret exists: {bool(token.twitter_oauth_secret)}")
         
         # Get mention_response setting, defaulting to agent_decides
         mention_response = token.ai_character.get('mention_response', 'agent_decides')
@@ -249,12 +250,23 @@ def handle_mentions(token):
             raise ValueError(f'Token {token.address} missing Twitter credentials')
             
         try:
+            print("debug mention: initializing Twitter client")
+            print(f"debug mention: API key exists: {bool(Config.TWITTER_API_KEY)}, API secret exists: {bool(Config.TWITTER_API_SECRET)}")
             client = tweepy.Client(
                 consumer_key=Config.TWITTER_API_KEY,
                 consumer_secret=Config.TWITTER_API_SECRET,
                 access_token=token.twitter_oauth_token,
                 access_token_secret=token.twitter_oauth_secret
             )
+            
+            # Test the credentials first
+            print("debug mention: testing credentials with get_me()")
+            try:
+                me = client.get_me()
+                print(f"debug mention: successfully got user profile - {me.data.username}")
+            except Exception as e:
+                print(f"debug mention: failed to get user profile - {str(e)}")
+                raise
             
             # Get user's ID
             print("debug mention: fetching user ID")
