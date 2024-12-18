@@ -191,6 +191,8 @@ def generate_and_tweet(address):
         # Get request data for optional thread_id
         data = request.get_json() or {}
         thread_id = data.get('thread_id')
+        max_retries = 3
+        current_try = 0
         
         # Get the token from database
         token = Token.query.filter_by(address=address.lower()).first()
@@ -216,69 +218,79 @@ def generate_and_tweet(address):
                 'message': f'Token {address} missing AI character configuration'
             }), 400
 
-        # Generate tweet using OpenRouter
-        print("🤖 Generating tweet using AI...")
-        openrouter_client = get_openrouter_client()
-        tweet_content, messages = openrouter_client.generate_tweet(
-            token.ai_character,
-            thread_id=thread_id
-        )
-        
-        if not tweet_content:
-            print("❌ Failed to generate tweet content")
-            return jsonify({
-                'status': 'error',
-                'message': 'Failed to generate tweet content'
-            }), 500
+        while current_try < max_retries:
+            current_try += 1
+            print(f"🤖 Generating tweet (attempt {current_try}/{max_retries})...")
+            
+            # Generate tweet using OpenRouter
+            openrouter_client = get_openrouter_client()
+            tweet_content, messages = openrouter_client.generate_tweet(
+                token.ai_character,
+                thread_id=thread_id
+            )
+            
+            if not tweet_content:
+                print("❌ Failed to generate tweet content")
+                continue
 
-        # Post to Twitter using Tweepy
-        print("🐦 Posting to Twitter...")
-        client = tweepy.Client(
-            consumer_key=Config.TWITTER_API_KEY,
-            consumer_secret=Config.TWITTER_API_SECRET,
-            access_token=token.twitter_oauth_token,
-            access_token_secret=token.twitter_oauth_secret
-        )
-        
-        # Post tweet
-        if thread_id:
-            tweet_response = client.create_tweet(
-                text=tweet_content,
-                in_reply_to_tweet_id=thread_id
+            # Post to Twitter using Tweepy
+            print("🐦 Posting to Twitter...")
+            client = tweepy.Client(
+                consumer_key=Config.TWITTER_API_KEY,
+                consumer_secret=Config.TWITTER_API_SECRET,
+                access_token=token.twitter_oauth_token,
+                access_token_secret=token.twitter_oauth_secret
             )
-        else:
-            tweet_response = client.create_tweet(
-                text=tweet_content
-            )
+            
+            try:
+                # Post tweet
+                if thread_id:
+                    tweet_response = client.create_tweet(
+                        text=tweet_content,
+                        in_reply_to_tweet_id=thread_id
+                    )
+                else:
+                    tweet_response = client.create_tweet(
+                        text=tweet_content
+                    )
+                
+                # If we get here, tweet was posted successfully
+                print("💾 Saving tweet to database...")
+                tweet = Tweet(
+                    tweet_id=str(tweet_response.data['id']),
+                    messages=messages,
+                    token_address=token.address,
+                    model="anthropic/claude-3-sonnet-20240229",
+                    output=tweet_content,
+                    in_reply_to=thread_id
+                )
+                db.session.add(tweet)
+                db.session.commit()
+                
+                print(f"✅ Successfully posted tweet for token: {address}")
+                return jsonify({
+                    'status': 'success',
+                    'message': f'Posted tweet for token {address}',
+                    'tweet': {
+                        'content': tweet_content,
+                        'response': tweet_response.data,
+                        'thread_id': thread_id,
+                        'generation': {
+                            'messages': messages,
+                            'model': "anthropic/claude-3-sonnet-20240229"
+                        },
+                        'db_record': tweet.to_dict()
+                    }
+                })
+                
+            except tweepy.errors.BadRequest as e:
+                print(f"⚠️ Tweet attempt {current_try} failed: {str(e)}")
+                if current_try == max_retries:
+                    raise e
+                continue
         
-        # Save tweet to database
-        print("💾 Saving tweet to database...")
-        tweet = Tweet(
-            tweet_id=str(tweet_response.data['id']),  # Convert to string as Tweepy returns int
-            messages=messages,
-            token_address=token.address,
-            model="anthropic/claude-3-sonnet-20240229",
-            output=tweet_content,
-            in_reply_to=thread_id
-        )
-        db.session.add(tweet)
-        db.session.commit()
-        
-        print(f"✅ Successfully posted tweet for token: {address}")
-        return jsonify({
-            'status': 'success',
-            'message': f'Posted tweet for token {address}',
-            'tweet': {
-                'content': tweet_content,
-                'response': tweet_response.data,
-                'thread_id': thread_id,
-                'generation': {
-                    'messages': messages,
-                    'model': "anthropic/claude-3-sonnet-20240229"
-                },
-                'db_record': tweet.to_dict()
-            }
-        })
+        # If we get here, all retries failed
+        raise Exception(f"Failed to post tweet after {max_retries} attempts")
         
     except Exception as e:
         print(f"❌ Error generating/posting tweet for token {address}: {str(e)}")
@@ -291,53 +303,34 @@ def generate_and_tweet(address):
 @require_jobs_auth
 def get_tweet(tweet_id):
     """
-    Get a tweet by its ID using Twitter API
+    Get a tweet by its ID from our database
     """
     print(f"🔵 Getting tweet: {tweet_id}")
     try:
-        # First check if we have this tweet in our database
+        # Get tweet from database
         tweet = Tweet.query.filter_by(tweet_id=tweet_id).first()
         
-        # Create Tweepy client using application credentials
-        client = tweepy.Client(
-            consumer_key=Config.TWITTER_API_KEY,
-            consumer_secret=Config.TWITTER_API_SECRET
-        )
-        
-        # Get tweet from Twitter API
-        tweet_response = client.get_tweet(
-            tweet_id,
-            expansions=['author_id'],
-            tweet_fields=['created_at', 'text', 'public_metrics']
-        )
-        
-        if not tweet_response.data:
-            print(f"❌ Tweet not found: {tweet_id}")
+        if not tweet:
+            print(f"❌ Tweet not found in database: {tweet_id}")
             return jsonify({
                 'status': 'error',
-                'message': f'Tweet {tweet_id} not found'
+                'message': f'Tweet {tweet_id} not found in database'
             }), 404
 
-        response_data = {
+        print(f"✅ Found tweet in database: {tweet_id}")
+        return jsonify({
             'status': 'success',
             'tweet': {
-                'id': tweet_response.data.id,
-                'text': tweet_response.data.text,
-                'created_at': tweet_response.data.created_at,
-                'metrics': tweet_response.data.public_metrics,
+                'id': tweet.tweet_id,
+                'text': tweet.output,
+                'in_reply_to': tweet.in_reply_to,
+                'generation': {
+                    'messages': tweet.messages,
+                    'model': tweet.model
+                },
+                'db_record': tweet.to_dict()
             }
-        }
-
-        # Add our database info if we have it
-        if tweet:
-            response_data['tweet']['generation'] = {
-                'messages': tweet.messages,
-                'model': tweet.model
-            }
-            response_data['tweet']['db_record'] = tweet.to_dict()
-
-        print(f"✅ Successfully retrieved tweet: {tweet_id}")
-        return jsonify(response_data)
+        })
 
     except Exception as e:
         print(f"❌ Error getting tweet {tweet_id}: {str(e)}")

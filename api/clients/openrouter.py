@@ -83,7 +83,7 @@ class OpenRouterClient:
         else:
             prompt_parts.extend([
                 "\nGenerate a new standalone tweet that matches your character's voice and topics.",
-                "IMPORTANT: Keep the response under 280 characters.",
+                "IMPORTANT: Keep the response under 200 characters. Under the length of a tweet",
                 "ONLY respond as the character with no additional content around it.",
                 "Do not include hashtags or @mentions unless they are essential to the message.",
                 "The tweet should be about one of your typical topics and demonstrate your personality."
