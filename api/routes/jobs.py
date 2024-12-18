@@ -232,79 +232,102 @@ def should_respond_to_mention(token, mention_text: str) -> Tuple[bool, Optional[
 
 def handle_mentions(token):
     """Handle mentions for the token's Twitter account"""
-    print(f"debug mention: starting mention handling for token {token.address}")
-    
-    # Get mention_response setting, defaulting to agent_decides
-    mention_response = token.ai_character.get('mention_response', 'agent_decides')
-    print(f"debug mention: mention_response setting is {mention_response}")
-    
-    # Skip if mentions are disabled
-    if mention_response == 'no_response':
-        print("debug mention: mentions disabled, skipping")
-        return []
+    try:
+        print(f"debug mention: starting mention handling for token {token.address}")
         
-    if not token.twitter_oauth_token or not token.twitter_oauth_secret:
-        print("debug mention: missing Twitter credentials")
-        raise ValueError(f'Token {token.address} missing Twitter credentials')
+        # Get mention_response setting, defaulting to agent_decides
+        mention_response = token.ai_character.get('mention_response', 'agent_decides')
+        print(f"debug mention: mention_response setting is {mention_response}")
         
-    client = tweepy.Client(
-        consumer_key=Config.TWITTER_API_KEY,
-        consumer_secret=Config.TWITTER_API_SECRET,
-        access_token=token.twitter_oauth_token,
-        access_token_secret=token.twitter_oauth_secret
-    )
-    
-    # Get user's ID
-    print("debug mention: fetching user ID")
-    me = client.get_me()
-    user_id = me.data.id
-    print(f"debug mention: user ID is {user_id}")
-    
-    # Calculate start_time as 1 hour ago
-    start_time = datetime.utcnow() - timedelta(hours=1)
-    print(f"debug mention: fetching mentions since {start_time}")
-    
-    # Get mentions from the last hour
-    mentions = client.get_users_mentions(
-        user_id,
-        max_results=100,
-        tweet_fields=['conversation_id', 'text'],
-        start_time=start_time
-    )
-    
-    print(f"debug mention: found {len(mentions.data or [])} mentions")
-    
-    responses = []
-    for mention in mentions.data or []:
-        print(f"debug mention: processing mention {mention.id}")
-        # Check if we've already replied to this mention
-        existing_reply = Tweet.query.filter_by(
-            in_reply_to=mention.id
-        ).first()
-        
-        if existing_reply:
-            print(f"debug mention: already replied to {mention.id}, skipping")
-            continue
+        # Skip if mentions are disabled
+        if mention_response == 'no_response':
+            print("debug mention: mentions disabled, skipping")
+            return []
             
-        # Determine if we should respond
-        print(f"debug mention: checking if should respond to {mention.id}")
-        should_respond, reason = should_respond_to_mention(token, mention.text)
+        if not token.twitter_oauth_token or not token.twitter_oauth_secret:
+            print("debug mention: missing Twitter credentials")
+            raise ValueError(f'Token {token.address} missing Twitter credentials')
+            
+        try:
+            client = tweepy.Client(
+                consumer_key=Config.TWITTER_API_KEY,
+                consumer_secret=Config.TWITTER_API_SECRET,
+                access_token=token.twitter_oauth_token,
+                access_token_secret=token.twitter_oauth_secret
+            )
+            
+            # Get user's ID
+            print("debug mention: fetching user ID")
+            me = client.get_me()
+            user_id = me.data.id
+            print(f"debug mention: user ID is {user_id}")
+            
+        except Exception as e:
+            print(f"debug mention: error creating Twitter client or getting user ID: {str(e)}")
+            raise
         
-        if not should_respond:
-            print(f"debug mention: skipping mention {mention.id}: {reason}")
-            continue
+        try:
+            # Calculate start_time as 1 hour ago
+            start_time = datetime.utcnow() - timedelta(hours=1)
+            print(f"debug mention: fetching mentions since {start_time}")
             
-        # Generate and post reply
-        print(f"debug mention: generating reply to {mention.id}")
-        tweet_content, messages = generate_tweet_content(token, thread_id=mention.id)
-        if tweet_content:
-            print(f"debug mention: posting reply to {mention.id}")
-            tweet, tweet_response = post_tweet(token, tweet_content, thread_id=mention.id, messages=messages)
-            responses.append(tweet)
-            print(f"debug mention: successfully replied to {mention.id}")
+            # Get mentions from the last hour
+            mentions = client.get_users_mentions(
+                user_id,
+                max_results=100,
+                tweet_fields=['conversation_id', 'text'],
+                start_time=start_time
+            )
             
-    print(f"debug mention: finished processing mentions, sent {len(responses)} replies")
-    return responses
+            print(f"debug mention: found {len(mentions.data or [])} mentions")
+            
+        except Exception as e:
+            print(f"debug mention: error fetching mentions: {str(e)}")
+            raise
+        
+        responses = []
+        for mention in mentions.data or []:
+            try:
+                print(f"debug mention: processing mention {mention.id}")
+                # Check if we've already replied to this mention
+                existing_reply = Tweet.query.filter_by(
+                    in_reply_to=mention.id
+                ).first()
+                
+                if existing_reply:
+                    print(f"debug mention: already replied to {mention.id}, skipping")
+                    continue
+                    
+                # Determine if we should respond
+                print(f"debug mention: checking if should respond to {mention.id}")
+                should_respond, reason = should_respond_to_mention(token, mention.text)
+                
+                if not should_respond:
+                    print(f"debug mention: skipping mention {mention.id}: {reason}")
+                    continue
+                    
+                # Generate and post reply
+                print(f"debug mention: generating reply to {mention.id}")
+                tweet_content, messages = generate_tweet_content(token, thread_id=mention.id)
+                if tweet_content:
+                    print(f"debug mention: posting reply to {mention.id}")
+                    tweet, tweet_response = post_tweet(token, tweet_content, thread_id=mention.id, messages=messages)
+                    responses.append(tweet)
+                    print(f"debug mention: successfully replied to {mention.id}")
+                else:
+                    print(f"debug mention: failed to generate content for {mention.id}")
+                    
+            except Exception as e:
+                print(f"debug mention: error processing mention {mention.id}: {str(e)}")
+                # Continue processing other mentions even if one fails
+                continue
+                
+        print(f"debug mention: finished processing mentions, sent {len(responses)} replies")
+        return responses
+        
+    except Exception as e:
+        print(f"debug mention: fatal error in handle_mentions: {str(e)}")
+        raise  # Re-raise the exception to be handled by the caller
 
 def is_token_allowed(token_address):
     """Check if token is allowed based on whitelist"""
