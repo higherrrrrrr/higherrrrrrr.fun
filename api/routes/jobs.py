@@ -118,7 +118,7 @@ def generate_tweet_content(token, thread_id=None):
             
     return tweet_content, messages
 
-def post_tweet(token, tweet_content, thread_id=None):
+def post_tweet(token, tweet_content, thread_id=None, messages=None):
     """Post tweet and save to database"""
     client = tweepy.Client(
         consumer_key=Config.TWITTER_API_KEY,
@@ -165,7 +165,7 @@ def create_tweet(token):
     if not tweet_content:
         raise ValueError('Failed to generate tweet content')
         
-    tweet, tweet_response = post_tweet(token, tweet_content)
+    tweet, tweet_response = post_tweet(token, tweet_content, messages=messages)
     return tweet, None
 
 def should_respond_to_mention(token, mention_text: str) -> Tuple[bool, Optional[str]]:
@@ -245,11 +245,15 @@ def handle_mentions(token):
     me = client.get_me()
     user_id = me.data.id
     
-    # Get mentions
+    # Calculate start_time as 1 hour ago
+    start_time = datetime.utcnow() - timedelta(hours=1)
+    
+    # Get mentions from the last hour
     mentions = client.get_users_mentions(
         user_id,
         max_results=100,
-        tweet_fields=['conversation_id', 'text']
+        tweet_fields=['conversation_id', 'text'],
+        start_time=start_time
     )
     
     responses = []
@@ -272,7 +276,7 @@ def handle_mentions(token):
         # Generate and post reply
         tweet_content, messages = generate_tweet_content(token, thread_id=mention.id)
         if tweet_content:
-            tweet, tweet_response = post_tweet(token, tweet_content, thread_id=mention.id)
+            tweet, tweet_response = post_tweet(token, tweet_content, thread_id=mention.id, messages=messages)
             responses.append(tweet)
             
     return responses
@@ -360,7 +364,7 @@ def generate_and_tweet(address):
                 'message': 'Failed to generate tweet content'
             }), 500
             
-        tweet, tweet_response = post_tweet(token, tweet_content, thread_id)
+        tweet, tweet_response = post_tweet(token, tweet_content, thread_id, messages=messages)
         
         return jsonify({
             'status': 'success',
