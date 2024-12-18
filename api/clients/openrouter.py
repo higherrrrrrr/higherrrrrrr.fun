@@ -29,16 +29,17 @@ class OpenRouterClient:
         )
         return response
 
-    def generate_example_tweet(self, ai_character, model="anthropic/claude-3-sonnet-20240229"):
+    def generate_tweet(self, ai_character, thread_id=None, model="anthropic/claude-3-sonnet-20240229"):
         """
-        Generate an example tweet based on provided character configuration
+        Generate a tweet based on provided character configuration
         
         Args:
             ai_character (dict): Character configuration
+            thread_id (str, optional): ID of tweet being responded to
             model (str): Model identifier to use
             
         Returns:
-            str: Generated tweet
+            tuple: (generated_tweet: str, messages: list) The generated tweet and the messages used to generate it
         """
         prompt_parts = [
             f"You are {ai_character.get('name', 'an AI character')}.",
@@ -71,22 +72,46 @@ class OpenRouterClient:
             *[f"- {post}" for post in ai_character.get('post_examples', []) if post]
         ])
 
-        prompt_parts.extend([
-                "\nGenerate a new example tweet that matches your character's voice and topics.",
+        if thread_id:
+            prompt_parts.extend([
+                "\nYou are responding to a tweet in a thread. Keep your response relevant and maintain conversation flow.",
                 "IMPORTANT: Keep the response under 280 characters.",
-                "ONLY respond as the character with no additional content around it. Only use the character's voice in your response.",
+                "ONLY respond as the character with no additional content around it.",
+                "Do not include hashtags or @mentions unless they are essential to the message.",
+                "Make sure your response feels natural in a conversation thread."
+            ])
+        else:
+            prompt_parts.extend([
+                "\nGenerate a new standalone tweet that matches your character's voice and topics.",
+                "IMPORTANT: Keep the response under 280 characters.",
+                "ONLY respond as the character with no additional content around it.",
                 "Do not include hashtags or @mentions unless they are essential to the message.",
                 "The tweet should be about one of your typical topics and demonstrate your personality."
             ])
 
+        user_prompt = "Generate a response tweet." if thread_id else "Generate a new tweet about one of your typical topics."
+        
         messages = [
             {"role": "system", "content": "\n".join(prompt_parts)},
-            {"role": "user", "content": "Generate an example tweet about one of your typical topics."}
+            {"role": "user", "content": user_prompt}
         ]
-
         
         response = self.chat_completion(messages, model)
-        return response.choices[0].message.content
+        return response.choices[0].message.content, messages
+
+    def generate_example_tweet(self, ai_character, model="anthropic/claude-3-sonnet-20240229"):
+        """
+        Generate an example tweet based on provided character configuration
+        
+        Args:
+            ai_character (dict): Character configuration
+            model (str): Model identifier to use
+            
+        Returns:
+            str: Generated tweet
+        """
+        tweet_content, _ = self.generate_tweet(ai_character, thread_id=None, model=model)
+        return tweet_content
 
 @lru_cache()
 def get_openrouter_client():
