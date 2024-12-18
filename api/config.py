@@ -31,7 +31,7 @@ class Config:
     JOBS_SECRET = os.getenv('JOBS_SECRET', 'albertisthecustestcorigeverrrrrr')
 
     # Cloud Tasks configuration
-    CLOUD_TASKS_QUEUE = os.getenv('CLOUD_TASKS_QUEUE', 'higherrrrrrr-prod')
+    CLOUD_TASKS_QUEUE = os.getenv('CLOUD_TASKS_QUEUE', 'higherrrrrrrr-prod')
     CLOUD_TASKS_LOCATION = os.getenv('CLOUD_TASKS_LOCATION', 'us-central1')
     GOOGLE_CLOUD_PROJECT = os.getenv('GOOGLE_CLOUD_PROJECT', 'solid-solstice-441401-v0')
     SERVICE_ACCOUNT_EMAIL = os.getenv('SERVICE_ACCOUNT_EMAIL')
