@@ -144,7 +144,8 @@ export default function EditTokenPage() {
       },
       includeMarketData: false,
       tweetsPerDay: 7,
-      model: 'llama-3'
+      model: 'llama-3',
+      mentionResponse: 'agent_decides'
     }
   });
   const [error, setError] = useState('');
@@ -211,6 +212,7 @@ export default function EditTokenPage() {
               ? tokenData.ai_character.tweets_per_day 
               : 7,
             model: tokenData.ai_character?.model || 'llama-3',
+            mentionResponse: tokenData.ai_character?.mention_response || 'agent_decides'
           }
         });
       } catch (error) {
@@ -262,6 +264,7 @@ export default function EditTokenPage() {
           include_market_data: formData.aiCharacter.includeMarketData,
           tweets_per_day: formData.aiCharacter.tweetsPerDay,
           model: formData.aiCharacter.model,
+          mention_response: formData.aiCharacter.mentionResponse
         }
       }, signature);
 
@@ -298,7 +301,9 @@ export default function EditTokenPage() {
                 post: characterFile.style?.post || ['']
               },
               includeMarketData: prev.aiCharacter.includeMarketData,
-              tweetsPerDay: prev.aiCharacter.tweetsPerDay
+              tweetsPerDay: prev.aiCharacter.tweetsPerDay,
+              model: prev.aiCharacter.model,
+              mentionResponse: prev.aiCharacter.mentionResponse
             }
           }));
         } catch (error) {
@@ -561,6 +566,31 @@ export default function EditTokenPage() {
                     <option value="claude-3-sonnet">Claude 3.5 Sonnet</option>
                     <option value="gpt-4">GPT-4</option>
                     <option value="llama-3">Llama 3.1</option>
+                  </select>
+                </div>
+
+                {/* Mention Response Selection */}
+                <div>
+                  <label className="block text-sm text-green-500/70 mb-2">
+                    Mention Response
+                  </label>
+                  <p className="text-sm text-green-500/50 mb-2">
+                    Choose how your character responds when mentioned on Twitter
+                  </p>
+                  <select
+                    value={formData.aiCharacter.mentionResponse}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      aiCharacter: {
+                        ...formData.aiCharacter,
+                        mentionResponse: e.target.value
+                      }
+                    })}
+                    className="w-full bg-black border border-green-500/30 text-green-500 p-2 rounded focus:border-green-500 focus:outline-none"
+                  >
+                    <option value="no_response">Never Respond</option>
+                    <option value="agent_decides">Let Agent Decide</option>
+                    <option value="always_respond">Always Respond</option>
                   </select>
                 </div>
 
