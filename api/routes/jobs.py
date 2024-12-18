@@ -197,7 +197,7 @@ def should_respond_to_mention(token, mention_text: str) -> Tuple[bool, Optional[
                 "should_respond": boolean,
                 "reason": string
             }
-            Consider the token's character and whether the mention warrants a response."""
+            Only respond if it makes sense to respond in the context of the mention."""
         }
         
         user_prompt = {
