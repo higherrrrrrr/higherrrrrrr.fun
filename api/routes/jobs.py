@@ -7,6 +7,8 @@ from google.cloud import tasks_v2
 import tweepy
 from clients.openrouter import get_openrouter_client
 from datetime import datetime, timedelta
+from typing import Optional, Tuple
+import json
 
 jobs = Blueprint('jobs', __name__)
 
@@ -87,12 +89,29 @@ def generate_tweet_content(token, thread_id=None):
     tweet_content = None
     messages = None
     
+    # Get thread content if this is a reply
+    thread_content = None
+    if thread_id:
+        try:
+            client = tweepy.Client(
+                consumer_key=Config.TWITTER_API_KEY,
+                consumer_secret=Config.TWITTER_API_SECRET,
+                access_token=token.twitter_oauth_token,
+                access_token_secret=token.twitter_oauth_secret
+            )
+            tweet = client.get_tweet(thread_id)
+            if tweet and tweet.data:
+                thread_content = tweet.data.text
+        except Exception as e:
+            print(f"Error fetching thread tweet: {e}")
+    
     while current_try < max_retries and not tweet_content:
         current_try += 1
         openrouter_client = get_openrouter_client()
         tweet_content, messages = openrouter_client.generate_tweet(
             token.ai_character,
-            thread_id=thread_id
+            thread_id=thread_id,
+            thread_content=thread_content
         )
         if tweet_content:
             break
@@ -151,8 +170,69 @@ def create_tweet(token):
     tweet, tweet_response = post_tweet(token, tweet_content)
     return tweet, None
 
+def should_respond_to_mention(token, mention_text: str) -> Tuple[bool, Optional[str]]:
+    """Have the AI agent decide whether to respond to a mention"""
+    
+    # Get mention_response setting, defaulting to agent_decides
+    mention_response = token.ai_character.get('mention_response', 'agent_decides')
+    
+    # If configured to never respond
+    if mention_response == 'no_response':
+        return False, "Mentions disabled for this token"
+        
+    # If configured to always respond
+    if mention_response == 'always_respond':
+        return True, None
+        
+    # For agent_decides (default case)
+    if mention_response == 'agent_decides':
+        openrouter_client = get_openrouter_client()
+        
+        # Create a structured prompt for the AI
+        system_prompt = {
+            "role": "system",
+            "content": """You are an AI helping decide whether to respond to a Twitter mention.
+            Analyze the mention and return a JSON object with:
+            {
+                "should_respond": boolean,
+                "reason": string
+            }
+            Consider the token's character and whether the mention warrants a response."""
+        }
+        
+        user_prompt = {
+            "role": "user",
+            "content": f"""As {token.ai_character.get('name', 'the token')}, 
+            should you respond to this mention?: {mention_text}
+            
+            Return only valid JSON."""
+        }
+        
+        try:
+            response = openrouter_client.chat.completions.create(
+                model=token.ai_character.get('model', 'anthropic/claude-3-sonnet-20240229'),
+                messages=[system_prompt, user_prompt],
+                response_format={ "type": "json_object" }
+            )
+            
+            result = json.loads(response.choices[0].message.content)
+            return result["should_respond"], result["reason"]
+            
+        except Exception as e:
+            print(f"Error in should_respond_to_mention: {e}")
+            return False, f"Error determining response: {str(e)}"
+            
+    return False, f"Invalid mention_response configuration: {mention_response}"
+
 def handle_mentions(token):
     """Handle mentions for the token's Twitter account"""
+    # Get mention_response setting, defaulting to agent_decides
+    mention_response = token.ai_character.get('mention_response', 'agent_decides')
+    
+    # Skip if mentions are disabled
+    if mention_response == 'no_response':
+        return []
+        
     if not token.twitter_oauth_token or not token.twitter_oauth_secret:
         raise ValueError(f'Token {token.address} missing Twitter credentials')
         
@@ -171,7 +251,7 @@ def handle_mentions(token):
     mentions = client.get_users_mentions(
         user_id,
         max_results=100,
-        tweet_fields=['conversation_id']
+        tweet_fields=['conversation_id', 'text']
     )
     
     responses = []
@@ -182,6 +262,13 @@ def handle_mentions(token):
         ).first()
         
         if existing_reply:
+            continue
+            
+        # Determine if we should respond
+        should_respond, reason = should_respond_to_mention(token, mention.text)
+        
+        if not should_respond:
+            print(f"Skipping mention {mention.id}: {reason}")
             continue
             
         # Generate and post reply

@@ -29,13 +29,14 @@ class OpenRouterClient:
         )
         return response
 
-    def generate_tweet(self, ai_character, thread_id=None, model="anthropic/claude-3-sonnet-20240229"):
+    def generate_tweet(self, ai_character, thread_id=None, thread_content=None, model="anthropic/claude-3-sonnet-20240229"):
         """
         Generate a tweet based on provided character configuration
         
         Args:
             ai_character (dict): Character configuration
             thread_id (str, optional): ID of tweet being responded to
+            thread_content (str, optional): Content of the tweet being responded to
             model (str): Model identifier to use
             
         Returns:
@@ -75,10 +76,12 @@ class OpenRouterClient:
         if thread_id:
             prompt_parts.extend([
                 "\nYou are responding to a tweet in a thread. Keep your response relevant and maintain conversation flow.",
+                f"\nTweet you are responding to: {thread_content}" if thread_content else "",
                 "IMPORTANT: Keep the response under 280 characters.",
                 "ONLY respond as the character with no additional content around it.",
                 "Do not include hashtags or @mentions unless they are essential to the message.",
-                "Make sure your response feels natural in a conversation thread."
+                "Make sure your response feels natural in a conversation thread.",
+                "Your response should be relevant to the tweet you're replying to."
             ])
         else:
             prompt_parts.extend([
