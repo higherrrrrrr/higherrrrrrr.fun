@@ -153,6 +153,7 @@ export default function EditTokenPage() {
   const [isGeneratingTweet, setIsGeneratingTweet] = useState(false);
   const [isConnectingTwitter, setIsConnectingTwitter] = useState(false);
   const [twitterUsername, setTwitterUsername] = useState('');
+  const [showAutomationModal, setShowAutomationModal] = useState(false);
 
   const { signMessageAsync } = useSignMessage();
 
@@ -357,6 +358,38 @@ export default function EditTokenPage() {
       Cookies.set('last_token_address', address, { expires: 7 }); // Expires in 7 days
     }
   }, [address]);
+
+  const AutomationModal = () => (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+      <div className="bg-black border border-green-500/30 rounded-lg p-6 max-w-md w-full relative">
+        <button
+          onClick={() => setShowAutomationModal(false)}
+          className="absolute top-4 right-4 text-green-500 hover:text-green-400"
+        >
+          ×
+        </button>
+        <h3 className="text-lg font-bold text-green-500 mb-4">How to Add Automated Tag</h3>
+        <ol className="list-decimal list-inside space-y-2 text-green-500/90">
+          <li>Go to your account settings</li>
+          <li>Select "Your account"</li>
+          <li>Select "Your account information"</li>
+          <li>Select "Automation"</li>
+          <li>Select "Managing account"</li>
+          <li>Next, select the Twitter account, which runs your bot account</li>
+          <li>Enter your password to log in</li>
+          <li>Finally, you should see confirmation that the label has been applied to your account.</li>
+        </ol>
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => setShowAutomationModal(false)}
+            className="px-4 py-2 bg-green-500 text-black rounded hover:bg-green-400 transition-colors"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -776,6 +809,15 @@ export default function EditTokenPage() {
                       Connected as @{twitterUsername}
                     </p>
                   )}
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowAutomationModal(true)}
+                      className="text-xs text-green-500/70 hover:text-green-500 underline"
+                    >
+                      How to Add Automated Tag to Account (Required)
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -788,7 +830,7 @@ export default function EditTokenPage() {
                 {error}
               </div>
             )}
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center space-y-5">
               <button
                 type="submit"
                 disabled={saving}
@@ -801,6 +843,7 @@ export default function EditTokenPage() {
             </div>
           </div>
         </form>
+        {showAutomationModal && <AutomationModal />}
       </div>
     </div>
   );
