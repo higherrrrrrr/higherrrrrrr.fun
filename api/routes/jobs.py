@@ -170,20 +170,25 @@ def create_tweet(token):
 
 def should_respond_to_mention(token, mention_text: str) -> Tuple[bool, Optional[str]]:
     """Have the AI agent decide whether to respond to a mention"""
+    print(f"debug mention: checking response for token {token.address} to: {mention_text}")
     
     # Get mention_response setting, defaulting to agent_decides
     mention_response = token.ai_character.get('mention_response', 'agent_decides')
+    print(f"debug mention: mention_response setting is {mention_response}")
     
     # If configured to never respond
     if mention_response == 'no_response':
+        print("debug mention: mentions disabled for this token")
         return False, "Mentions disabled for this token"
         
     # If configured to always respond
     if mention_response == 'always_respond':
+        print("debug mention: always respond configured, will reply")
         return True, None
         
     # For agent_decides (default case)
     if mention_response == 'agent_decides':
+        print("debug mention: letting AI decide whether to respond")
         openrouter_client = get_openrouter_client()
         
         # Create a structured prompt for the AI
@@ -207,6 +212,7 @@ def should_respond_to_mention(token, mention_text: str) -> Tuple[bool, Optional[
         }
         
         try:
+            print("debug mention: sending decision request to AI")
             response = openrouter_client.chat.completions.create(
                 model=token.ai_character.get('model', 'anthropic/claude-3-sonnet-20240229'),
                 messages=[system_prompt, user_prompt],
@@ -214,24 +220,31 @@ def should_respond_to_mention(token, mention_text: str) -> Tuple[bool, Optional[
             )
             
             result = json.loads(response.choices[0].message.content)
+            print(f"debug mention: AI decision - should_respond: {result['should_respond']}, reason: {result['reason']}")
             return result["should_respond"], result["reason"]
             
         except Exception as e:
-            print(f"Error in should_respond_to_mention: {e}")
+            print(f"debug mention: error in AI decision: {str(e)}")
             return False, f"Error determining response: {str(e)}"
             
+    print(f"debug mention: invalid mention_response configuration: {mention_response}")
     return False, f"Invalid mention_response configuration: {mention_response}"
 
 def handle_mentions(token):
     """Handle mentions for the token's Twitter account"""
+    print(f"debug mention: starting mention handling for token {token.address}")
+    
     # Get mention_response setting, defaulting to agent_decides
     mention_response = token.ai_character.get('mention_response', 'agent_decides')
+    print(f"debug mention: mention_response setting is {mention_response}")
     
     # Skip if mentions are disabled
     if mention_response == 'no_response':
+        print("debug mention: mentions disabled, skipping")
         return []
         
     if not token.twitter_oauth_token or not token.twitter_oauth_secret:
+        print("debug mention: missing Twitter credentials")
         raise ValueError(f'Token {token.address} missing Twitter credentials')
         
     client = tweepy.Client(
@@ -242,11 +255,14 @@ def handle_mentions(token):
     )
     
     # Get user's ID
+    print("debug mention: fetching user ID")
     me = client.get_me()
     user_id = me.data.id
+    print(f"debug mention: user ID is {user_id}")
     
     # Calculate start_time as 1 hour ago
     start_time = datetime.utcnow() - timedelta(hours=1)
+    print(f"debug mention: fetching mentions since {start_time}")
     
     # Get mentions from the last hour
     mentions = client.get_users_mentions(
@@ -256,29 +272,38 @@ def handle_mentions(token):
         start_time=start_time
     )
     
+    print(f"debug mention: found {len(mentions.data or [])} mentions")
+    
     responses = []
     for mention in mentions.data or []:
+        print(f"debug mention: processing mention {mention.id}")
         # Check if we've already replied to this mention
         existing_reply = Tweet.query.filter_by(
             in_reply_to=mention.id
         ).first()
         
         if existing_reply:
+            print(f"debug mention: already replied to {mention.id}, skipping")
             continue
             
         # Determine if we should respond
+        print(f"debug mention: checking if should respond to {mention.id}")
         should_respond, reason = should_respond_to_mention(token, mention.text)
         
         if not should_respond:
-            print(f"Skipping mention {mention.id}: {reason}")
+            print(f"debug mention: skipping mention {mention.id}: {reason}")
             continue
             
         # Generate and post reply
+        print(f"debug mention: generating reply to {mention.id}")
         tweet_content, messages = generate_tweet_content(token, thread_id=mention.id)
         if tweet_content:
+            print(f"debug mention: posting reply to {mention.id}")
             tweet, tweet_response = post_tweet(token, tweet_content, thread_id=mention.id, messages=messages)
             responses.append(tweet)
+            print(f"debug mention: successfully replied to {mention.id}")
             
+    print(f"debug mention: finished processing mentions, sent {len(responses)} replies")
     return responses
 
 def is_token_allowed(token_address):
