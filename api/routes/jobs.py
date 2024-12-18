@@ -182,17 +182,18 @@ def handle_token(address):
 @jobs.route('/jobs/tweet/<address>', methods=['POST'])
 @require_jobs_auth
 def generate_and_tweet(address):
-    """
-    Generate and post a tweet for a specific token using its AI character configuration
-    and Twitter credentials
-    """
     print(f"🔵 Generating tweet for token: {address}")
     try:
+        # Handle empty request body
+        if not request.is_json and request.get_data():
+            return jsonify({
+                'status': 'error',
+                'message': 'Invalid JSON in request body'
+            }), 400
+
         # Get request data for optional thread_id
         data = request.get_json() or {}
         thread_id = data.get('thread_id')
-        max_retries = 3
-        current_try = 0
         
         # Get the token from database
         token = Token.query.filter_by(address=address.lower()).first()
@@ -218,89 +219,105 @@ def generate_and_tweet(address):
                 'message': f'Token {address} missing AI character configuration'
             }), 400
 
-        while current_try < max_retries:
+        # Set up Twitter API v2 client
+        print("🔑 Setting up Twitter client...")
+        client = tweepy.Client(
+            consumer_key=Config.TWITTER_API_KEY,
+            consumer_secret=Config.TWITTER_API_SECRET,
+            access_token=token.twitter_oauth_token,
+            access_token_secret=token.twitter_oauth_secret
+        )
+
+        # Verify credentials by getting user info
+        me = client.get_me()
+        print(f"✅ Twitter authentication successful - Connected as @{me.data.username}")
+
+        # Try generating tweet up to 3 times
+        max_retries = 3
+        current_try = 0
+        tweet_content = None
+        messages = None
+        
+        while current_try < max_retries and not tweet_content:
             current_try += 1
             print(f"🤖 Generating tweet (attempt {current_try}/{max_retries})...")
             
-            # Generate tweet using OpenRouter
             openrouter_client = get_openrouter_client()
             tweet_content, messages = openrouter_client.generate_tweet(
-                token.ai_character,
-                thread_id=thread_id
+                token.ai_character
             )
             
             if not tweet_content:
-                print("❌ Failed to generate tweet content")
+                print("❌ Failed to generate tweet content, retrying...")
                 continue
 
-            # Post to Twitter using Tweepy
-            print("🐦 Posting to Twitter...")
-            client = tweepy.Client(
-                consumer_key=Config.TWITTER_API_KEY,
-                consumer_secret=Config.TWITTER_API_SECRET,
-                access_token=token.twitter_oauth_token,
-                access_token_secret=token.twitter_oauth_secret
-            )
-            
-            try:
-                # Post tweet
-                if thread_id:
-                    tweet_response = client.create_tweet(
-                        text=tweet_content,
-                        in_reply_to_tweet_id=thread_id
-                    )
-                else:
-                    tweet_response = client.create_tweet(
-                        text=tweet_content
-                    )
-                
-                # If we get here, tweet was posted successfully
-                print("💾 Saving tweet to database...")
-                tweet = Tweet(
-                    tweet_id=str(tweet_response.data['id']),
-                    messages=messages,
-                    token_address=token.address,
-                    model="anthropic/claude-3-sonnet-20240229",
-                    output=tweet_content,
-                    in_reply_to=thread_id
+        if not tweet_content:
+            print("❌ Failed to generate tweet content after all attempts")
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to generate tweet content after all attempts'
+            }), 500
+
+        # Post to Twitter using v2 API
+        print("🐦 Posting to Twitter...")
+        try:
+            # Post tweet using v2 endpoint
+            if thread_id:
+                print(f"↩️ Replying to tweet: {thread_id}")
+                tweet_response = client.create_tweet(
+                    text=tweet_content,
+                    in_reply_to_tweet_id=thread_id
                 )
-                db.session.add(tweet)
-                db.session.commit()
-                
-                print(f"✅ Successfully posted tweet for token: {address}")
-                return jsonify({
-                    'status': 'success',
-                    'message': f'Posted tweet for token {address}',
-                    'tweet': {
-                        'content': tweet_content,
-                        'response': tweet_response.data,
-                        'thread_id': thread_id,
-                        'generation': {
-                            'messages': messages,
-                            'model': "anthropic/claude-3-sonnet-20240229"
-                        },
-                        'db_record': tweet.to_dict()
-                    }
-                })
-                
-            except tweepy.errors.BadRequest as e:
-                print(f"⚠️ Tweet attempt {current_try} failed: {str(e)}")
-                if current_try == max_retries:
-                    raise e
-                continue
-        
-        # If we get here, all retries failed
-        raise Exception(f"Failed to post tweet after {max_retries} attempts")
+            else:
+                tweet_response = client.create_tweet(
+                    text=tweet_content
+                )
+            
+            # If we get here, tweet was posted successfully
+            print("💾 Saving tweet to database...")
+            tweet = Tweet(
+                tweet_id=str(tweet_response.data['id']),
+                messages=messages,
+                token_address=token.address,
+                model="anthropic/claude-3-sonnet-20240229",
+                output=tweet_content,
+                in_reply_to=thread_id
+            )
+            db.session.add(tweet)
+            db.session.commit()
+            
+            print(f"✅ Successfully posted tweet: {tweet_response.data['id']}")
+            return jsonify({
+                'status': 'success',
+                'message': f'Posted tweet for token {address}',
+                'tweet': {
+                    'content': tweet_content,
+                    'id': tweet_response.data['id'],
+                    'text': tweet_content,
+                    'thread_id': thread_id,
+                    'generation': {
+                        'messages': messages,
+                        'model': "anthropic/claude-3-sonnet-20240229"
+                    },
+                    'db_record': tweet.to_dict()
+                }
+            })
+            
+        except tweepy.errors.TweepyException as e:
+            print(f"⚠️ Tweet failed: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to post tweet: {str(e)}'
+            }), 500
         
     except Exception as e:
-        print(f"❌ Error generating/posting tweet for token {address}: {str(e)}")
+        print(f"❌ Error: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': str(e)
         }), 500
 
 @jobs.route('/jobs/tweet/get/<tweet_id>', methods=['GET'])
-@require_jobs_auth
 def get_tweet(tweet_id):
     """
     Get a tweet by its ID from our database
