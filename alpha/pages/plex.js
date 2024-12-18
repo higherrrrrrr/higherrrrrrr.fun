@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 export default function TrustScorePage() {
+  const router = useRouter()
   const [messages, setMessages] = useState([
     { 
       role: 'system', 
@@ -19,6 +21,37 @@ export default function TrustScorePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
+
+  useEffect(() => {
+    if (router.query.tweetId) {
+      loadTweetData(router.query.tweetId)
+    }
+  }, [router.query.tweetId])
+
+  const loadTweetData = async (id) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch(`https://api.higherrrrrrr.fun/api/jobs/tweet/get/${id}`)
+      const data = await response.json()
+
+      if (data.status !== 'success') {
+        throw new Error('Failed to load tweet data')
+      }
+
+      setMessages(data.tweet.generation.messages)
+      
+      setOutput(data.tweet.text)
+      
+      setTweetId(id)
+
+    } catch (err) {
+      setError('Failed to load tweet data: ' + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleMessageChange = (index, field, value) => {
     const newMessages = [...messages]
@@ -76,7 +109,12 @@ export default function TrustScorePage() {
   }
 
   const importFromTweet = () => {
-    console.log('Importing from tweet:', tweetId)
+    if (!tweetId.trim()) return
+    
+    router.push({
+      pathname: router.pathname,
+      query: { tweetId: tweetId.trim() }
+    })
   }
 
   return (

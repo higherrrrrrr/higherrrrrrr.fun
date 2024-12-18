@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from models.token import Token
+from models.tweet import Tweet, db  # Update this import to include db
 from flask import current_app
 from functools import wraps
 import logging
@@ -9,8 +10,7 @@ from google.protobuf import duration_pb2
 import json
 import datetime
 from clients.openrouter import get_openrouter_client
-from models.tweet import Tweet  # Add this import at the top
-import tweepy  # Add this import at the top
+import tweepy
 
 jobs = Blueprint('jobs', __name__)
 
