@@ -137,16 +137,14 @@ def post_tweet(token, tweet_content, thread_id=None):
         tweet_response = client.create_tweet(
             text=tweet_content
         )
-    
-    # Save to database
+
     tweet = Tweet(
         tweet_id=str(tweet_response.data['id']),
         messages=messages,
         token_address=token.address,
         model=token.ai_character.get('model', 'anthropic/claude-3-sonnet-20240229'),
         output=tweet_content,
-        in_reply_to=thread_id,
-        created_at=datetime.utcnow()
+        in_reply_to=thread_id
     )
     db.session.add(tweet)
     db.session.commit()
