@@ -27,4 +27,19 @@ class Config:
 
     SECRET_KEY = os.getenv('SECRET_KEY', 'asdlfgasdkjlhgasdfg')
 
+    # Add this new config value
+    JOBS_SECRET = os.getenv('JOBS_SECRET', 'albertisthecustestcorigeverrrrrr')
+
+    # Cloud Tasks configuration
+    CLOUD_TASKS_QUEUE = os.getenv('CLOUD_TASKS_QUEUE', 'token-processing-queue')
+    CLOUD_TASKS_LOCATION = os.getenv('CLOUD_TASKS_LOCATION', 'us-central1')
+    GOOGLE_CLOUD_PROJECT = os.getenv('GOOGLE_CLOUD_PROJECT', 'your-project-id')
+    SERVICE_ACCOUNT_EMAIL = os.getenv('SERVICE_ACCOUNT_EMAIL')
+    
+    # The URL where Cloud Tasks will send requests to
+    CLOUD_TASKS_HANDLER_URL = os.getenv(
+        'CLOUD_TASKS_HANDLER_URL', 
+        'https://api.higherrrrrrr.fun/api/jobs/handle-token'
+    )
+
 

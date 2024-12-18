@@ -10,6 +10,7 @@ from routes.tokens import tokens
 from routes.trading import trading
 from routes.twitter import twitter
 from models.tweet import Tweet
+from routes.jobs import jobs
 
 def create_app():
     app = Flask(__name__)
@@ -48,6 +49,7 @@ def create_app():
     # Register blueprints
     for blueprint, url_prefix in blueprints:
         app.register_blueprint(blueprint, url_prefix=url_prefix)
+    app.register_blueprint(jobs, url_prefix='/api')
     app.register_blueprint(twitter, url_prefix='/api')
 
     @app.route('/api/endpoints', methods=['GET'])
