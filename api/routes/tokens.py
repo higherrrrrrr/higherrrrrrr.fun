@@ -67,7 +67,6 @@ def get_token_creator_endpoint(address):
         
     return jsonify({
         'creator': creator,
-        'source': 'database'
     })
 
 @tokens.route('/token', methods=['POST'])

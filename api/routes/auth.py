@@ -100,9 +100,13 @@ def get_and_set_token_creator(token_address: str) -> str:
         
         # Get token from database
         token = Token.query.filter_by(address=token_address.lower()).first()
+
+        if not token:
+            token = Token.create_if_not_exists(token_address)
+            db.session.commit()
             
         # Return cached creator if exists and isn't same as token address
-        if token and token.creator and token.creator.lower() != token.address.lower():
+        if token.creator and token.creator.lower() != token.address.lower():
             return token.creator.lower()
             
         # Fetch creator from chain
