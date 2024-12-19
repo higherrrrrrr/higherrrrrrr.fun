@@ -234,7 +234,6 @@ def handle_mentions(token):
     """Handle mentions for the token's Twitter account"""
     try:
         print(f"debug mention: starting mention handling for token {token.address}")
-        print(f"debug mention: checking Twitter credentials - oauth token exists: {bool(token.twitter_oauth_token)}, oauth secret exists: {bool(token.twitter_oauth_secret)}")
         
         # Get mention_response setting, defaulting to agent_decides
         mention_response = token.ai_character.get('mention_response', 'agent_decides')
@@ -250,55 +249,42 @@ def handle_mentions(token):
             raise ValueError(f'Token {token.address} missing Twitter credentials')
             
         try:
-            print("debug mention: initializing Twitter client")
-            print(f"debug mention: API key exists: {bool(Config.TWITTER_API_KEY)}, API secret exists: {bool(Config.TWITTER_API_SECRET)}")
-            client = tweepy.Client(
-                consumer_key=Config.TWITTER_API_KEY,
-                consumer_secret=Config.TWITTER_API_SECRET,
-                access_token=token.twitter_oauth_token,
-                access_token_secret=token.twitter_oauth_secret
+            # Create v1 API client
+            auth = tweepy.OAuthHandler(
+                Config.TWITTER_API_KEY,
+                Config.TWITTER_API_SECRET
             )
+            auth.set_access_token(
+                token.twitter_oauth_token,
+                token.twitter_oauth_secret
+            )
+            api = tweepy.API(auth)
             
-            # Test the credentials first
-            print("debug mention: testing credentials with get_me()")
-            try:
-                me = client.get_me()
-                print(f"debug mention: successfully got user profile - {me.data.username}")
-            except Exception as e:
-                print(f"debug mention: failed to get user profile - {str(e)}")
-                raise
-            
-            # Get user's ID
-            print("debug mention: fetching user ID")
-            me = client.get_me()
-            user_id = me.data.id
-            print(f"debug mention: user ID is {user_id}")
-            
-        except Exception as e:
-            print(f"debug mention: error creating Twitter client or getting user ID: {str(e)}")
-            raise
-        
-        try:
             # Calculate start_time as 1 hour ago
             start_time = datetime.utcnow() - timedelta(hours=1)
             print(f"debug mention: fetching mentions since {start_time}")
             
-            # Get mentions from the last hour
-            mentions = client.get_users_mentions(
-                user_id,
-                max_results=100,
-                tweet_fields=['conversation_id', 'text'],
-                start_time=start_time
+            # Get mentions using v1 endpoint
+            mentions = api.mentions_timeline(
+                count=10,
+                since_id=None,  # We'll filter by time instead
+                tweet_mode='extended'  # Get full tweet text
             )
             
-            print(f"debug mention: found {len(mentions.data or [])} mentions")
+            # Filter mentions to last hour only
+            recent_mentions = [
+                mention for mention in mentions 
+                if mention.created_at > start_time
+            ]
+            
+            print(f"debug mention: found {len(recent_mentions)} recent mentions")
             
         except Exception as e:
             print(f"debug mention: error fetching mentions: {str(e)}")
             raise
         
         responses = []
-        for mention in mentions.data or []:
+        for mention in recent_mentions:
             try:
                 print(f"debug mention: processing mention {mention.id}")
                 # Check if we've already replied to this mention
@@ -312,7 +298,7 @@ def handle_mentions(token):
                     
                 # Determine if we should respond
                 print(f"debug mention: checking if should respond to {mention.id}")
-                should_respond, reason = should_respond_to_mention(token, mention.text)
+                should_respond, reason = should_respond_to_mention(token, mention.full_text)
                 
                 if not should_respond:
                     print(f"debug mention: skipping mention {mention.id}: {reason}")
