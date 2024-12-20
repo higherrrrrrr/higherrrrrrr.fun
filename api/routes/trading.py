@@ -209,11 +209,11 @@ def get_top_trading_tokens():
 
         # Format the response
         tokens = [{
-            'address': row['tokenAddress'],
+            'address': row['address'],
             'volume_24h': row['transferCount'],
             'trades_24h': row['transferCount'],
-            'creation_time': row['creationTime'],
-            'creation_tx': row['creationTx']
+            'creation_time': row['blockTimestamp'],
+            'creation_tx': row['txHash']
         } for row in rows]
 
         # Add filtering before creating the response
