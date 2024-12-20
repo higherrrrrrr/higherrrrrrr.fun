@@ -1,4 +1,5 @@
 import { desc, graphql, count, gte, eq } from "ponder";
+import { getTableColumns } from "drizzle-orm";
 import { ponder } from "ponder:registry";
 import { token, tokenTransfer } from "ponder:schema";
 import { isAddress } from "viem";
@@ -68,22 +69,13 @@ ponder.get("/tokens/top-trading", async (c) => {
 
   const result = await c.db
     .select({
-      tokenName: token.name,
-      tokenSymbol: token.symbol,
-      tokenAddress: transfers.tokenAddress,
+      ...getTableColumns(token),
       transferCount: transfers.transferCount,
-      creationTime: token.blockTimestamp,
-      creationTx: token.txHash,
     })
     .from(transfers)
     .innerJoin(token, eq(transfers.tokenAddress, token.address))
     .orderBy(desc(transfers.transferCount))
     .limit(2000);
 
-  return c.json(
-    result.map((r) => ({
-      ...r,
-      creationTime: blockTimestampToDate(r.creationTime),
-    }))
-  );
+  return c.json(result.map(tokenToJSON));
 });
