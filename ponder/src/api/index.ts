@@ -19,7 +19,7 @@ const tokenToJSON = (t: typeof token.$inferSelect) => ({
   blockTimestamp: blockTimestampToDate(t.blockTimestamp),
 });
 
-if (process.env.ENABLE_GRAPHQL === "true") {
+if (process.env.ENABLE_GRAPHQL_API === "true") {
   ponder.use("/", graphql());
   ponder.use("/graphql", graphql());
 }
