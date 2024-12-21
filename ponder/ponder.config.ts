@@ -3,8 +3,10 @@ import { http } from "viem";
 import { parseAbiItem } from "abitype";
 import { HigherrrrrrrFactoryAbi as HigherrrrrrrFactoryAbiV0 } from "./abis/v0/HigherrrrrrrFactory";
 import { HigherrrrrrrAbi as HigherrrrrrrAbiV0 } from "./abis/v0/Higherrrrrrr";
+import { HigherrrrrrrConvictionAbi as HigherrrrrrrConvictionAbiV0 } from "./abis/v0/HigherrrrrrrConviction";
 import { HigherrrrrrrFactoryAbi as HigherrrrrrrFactoryAbiV1 } from "./abis/v1/HigherrrrrrrFactory";
 import { HigherrrrrrrAbi as HigherrrrrrrAbiV1 } from "./abis/v1/Higherrrrrrr";
+import { HigherrrrrrrConvictionAbi as HigherrrrrrrConvictionAbiV1 } from "./abis/v1/HigherrrrrrrConviction";
 
 const newTokenV0Event = parseAbiItem(
   "event NewToken(address indexed token, address indexed conviction)"
@@ -94,6 +96,16 @@ export default createConfig({
       }),
       startBlock: HIGHERRRRRRR_V0_INDEXING_START_BLOCK,
     },
+    HigherrrrrrrConvictionV0: {
+      network: "base",
+      abi: HigherrrrrrrConvictionAbiV0,
+      address: factory({
+        address: HIGHERRRRRRR_FACTORY_V0_ADDRESS,
+        event: newTokenV0Event,
+        parameter: "conviction",
+      }),
+      startBlock: HIGHERRRRRRR_V0_INDEXING_START_BLOCK,
+    },
     HigherrrrrrrFactoryV1: {
       network: "base",
       abi: HigherrrrrrrFactoryAbiV1,
@@ -110,5 +122,15 @@ export default createConfig({
       }),
       startBlock: HIGHERRRRRRR_V1_INDEXING_START_BLOCK,
     },
-  }
+    HigherrrrrrrConvictionV1: {
+      network: "base",
+      abi: HigherrrrrrrConvictionAbiV1,
+      address: factory({
+        address: HIGHERRRRRRR_FACTORY_V1_ADDRESS,
+        event: newTokenV1Event,
+        parameter: "conviction",
+      }),
+      startBlock: HIGHERRRRRRR_V1_INDEXING_START_BLOCK,
+    },
+  },
 });
