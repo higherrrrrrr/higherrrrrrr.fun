@@ -1,1370 +1,725 @@
 export const HigherrrrrrrAbi = [
   {
+    type: "constructor",
     inputs: [
+      { name: "_feeRecipient", type: "address", internalType: "address" },
+      { name: "_weth", type: "address", internalType: "address" },
       {
-        internalType: "string",
-        name: "variable",
-        type: "string",
-      },
-    ],
-    name: "AddressZero",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "AllowanceOverflow",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "AllowanceUnderflow",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InsufficientAllowance",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InsufficientBalance",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InsufficientFunds",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InvalidInitialization",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InvalidMarketType",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InvalidPermit",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InvalidPriceLevels",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NotInitializing",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "Permit2AllowanceIsFixedAtInfinity",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "PermitExpired",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "Reentrancy",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "SlippageBoundsExceeded",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "TotalSupplyOverflow",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "Unauthorized",
-    type: "error",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "Approval",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "tokenAddress",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "poolAddress",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalEthLiquidity",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalTokenLiquidity",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "lpPositionId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "enum IHigherrrrrrr.MarketType",
-        name: "marketType",
-        type: "uint8",
-      },
-    ],
-    name: "HigherrrrrrMarketGraduated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "buyer",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "recipient",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalEth",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "ethFee",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "ethSold",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "tokensBought",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "buyerTokenBalance",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "comment",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalSupply",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "enum IHigherrrrrrr.MarketType",
-        name: "marketType",
-        type: "uint8",
-      },
-    ],
-    name: "HigherrrrrrTokenBuy",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "feeRecipient",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "address",
-        name: "token",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "fee",
-        type: "uint256",
-      },
-    ],
-    name: "HigherrrrrrTokenFees",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "seller",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "recipient",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalEth",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "ethFee",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "ethBought",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "tokensSold",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "sellerTokenBalance",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "comment",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalSupply",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "enum IHigherrrrrrr.MarketType",
-        name: "marketType",
-        type: "uint8",
-      },
-    ],
-    name: "HigherrrrrrTokenSell",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "fromTokenBalance",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "toTokenBalance",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "totalSupply",
-        type: "uint256",
-      },
-    ],
-    name: "HigherrrrrrTokenTransfer",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "uint64",
-        name: "version",
-        type: "uint64",
-      },
-    ],
-    name: "Initialized",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "Transfer",
-    type: "event",
-  },
-  {
-    inputs: [],
-    name: "CONVICTION_THRESHOLD",
-    outputs: [
-      {
-        internalType: "uint16",
-        name: "",
-        type: "uint16",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "DOMAIN_SEPARATOR",
-    outputs: [
-      {
-        internalType: "bytes32",
-        name: "result",
-        type: "bytes32",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "LP_FEE",
-    outputs: [
-      {
-        internalType: "uint16",
-        name: "",
-        type: "uint16",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "MAX_TOTAL_SUPPLY",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "MIN_ORDER_SIZE",
-    outputs: [
-      {
-        internalType: "uint64",
-        name: "",
-        type: "uint64",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "PRIMARY_MARKET_SUPPLY",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "SECONDARY_MARKET_SUPPLY",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "TRADING_FEE_BPS",
-    outputs: [
-      {
-        internalType: "uint16",
-        name: "",
-        type: "uint16",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "WETH",
-    outputs: [
-      {
-        internalType: "contract IWETH",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-    ],
-    name: "allowance",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "result",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "approve",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "balanceOf",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "result",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokensToBurn",
-        type: "uint256",
-      },
-    ],
-    name: "burn",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "recipient",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "refundRecipient",
-        type: "address",
-      },
-      {
-        internalType: "string",
-        name: "comment",
-        type: "string",
-      },
-      {
-        internalType: "enum IHigherrrrrrr.MarketType",
-        name: "expectedMarketType",
-        type: "uint8",
-      },
-      {
-        internalType: "uint256",
-        name: "minOrderSize",
-        type: "uint256",
-      },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceLimitX96",
-        type: "uint160",
-      },
-    ],
-    name: "buy",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "trueOrderSize",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "amountIn",
-        type: "uint256",
-      },
-    ],
-    name: "calculateTradingFee",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "protocolFee",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "pure",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "desiredAmountOut",
-        type: "uint256",
-      },
-    ],
-    name: "calculateTradingMarkup",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "protocolFee",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "pure",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "convictionNFT",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "decimals",
-    outputs: [
-      {
-        internalType: "uint8",
-        name: "",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getCurrentPrice",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getCurrentPriceLevel",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "currentPrice",
-        type: "uint256",
-      },
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "price",
-            type: "uint256",
-          },
-          {
-            internalType: "string",
-            name: "name",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "imageURI",
-            type: "string",
-          },
-        ],
-        internalType: "struct IHigherrrrrrr.PriceLevel",
-        name: "currentLevel",
-        type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "ethOrderSize",
-        type: "uint256",
-      },
-    ],
-    name: "getEthBuyQuote",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "ethOrderSize",
-        type: "uint256",
-      },
-    ],
-    name: "getEthSellQuote",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getPriceLevels",
-    outputs: [
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "price",
-            type: "uint256",
-          },
-          {
-            internalType: "string",
-            name: "name",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "imageURI",
-            type: "string",
-          },
-        ],
-        internalType: "struct IHigherrrrrrr.PriceLevel[]",
-        name: "",
-        type: "tuple[]",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokenOrderSize",
-        type: "uint256",
-      },
-    ],
-    name: "getTokenBuyQuote",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokenOrderSize",
-        type: "uint256",
-      },
-    ],
-    name: "getTokenSellQuote",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "harderrrrrrr",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "wethAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "tokenAmount",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "_weth",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "_convictionNFT",
-        type: "address",
-      },
-      {
-        internalType: "address",
         name: "_nonfungiblePositionManager",
         type: "address",
-      },
-      {
         internalType: "address",
-        name: "_swapRouter",
-        type: "address",
       },
-      {
-        internalType: "address",
-        name: "_protocolFeeRecipient",
-        type: "address",
-      },
-      {
-        internalType: "string",
-        name: "_name",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "_symbol",
-        type: "string",
-      },
-      {
-        internalType: "enum IHigherrrrrrr.TokenType",
-        name: "_tokenType",
-        type: "uint8",
-      },
-      {
-        internalType: "string",
-        name: "_tokenURI",
-        type: "string",
-      },
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "price",
-            type: "uint256",
-          },
-          {
-            internalType: "string",
-            name: "name",
-            type: "string",
-          },
-          {
-            internalType: "string",
-            name: "imageURI",
-            type: "string",
-          },
-        ],
-        internalType: "struct IHigherrrrrrr.PriceLevel[]",
-        name: "_priceLevels",
-        type: "tuple[]",
-      },
+      { name: "_swapRouter", type: "address", internalType: "address" },
     ],
-    name: "initialize",
+    stateMutability: "nonpayable",
+  },
+  { type: "receive", stateMutability: "payable" },
+  {
+    type: "function",
+    name: "CONVICTION_THRESHOLD",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "MAX_TOTAL_SUPPLY",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "MIN_ORDER_SIZE",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "TOTAL_FEE_BPS",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "WETH",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "allowance",
+    inputs: [
+      { name: "owner", type: "address", internalType: "address" },
+      { name: "spender", type: "address", internalType: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "approve",
+    inputs: [
+      { name: "spender", type: "address", internalType: "address" },
+      { name: "value", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "balanceOf",
+    inputs: [{ name: "account", type: "address", internalType: "address" }],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "bondingCurve",
+    inputs: [],
+    outputs: [
+      { name: "", type: "address", internalType: "contract BondingCurve" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "burn",
+    inputs: [
+      { name: "tokensToBurn", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [],
-    name: "marketType",
-    outputs: [
-      {
-        internalType: "enum IHigherrrrrrr.MarketType",
-        name: "",
-        type: "uint8",
-      },
-    ],
-    stateMutability: "view",
     type: "function",
-  },
-  {
-    inputs: [],
-    name: "name",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
+    name: "buy",
     inputs: [
+      { name: "recipient", type: "address", internalType: "address" },
+      { name: "refundRecipient", type: "address", internalType: "address" },
+      { name: "comment", type: "string", internalType: "string" },
       {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-    ],
-    name: "nonces",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "result",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "nonfungiblePositionManager",
-    outputs: [
-      {
-        internalType: "contract INonfungiblePositionManager",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "numPriceLevels",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-    ],
-    name: "onERC721Received",
-    outputs: [
-      {
-        internalType: "bytes4",
-        name: "",
-        type: "bytes4",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "spender",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "deadline",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
-      },
-    ],
-    name: "permit",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "poolAddress",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "positionId",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    name: "priceLevels",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "price",
-        type: "uint256",
-      },
-      {
-        internalType: "string",
-        name: "name",
-        type: "string",
-      },
-      {
-        internalType: "string",
-        name: "imageURI",
-        type: "string",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "protocolFeeRecipient",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "tokensToSell",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "recipient",
-        type: "address",
-      },
-      {
-        internalType: "string",
-        name: "comment",
-        type: "string",
-      },
-      {
-        internalType: "enum IHigherrrrrrr.MarketType",
         name: "expectedMarketType",
         type: "uint8",
+        internalType: "enum IHigherrrrrrr.MarketType",
       },
-      {
-        internalType: "uint256",
-        name: "minPayoutSize",
-        type: "uint256",
-      },
-      {
-        internalType: "uint160",
-        name: "sqrtPriceLimitX96",
-        type: "uint160",
-      },
+      { name: "minOrderSize", type: "uint256", internalType: "uint256" },
+      { name: "sqrtPriceLimitX96", type: "uint160", internalType: "uint160" },
     ],
-    name: "sell",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "payable",
   },
   {
+    type: "function",
+    name: "convictionNFT",
     inputs: [],
-    name: "state",
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "currentExchangeRate",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "decimals",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8", internalType: "uint8" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "feeRecipient",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getCurrentPrice",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getEthBuyQuote",
+    inputs: [
+      { name: "ethOrderSize", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getEthSellQuote",
+    inputs: [
+      { name: "ethOrderSize", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getPriceLevels",
+    inputs: [],
     outputs: [
       {
+        name: "",
+        type: "tuple[]",
+        internalType: "struct IHigherrrrrrr.PriceLevel[]",
         components: [
-          {
-            internalType: "enum IHigherrrrrrr.MarketType",
-            name: "marketType",
-            type: "uint8",
-          },
-          {
-            internalType: "address",
-            name: "marketAddress",
-            type: "address",
-          },
+          { name: "price", type: "uint256", internalType: "uint256" },
+          { name: "name", type: "string", internalType: "string" },
         ],
-        internalType: "struct IHigherrrrrrr.MarketState",
-        name: "",
-        type: "tuple",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
-    name: "swapRouter",
-    outputs: [
-      {
-        internalType: "contract ISwapRouter",
-        name: "",
-        type: "address",
-      },
+    type: "function",
+    name: "getTokenBuyQuote",
+    inputs: [
+      { name: "tokenOrderSize", type: "uint256", internalType: "uint256" },
     ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [],
-    name: "symbol",
-    outputs: [
-      {
-        internalType: "string",
-        name: "",
-        type: "string",
-      },
+    type: "function",
+    name: "getTokenSellQuote",
+    inputs: [
+      { name: "tokenOrderSize", type: "uint256", internalType: "uint256" },
     ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "initialize",
+    inputs: [
+      { name: "_bondingCurve", type: "address", internalType: "address" },
+      { name: "_tokenURI", type: "string", internalType: "string" },
+      { name: "_name", type: "string", internalType: "string" },
+      { name: "_symbol", type: "string", internalType: "string" },
+      {
+        name: "_priceLevels",
+        type: "tuple[]",
+        internalType: "struct IHigherrrrrrr.PriceLevel[]",
+        components: [
+          { name: "price", type: "uint256", internalType: "uint256" },
+          { name: "name", type: "string", internalType: "string" },
+        ],
+      },
+      { name: "_convictionNFT", type: "address", internalType: "address" },
+    ],
+    outputs: [],
+    stateMutability: "payable",
+  },
+  {
+    type: "function",
+    name: "marketType",
     inputs: [],
-    name: "tokenType",
     outputs: [
       {
-        internalType: "enum IHigherrrrrrr.TokenType",
         name: "",
         type: "uint8",
+        internalType: "enum IHigherrrrrrr.MarketType",
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
+    type: "function",
+    name: "name",
     inputs: [],
-    name: "totalSupply",
+    outputs: [{ name: "", type: "string", internalType: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "nonfungiblePositionManager",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "numPriceLevels",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "onERC721Received",
+    inputs: [
+      { name: "", type: "address", internalType: "address" },
+      { name: "", type: "address", internalType: "address" },
+      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "", type: "bytes", internalType: "bytes" },
+    ],
+    outputs: [{ name: "", type: "bytes4", internalType: "bytes4" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "poolAddress",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "priceLevels",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      { name: "price", type: "uint256", internalType: "uint256" },
+      { name: "name", type: "string", internalType: "string" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "sell",
+    inputs: [
+      { name: "tokensToSell", type: "uint256", internalType: "uint256" },
+      { name: "recipient", type: "address", internalType: "address" },
+      { name: "comment", type: "string", internalType: "string" },
+      {
+        name: "expectedMarketType",
+        type: "uint8",
+        internalType: "enum IHigherrrrrrr.MarketType",
+      },
+      { name: "minPayoutSize", type: "uint256", internalType: "uint256" },
+      { name: "sqrtPriceLimitX96", type: "uint160", internalType: "uint160" },
+    ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "state",
+    inputs: [],
     outputs: [
       {
-        internalType: "uint256",
-        name: "result",
-        type: "uint256",
+        name: "",
+        type: "tuple",
+        internalType: "struct IHigherrrrrrr.MarketState",
+        components: [
+          {
+            name: "marketType",
+            type: "uint8",
+            internalType: "enum IHigherrrrrrr.MarketType",
+          },
+          { name: "marketAddress", type: "address", internalType: "address" },
+        ],
       },
     ],
     stateMutability: "view",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
+    type: "function",
+    name: "swapRouter",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "symbol",
+    inputs: [],
+    outputs: [{ name: "", type: "string", internalType: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "tokenURI",
+    inputs: [],
+    outputs: [{ name: "", type: "string", internalType: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "totalSupply",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "transfer",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+    inputs: [
+      { name: "to", type: "address", internalType: "address" },
+      { name: "value", type: "uint256", internalType: "uint256" },
     ],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
+    type: "function",
     name: "transferFrom",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
+    inputs: [
+      { name: "from", type: "address", internalType: "address" },
+      { name: "to", type: "address", internalType: "address" },
+      { name: "value", type: "uint256", internalType: "uint256" },
     ],
+    outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "int256",
-        name: "amount0Delta",
-        type: "int256",
-      },
-      {
-        internalType: "int256",
-        name: "amount1Delta",
-        type: "int256",
-      },
-      {
-        internalType: "bytes",
-        name: "",
-        type: "bytes",
-      },
-    ],
+    type: "function",
     name: "uniswapV3SwapCallback",
+    inputs: [
+      { name: "amount0Delta", type: "int256", internalType: "int256" },
+      { name: "amount1Delta", type: "int256", internalType: "int256" },
+      { name: "", type: "bytes", internalType: "bytes" },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
-    type: "function",
   },
   {
-    stateMutability: "payable",
-    type: "receive",
+    type: "event",
+    name: "Approval",
+    inputs: [
+      {
+        name: "owner",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "spender",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "value",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
   },
+  {
+    type: "event",
+    name: "HigherrrrrrMarketGraduated",
+    inputs: [
+      {
+        name: "tokenAddress",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "poolAddress",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "totalEthLiquidity",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "totalTokenLiquidity",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "lpPositionId",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "marketType",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum IHigherrrrrrr.MarketType",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "HigherrrrrrTokenBuy",
+    inputs: [
+      {
+        name: "buyer",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "recipient",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "totalEth",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "ethFee",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "ethSold",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "tokensBought",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "buyerTokenBalance",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "comment",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "totalSupply",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "marketType",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum IHigherrrrrrr.MarketType",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "HigherrrrrrTokenFees",
+    inputs: [
+      {
+        name: "feeRecipient",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      { name: "fee", type: "uint256", indexed: false, internalType: "uint256" },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "HigherrrrrrTokenSell",
+    inputs: [
+      {
+        name: "seller",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "recipient",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "totalEth",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "ethFee",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "ethBought",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "tokensSold",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "sellerTokenBalance",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "comment",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "totalSupply",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "marketType",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum IHigherrrrrrr.MarketType",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "HigherrrrrrTokenTransfer",
+    inputs: [
+      { name: "from", type: "address", indexed: true, internalType: "address" },
+      { name: "to", type: "address", indexed: true, internalType: "address" },
+      {
+        name: "amount",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "fromTokenBalance",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "toTokenBalance",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+      {
+        name: "totalSupply",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Initialized",
+    inputs: [
+      {
+        name: "version",
+        type: "uint64",
+        indexed: false,
+        internalType: "uint64",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "Transfer",
+    inputs: [
+      { name: "from", type: "address", indexed: true, internalType: "address" },
+      { name: "to", type: "address", indexed: true, internalType: "address" },
+      {
+        name: "value",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  { type: "error", name: "AddressZero", inputs: [] },
+  {
+    type: "error",
+    name: "ERC20InsufficientAllowance",
+    inputs: [
+      { name: "spender", type: "address", internalType: "address" },
+      { name: "allowance", type: "uint256", internalType: "uint256" },
+      { name: "needed", type: "uint256", internalType: "uint256" },
+    ],
+  },
+  {
+    type: "error",
+    name: "ERC20InsufficientBalance",
+    inputs: [
+      { name: "sender", type: "address", internalType: "address" },
+      { name: "balance", type: "uint256", internalType: "uint256" },
+      { name: "needed", type: "uint256", internalType: "uint256" },
+    ],
+  },
+  {
+    type: "error",
+    name: "ERC20InvalidApprover",
+    inputs: [{ name: "approver", type: "address", internalType: "address" }],
+  },
+  {
+    type: "error",
+    name: "ERC20InvalidReceiver",
+    inputs: [{ name: "receiver", type: "address", internalType: "address" }],
+  },
+  {
+    type: "error",
+    name: "ERC20InvalidSender",
+    inputs: [{ name: "sender", type: "address", internalType: "address" }],
+  },
+  {
+    type: "error",
+    name: "ERC20InvalidSpender",
+    inputs: [{ name: "spender", type: "address", internalType: "address" }],
+  },
+  { type: "error", name: "EthAmountTooSmall", inputs: [] },
+  { type: "error", name: "EthTransferFailed", inputs: [] },
+  { type: "error", name: "InitialOrderSizeTooLarge", inputs: [] },
+  { type: "error", name: "InsufficientFunds", inputs: [] },
+  { type: "error", name: "InsufficientLiquidity", inputs: [] },
+  { type: "error", name: "InvalidInitialization", inputs: [] },
+  { type: "error", name: "InvalidMarketType", inputs: [] },
+  { type: "error", name: "InvalidPriceLevels", inputs: [] },
+  { type: "error", name: "MarketAlreadyGraduated", inputs: [] },
+  { type: "error", name: "MarketNotGraduated", inputs: [] },
+  { type: "error", name: "NoPriceLevels", inputs: [] },
+  { type: "error", name: "NotInitializing", inputs: [] },
+  { type: "error", name: "OnlyPool", inputs: [] },
+  { type: "error", name: "OnlyWeth", inputs: [] },
+  { type: "error", name: "ReentrancyGuardReentrantCall", inputs: [] },
+  {
+    type: "error",
+    name: "SafeERC20FailedOperation",
+    inputs: [{ name: "token", type: "address", internalType: "address" }],
+  },
+  { type: "error", name: "SlippageBoundsExceeded", inputs: [] },
+  { type: "error", name: "TooManyPriceLevels", inputs: [] },
 ] as const;

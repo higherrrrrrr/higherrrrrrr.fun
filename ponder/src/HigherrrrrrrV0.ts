@@ -50,7 +50,7 @@ ponder.on("HigherrrrrrrV0:Transfer", async ({ event, context }) => {
     tokenAddress: event.log.address,
     from: event.args.from,
     to: event.args.to,
-    amount: event.args.amount,
+    amount: event.args.value,
     txHash: event.transaction.hash,
     blockNumber: event.block.number,
     blockTimestamp: event.block.timestamp,
