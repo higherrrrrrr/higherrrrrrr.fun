@@ -24,25 +24,6 @@ if (process.env.ENABLE_GRAPHQL_API === "true") {
   ponder.use("/graphql", graphql());
 }
 
-ponder.get("/token/:address", async (c) => {
-  const address = c.req.param("address");
-  if (!isAddress(address)) {
-    return c.json({ error: "Invalid address" }, 400);
-  }
-
-  try {
-    const result = await c.db
-      .select()
-      .from(token)
-      .where(eq(token.address, address))
-      .then(takeUniqueOrThrow);
-
-    return c.json(tokenToJSON(result));
-  } catch (_) {
-    return c.json({ error: "Token not found" }, 404);
-  }
-});
-
 ponder.get("/tokens/latest", async (c) => {
   const tokens = await c.db
     .select()
@@ -78,4 +59,23 @@ ponder.get("/tokens/top-trading", async (c) => {
     .limit(2000);
 
   return c.json(result.map(tokenToJSON));
+});
+
+ponder.get("/tokens/:address", async (c) => {
+  const address = c.req.param("address");
+  if (!isAddress(address)) {
+    return c.json({ error: "Invalid address" }, 400);
+  }
+
+  try {
+    const result = await c.db
+      .select()
+      .from(token)
+      .where(eq(token.address, address))
+      .then(takeUniqueOrThrow);
+
+    return c.json(tokenToJSON(result));
+  } catch (_) {
+    return c.json({ error: "Token not found" }, 404);
+  }
 });
