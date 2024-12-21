@@ -1,8 +1,8 @@
-import { desc, graphql, count, gte, eq } from "ponder";
+import { desc, graphql, count, gte, eq, and } from "ponder";
 import { getTableColumns } from "drizzle-orm";
 import { ponder } from "ponder:registry";
-import { token, tokenTransfer } from "ponder:schema";
-import { isAddress } from "viem";
+import { token, tokenTransfer, convictionNFT } from "ponder:schema";
+import { isAddress, formatEther } from "viem";
 
 const takeUniqueOrThrow = <T extends any[]>(values: T): T[number] => {
   if (values.length !== 1)
@@ -19,29 +19,35 @@ const tokenToJSON = (t: typeof token.$inferSelect) => ({
   blockTimestamp: blockTimestampToDate(t.blockTimestamp),
 });
 
-if (process.env.ENABLE_GRAPHQL === "true") {
+const nftToJSON = (nft: typeof convictionNFT.$inferSelect) => {
+  const {
+    metadataName,
+    metadataAmount,
+    metadataPrice,
+    metadataTimestamp,
+    metadataImageURI,
+    id,
+    ...token
+  } = nft;
+
+  return {
+    ...token,
+    id: id.toString(),
+    metadata: {
+      name: metadataName,
+      amount: (metadataAmount / BigInt(Math.pow(10, 18))).toString(),
+      amountFull: metadataAmount.toString(),
+      price: formatEther(metadataPrice),
+      timestamp: blockTimestampToDate(metadataTimestamp),
+      imageURI: metadataImageURI,
+    },
+  };
+};
+
+if (process.env.ENABLE_GRAPHQL_API === "true") {
   ponder.use("/", graphql());
   ponder.use("/graphql", graphql());
 }
-
-ponder.get("/token/:address", async (c) => {
-  const address = c.req.param("address");
-  if (!isAddress(address)) {
-    return c.json({ error: "Invalid address" }, 400);
-  }
-
-  try {
-    const result = await c.db
-      .select()
-      .from(token)
-      .where(eq(token.address, address))
-      .then(takeUniqueOrThrow);
-
-    return c.json(tokenToJSON(result));
-  } catch (_) {
-    return c.json({ error: "Token not found" }, 404);
-  }
-});
 
 ponder.get("/tokens/latest", async (c) => {
   const tokens = await c.db
@@ -78,4 +84,72 @@ ponder.get("/tokens/top-trading", async (c) => {
     .limit(2000);
 
   return c.json(result.map(tokenToJSON));
+});
+
+ponder.get("/tokens/:address", async (c) => {
+  const address = c.req.param("address");
+  if (!isAddress(address)) {
+    return c.json({ error: "Invalid address" }, 400);
+  }
+
+  try {
+    const result = await c.db
+      .select()
+      .from(token)
+      .where(eq(token.address, address))
+      .then(takeUniqueOrThrow);
+
+    return c.json(tokenToJSON(result));
+  } catch (_) {
+    return c.json({ error: "Token not found" }, 404);
+  }
+});
+
+ponder.get("/tokens/:address/nfts", async (c) => {
+  const address = c.req.param("address");
+  if (!isAddress(address)) {
+    return c.json({ error: "Invalid address" }, 400);
+  }
+
+  const nfts = await c.db
+    .select()
+    .from(convictionNFT)
+    .where(eq(convictionNFT.tokenAddress, address));
+
+  return c.json(nfts.map(nftToJSON));
+});
+
+ponder.get("/tokens/:address/nfts/:id", async (c) => {
+  const address = c.req.param("address");
+  const id = c.req.param("id");
+  if (!isAddress(address)) {
+    return c.json({ error: "Invalid address" }, 400);
+  }
+
+  const nft = await c.db.query.convictionNFT.findFirst({
+    where: and(
+      eq(convictionNFT.tokenAddress, address),
+      eq(convictionNFT.id, BigInt(id))
+    ),
+  });
+
+  if (!nft) {
+    return c.json({ error: "NFT not found" }, 404);
+  }
+
+  return c.json(nftToJSON(nft));
+});
+
+ponder.get("/accounts/:address/nfts", async (c) => {
+  const address = c.req.param("address");
+  if (!isAddress(address)) {
+    return c.json({ error: "Invalid address" }, 400);
+  }
+
+  const nfts = await c.db
+    .select()
+    .from(convictionNFT)
+    .where(eq(convictionNFT.owner, address));
+
+  return c.json(nfts.map(nftToJSON));
 });
