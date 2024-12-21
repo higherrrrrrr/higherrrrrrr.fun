@@ -29,6 +29,7 @@ export const token = onchainTable(
 
 export const tokenRelations = relations(token, ({ many }) => ({
   tokenTransfers: many(tokenTransfer),
+  convictionNFTs: many(convictionNFT),
 }));
 
 export const tokenTransfer = onchainTable(
@@ -58,3 +59,44 @@ export const tokenTransferRelations = relations(tokenTransfer, ({ one }) => ({
     references: [token.address],
   }),
 }));
+
+export const convictionNFT = onchainTable(
+  "conviction_nft",
+  (t) => ({
+    address: t.hex().notNull(),
+    tokenAddress: t.hex().notNull(),
+    id: t.bigint().notNull(),
+    minter: t.hex(),
+    owner: t.hex().notNull(),
+
+    metadataName: t.text().notNull(),
+    metadataAmount: t.bigint().notNull(),
+    metadataPrice: t.bigint().notNull(),
+    metadataTimestamp: t.bigint().notNull(),
+    metadataImageURI: t.text(),
+  }),
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.address, table.id],
+    }),
+    ownerIdx: index().on(table.owner),
+    tokenAddressIdx: index().on(table.tokenAddress),
+  })
+);
+
+export const convictionNFTRelations = relations(convictionNFT, ({ one }) => ({
+  token: one(token, {
+    fields: [convictionNFT.tokenAddress],
+    references: [token.address],
+  }),
+}));
+
+// Mapping table between convictionAddress -> tokenAddress, only used for internal
+// lookups during indexing
+export const tokenConvictionMapping = onchainTable(
+  "token_conviction_mapping",
+  (t) => ({
+    tokenAddress: t.hex().notNull(),
+    convictionAddress: t.hex().notNull().primaryKey(),
+  })
+);
