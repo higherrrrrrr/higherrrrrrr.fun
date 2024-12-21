@@ -60,3 +60,64 @@ ponder.on("HigherrrrrrrV1:Transfer", async ({ event, context }) => {
     logId: event.log.id,
   });
 });
+
+ponder.on("HigherrrrrrrConvictionV1:Transfer", async ({ event, context }) => {
+  const higherrrrrrrToken = await context.db.find(tokenConvictionMapping, {
+    convictionAddress: event.log.address,
+  });
+
+  if (!higherrrrrrrToken) {
+    console.warn(
+      `Token for conviction NFT with address ${event.log.address} not found`
+    );
+    return;
+  }
+
+  const insertNFT = async (minter?: `0x${string}`) => {
+    const { client } = context;
+    const { HigherrrrrrrConvictionV1 } = context.contracts;
+
+    const [name, imageURI, amount, price, timestamp] =
+      await client.readContract({
+        abi: HigherrrrrrrConvictionV1.abi,
+        address: event.log.address,
+        functionName: "convictionDetails",
+        args: [event.args.id],
+      });
+
+    await context.db.insert(convictionNFT).values({
+      address: event.log.address,
+      id: event.args.id,
+      minter: minter,
+      owner: event.args.to,
+      tokenAddress: higherrrrrrrToken.tokenAddress,
+      metadataName: name,
+      metadataAmount: amount,
+      metadataPrice: price,
+      metadataTimestamp: timestamp,
+      metadataImageURI: imageURI,
+    });
+  };
+
+  if (event.args.from === "0x0000000000000000000000000000000000000000") {
+    // Mint, assign minter
+    await insertNFT(event.args.to);
+  } else {
+    // Transfer, update owner
+    try {
+      await context.db
+        .update(convictionNFT, {
+          address: event.log.address,
+          id: event.args.id,
+        })
+        .set({
+          owner: event.args.to,
+        });
+    } catch (_) {
+      console.warn("Failed to update existing conviction NFT");
+      // Note: If the token isn't found it means that we aren't indexing the full history so we've
+      // missed the mint event. We create it again but we can't assign the minter in this case
+      await insertNFT(undefined);
+    }
+  }
+});
