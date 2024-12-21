@@ -1,5 +1,10 @@
 import { ponder } from "ponder:registry";
-import { token, tokenTransfer } from "../ponder.schema";
+import {
+  token,
+  tokenTransfer,
+  convictionNFT,
+  tokenConvictionMapping,
+} from "ponder:schema";
 
 ponder.on("HigherrrrrrrFactoryV0:NewToken", async ({ event, context }) => {
   const { client } = context;
@@ -32,6 +37,11 @@ ponder.on("HigherrrrrrrFactoryV0:NewToken", async ({ event, context }) => {
     txHash: event.transaction.hash,
     blockNumber: event.block.number,
     blockTimestamp: event.block.timestamp,
+  });
+
+  await context.db.insert(tokenConvictionMapping).values({
+    tokenAddress: event.args.token,
+    convictionAddress: event.args.conviction,
   });
 });
 
