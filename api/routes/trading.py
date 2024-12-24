@@ -212,6 +212,14 @@ def get_top_trading_tokens():
             'address': row['address'],
             'volume_24h': row['transferCount'],
             'trades_24h': row['transferCount'],
+            'name': row['name'],
+            'symbol': row['symbol'],
+            'protocol_version': row['protocolVersion'],
+            'token_type': row['tokenType'],
+            'market_type': row['marketType'],
+            'pool_address': row['poolAddress'],
+            'conviction_address': row['convictionAddress'],
+            'creator_address': row['creatorAddress'],
             'creation_time': row['blockTimestamp'],
             'creation_tx': row['txHash']
         } for row in rows]
