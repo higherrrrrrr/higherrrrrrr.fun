@@ -14,7 +14,7 @@ const TOKENS_PER_PAGE = 24;
 const VISIT_COOKIE_NAME = 'homepage_visits';
 
 export default function Home() {
-  const [topTokens, setTopTokens] = useState([]);
+  const [tokens, setTokens] = useState([]);
   const [displayedTokens, setDisplayedTokens] = useState([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -50,18 +50,18 @@ export default function Home() {
         
         if (viewMode === 'latest') {
           const { tokens: latestTokens } = await getLatestTokens();
-          setTopTokens(latestTokens || []);
+          setTokens(latestTokens || []);
           setDisplayedTokens((latestTokens || []).slice(0, TOKENS_PER_PAGE));
           setHasMore((latestTokens || []).length > TOKENS_PER_PAGE);
         } else {
           const { tokens: trendingTokens } = await getTopTradingTokens();
-          setTopTokens(trendingTokens || []);
+          setTokens(trendingTokens || []);
           setDisplayedTokens((trendingTokens || []).slice(0, TOKENS_PER_PAGE));
           setHasMore((trendingTokens || []).length > TOKENS_PER_PAGE);
         }
       } catch (error) {
         console.error(`Failed to fetch ${viewMode} tokens:`, error);
-        setTopTokens([]);
+        setTokens([]);
         setDisplayedTokens([]);
         setHasMore(false);
       } finally {
@@ -79,11 +79,11 @@ export default function Home() {
       const end = start + TOKENS_PER_PAGE;
       
       // Use the tokens we already have in topTokens
-      const newTokens = topTokens.slice(start, end);
+      const newTokens = tokens.slice(start, end);
       setDisplayedTokens(prev => [...prev, ...newTokens]);
-      setHasMore(end < topTokens.length);
+      setHasMore(end < tokens.length);
     }
-  }, [page, topTokens]);
+  }, [page, tokens]);
 
   // Modified effect to fetch token states in parallel
   useEffect(() => {
