@@ -24,8 +24,6 @@ export interface TokenState {
   priceLevels: PriceLevel[];
   currentName: string;
   marketType: number;
-  bondingCurve: string;
-  convictionNFT: string;
   CONVICTION_THRESHOLD: string;
   MIN_ORDER_SIZE: string;
   TOTAL_FEE_BPS: number;
@@ -65,80 +63,74 @@ const PoolABI = [
   }
 ] as const;
 
-export async function getTokenState(tokenAddress: string): Promise<TokenState> {
-  console.log('Getting state for token:', tokenAddress);
-  
+const staticTokenState = {
+  // Values this large cannot be represented accurately by one int literal
+  maxTotalSupply: BigInt(1_000_000_000_000_000) * BigInt(1_000_000_000_000),
+
+  convictionThreshold: BigInt(1000),
+
+  // 0.0000001 ether
+  minOrderSize: BigInt(100000000000),
+
+  // 1%
+  totalFeeBps: 100,
+};
+
+export async function getTokenState(
+  tokenAddress: string
+): Promise<TokenState> {
+  console.log("Getting state for token:", tokenAddress);
+
   try {
     // Get token data
-    const [name, symbol, totalSupply, currentPrice, maxSupply, marketType, bondingCurve, convictionNFT, 
-           convictionThreshold, minOrderSize, totalFeeBps, poolAddress, priceLevels] = await publicClient.multicall({
+    const [
+      name,
+      symbol,
+      totalSupply,
+      currentPrice,
+      priceLevels,
+      marketType,
+      poolAddress,
+    ] = await publicClient.multicall({
       contracts: [
         {
           address: tokenAddress as `0x${string}`,
           abi: higherrrrrrrAbi,
-          functionName: 'name'
+          functionName: "name",
         },
         {
           address: tokenAddress as `0x${string}`,
           abi: higherrrrrrrAbi,
-          functionName: 'symbol'
+          functionName: "symbol",
         },
         {
           address: tokenAddress as `0x${string}`,
           abi: higherrrrrrrAbi,
-          functionName: 'totalSupply'
+          functionName: "totalSupply",
         },
         {
           address: tokenAddress as `0x${string}`,
           abi: higherrrrrrrAbi,
-          functionName: 'getCurrentPrice'
+          functionName: "getCurrentPrice",
         },
         {
           address: tokenAddress as `0x${string}`,
           abi: higherrrrrrrAbi,
-          functionName: 'MAX_TOTAL_SUPPLY'
+          functionName: "getPriceLevels",
+        },
+        // TODO we know marketType & poolAddress from api but we might not want to rely on indexed data
+        // to make orders in case it is lagging behind? shouldn't but we fetch from chain just in case
+        {
+          address: tokenAddress as `0x${string}`,
+          abi: higherrrrrrrAbi,
+          functionName: "marketType",
         },
         {
           address: tokenAddress as `0x${string}`,
           abi: higherrrrrrrAbi,
-          functionName: 'marketType'
+          functionName: "poolAddress",
         },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'bondingCurve'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'convictionNFT'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'CONVICTION_THRESHOLD'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'MIN_ORDER_SIZE'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'TOTAL_FEE_BPS'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'poolAddress'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'getPriceLevels'
-        }
-      ]
+      ],
     });
 
     // Remove the old price levels loop and use the returned data
@@ -152,17 +144,17 @@ export async function getTokenState(tokenAddress: string): Promise<TokenState> {
       symbol: symbol.result,
       totalSupply: formatEther(totalSupply.result || BigInt(0)),
       currentPrice: formatEther(currentPrice.result || BigInt(0)),
-      maxSupply: formatEther(maxSupply.result || BigInt(0)),
+      maxSupply: formatEther(staticTokenState.maxTotalSupply),
       marketType: Number(marketType.result || 0),
-      bondingCurve: bondingCurve.result?.toString() || '',
-      convictionNFT: convictionNFT.result?.toString() || '',
-      CONVICTION_THRESHOLD: formatEther(convictionThreshold.result || BigInt(0)),
-      MIN_ORDER_SIZE: formatEther(minOrderSize.result || BigInt(0)),
-      TOTAL_FEE_BPS: Number(totalFeeBps.result || 0),
-      poolAddress: poolAddress.result?.toString() || '',
+      CONVICTION_THRESHOLD: formatEther(
+        staticTokenState.convictionThreshold || BigInt(0)
+      ),
+      MIN_ORDER_SIZE: formatEther(staticTokenState.minOrderSize || BigInt(0)),
+      TOTAL_FEE_BPS: staticTokenState.totalFeeBps,
+      poolAddress: poolAddress.result?.toString() || "",
       priceLevels: formattedPriceLevels,
-      currentName: name.result?.toString() || '',
-      MAX_TOTAL_SUPPLY: formatEther(maxSupply.result || BigInt(0))
+      currentName: name.result?.toString() || "",
+      MAX_TOTAL_SUPPLY: formatEther(staticTokenState.maxTotalSupply),
     };
   } catch (error) {
     console.error('Error getting token state:', error);
