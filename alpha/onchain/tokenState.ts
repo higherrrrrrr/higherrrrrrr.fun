@@ -2,11 +2,12 @@ import { createPublicClient, http, formatEther } from 'viem';
 import { base } from 'wagmi/chains';
 import { getCurrentChain } from '../components/Web3Provider';
 import { higherrrrrrrAbi } from './generated';
+import { CURRENT_RPC_URL } from "./config";
 
 // Create public client
 const publicClient = createPublicClient({
   chain: base,
-  transport: http('https://rpc.higherrrrrrr.fun/')
+  transport: http(CURRENT_RPC_URL),
 });
 
 export interface PriceLevel {

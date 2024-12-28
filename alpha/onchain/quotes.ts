@@ -5,11 +5,12 @@ import { createPublicClient, http } from 'viem';
 import { base } from 'wagmi/chains';
 import { formatUnits, parseUnits } from 'ethers';
 import { getBuyQuote as getApiBuyQuote, getSellQuote as getApiSellQuote } from '../api/token';
+import { CURRENT_RPC_URL } from './config';
 
 // Use the same public client setup as tokenState.ts
 const publicClient = createPublicClient({
   chain: base,
-  transport: http('https://rpc.higherrrrrrr.fun/')
+  transport: http(CURRENT_RPC_URL)
 });
 
 export async function getBuyQuote(

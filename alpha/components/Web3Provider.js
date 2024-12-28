@@ -5,27 +5,25 @@ import { useEffect, useState, createContext, useContext } from 'react';
 import { getContractAddress } from '../api/contract';
 import { http } from 'viem';
 import { InjectedConnector } from 'wagmi/connectors/injected';
+import { CURRENT_RPC_URL, WALLETCONNECT_PROJECT_ID } from '../onchain/config';
 
 export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
-
-const ALCHEMY_RPC = 'https://rpc.higherrrrrrr.fun/';
-const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
 
 // Completely override Base chain with our RPC
 const baseChain = {
   ...base,
   rpcUrls: {
     default: {
-      http: [ALCHEMY_RPC],
+      http: [CURRENT_RPC_URL],
       webSocket: []
     },
     public: {
-      http: [ALCHEMY_RPC],
+      http: [CURRENT_RPC_URL],
       webSocket: []
     },
     alchemy: {
-      http: [ALCHEMY_RPC],
+      http: [CURRENT_RPC_URL],
       webSocket: []
     }
   }
@@ -39,7 +37,7 @@ const wagmiConfig = createConfig({
     appName: "Higherrrrrrr",
     chains,
     transports: {
-      [baseChain.id]: http(ALCHEMY_RPC),
+      [baseChain.id]: http(CURRENT_RPC_URL),
     },
     walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
   }),
