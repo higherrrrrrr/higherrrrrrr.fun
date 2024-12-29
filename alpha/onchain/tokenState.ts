@@ -16,6 +16,7 @@ export interface PriceLevel {
 }
 
 export interface TokenState {
+  tokenType: number;
   name: string;
   symbol: string;
   totalSupply: string;
@@ -89,6 +90,7 @@ export async function getTokenState(
       totalSupply,
       currentPrice,
       priceLevels,
+      tokenType,
       marketType,
       poolAddress,
     ] = await publicClient.multicall({
@@ -118,7 +120,12 @@ export async function getTokenState(
           abi: higherrrrrrrAbi,
           functionName: "getPriceLevels",
         },
-        // TODO we know marketType & poolAddress from api but we might not want to rely on indexed data
+        {
+          address: tokenAddress as `0x${string}`,
+          abi: higherrrrrrrAbi,
+          functionName: "tokenType",
+        },
+        // NOTE: we know marketType & poolAddress from api but we might not want to rely on indexed data
         // to make orders in case it is lagging behind? shouldn't but we fetch from chain just in case
         {
           address: tokenAddress as `0x${string}`,
@@ -140,6 +147,8 @@ export async function getTokenState(
     }));
 
     return {
+      // all v0 tokens are of type 1 = TEXT_EVOLUTION
+      tokenType: tokenType.error ? 1 : tokenType.result,
       name: name.result,
       symbol: symbol.result,
       totalSupply: formatEther(totalSupply.result || BigInt(0)),
