@@ -93,17 +93,11 @@ export default function Home() {
       try {
         const statePromises = displayedTokens.map(async (token) => {
           try {
-            const state = await getTokenState(token.address);
-            return { 
-              address: token.address, 
-              state: {
-                ...state,
-                // Calculate progress percentage if on bonding curve
-                progress: state.marketType === 'bonding_curve' ? 
-                  (state.currentPrice / state.priceLevels[state.priceLevels.length - 1]) * 100 : 
-                  null
-              }
-            };
+            const { address } = token;
+
+            const state = await getTokenState(address);
+
+            return { address, state };
           } catch (error) {
             console.error(`Error fetching state for ${token.address}:`, error);
             return { address: token.address, state: null };
