@@ -685,18 +685,20 @@ export default function TokenPage({ addressProp }) {
         )}
 
         {/* Level Progress */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Progress to Next Level</span>
-            <span>{getProgressToNextLevel(tokenState).toFixed(2)}%</span>
+        {tokenState.tokenType !== 0 && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Progress to Next Level</span>
+              <span>{getProgressToNextLevel(tokenState).toFixed(2)}%</span>
+            </div>
+            <div className="w-full bg-green-500/20 rounded-full h-4">
+              <div
+                className="bg-green-500 h-4 rounded-full transition-all"
+                style={{ width: `${getProgressToNextLevel(tokenState)}%` }}
+              />
+            </div>
           </div>
-          <div className="w-full bg-green-500/20 rounded-full h-4">
-            <div 
-              className="bg-green-500 h-4 rounded-full transition-all"
-              style={{ width: `${getProgressToNextLevel(tokenState)}%` }}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Chart Section - Only show for graduated tokens */}
         {tokenState?.marketType === 1 && tokenState?.poolAddress && (
