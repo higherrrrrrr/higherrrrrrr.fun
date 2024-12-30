@@ -1587,136 +1587,154 @@ export const higherrrrrrrV1Abi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9425E9264BA541Eb00E30606F04c248Db5d0E759)
  * -
  */
-export const higherrrrrrrFactoryAbi = [
+export const higherrrrrrrFactoryV1Abi = [
   {
-    type: 'constructor',
+    type: "constructor",
     inputs: [
-      { name: '_feeRecipient', internalType: 'address', type: 'address' },
-      { name: '_weth', internalType: 'address', type: 'address' },
+      { name: "_feeRecipient", type: "address", internalType: "address" },
+      { name: "_weth", type: "address", internalType: "address" },
       {
-        name: '_nonfungiblePositionManager',
-        internalType: 'address',
-        type: 'address',
+        name: "_nonfungiblePositionManager",
+        type: "address",
+        internalType: "address",
       },
-      { name: '_swapRouter', internalType: 'address', type: 'address' },
-      { name: '_bondingCurve', internalType: 'address', type: 'address' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'bondingCurve',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'convictionImplementation',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'name', internalType: 'string', type: 'string' },
-      { name: 'symbol', internalType: 'string', type: 'string' },
-      { name: 'uri', internalType: 'string', type: 'string' },
+      { name: "_swapRouter", type: "address", internalType: "address" },
       {
-        name: 'levels',
-        internalType: 'struct IHigherrrrrrr.PriceLevel[]',
-        type: 'tuple[]',
+        name: "_tokenImplementation",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_convictionImplementation",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "convictionImplementation",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "createHigherrrrrrr",
+    inputs: [
+      { name: "_name", type: "string", internalType: "string" },
+      { name: "_symbol", type: "string", internalType: "string" },
+      { name: "_baseTokenURI", type: "string", internalType: "string" },
+      {
+        name: "_tokenType",
+        type: "uint8",
+        internalType: "enum IHigherrrrrrr.TokenType",
+      },
+      {
+        name: "_priceLevels",
+        type: "tuple[]",
+        internalType: "struct IHigherrrrrrr.PriceLevel[]",
         components: [
-          { name: 'price', internalType: 'uint256', type: 'uint256' },
-          { name: 'name', internalType: 'string', type: 'string' },
+          { name: "price", type: "uint256", internalType: "uint256" },
+          { name: "name", type: "string", internalType: "string" },
+          { name: "imageURI", type: "string", internalType: "string" },
         ],
       },
     ],
-    name: 'createHigherrrrrrr',
     outputs: [
-      { name: 'token', internalType: 'address', type: 'address' },
-      { name: 'conviction', internalType: 'address', type: 'address' },
+      { name: "token", type: "address", internalType: "address" },
+      { name: "conviction", type: "address", internalType: "address" },
     ],
-    stateMutability: 'payable',
+    stateMutability: "payable",
   },
   {
-    type: 'function',
+    type: "function",
+    name: "feeRecipient",
     inputs: [],
-    name: 'feeRecipient',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
   },
   {
-    type: 'function',
+    type: "function",
+    name: "nonfungiblePositionManager",
     inputs: [],
-    name: 'nonfungiblePositionManager',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
   },
   {
-    type: 'function',
+    type: "function",
+    name: "swapRouter",
     inputs: [],
-    name: 'swapRouter',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
   },
   {
-    type: 'function',
+    type: "function",
+    name: "tokenImplementation",
     inputs: [],
-    name: 'weth',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
   },
   {
-    type: 'event',
+    type: "function",
+    name: "weth",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "event",
+    name: "NewToken",
+    inputs: [
+      {
+        name: "token",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "conviction",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      { name: "name", type: "string", indexed: false, internalType: "string" },
+      {
+        name: "symbol",
+        type: "string",
+        indexed: false,
+        internalType: "string",
+      },
+      {
+        name: "tokenType",
+        type: "uint8",
+        indexed: false,
+        internalType: "enum IHigherrrrrrr.TokenType",
+      },
+    ],
     anonymous: false,
-    inputs: [
-      {
-        name: 'token',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'conviction',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-    ],
-    name: 'NewToken',
   },
-  { type: 'error', inputs: [], name: 'FailedDeployment' },
-  {
-    type: 'error',
-    inputs: [
-      { name: 'balance', internalType: 'uint256', type: 'uint256' },
-      { name: 'needed', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'InsufficientBalance',
-  },
-  { type: 'error', inputs: [], name: 'Unauthorized' },
-  { type: 'error', inputs: [], name: 'ZeroAddress' },
-] as const
+  { type: "error", name: "ZeroAddress", inputs: [] },
+] as const;
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9425E9264BA541Eb00E30606F04c248Db5d0E759)
  * -
  */
 export const higherrrrrrrFactoryAddress = {
-  8453: '0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1',
+  8453: '0x9425E9264BA541Eb00E30606F04c248Db5d0E759',
   31337: '0x158d291D8b47F056751cfF47d1eEcd19FDF9B6f8',
 } as const
 
 /**
- * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
+ * - [__View Contract on Base Basescan__](https://basescan.org/address/0x9425E9264BA541Eb00E30606F04c248Db5d0E759)
  * -
  */
 export const higherrrrrrrFactoryConfig = {
   address: higherrrrrrrFactoryAddress,
-  abi: higherrrrrrrFactoryAbi,
+  abi: higherrrrrrrFactoryV1Abi,
 } as const

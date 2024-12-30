@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
 import { parseEther, decodeEventLog } from 'viem';
-import { higherrrrrrrFactoryAbi, higherrrrrrrFactoryAddress } from '../onchain/generated';
+import { higherrrrrrrFactoryV1Abi, higherrrrrrrFactoryAddress } from '../onchain/generated';
 import { getEthPrice } from '../api/price';
 import { getContractAddress } from '../api/contract';
 import { ethers } from 'ethers';
@@ -56,6 +56,9 @@ const formatEth = (num) => {
 // keccak256("NewToken(address,address)")
 const NEW_TOKEN_EVENT_SIGNATURE = "0x46960970e01c8cbebf9e58299b0acf8137b299ef06eb6c4f5be2c0443d5e5f22";
 
+// keccak256("NewToken(address,address,string,string,uint8))
+const NEW_TOKEN_EVENT_SIGNATURE_V1 = "0xbb64cf2cbc9d5561e3aeaef9dbd9670048fa461d2413a9754720b431244585a7";
+
 export default function LaunchPage() {
   const router = useRouter();
   const { openConnectModal } = useConnectModal();
@@ -108,7 +111,7 @@ export default function LaunchPage() {
 
   const { write: createToken, data: createData } = useContractWrite({
     address: factoryAddress,
-    abi: higherrrrrrrFactoryAbi,
+    abi: higherrrrrrrFactoryV1Abi,
     functionName: 'createHigherrrrrrr'
   });
 
@@ -122,7 +125,7 @@ export default function LaunchPage() {
       // Look for the token deployment event
       const deployEvent = data.logs.find(log => {
         try {
-          return log.topics[0] === NEW_TOKEN_EVENT_SIGNATURE;
+          return [NEW_TOKEN_EVENT_SIGNATURE, NEW_TOKEN_EVENT_SIGNATURE_V1].includes(log.topics[0]);
         } catch (error) {
           console.log('Failed to check log:', error);
           return false;
