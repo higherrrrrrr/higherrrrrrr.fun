@@ -11,13 +11,13 @@ import { useAccount } from 'wagmi';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 const DEFAULT_PRICE_LEVELS = [
-  { price: '0.000000005', name: 'Pleb', usdPrice: '0' },
-  { price: '0.00000001', name: 'Degen', usdPrice: '0' },
-  { price: '0.00000005', name: 'Ape', usdPrice: '0' },
-  { price: '0.0000001', name: 'Based', usdPrice: '0' },
-  { price: '0.0000005', name: 'Chad', usdPrice: '0' },
-  { price: '0.000001', name: 'Sigma', usdPrice: '0' },
-  { price: '0.000005', name: 'Gigachad', usdPrice: '0' }
+  { price: '0.000000005', name: 'Pleb', usdPrice: '0', imageURI: '' },
+  { price: '0.00000001', name: 'Degen', usdPrice: '0', imageURI: '' },
+  { price: '0.00000005', name: 'Ape', usdPrice: '0', imageURI: '' },
+  { price: '0.0000001', name: 'Based', usdPrice: '0', imageURI: '' },
+  { price: '0.0000005', name: 'Chad', usdPrice: '0', imageURI: '' },
+  { price: '0.000001', name: 'Sigma', usdPrice: '0', imageURI: '' },
+  { price: '0.000005', name: 'Gigachad', usdPrice: '0', imageURI: '' }
 ];
 
 // Add helper function for formatting numbers
@@ -69,6 +69,7 @@ export default function LaunchPage() {
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     symbol: '',
+    tokenType: 1,
     priceLevels: DEFAULT_PRICE_LEVELS
   });
 
@@ -172,15 +173,18 @@ export default function LaunchPage() {
     
     // Use just the first level's name as the token name
     const name = formData.priceLevels[0].name;
-    const uri = `https://higherrrrrrr.fun/metadata/${formData.symbol.toLowerCase()}`;
+
+    // Use just the first level's image uri as the baseURI, or empty string if not an IMAGE_EVOLUTION token
+    const tokenURI = formData.priceLevels[0].imageURI ?? "";
     
     const levels = formData.priceLevels.map(level => ({
       price: parseEther(level.price),
-      name: level.name
+      name: level.name,
+      ...(formData.tokenType === 2 ? {imageURI: level.imageURI } : {})
     }));
 
     createToken({
-      args: [name, formData.symbol, uri, levels]
+      args: [name, formData.symbol, tokenURI, BigInt(formData.tokenType), levels]
     });
   };
 
@@ -276,6 +280,19 @@ export default function LaunchPage() {
           />
         </div>
 
+        <div>
+          <label className="block font-mono text-green-500 mb-2 text-sm md:text-base">Token Type</label>
+          <select
+            value={formData.tokenType}
+            onChange={(e) => setFormData(prev => ({ ...prev, tokenType: parseInt(e.target.value) }))}
+            className="w-full bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none text-sm md:text-base"
+            required
+          >
+            <option value={1}>Text Evolution</option>
+            <option value={2}>Text + Image Evolution</option>
+          </select>
+        </div>
+
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-lg md:text-xl font-mono text-green-500">Price Levels</h2>
@@ -350,6 +367,23 @@ export default function LaunchPage() {
                     X
                   </button>
                 </div>
+                {formData.tokenType === 2 && (
+                  <div className="flex flex-col">
+                    <label className="block font-mono text-green-500 my-2 text-sm md:text-base">Conviction NFT URI</label>
+                    <input
+                      type="text"
+                      placeholder="URI"
+                      value={level.imageURI}
+                      onChange={(e) => handlePriceLevelChange(index, 'imageURI', e.target.value)}
+                      className="flex-1 bg-black border border-green-500/30 text-green-500 font-mono p-2 rounded focus:border-green-500 focus:outline-none text-sm md:text-base"
+                      {...(formData.tokenType === 2 ? {required : true} : {})}
+                    />
+
+                    <div className="text-green-500/50 text-xs md:text-sm mt-1 font-mono">
+                      Image URI can be an IPFS URI, HTTPS URL or similar.
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
