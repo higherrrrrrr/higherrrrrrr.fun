@@ -651,13 +651,21 @@ export default function TokenPage({ addressProp }) {
       <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
         {/* Current Level */}
         <div className="text-center py-12">
-          <div className="text-sm text-green-500/50 mb-4">Current Name</div>
+          <div className="text-sm text-green-500/50 mb-4">{tokenState.tokenType === 0 ? 'Name' : 'Current Name'}</div>
           <div className="text-xl md:text-7xl font-bold mb-6 break-words max-w-[90vw] mx-auto">
             {tokenState.currentName || 'Loading...'}
           </div>
-          <div className="text-lg md:text-xl text-green-500/70">
-            Level {getCurrentLevelIndex(tokenState) + 1} of {tokenState.priceLevels?.length || 0}
-          </div>
+          {tokenState.tokenType === 2 && (
+            <div className="flex flex-col items-center mt-8 mb-4">
+              <div className="text-sm text-green-500/50 mb-4">Current Conviction NFT</div>
+              <img className="max-w-full" src={tokenState.priceLevels[getCurrentLevelIndex(tokenState)].imageURI} alt="Current Conviction NFT" />
+            </div>
+          )}
+          {tokenState.tokenType !== 0 && (
+            <div className="text-lg md:text-xl text-green-500/70">
+              Level {getCurrentLevelIndex(tokenState) + 1} of {tokenState.priceLevels?.length || 0}
+            </div>
+          )}
         </div>
 
         {/* Progress Bar (only show if on bonding curve and supply < 800M) */}
@@ -963,6 +971,9 @@ export default function TokenPage({ addressProp }) {
                 <th className="p-4 text-left">
                   <div className="max-w-[260px] truncate">Name</div>
                 </th>
+                {tokenState.tokenType === 2 && (
+                  <th className="p-4 text-left whitespace-nowrap">NFT</th>
+                )}
                 <th className="p-4 text-right whitespace-nowrap">Price</th>
                 <th className="p-4 text-right whitespace-nowrap">Market Cap</th>
                 <th className="p-4 text-center whitespace-nowrap">State</th>
@@ -990,6 +1001,18 @@ export default function TokenPage({ addressProp }) {
                         {level.name}
                       </div>
                     </td>
+                    {tokenState.tokenType === 2 && (
+                      <td className={`p-4 text-left relative group ${isCurrentLevel ? 'border-b border-green-500/20' : ''}`}>
+                        <img className="w-auto max-w-[40px] h-auto max-h-[24px]" src={level.imageURI} alt="Level NFT" />
+                        <div className="absolute hidden group-hover:block z-50 left-0 top-3 mb-2">
+                          <img
+                            className="w-[90px] h-auto border border-green-500/30 bg-black shadow-lg"
+                            src={level.imageURI}
+                            alt="Level NFT Preview"
+                          />
+                        </div>
+                      </td>
+                    )}
                     <td className="p-4 text-right whitespace-nowrap">
                       {index === 0 ? (
                         'Free'
