@@ -1,7 +1,7 @@
 import { createPublicClient, http, formatEther } from 'viem';
 import { base } from 'wagmi/chains';
 import { getCurrentChain } from '../components/Web3Provider';
-import { higherrrrrrrAbi } from './generated';
+import { higherrrrrrrAbi, higherrrrrrrV1Abi } from './generated';
 import { CURRENT_RPC_URL } from "./config";
 
 // Create public client
@@ -77,9 +77,7 @@ const staticTokenState = {
   totalFeeBps: 100,
 };
 
-export async function getTokenState(
-  tokenAddress: string
-): Promise<TokenState> {
+export async function getTokenState(tokenAddress: string): Promise<TokenState> {
   console.log("Getting state for token:", tokenAddress);
 
   try {
@@ -89,7 +87,8 @@ export async function getTokenState(
       symbol,
       totalSupply,
       currentPrice,
-      priceLevels,
+      priceLevelsV0,
+      priceLevelsV1,
       tokenType,
       marketType,
       poolAddress,
@@ -122,7 +121,12 @@ export async function getTokenState(
         },
         {
           address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
+          abi: higherrrrrrrV1Abi,
+          functionName: "getPriceLevels",
+        },
+        {
+          address: tokenAddress as `0x${string}`,
+          abi: higherrrrrrrV1Abi,
           functionName: "tokenType",
         },
         // NOTE: we know marketType & poolAddress from api but we might not want to rely on indexed data
@@ -140,10 +144,17 @@ export async function getTokenState(
       ],
     });
 
+    const priceLevels: readonly {
+      price: bigint;
+      name: string;
+      imageURI?: string;
+    }[] = !priceLevelsV1.error ? priceLevelsV1.result : priceLevelsV0.result;
+
     // Remove the old price levels loop and use the returned data
-    const formattedPriceLevels = priceLevels.result?.map((level, index) => ({
-      price: index === 0 ? '0' : formatEther(level.price),
-      name: level.name
+    const formattedPriceLevels = priceLevels?.map((level, index) => ({
+      price: index === 0 ? "0" : formatEther(level.price),
+      name: level.name,
+      imageURI: level.imageURI,
     }));
 
     return {
