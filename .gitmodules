@@ -1,3 +1,3 @@
-[submodule "higherrrrrrr-protocol"]
-	path = higherrrrrrr-protocol
+[submodule "services/evm/higherrrrrrr-protocol"]
+	path = services/evm/higherrrrrrr-protocol
 	url = git@github.com:Thrive-Point-Group/higherrrrrrr-protocol.git
