@@ -1,0 +1,43 @@
+{
+  "name": "alpha",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "DISABLE_ESLINT_PLUGIN=true next build",
+    "start": "next start",
+    "generate": "wagmi generate"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@tailwindcss/typography": "^0.5.15",
+    "@tanstack/react-query": "5.14.2",
+    "@uniswap/sdk-core": "^6.1.0",
+    "@uniswap/v3-core": "^1.0.1",
+    "@uniswap/v3-periphery": "^1.4.4",
+    "@uniswap/v3-sdk": "^3.19.0",
+    "@wagmi/cli": "^2.1.18",
+    "call-bind": "^1.0.8",
+    "clsx": "^2.0.0",
+    "connectkit": "1.5.3",
+    "date-fns": "^2.30.0",
+    "ethers": "6.9.0",
+    "framer-motion": "^10.16.16",
+    "js-cookie": "^3.0.5",
+    "next": "14.0.4",
+    "posthog-js": "^1.195.0",
+    "react": "^18",
+    "react-7-segment-display": "^1.1.2",
+    "react-dom": "^18",
+    "util": "^0.12.5",
+    "viem": "^1.19.11",
+    "wagmi": "1.4.10"
+  },
+  "devDependencies": {
+    "@typechain/ethers-v6": "^0.5.1",
+    "autoprefixer": "^10.0.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typechain": "^8.3.2"
+  }
+}

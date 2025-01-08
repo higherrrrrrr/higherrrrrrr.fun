@@ -1,0 +1,8 @@
+cytoolz==1.0.0
+eth-hash==0.7.0
+eth-keys==0.6.0
+eth-typing==5.0.1
+eth-utils==5.1.0
+pycryptodome==3.21.0
+toolz==1.0.0
+typing_extensions==4.12.2
