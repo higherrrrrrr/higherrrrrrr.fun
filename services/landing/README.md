@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Higherrrrrrr.fun
 
-## Getting Started
+A new type of asset exchange that unlocks revolutionary forms of onchain expression. Not tokens. Not NFTs. A new meta that transforms memes from ephemeral culture into tradeable capital.
 
-First, run the development server:
+## 🌟 Overview
 
+Higherrrrrrr.fun is built on the premise that memes are humanity's first truly democratic language - a force that transcends traditional barriers of culture and class. Our platform introduces evolutionary tokens that grow and transform with their communities, creating a new paradigm for digital assets.
+
+## 🛠 Technical Stack
+
+- Framework: Next.js
+- Styling: TailwindCSS
+- Font: VT323 (Terminal style)
+- Network: Base (EVM)
+
+## 🚀 Getting Started
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/higherrrrrrr.fun.git
+cd higherrrrrrr.fun
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📑 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/pages` - Main application routes
+  - `index.tsx` - Landing page with terminal-style animation
+  - `protocol.tsx` - Technical details of the Higherrrrrrr protocol
+  - `theology.tsx` - Manifesto on crypto, religion, and community
+  - `pledge.tsx` - User pledge interface
+  - `faq.tsx` - Frequently asked questions
 
-## Learn More
+## 🎨 Key Features
 
-To learn more about Next.js, take a look at the following resources:
+- Terminal-style interface with animated text
+- Dynamic pledge system for community engagement
+- Comprehensive protocol documentation
+- Revolutionary evolutionary token mechanics
+- Conviction NFTs for historical preservation
+- Points program for early believers
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔗 Important Links
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Main Site: [higherrrrrrr.fun](https://higherrrrrrr.fun)
+- Alpha Platform: [alpha.higherrrrrrr.fun](https://alpha.higherrrrrrr.fun)
+- Twitter: [@carlcortright](https://twitter.com/carlcortright)
 
-## Deploy on Vercel
+## 🤝 Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+We welcome contributions from the faithful. This is a community-driven project built for fun and expression.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚠️ Disclaimer
+
+This is an experimental project. Participate at your own risk and only pledge what you're willing to lose. Remember: we're going much, much higherrrrrrr.
+
+## 📜 License
+
+This project is licensed under the WAGMI License (MIT-Compatible) - see the LICENSE file for details.
+
+---
+
+Built with 💚 by the Higherrrrrrr team. 
