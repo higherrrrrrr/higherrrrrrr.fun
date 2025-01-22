@@ -197,12 +197,12 @@ export default function MainLayout({ children }) {
             </a>
           </div>
           <a 
-            href="https://base.org" 
+            href="https://solana.com" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
           >
-            Built on Base
+            Built on <span className="line-through">Base</span> Solana
           </a>
         </div>
       </footer>
