@@ -197,13 +197,13 @@ export default function Home() {
               </div>
               
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">💰 Evolution Rewards</h3>
-                <p className="text-sm opacity-80">Earn from every evolution. Direct rewards for leaders and their followers.</p>
+                <h3 className="text-xl font-bold">🔥 Conviction NFTs</h3>
+                <p className="text-sm opacity-80">Sacred proofs of your belief. True believers are blessed at every evolution.</p>
               </div>
               
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">🎯 Early Access</h3>
-                <p className="text-sm opacity-80">Launch with guaranteed allocation. Build the future of evolving tokens.</p>
+                <h3 className="text-xl font-bold">🎯 Pre-mint Access</h3>
+                <p className="text-sm opacity-80">Guaranteed allocation for creators. Be among the first to launch an evolving token.</p>
               </div>
               
               <div className="space-y-2">
