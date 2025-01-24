@@ -1,175 +1,201 @@
 # Higherrrrrrr Community Brief
 
-Hey there—welcome to the **Higherrrrrrr** community tokenomics overview. This document’s your go‐to for understanding our new meme‐style token on Solana, how `$HARDER` and `$IDK` holders fit in, and why we have this comedic “Conviction NFTs” approach. We’ll mention the ticker **once**—*it’s called **ZETA1** (wink)*—but after that, it’s just “the token.”
-
-**Summary of the Higherrrrrrr Tokenomics Model (tl;dr)**
-
-- **Deflationary Pressure**: A 1% trading fee on the token side gets burned, gradually shrinking the total supply. Over time, this may drive the token price upward if demand holds steady.
-  
-- **Self-Reinforcing Liquidity**: The 1% fee on the SOL side re-enters the liquidity pool, making the pool deeper. This reduces volatility and provides a more stable price floor.
-  
-- **Evolutionary Meme Mechanics**: Crossing certain price thresholds triggers comedic on-chain artwork/name changes. This “gamified” approach may spur recurring community hype each time a new threshold is reached.
-  
-- **Conviction NFTs**: Holding at least 0.42069% of the supply gets you special NFT rewards at each “evolution.” This may incentivize whales to keep large bags and further reduce active float.
-  
-- **Team & Community Distribution**: With 70% ILO, 15% to `HARDER`/`IDK` communities, and 15% to the team (with vesting), the supply is broadly spread out while still providing developer incentives.
-  
-- **Rational Market Expectation**: Over time, if the project gains traction, the deflationary burn + increased liquidity could create upward price pressure. However, actual performance depends on real-world demand, speculation, and community engagement.
-
+Welcome, deviants, to the **Higherrrrrrr** community tokenomics overview. This doc is your biblical resource for the **Higherrrrrrr** protocol token on Solana—how `$HARDER` and `$IDK` holders fit in, why we have “Conviction NFTs,” and how the “floor mechanism” works. We’ll mention the ticker **once**—*it’s called **CULT***—but after that, it’s just “the token.”
 
 ---
 
-## 1. What’s the Meme All About?
+## Quick Degen Analogy: “On-Chain Arcade Machine”
 
-**Higherrrrrrr** (with seven “r”s) is about having fun while building a genuinely solid token ecosystem. Here’s the gist:
+Imagine a giant arcade machine:
 
-- **1,000,000,000 total tokens**, 9 decimals, **no extra minting** (burned authority).
-- A comedic spin on “price‐based evolutions,” so the token’s on‐chain name/art shifts at certain thresholds.
-- A special threshold of **0.42069%** for “Conviction NFTs”—yep, we did that.
+- You toss in **tokens** when you want to play (trade).  
+- Half of your coin (0.5%) is **burned**—like the arcade ripping up your credits so no one else can use them.  
+- The other half (0.5%) in **SOL** is used to **refill the prize pool** (the liquidity floor), so there’s always more plushies in the claw machine if the market price dips.  
 
-We want a meme token that **evolves** over time and hands out comedic badges to big holders. The goal is to inject a bit of levity while still delivering robust tokenomics.
+Over time:
 
----
+1. **Token Supply** shrinks (from constant burns).  
+2. **Floor Liquidity** grows, so big dumps get absorbed.  
 
-## 2. Distribution: Community First
-
-### 2.1. How the Token Supply Splits
-
-1. **Team: 15%**  
-   - We need some stake to keep shipping code.  
-   - Of that 15%, **7.7777…%** goes to Carl (the main driver), and the remaining ~7.22% is for other team members/advisors.
-
-2. **$HARDER & $IDK Communities: 15%**  
-   - If you hold `$HARDER` or `$IDK`, we’ve reserved 15% total for you.  
-   - You’ll either get an airdrop or bridging claim—no final decision yet, but you won’t be left behind.
-
-3. **Initial Liquidity Offering (ILO): 70%**  
-   - The other 70% is going into a public liquidity pool on Solana.  
-   - We want a **single‐sided deposit** so folks can buy in fairly without huge slippage.
-
-**Reasoning**: We love existing meme communities, so they get a decent chunk. The team’s share is modest enough not to overshadow the rest. And 70% in a public pool ensures a wide open market from day one.
+That’s how **Higherrrrrrr** keeps the game going for degens.
 
 ---
 
-## 3. Evolution Mechanics
+## 1. Summary (tl;dr)
 
-### 3.1. Price‐Based Evolution
-
-Whenever the token’s price crosses certain lines—like $0.001, $0.01, or beyond—its name/art on‐chain **evolves**. Think about checking your wallet and seeing it morph from “Higherrrrrrr V1” to “Higherrrrrrr In Warp Drive.” It’s a comedic twist powered by Solana’s Metaplex metadata system.
-
-### 3.2. `evolution.svg`
-
-We store a file named `evolution.svg` that updates or transforms each time the token levels up. So, the comedic story of **Higherrrrrrr** literally unfolds in your wallet:
-
-<img src="evolution.svg" alt="Evolution Illustration" width="400" />
-
-Basically, watch out for new memes, new colors, or silly references inside that SVG.
-
-### 3.3. Why Evolve?
-
-1. **Keeps It Fun**  
-   - Each threshold crossing is like an event we celebrate.  
-2. **Amplifies Meme Culture**  
-   - It’s not “only number go up,” it’s “number go up, *image* changes, jokes ensue.”  
-3. **Dynamic**  
-   - Any wallet that respects Metaplex metadata sees these comedic changes in real time.
+- **LP Fees:** 1% total fee on trades (via Orca/Jupiter).  
+  - **0.5%** of the **token side** is burned (removed from supply).  
+  - **0.5%** of the **SOL side** is added as single-sided liquidity to help stabilize the token price.  
+- **Conviction NFTs:** Holding **≥ 0.042069%** of the supply (420,690 tokens) grants you special NFTs (or “relics”) every time the token “evolves.”  
+- **Distribution & Allocations:**  
+  - **Team**: 20% total in a multisig (7.77% current team w/ vesting, 12.33% future expansions)  
+  - **HARDER/CULT LP**: 5%  
+  - **$HARDER & $IDK**: 15%  
+  - **Single-Sided Launch Pool**: 60%  
+- **Evolutionary Mechanics:** Certain market cap (or price) thresholds trigger on-chain relics and name/art updates.  
+- **New Creator Tokens:** For other tokens launched by Higherrrrrrr, the 0.5% SOL fee may be **split** (e.g., 0.25% to protocol revenue, 0.25% to that token’s floor).  
 
 ---
 
-## 4. Conviction NFTs (≥ 0.42069%)
+## 2. What’s the Higherrrrrrr Cult About?
 
-### 4.1. The Meme Threshold
+**Higherrrrrrr** (with seven “r”s) is about being based while building an ever-evolving “cult coin.” Key bullet points:
 
-By now, 420 and 69 need no introduction. If you hold **0.42069%** of the token supply (4,206,900 ignoring decimals), you qualify for “Conviction” status—basically, you’re a big fish.
+- **Total Supply**: 1,000,000,000 tokens, 9 decimals, no future minting (burn authority = gone).  
+- **Evolutions**: Token’s on-chain name/art changes at certain thresholds—think “ritualistic transformations” but purely for hype.  
+- **Conviction NFTs**: Holding at least **0.042069%** of the supply (420,690 tokens) grants special relic NFTs each time the token “levels up.”  
 
-### 4.2. The Registry & The Reward
-
-We keep an on‐chain list of addresses above 0.42069%. If you pass that threshold, you can “register_holder.” Then, whenever the token crosses a new price threshold:
-
-- Everyone still on that registry (≥ 0.42069%) gets an NFT to commemorate the “old level” we just transcended.
-
-### 4.3. Degen‐Friendly
-
-We anticipate maybe 200 big holders at most, so it’s easy to handle. If you dip below 0.42069%, you’ll be pruned from the registry. Gotta stay big to stay convicted.
+We aim to combine a dash of degenerate humor with robust on-chain engineering to keep the community engaged and entertained.
 
 ---
 
-## 5. Fees & Burning Mechanic
+## 3. Distribution: Community Focus
 
-This is where the new twist comes in:
+### 3.1 Team & Future Expansions (20%)
 
-### 5.1. Trading Fees
+- **Current Team (7.77%)**  
+  - 3.33% to Carl (the main dev), the remainder to other team/advisors, all under a **12-month linear vesting schedule**.  
+  - Held in a **Squads multisig**—no day-one dumps.  
 
-We take a small fee on each swap— 1%. Then:
+- **Future Reserve (12.33%)**  
+  - Marketing, strategic OTC sales, future contributors.  
+  - Also locked in the **Squads multisig**; requires team/community approval for usage.
 
-- **Token Side**: We burn those tokens outright, removing them from circulation. The more trading volume, the more tokens vanish over time—making the remaining supply more scarce.  
-- **SOL Side**: The fee in SOL doesn’t go to the treasury; we put it **back into the liquidity pool**. That helps keep the pool deep, reduces volatility, and supports a healthier market.
+### 3.2 HARDER/CULT LP (5%)
 
-### 5.2. Building Protocol Liquidity
+- 5% of tokens seed a **HARDER/CULT** liquidity pool.  
+- The HARDER side also burns on each trade, while CULT’s SOL fees go to the floor.  
 
-Because the SOL side of fees goes back in the pool, the liquidity effectively grows each time a trade happens. Think of it as an *auto‐reinforcing liquidity system.* The protocol itself doesn’t keep SOL from the fees—it just recycles it into the AMM to stabilize price dynamics.
+### 3.3 $HARDER & $IDK Communities (15%)
 
-### 5.3. Transparency
+- If you hold **$HARDER** or **$IDK**, 15% of CULT is reserved for you.  
+- Method (airdrop/bridge) TBD.
 
-You’ll see the burn transactions for tokens on the Solana explorer (they go to a known burn address). And the SOL is just re-added to the same liquidity pool. No hidden vault, no single team wallet. Totally visible and trackable.
+### 3.4 Single-Sided Launch Pool (60%)
 
----
-
-## 6. Team Vesting & Security
-
-### 6.1. Team’s 15%
-
-Carl’s 7.7777…% is on a vesting schedule—like monthly or quarterly. The other ~7.22% is also vested for the rest of the team. No day-one dumps, no behind-the-scenes drama.
-
-### 6.2. Multi‐Sig & Optional Immutability
-
-A multi-sig (e.g., Squads) controls the upgrade authority. If a bug arises, we can patch it with multiple signers. If the community eventually wants total immutability, we burn that authority, and no more changes can occur.
+- Placed on Orca as a single-sided liquidity deposit for open trading.  
+- Ensures broad distribution from day one, minimal slippage, and no insider advantage.
 
 ---
 
-## 7. $HARDER & $IDK Communities
+## 4. Evolution Mechanics
 
-A total of 15% is reserved for `$HARDER` and `$IDK` holders. We’re fans of your memetic spirit, so we want you in on Higherrrrrrr. You’ll either get an airdrop or bridging instructions soon. Stay tuned on Discord or Twitter. We promise you’re part of the plan.
+### 4.1 On-Chain Price/Cap Triggers
 
----
+When the token crosses certain thresholds (price or market cap), we update the token’s metadata via **Metaplex**—shifting its name, art, or references. Think of it as “leveling up” each time the cult hits a new milestone.
 
-## 8. Launch Plan (70% ILO)
+### 4.2 The `evolution.svg` File
 
-### 8.1. Single‐Sided Liquidity
+We store a file named `evolution.svg` that morphs at each threshold—introducing new relics, colors, or inside jokes. It’s basically a “cult tapestry” that gets upgraded over time.
 
-We’ll deposit 700 million tokens into a Solana DEX (like Orca) on day one. This ensures a fair open market, minimal slippage, and no insider ratio. The community sets the price—demand + supply do the rest.
+### 4.3 Why Evolve?
 
-### 8.2. Keep an Eye on Evolutions
-
-If trading volume spikes the price past a threshold, you’ll see the comedic rename or updated `evolution.svg` effect. And if you’re above 0.42069% in holdings, you’ll snag your first “Conviction NFT” for the old level.
-
----
-
-## 9. Next Steps for You
-
-1. **Check Out the Liquidity Offering**: Once we’re live, you can buy in.  
-2. **Register if You’re a Big Holder**: If you surpass 0.42069%, call the “register_holder” function.  
-3. **Watch the Art**: Keep an eye on your wallet to see if the token’s name or image evolves.  
-4. **HODL or Trade**: Up to you. But the comedic evolutions might make you want to stick around.  
-5. **Chime In**: Suggest new comedic slogans or help us craft the next version of `evolution.svg`.
+- **Keeps It Fun**: Each threshold crossing is a community event for new memes.  
+- **Real-Time Updates**: Token explorers and wallets that respect Metaplex metadata will show these changes.  
 
 ---
 
-## 10. Recap: The Setup
+## 5. Conviction NFTs (≥ 0.042069%)
 
-- **1B tokens** total, 0 minted after launch (burn authority = gone).  
-- **Distribution**: 
-  - 15% team (Carl at 7.7777…%),  
-  - 15% `$HARDER & $IDK`,  
-  - 70% ILO.  
-- **Evolution**: On-chain comedic name changes, referencing `evolution.svg`.  
-- **Conviction**: ≥ 0.42069% gets you NFTs whenever we cross a new price threshold.  
-- **Fees**: We **burn** tokens on the token side, and **re-add** SOL to the liquidity pool.  
-- **Upgrade**: Multi-sig. Possibly locked forever if the community demands it.
+### 5.1 The Zealot Threshold
+
+Hold **0.042069%** of the supply (420,690 tokens) to become a “zealot.” This comedic figure ensures only big holders get the “cult relic” NFTs.
+
+### 5.2 Registry & Rewards
+
+An on-chain registry tracks addresses above 420,690 tokens. Whenever the token “levels up”:
+
+- Everyone still on the registry can claim an NFT commemorating the “old level.”  
+- If you dip below the threshold, you’re pruned.
 
 ---
 
-We hope you’ll jump in and help push **Higherrrrrrr** to comedic, possibly profitable extremes. Stay tuned on your favorite channels, and let’s see how far we can take this meme. Thanks for reading, buddy!
+## 6. Fees & Burning Mechanic
+
+### 6.1 Trading Fees
+
+A **1%** fee applies to every swap. It’s split into:
+
+1. **Token Side (0.5%)**  
+   - Burned outright—supply deflates continuously.
+
+2. **SOL Side (0.5%)**  
+   - Re-added as single-sided liquidity at a lower price range, creating an ever-stronger floor.
+
+### 6.2 Pokémon Card Store Analogy
+
+- **Buy/Sell** Pokémon cards at a local store.  
+- The store **removes** some cards from circulation each time (burn).  
+- The store keeps a portion of the cash (SOL) and uses it to **buy** more cards if prices dip, stabilizing the market.  
+
+---
+
+## 7. Team Vesting & Security
+
+### 7.1 Team Reserves (20%)
+
+- **7.77%** for current team/advisors:  
+  - 12-month linear vesting schedule.  
+- **13.33%** for future expansions, marketing, or partnerships.  
+
+All team tokens live in a **Squads multisig**, ensuring no single actor can dump or misappropriate.
+
+### 7.2 Multi-Sig & Optional Immutability
+
+A multi-sig (e.g., Squads) controls upgrade authority. If the community prefers, we can burn that authority for full immutability—no more changes possible.
+
+---
+
+## 8. $HARDER & $IDK Communities
+
+A total of **15%** is reserved for you. We’ll provide instructions on airdrops or bridging soon. Keep an eye on socials for updates.
+
+---
+
+## 9. Launch Plan & Liquidity
+
+### 9.1 Single-Sided Liquidity
+
+We deposit **60%** of the supply into Orca on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
+
+### 9.2 HARDER/CULT LP
+
+We also seed a separate **HARDER/CULT** liquidity pool with **5%** of the supply for cross-pollination between these two ecosystems.
+
+### 9.3 Future Adjustments for New Tokens
+
+- **For other tokens** launching under the Higherrrrrrr banner, the SOL side of fees (0.5%) can be **split** (e.g., 0.25% to protocol revenue, 0.25% to floor). The exact ratio is **globally adjustable** by the Higherrrrrrr team if needed.
+
+---
+
+## 10. Next Steps
+
+1. **Check the Liquidity**: Once launched, you can buy/sell on Orca or via Jupiter.  
+2. **Register if You’re a Zealot**: If you hit ≥ 420,690 tokens, call `register_holder`.  
+3. **Watch the Art**: Keep an eye out for **`evolution.svg`** updates whenever thresholds are hit.  
+4. **HODL or Trade**: Up to you—just remember, relic NFTs reward big holders.  
+5. **Provide Feedback**: Suggest new slogans, relic ideas, or comedic thresholds.
+
+---
+
+## 11. Recap (Tech Scope)
+
+- **Token Supply**: 1,000,000,000 total, no extra minting.  
+- **Distribution**:  
+  - 20% Team/Expansions (7.77% for current team w/ vesting, 12.33% for future uses)  
+  - 5% HARDER/CULT LP  
+  - 15% HARDER & IDK  
+  - 60% Single-Sided Launch  
+- **Evolutions**: On-chain comedic name changes, referencing `evolution.svg`.  
+- **Conviction NFTs**: Addresses ≥ 0.042069% (420,690 tokens) claim relics on each threshold.  
+- **Fees**:  
+  - 1% total (0.5% burn + 0.5% single-sided SOL to the floor).  
+  - **For new tokens**: 0.5% SOL is partially protocol revenue, partially floor liquidity (ratio adjustable).  
+- **Upgrade**: Multi-sig, can be burned for immutability.
+
+We invite you to jump in and help push **Higherrrrrrr** to comedic extremes. Stay tuned on your favorite channels, and let’s see how far we can take this meme.
+
+---
 
 **—From the Higherrrrrrr Community**  
-*(Where the meme meets creative engineering—and a dash of silliness.)*
+*(Where cult humor meets on-chain engineering… all hail the meme!)*
