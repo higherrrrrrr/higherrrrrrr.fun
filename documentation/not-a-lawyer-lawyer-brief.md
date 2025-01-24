@@ -122,3 +122,14 @@ Stay safe and stay transparent,
 **The higherrrrrrr Team**
 
 [Link to GPT output](https://chatgpt.com/share/6792a492-b088-8000-b2f8-0bd759134141)
+
+
+# Higherrrrrrr (ZETA1) Tokenomics Regulatory Thought, Open Source
+#### Added Jan 23/2025
+
+**Regulatory Perspective**:
+- We acknowledge potential risks but aim for good-faith operations.
+- Likelihood of major enforcement action is low unless the token becomes extremely large or engages in fraudulent conduct. Our assessment is that the maximum penality could be civil since we're open sourcing everything and documenting our actions with the intention of transparency for the community. Probably the first time a project has done this.
+
+**Conclusion**: We’re upfront about how everything works and continuously document our actions. By remaining honest and transparent, we aim to minimize risk for both us and our community, even as we grow. 
+
