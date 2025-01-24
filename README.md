@@ -2,9 +2,12 @@
 
 Higherrrrrrr is a next-generation social trading platform that introduces novel mechanics for community engagement and trading experiences.
 
+Good place to start is the [documentation](./documentation/README.md) that goes over the entire project. Each software component has its own README.
+
 ## Project Structure
 
 ```
+├── documentation/     # All project design docs and whitepapers (Start here)
 ├── scripts/           # Build and deployment scripts
 ├── services/         
 │   ├── evm/          # Ethereum Virtual Machine related services
