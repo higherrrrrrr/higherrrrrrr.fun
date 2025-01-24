@@ -270,3 +270,5 @@ Though bridging to Base or other chains is not included by default, the protocol
 This design proves that “fun” and “fundamental stability” need not conflict. **Higherrrrrrrr** invites memecoin enthusiasts, NFT collectors, liquidity providers, and dev teams to collaborate on comedic tokens that remain fully anchored in robust on-chain logic. The result is a living demonstration that “degen humor” can shine within a thoroughly secure, no-inflation, advanced token framework on **Solana**.
 
 **Thus,** as a comedic—and ironically well-structured—project, **Higherrrrrrrr** stands at the crossroads of **meme mania** and **DeFi best practices**, bridging the gap between ephemeral internet jokes and a stable token environment. By letting tokens “grow” in name or art as their price crosses comedic thresholds, awarding big holders with comedic NFTs, and distributing fees in a transparent manner, **Higherrrrrrrr** aims to become the definitive standard for evolutionary memecoins on Solana.
+
+[Whitepaper Gen Chat](https://chatgpt.com/share/67928c5e-d414-8000-9922-3e90e65acb3a)
