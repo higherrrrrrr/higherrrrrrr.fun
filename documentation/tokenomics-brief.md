@@ -173,3 +173,5 @@ We hope you’ll jump in and help push **Higherrrrrrr** to comedic, possibly pro
 
 **—From the Higherrrrrrr Community**  
 *(Where the meme meets creative engineering—and a dash of silliness.)*
+
+[Fancy Math Version](https://chatgpt.com/share/6792ed2a-5d60-8000-bcc4-121f19028944)
