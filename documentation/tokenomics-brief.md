@@ -145,7 +145,7 @@ If trading volume spikes the price past a threshold, you’ll see the comedic re
 
 ---
 
-## 9. Next Steps for You
+## 9. Next Steps
 
 1. **Check Out the Liquidity Offering**: Once we’re live, you can buy in.  
 2. **Register if You’re a Big Holder**: If you surpass 0.42069%, call the “register_holder” function.  
