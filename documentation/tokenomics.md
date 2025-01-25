@@ -1,6 +1,6 @@
 # Higherrrrrrr Community Brief
 
-Welcome, deviants, to the **Higherrrrrrr** community tokenomics overview. This doc is your biblical resource for the **Higherrrrrrr** protocol token on Solana—how `$HARDER` and `$IDK` holders fit in, why we have “Conviction NFTs,” and how the “floor mechanism” works. We’ll mention the ticker **once**—*it’s called **CULT***—but after that, it’s just “the token.”
+Welcome, deviants, to the **Higherrrrrrr** community tokenomics overview. This doc is your biblical resource for the **Higherrrrrrr** protocol token on Solana—how *Base V1 Supporters*\* fit in, why we have “Conviction NFTs,” and how the “floor mechanism” works. We’ll mention the ticker **once**—*it’s called **CULT***—but after that, it’s just “the token.”
 
 ---
 
@@ -29,17 +29,17 @@ That’s how **Higherrrrrrr** keeps the game going for degens.
 - **Conviction NFTs:** Holding **≥ 0.042069%** of the supply (420,690 tokens) grants you special NFTs (or “relics”) every time the token “evolves.”  
 - **Distribution & Allocations:**  
   - **Team**: 20% total in a multisig (7.77% current team w/ vesting, 12.33% future expansions)  
-  - **HARDER/CULT LP**: 5%  
-  - **$HARDER & $IDK**: 15%  
+  - **Migration LP Support\***: 5%  
+  - **Base V1 Supporters\***: 15%  
   - **Single-Sided Launch Pool**: 60%  
 - **Evolutionary Mechanics:** Certain market cap (or price) thresholds trigger on-chain relics and name/art updates.  
-- **New Creator Tokens:** For other tokens launched by Higherrrrrrr, the 0.5% SOL fee may be **split** (e.g., 0.25% to protocol revenue, 0.25% to that token’s floor).  
+- **New Creator Tokens:** For other tokens launched on Higherrrrrrr, the 0.5% SOL fee may be **split** (e.g., 0.25% to protocol revenue, 0.25% to that token’s floor).
 
 ---
 
 ## 2. What’s the Higherrrrrrr Cult About?
 
-**Higherrrrrrr** (with seven “r”s) is about being based while building an ever-evolving “cult coin.” Key bullet points:
+**Higherrrrrrr** (with seven “r”s) is about being based while building an ever-evolving “cult coins.” Key bullet points:
 
 - **Total Supply**: 1,000,000,000 tokens, 9 decimals, no future minting (burn authority = gone).  
 - **Evolutions**: Token’s on-chain name/art changes at certain thresholds—think “ritualistic transformations” but purely for hype.  
@@ -61,15 +61,15 @@ We aim to combine a dash of degenerate humor with robust on-chain engineering to
   - Marketing, strategic OTC sales, future contributors.  
   - Also locked in the **Squads multisig**; requires team/community approval for usage.
 
-### 3.2 HARDER/CULT LP (5%)
+### 3.2 Migration LP Support\* (5%)
 
-- 5% of tokens seed a **HARDER/CULT** liquidity pool.  
-- The HARDER side also burns on each trade, while CULT’s SOL fees go to the floor.  
+- Reserved for establishing and supporting a cross-token liquidity pool.  
+- See [Appendix](#appendix) for details.
 
-### 3.3 $HARDER & $IDK Communities (15%)
+### 3.3 Base V1 Supporters\* (15%)
 
-- If you hold **$HARDER** or **$IDK**, 15% of CULT is reserved for you.  
-- Method (airdrop/bridge) TBD.
+- Reserved for those who supported Higherrrrrrr V1 on Base.  
+- See [Appendix](#appendix) for details.
 
 ### 3.4 Single-Sided Launch Pool (60%)
 
@@ -136,7 +136,7 @@ A **1%** fee applies to every swap. It’s split into:
 
 - **7.77%** for current team/advisors:  
   - 12-month linear vesting schedule.  
-- **13.33%** for future expansions, marketing, or partnerships.  
+- **12.33%** for future expansions, marketing, or partnerships.
 
 All team tokens live in a **Squads multisig**, ensuring no single actor can dump or misappropriate.
 
@@ -146,9 +146,9 @@ A multi-sig (e.g., Squads) controls upgrade authority. If the community prefers,
 
 ---
 
-## 8. $HARDER & $IDK Communities
+## 8. Base V1 Supporters\* (15%)
 
-A total of **15%** is reserved for you. We’ll provide instructions on airdrops or bridging soon. Keep an eye on socials for updates.
+A total of **15%** is reserved for these loyal participants. We’ll provide instructions on airdrops or bridging soon. Keep an eye on socials for updates.
 
 ---
 
@@ -158,9 +158,9 @@ A total of **15%** is reserved for you. We’ll provide instructions on airdrops
 
 We deposit **60%** of the supply into Orca on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
 
-### 9.2 HARDER/CULT LP
+### 9.2 Migration LP Support\* (5%)
 
-We also seed a separate **HARDER/CULT** liquidity pool with **5%** of the supply for cross-pollination between these two ecosystems.
+A separate **migration-focused** liquidity pool will be seeded with 5% of the supply. See [Appendix](#appendix) for details.
 
 ### 9.3 Future Adjustments for New Tokens
 
@@ -183,8 +183,8 @@ We also seed a separate **HARDER/CULT** liquidity pool with **5%** of the supply
 - **Token Supply**: 1,000,000,000 total, no extra minting.  
 - **Distribution**:  
   - 20% Team/Expansions (7.77% for current team w/ vesting, 12.33% for future uses)  
-  - 5% HARDER/CULT LP  
-  - 15% HARDER & IDK  
+  - 5% Migration LP Support\*  
+  - 15% Base V1 Supporters\*  
   - 60% Single-Sided Launch  
 - **Evolutions**: On-chain comedic name changes, referencing `evolution.svg`.  
 - **Conviction NFTs**: Addresses ≥ 0.042069% (420,690 tokens) claim relics on each threshold.  
@@ -198,4 +198,14 @@ We invite you to jump in and help push **Higherrrrrrr** to comedic extremes. Sta
 ---
 
 **—From the Higherrrrrrr Community**  
-*(Where cult humor meets on-chain engineering… all hail the meme!)*
+*(Where cults meet on-chain engineering… all hail the meme!)*
+
+---
+
+## Appendix
+
+### Base V1 Supporters\* (15%)
+This allocation is reserved for the `$HARDER` and `$IDK` communities that supported the original Higherrrrrrr V1 launch on Base. We’ll finalize the airdrop or bridging mechanism for these tokens soon.
+
+### Migration LP Support\* (5%)
+Designated for the **HARDER/CULT** liquidity pool. The HARDER side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures a robust cross-token liquidity pool.
