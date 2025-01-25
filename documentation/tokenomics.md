@@ -10,14 +10,14 @@ Imagine a giant arcade machine:
 
 - You toss in **tokens** when you want to play (trade).  
 - Half of your coin (0.5%) is **burned**—like the arcade ripping up your credits so no one else can use them.  
-- The other half (0.5%) in **SOL** is used to **refill the prize pool** (the liquidity floor), so there’s always more plushies in the claw machine if the market price dips.
+- The other half (0.5%) in **SOL** is used to **refill the prize pool** (the liquidity floor), so there’s always more plushies in the claw machine if the market price dips.  
 
 Over time:
 
 1. **Token Supply** shrinks (from constant burns).  
-2. **Floor Liquidity** grows, so big dumps get absorbed.
+2. **Floor Liquidity** grows, so big dumps get absorbed.  
 
-That’s how **Higherrrrrrr** keeps the game infinitely running for degens.
+That’s how **Higherrrrrrr** keeps the game going for degens.
 
 ---
 
@@ -55,7 +55,7 @@ We aim to combine a dash of degenerate humor with robust on-chain engineering to
 
 - **Current Team (7.77%)**  
   - 3.33% to Carl (the main dev), the remainder to other team/advisors, all under a **12-month linear vesting schedule**.  
-  - Held in a **Squads multisig**—no day-one dumps.
+  - Held in a **Squads multisig**—no day-one dumps.  
 
 - **Future Reserve (12.33%)**  
   - Marketing, strategic OTC sales, future contributors.  
@@ -91,7 +91,7 @@ We store a file named `evolution.svg` that morphs at each threshold—introducin
 ### 4.3 Why Evolve?
 
 - **Keeps It Fun**: Each threshold crossing is a community event for new memes.  
-- **Real-Time Updates**: Token explorers and wallets that respect Metaplex metadata will show these changes.
+- **Real-Time Updates**: Token explorers and wallets that respect Metaplex metadata will show these changes.  
 
 ---
 
@@ -99,7 +99,7 @@ We store a file named `evolution.svg` that morphs at each threshold—introducin
 
 ### 5.1 The Zealot Threshold
 
-Hold **0.042069%** of the supply (420,690 tokens) to become a “zealot.” This on-chain threshold ensures that only loyal holders get the “cult relic” NFTs.
+Hold **0.042069%** of the supply (420,690 tokens) to become a “zealot.” This comedic figure ensures only big holders get the “cult relic” NFTs.
 
 ### 5.2 Registry & Rewards
 
@@ -126,7 +126,7 @@ A **1%** fee applies to every swap. It’s split into:
 
 - **Buy/Sell** Pokémon cards at a local store.  
 - The store **removes** some cards from circulation each time (burn).  
-- The store keeps a portion of the cash (SOL) and uses it to **buy** more cards if prices dip, stabilizing the market.
+- The store keeps a portion of the cash (SOL) and uses it to **buy** more cards if prices dip, stabilizing the market.  
 
 ---
 

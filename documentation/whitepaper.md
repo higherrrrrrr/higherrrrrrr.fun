@@ -1,7 +1,7 @@
 # Higherrrrrrrr (CULT) Protocol White Paper
 
 > **A Solana-Based Memecoin Launchpad and Evolutionary Token Framework**  
-> *Where threshold-based metadata, big-holder NFTs, and deflationary principles unite.*
+> *Where threshold-based metadata, big-holder NFTs, and deflationary principles unite—yet with flexible fee splits and extensive configurability.*
 
 ## Table of Contents
 
@@ -25,18 +25,15 @@
 
 ## 1. Introduction
 
-**Higherrrrrrrr**—pronounced with **seven** trailing “r”s—represents a fusion of **memecoin culture** and **robust token engineering** on Solana. Although playful in its aesthetic, the protocol enforces a **serious** approach to on-chain identity updates, holder engagement, fee management, and single-sided liquidity provision.
+**Higherrrrrrrr**—pronounced with **seven** trailing “r”s—represents a fusion of **memecoin culture** and **robust token engineering** on Solana. While it has an intentionally playful aesthetic, the protocol enforces a **serious, modular, and configurable** approach to on-chain identity updates, holder engagement, fee management, and single-sided liquidity provision. Here is a quick overview of its five key mechanics:
 
-A core hallmark of **Higherrrrrrrr** is the ability to **“evolve”** token metadata—particularly the displayed name or image—based on **price** milestones or other thresholds. Holders who accumulate **0.042069%** (420,690 tokens) or more of the total supply can earn “Conviction NFTs” each time the token “levels up.” The protocol ensures no further minting (no inflation), with a hard cap of **1,000,000,000** tokens (9 decimals). Additionally, a **1%** trading fee mechanism is applied to each swap:
+- **Threshold-Based Evolving Metadata**: Token names and artwork can “level up” as certain price or market milestones are crossed.  
+- **Deflationary Design**: A portion of tokens are burned on every swap, ensuring a continuously decreasing supply.  
+- **Big-Holder “Conviction” NFTs**: Addresses holding at least 0.042069% of a token’s total supply automatically receive commemorative NFTs each time the token evolves.  
+- **Single-Sided Liquidity**: Projects can provide only their own tokens to a pool, letting the market bring in SOL, thus enabling fair price discovery.  
+- **Flexible Fee Splits**: A default 1% swap fee is split between token burns and SOL-based liquidity or revenue—but **all splits and destinations** (including protocol revenue vs. “floor” support) are fully configurable, even for the flagship CULT token.
 
-- **For the CULT token itself**:
-  - **0.5%** of the CULT side is burned.
-  - **0.5%** of the SOL side is fully reinvested as single-sided liquidity at the lower price range (the “floor”).  
-- **For creator tokens launched on Higherrrrrrrr**:
-  - **0.5%** of the token side is burned (deflation).
-  - **0.5%** of the SOL side is **split** between the protocol and the floor (e.g., 0.25% revenue to Higherrrrrrrr, 0.25% to the floor). This split is globally configurable by the Higherrrrrrrr team.
-
-This design blends playful elements with strong cryptographic fundamentals, while also ensuring the protocol can sustain its operations via a revenue share on new creator tokens.
+By aligning playful elements with cryptographic fundamentals—and keeping all parameters adjustable—**Higherrrrrrrr** aims to empower a new generation of meme tokens on Solana.
 
 ---
 
@@ -44,46 +41,44 @@ This design blends playful elements with strong cryptographic fundamentals, whil
 
 ### 2.1. Memecoin Evolution as a Core Feature
 
-**Higherrrrrrrr** uses threshold-based “evolutions” that change the on-chain name or artwork of the token in response to market conditions. This concept parallels how internet memes gain additional references or inside jokes over time, but here it is **anchored** to an immutable supply and a trust-minimized architecture.
+**Higherrrrrrrr** uses threshold-based “evolutions” that change the on-chain name or artwork of a token in response to market conditions. This concept parallels how internet memes gain additional references or inside jokes over time, but here it is **anchored** to trust-minimized, on-chain logic. Creators can define the thresholds that best fit their narrative—such as price marks, volume targets, or community events.
 
 ### 2.2. Balancing Engagement and Transparency
 
-Many meme tokens rely on hype without transparency. **Higherrrrrrrr** demonstrates that a lighthearted aesthetic can still be coupled with stable, transparent design. The threshold of **0.042069%** for large holders (420,690 tokens) is intentionally playful while adhering to an on-chain rule set that grants real, collectible NFTs each time a new “level” is reached.
+Many meme tokens rely on hype without transparency. **Higherrrrrrrr** proves that a lighthearted aesthetic can still be underpinned by sound tokenomics. The iconic threshold of **0.042069%** for big holders (420,690 tokens if the total supply is 1B) is playful while providing a clear on-chain rule set that rewards real engagement. Meanwhile, all distribution, burning, and fee flows are logged on-chain for transparent verification.
 
 ### 2.3. Why Solana?
 
-The Solana blockchain provides high throughput, low fees, and tooling like **Metaplex** for token/NFT metadata and **Orca** for efficient liquidity. This makes it possible to:
+The Solana blockchain provides high throughput, low fees, and tooling like **Metaplex** for token/NFT metadata and **Orca** for efficient liquidity. This makes it easy to:
 
-- Update token names and artwork frequently without excessive cost.  
-- Settle trades rapidly.  
+- Update token names/art frequently without excessive gas costs.  
+- Execute trades rapidly.  
 - Mint and distribute NFTs (for big holders) with minimal overhead.
 
 ---
 
 ## 3. Protocol Architecture
 
-**Higherrrrrrrr** can be seen as a **launchpad** or **framework** for a wide array of playful or meme-style tokens. The “CULT” token is a primary reference deployment showing how the architecture works, but the same approach may be replicated for other tokens featuring:
+**Higherrrrrrrr** can be seen as a **launchpad** or **framework** for a variety of meme-inspired tokens. The “CULT” token is the primary example demonstrating how each module works, but the same approach can be used for any token that wants to:
 
-- **A 1B supply, 9 decimals (hard cap).**  
-- **Threshold triggers** for metadata evolutions (price or market cap).  
-- **Optional** pre-mint allocations for team or community.  
-- **NFT awarding** to large holders via on-chain registry logic.
+- Fix its total supply (commonly 1B tokens, 9 decimals).  
+- Implement threshold-based metadata evolutions (price or other metrics).  
+- Award NFTs to large holders through an on-chain registry.  
+- Enforce fees for burning tokens and distributing the SOL side in a flexible way.
 
 ### Key Pillars
 
 1. **Token Creation & Supply Lock**  
-   - Mint exactly 1,000,000,000 tokens, then lock (burn) the mint authority. No inflation possible.  
+   - Mint a chosen supply (often 1B, 9 decimals), then lock (burn) the mint authority so no further minting can occur.
 
 2. **Metadata Evolutions**  
-   - The on-chain name/URI changes once specific thresholds are crossed, reflecting new “levels” of the token’s progression.  
+   - The on-chain name/URI changes once specific thresholds are crossed, reflecting new “levels” of the token’s progression.
 
 3. **Conviction NFTs**  
-   - Addresses holding ≥ 0.042069% of the total supply (420,690 tokens) can register to receive unique NFTs each time the token “evolves.”  
+   - Addresses holding ≥ 0.042069% of the total supply (420,690 tokens if 1B) are rewarded with unique NFTs each time the token evolves.
 
 4. **Fee & Liquidity Mechanics**  
-   - On every swap, a 1% fee is taken. The token side is burned (0.5%), and the SOL side is used to bolster liquidity. For CULT, the entire 0.5% SOL portion goes to the floor. For new creator tokens, a portion (e.g., 0.25%) may go to protocol revenue, and 0.25% to the floor.
-
-All of these elements are **modular**. Projects can adopt the entire suite or select only the components they need.
+   - On every swap, a 1% fee is taken. Half is burned from the token side, and half of the SOL side is sent to floor liquidity or revenue addresses. Both the distribution ratio and recipients are **fully configurable**.
 
 ---
 
@@ -91,17 +86,17 @@ All of these elements are **modular**. Projects can adopt the entire suite or se
 
 ### 4.1. The 1B Supply with 9 Decimals
 
-Each **Higherrrrrrrr** token (including **CULT**) enforces a total supply of \(10^{18}\) base units, typically shown to users as **1,000,000,000** tokens with 9 decimals.
+Each **Higherrrrrrrr** token (e.g., CULT) typically uses \(10^{18}\) base units, displayed as **1,000,000,000** tokens with 9 decimals. However, projects may choose a different fixed supply if desired.
 
 ### 4.2. Locking the Mint Authority
 
-Once any initial allocations (team, community, or liquidity pool) are completed, the token’s **mint authority** is set to `None`, guaranteeing no further minting.
+After any pre-launch allocations (e.g., team, community, or liquidity pool), the protocol sets the token’s **mint authority** to `None`. This step assures participants that no additional tokens can be minted in the future.
 
 ### 4.3. Supply Allocation for CULT
 
 To ensure a balanced and transparent distribution, the CULT token supply is allocated as follows:
 
-1. **Team (Held in a Multisig): 20%**  
+1. **20% to Team (Held in Squads Multisig)**
    - **7.77%** earmarked for the **current team**:
      - **3.33%** specifically allocated to **Carl** (lead developer).  
      - ~**4.44%** for other current team members and advisors.  
@@ -114,11 +109,12 @@ To ensure a balanced and transparent distribution, the CULT token supply is allo
 3. **Base V1 Supporters* : 15%**  
    - See the [Appendix](#15-appendix) for details.
 
-4. **Single-Sided Launch Pool: ~60%**  
-   - Placed into an Orca CL pool for open trading.  
-   - Ensures fair “price discovery,” minimal slippage, and no insider advantage.
 
-> **Note**: These allocations can be re-evaluated prior to final deployment if the community signals strong feedback. However, the above structure aims to offer sufficient liquidity, reward early communities, and grant the team enough stake to continue building without overshadowing the ecosystem.
+4. **60% to Single-Sided Launch Pool**  
+   - Placed into an Orca CL pool for open trading.  
+   - Ensures fair “price discovery” from day one, with no insider advantage.
+
+> **Note**: These allocations can be re-evaluated before final deployment if the community signals strong feedback. However, the above structure should mitigate excessive FUD by providing substantial liquidity, rewarding early communities, and giving the team enough stake to continue building without overshadowing the ecosystem.
 
 ---
 
@@ -126,15 +122,15 @@ To ensure a balanced and transparent distribution, the CULT token supply is allo
 
 ### 5.1. Price-Based Name or Artwork Updates
 
-Under **Higherrrrrrrr**, each threshold crossing prompts an on-chain metadata update. If CULT’s reference price surpasses a milestone, its name/art evolves accordingly.
+Tokens deployed under **Higherrrrrrrr** can define custom thresholds that trigger a name or artwork change. For CULT, if a certain price or market cap milestone is crossed, the metadata (name/URI) updates to reflect the new “level.” Other tokens might use on-chain volume or governance signals as triggers.
 
 ### 5.2. Metaplex On-Chain Updates
 
-Using **mpl-token-metadata**, an “update authority” can push changes to the token’s displayed name, symbol, or URI. The SPL token is never replaced—only its user-facing attributes.
+Using **mpl-token-metadata**, a designated “update authority” can push a new name, symbol (optional), or URI once a threshold is exceeded. The SPL token remains the same under the hood—only the displayed metadata changes.
 
 ### 5.3. On-Chain or Off-Chain Storage
 
-SVG, PNG, or other artwork can be stored on decentralized platforms like IPFS or Arweave. Whenever the token “levels up,” CULT updates its URI to point to the newly evolved file.
+Images may be stored on IPFS, Arweave, or other decentralized storage. The protocol updates the token’s metadata URI to reference the new assets, ensuring near-instant display in compatible wallets and explorers.
 
 ---
 
@@ -142,19 +138,19 @@ SVG, PNG, or other artwork can be stored on decentralized platforms like IPFS or
 
 ### 6.1. The 0.042069% Threshold (420,690 Tokens)
 
-With a 1B supply, addresses holding at least **420,690** CULT become “Conviction” holders, qualifying for NFT relics whenever the token evolves.
+Addresses holding **at least 0.042069%** of the total supply (420,690 tokens if the supply is 1B) qualify as “Conviction” holders. This threshold is intentionally meme-oriented yet enforces a meaningful stake.
 
 ### 6.2. On-Chain Registry
 
-A registry program tracks addresses above this threshold. After each evolution:
+A registry program tracks which addresses surpass the chosen threshold. When the token “levels up”:
 
-1. Addresses below 420,690 are pruned.  
-2. Those still above the threshold receive a newly minted relic NFT referencing the old level.
+1. Addresses below the threshold are pruned.  
+2. Addresses still above the threshold receive a newly minted “Conviction NFT,” signifying they “held through” the previous level.
 
 ### 6.3. Implementation Logic
 
-- **register_holder**: Called by a user who surpasses 420,690 CULT.  
-- **distribute_nfts**: Mints NFTs to all addresses meeting the threshold after each milestone crossing.
+- **register_holder** instruction: Users call this when their balance ≥ threshold.  
+- **distribute_nfts** instruction: After each threshold crossing, the protocol mints an NFT to all registered addresses that remain above the threshold.
 
 ---
 
@@ -162,44 +158,53 @@ A registry program tracks addresses above this threshold. After each evolution:
 
 ### 7.1. Orca as the Chosen AMM
 
-Solana’s **Orca** DEX offers concentrated liquidity (CL) pools, simplifying single-sided liquidity and enabling advanced management of price ranges.
+**Orca** offers a user-friendly concentrated liquidity (CL) DEX on Solana. **Higherrrrrrrr** leverages Orca’s smart contract calls to facilitate token ↔ SOL swaps while automatically implementing the fee/burn structure. Projects can opt to use other AMMs or aggregators as well, since the Higherrrrrrrr logic is modular.
 
-### 7.2. Single-Sided Liquidity Provision
+### 7.2. Single-Sided Liquidity
 
-CULT can launch by depositing only the token side. Traders bring the SOL, discovering a fair price. This method often yields a more organic initial price for memecoins.
+Projects can deposit only their token (e.g., CULT) into an Orca CL pool, letting outside traders introduce SOL. This fosters a “price discovery” mechanic where the community sets the initial price.
 
 ### 7.3. Automated Threshold Checks
 
-When someone swaps SOL for CULT:
+When a swap occurs (e.g., 100 SOL for CULT):
 
-1. Calculate the **1% fee**.  
-2. **0.5%** (CULT side) is burned.  
-3. **0.5%** (SOL side):  
-   - For CULT, put entirely into the liquidity floor.  
-   - For other tokens, partially directed to the protocol’s revenue.  
-4. If the resulting market cap/price passes a threshold, we trigger on-chain metadata updates and distribute relic NFTs to big holders.
+1. The **1%** fee (configurable) is computed.  
+2. **0.5%** of CULT is burned, shrinking total supply.  
+3. **SOL side** handling:
+   - By default, 0.5% is split between liquidity “floor” support and protocol revenue.  
+   - **For CULT**: This ratio is also adjustable—a portion could go to a treasury, a multi-sig, or remain in the floor liquidity.  
+4. If a new threshold is crossed, the protocol triggers metadata updates and/or calls `distribute_nfts`.
 
 ---
 
 ## 8. Fee Collection & Liquidity Reinforcement
 
-### 8.1. 1% Fee Mechanism
+### 8.1. 1% Fee Mechanism (Configurable)
 
-- **Token side (0.5%)**: Burned.  
-- **SOL side (0.5%)**: Used to reinforce the floor or partially collected as protocol revenue in the case of creator tokens.
+Each swap triggers a total fee of **1%** by default, **but the exact percentages and destinations are flexible**. The reference (CULT) model is:
 
-### 8.2. Pokémon Card Store Analogy
+- **Token Side (0.5%)**: Burned to reduce supply.  
+- **SOL Side (0.5%)**: Split between the floor (liquidity reinforcement) and the protocol’s revenue share. The ratio itself—0.25%/0.25%, for instance—can be changed based on governance or market conditions.
 
-Think of a card shop that:
+The **same configurable approach applies** to all new tokens launched via **Higherrrrrrrr**.
 
-- Removes some cards from circulation after each trade (burn).  
-- Adds the cash portion to its “stabilization fund” (floor liquidity).
+### 8.2. Example: Pokémon Card Store Analogy
 
-Over time, supply diminishes, and liquidity for downward support grows.
+Think of a card store:
 
-### 8.3. Adjustable Global Split (New Tokens)
+1. Each time someone trades a Pokémon card, a small fraction of the cards are removed from circulation (burn).  
+2. The store adds some cash portion to “floor liquidity,” ensuring buy-side depth and reducing price collapses.  
+3. A portion of the cash portion might go to store revenue or other designated addresses.
 
-For new tokens, **0.5%** of the SOL side may be divided (e.g., 0.25% to the floor, 0.25% to protocol revenue). **Higherrrrrrrr** can modify this ratio as conditions evolve.
+This is how **Higherrrrrrrr** implements deflation (burn) and stable floor support (SOL side). However, **any portion** of these fees can be redirected to multi-sigs, charities, or specialized pools, based on the project’s preference.
+
+### 8.3. Adjusting the Revenue Split
+
+A key feature is that the protocol (and each project) can dynamically tweak how the SOL-based fees are allocated. For example:
+
+- If the community wants more support for liquidity: **Increase the floor share.**  
+- If the protocol needs operational funding: **Increase the protocol share.**  
+- If the creator wants to fund a community treasury: **Send a portion there.**
 
 ---
 
@@ -207,32 +212,33 @@ For new tokens, **0.5%** of the SOL side may be divided (e.g., 0.25% to the floo
 
 ### 9.1. Multi-Sig Upgrade Authority
 
-A **Squads** or similar multi-sig controls the program. Multiple signers must approve upgrades, preventing any single entity from unilaterally making changes.
+Initially, a multi-sig (e.g., **Squads**) may control the main program to allow for quick fixes or parameter changes. This balances administrative flexibility with reduced risk of a single point of failure.
 
 ### 9.2. Transition to Full Immutability
 
-If stability is reached and the community prefers, the upgrade authority can be burned. The Metaplex metadata authority can also be burned, freezing name/art evolution at its final state.
+If the community desires maximum trustlessness, the upgrade authority can be set to `None`, rendering the program immutable. The same applies to burning the Metaplex metadata update authority, permanently fixing the token’s final name/art progression.
 
 ---
 
 ## 10. Launchpad & Ecosystem Vision
 
-**Higherrrrrrrr** aims to become a fun yet robust **launchpad**, enabling:
+**Higherrrrrrrr** is more than a single token—it’s a framework for spawning entire ecosystems of threshold-focused tokens. Key aspirations:
 
-1. **Multiple Meme Tokens** with identical deflationary and metadata-evolving logic.  
-2. **Flexible Thresholds**: Different tokens can define their own light-hearted or brand-based milestones.  
-3. **NFT Ecosystem**: Each threshold crossing can produce collectible relics for large holders.
+1. **Multiple Tokens**: Each adopting the 1B supply or an alternate fixed supply, threshold evolutions, and big-holder NFT logic.  
+2. **Optional Parameters**: Projects define unique threshold tiers, distribution splits, or NFT art styles.  
+3. **Financial Flexibility**: Creators can direct fees to multiple addresses, multi-sigs, treasuries, or even other protocols.  
+4. **Cross-Promotion**: Launching on **Higherrrrrrrr** confers a brand identity and a proven set of mechanics.
 
 ---
 
 ## 11. Use Cases & Scenarios
 
-1. **Meme-Focused Token**  
-   - A coin that changes “characters” at every \$X million market cap, awarding relic NFTs to big holders.  
-2. **Brand Activation**  
-   - A brand can launch a fun token, awarding brand-themed NFTs each time the token’s price hits new milestones.  
-3. **DAO Treasury**  
-   - A DAO might adopt floor mechanics to ensure stability, distributing “DAO relics” to members who maintain a large stake.
+1. **Playful / Thematic Token**  
+   - Example: “FrogLeaps” token crosses thresholds at \$0.001, \$0.01, and \$0.069. Large holders above 0.042069% get “Frog Royalty” NFTs. Part of the SOL fee might fund amphibian conservation.  
+2. **Brand or Marketing Experiment**  
+   - A brand can tie token “evolutions” to milestone campaigns, awarding “loyalty NFTs” to big supporters. Fee splits could channel a portion of revenue to brand charities or events.  
+3. **DAO & Governance**  
+   - A DAO might adopt the approach to gamify treasury growth, distributing new “era NFTs” each time a certain treasury level is reached, while a portion of the fees flows back to the DAO.
 
 ---
 
@@ -240,54 +246,63 @@ If stability is reached and the community prefers, the upgrade authority can be 
 
 ### 12.1. Typical Deployment Flow
 
-1. **Create** the CULT token (1B supply, 9 decimals).  
-2. **Burn** the mint authority to cap supply.  
-3. **Define** evolution thresholds (e.g., \$0.0001, \$0.001, \$0.01).  
-4. **Allocate** supply per the plan:  
-   - **20%** Team (multisig-controlled)  
-   - **5%** Migration LP Support*  
-   - **15%** Base V1 Supporters*  
-   - **60%** Single-Sided Launch Pool  
-5. **Register** big holders (≥ 420,690 CULT) for Conviction NFTs.  
-6. **Integrate** a front-end for threshold display, NFT claiming, and name/art evolution.
+1. **Create** the token with a chosen supply (e.g., 1B, 9 decimals).  
+2. **Allocate** supply (team, community, liquidity pool, etc.) as desired.  
+3. **Burn** the mint authority (no inflation possible).  
+4. **Define** threshold triggers (price, market cap, volume, or any logic).  
+5. **Register** large holders so they can receive Conviction NFTs.  
+6. **Set** or finalize the fee split structure (burn vs. floor vs. protocol vs. custom addresses).  
+7. **Provide** single-sided liquidity in Orca or a chosen DEX.  
+8. **Integrate** or deploy a front-end that tracks evolutions, NFT awards, and on-chain data.
 
 ### 12.2. Team Vesting & Multi-Sig
 
-- **7.77%** is vested linearly over 12 months for the current team (3.33% for Carl, ~4.44% for others).  
-- **12.33%** remains for future expansions, accessible only via the team’s multi-sig.  
-- No single party can dump or relocate large amounts without multi-sig approval.
+- For CULT, **20%** goes to a multi-sig: **7.77%** vested linearly over 12 months for the current team, **12.33%** for expansions.  
+- Other teams can define vesting schedules differently or adopt their own multi-sig structures.  
+- All team allocations remain under multi-sig control, ensuring no single person can move large balances unilaterally.
 
-### 12.3. Developer-Focused Community
+### 12.3. Building a Developer-Focused Community
 
-- Provide an **Anchor IDL** and reference front-end, so devs can easily integrate or replicate the threshold, burn, and NFT logic.  
-- Encourage community proposals for new light-hearted thresholds and evolutions.
+- A reference front-end or CLI could be provided, allowing anyone to inspect threshold data, register for Conviction NFTs, and view burn/liquidity transactions.  
+- An **IDL** (Interface Definition Language) is published if using Anchor, detailing instructions like `swap`, `distribute_nfts`, `update_metadata`, etc.
 
 ---
 
 ## 13. Beyond the Current Scope
 
-Potential future upgrades:
+Future expansions could include:
 
-- **Cross-Chain Launches**: Bridging to other L2s or chains.  
-- **Additional NFT Tiers** for mid-level holders or time-based achievements.  
-- **More Advanced Floor Management**: Dynamic liquidity repositioning based on volatility metrics.
+- **Bridging** to other chains or Layer 2 solutions.  
+- **Additional NFT Tiers** for smaller holders (partial “stamps” or progressive collectibles).  
+- **Dynamic Liquidity Strategies** adjusting single-sided pool positions based on market volatility.  
+- **Composable Fee Logic** integrating with other on-chain programs for yield farming or stablecoin issuance.
+
 
 ---
 
 ## 14. Conclusion
 
-**Higherrrrrrrr (CULT)** merges a threshold-driven aesthetic with a **deflationary** framework on Solana. Key takeaways:
+**Higherrrrrrrr (CULT)** merges threshold-based meme dynamics with a robust, **deflationary** architecture on Solana, emphasizing configurability at every turn. Core elements include:
 
-1. **Fixed Supply** (1B, 9 decimals): No further minting.  
-2. **Evolutions**: Metaplex metadata changes at price/cap milestones.  
-3. **Conviction Threshold (0.042069%)**: Large holders get relic NFTs each time the token “levels up.”  
-4. **1% Fee**:  
-   - CULT: 0.5% burn + 0.5% single-sided SOL to the floor.  
-   - Creator Tokens: 0.5% burn + 0.5% SOL split (floor/protocol revenue).  
-5. **Team Allocation** (20%): 7.77% vested for the current team, 12.33% for expansions, all in a multisig.  
-6. **Multi-Sig / Immutability**: Upgradable early, lockable if desired.
+1. **Fixed Supply (e.g., 1B, 9 Decimals)**  
+   - No further minting after launch.  
 
-By integrating light-hearted threshold evolutions with a serious burn-and-floor mechanism, **Higherrrrrrrr** sets a new precedent for “fun meets fundamentals.” The result is a stable-yet-entertaining memecoin environment—ideally suited for both degens and robust on-chain developers.
+2. **Threshold-Based Metadata Evolutions**  
+   - Token name/art updates at each milestone.  
+
+3. **Conviction NFTs for Big Holders**  
+   - Addresses holding ≥ 0.042069% of total supply gain commemorative NFTs each evolution.  
+
+4. **1% Fee on Swaps (Adjustable)**  
+   - 0.5% burned from the token side, 0.5% of SOL split among floor support, protocol revenue, or other addresses. Even for CULT, this ratio can be fine-tuned.  
+
+5. **Team Allocation & Vesting**  
+   - Example: 20% total for team & expansions, locked in multi-sigs with vesting for current contributors.  
+
+6. **Optional Multi-Sig or Immutability**  
+   - The program can remain upgradable or be fully locked once the community is satisfied.  
+
+By blending a playful, threshold-based aesthetic with stable, trust-minimized tokenomics—and by permitting the fluid redirection of fees—**Higherrrrrrrr** aspires to be the model for **configurable, evolution-focused tokens** on Solana.
 
 ---
 
