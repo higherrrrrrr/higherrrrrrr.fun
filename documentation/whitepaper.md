@@ -91,28 +91,29 @@ Each **Higherrrrrrrr** token (e.g., CULT) typically uses \(10^{18}\) base units,
 
 After any pre-launch allocations (e.g., team, community, or liquidity pool), the protocol sets the token’s **mint authority** to `None`. This step assures participants that no additional tokens can be minted in the future.
 
-### 4.3. Reference Allocation for CULT
+### 4.3. Supply Allocation for CULT
 
-Below is an **example** allocation for the flagship **CULT** token. Other projects can adapt this structure to their own needs, including sending various amounts to different addresses or multi-sigs:
+To ensure a balanced and transparent distribution, the CULT token supply is allocated as follows:
 
-1. **20% to Team (Held in Squads Multisig)**  
-   - **7.77%** for the **current team**:  
-     - **3.33%** for **Carl** (lead developer)  
-     - ~**4.44%** for other key contributors  
-   - **12.33%** reserved for future expansions, marketing, strategic OTC sales, and broader ecosystem initiatives.  
-   - **Vesting**: The 7.77% allocated to current team/advisors vests linearly over **12 months**. All team funds remain in a **Squads multisig**.
+1. **20% to Team (Held in Squads Multisig)**
+   - **7.77%** earmarked for the **current team**:
+     - **3.33%** specifically allocated to **Carl** (lead developer).  
+     - ~**4.44%** for other current team members and advisors.  
+   - **12.33%** reserved for **future expansions**, marketing, strategic OTC sales, and broader ecosystem initiatives.  
+   - **Vesting**: The 7.77% allocated to current team/advisors will vest linearly over **12 months**. This ensures alignment and continuous development. All of these funds remain in the **Squads multisig**, requiring multiple signatures for any disbursement. The 12.33% expansion reserve is likewise held in the same multisig, released only by team or governance approval.
 
 2. **5% to Seed HARDER/CULT Liquidity**  
-   - Establishes an LP with matching deflationary/floor mechanics.  
-   - **Note**: “HARDER” tokens would also be subject to their own burn or fee mechanisms, if chosen.
+   - Establishes a **HARDER/CULT** LP with similar fee mechanics (0.5% burned on the token side, 0.5% of SOL or HARDER side can be directed to the floor support for CULT).  
+   - **Note:** The “HARDER” tokens traded against CULT will be burned on their side to maintain deflationary principles, while the CULT side supports the floor for CULT.
 
 3. **15% to $HARDER & $IDK Communities**  
-   - Used for airdrops, bridging claims, or other distribution methods to reward existing communities.
+   - Airdrops, bridging claims, or other distribution methods to reward existing HARDER/IDK holders.
 
 4. **60% to Single-Sided Launch Pool**  
-   - Placed into an Orca CL pool for open trading and fair price discovery.
+   - Placed into an Orca CL pool for open trading.  
+   - Ensures fair “price discovery” from day one, with no insider advantage.
 
-> **Note**: This is a starting template. Different projects can adjust these allocations (or fee distributions) as they see fit.
+> **Note**: These allocations can be re-evaluated before final deployment if the community signals strong feedback. However, the above structure should mitigate excessive FUD by providing substantial liquidity, rewarding early communities, and giving the team enough stake to continue building without overshadowing the ecosystem.
 
 ---
 
