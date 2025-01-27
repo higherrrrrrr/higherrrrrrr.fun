@@ -1,157 +1,53 @@
+import styles from '../styles/HowItWorks.module.css';
+
 export default function HowItWorks() {
   return (
-    <div className="prose prose-invert prose-green max-w-none">
-      <div className="max-w-[800px] mx-auto">
-        <h1 className="text-4xl font-mono mb-8 text-green-500">How it Works?</h1>
-        
-        <div className="space-y-12">
-          <section>
-            <h2 className="text-2xl font-mono text-green-500">Evolutionary Tokens</h2>
-            <p className="text-green-500">
-              Traditional tokens remain static from launch, missing the dynamic energy of the communities they represent. 
-              We're introducing something different - tokens that evolve and grow with their community.
-            </p>
-            <p className="text-green-500">
-              Each price milestone unlocks a new evolution, transforming the token's fundamental properties on-chain. 
-              This creates natural momentum as communities work together toward the next evolution, with each new form 
-              becoming a shared achievement.
-            </p>
-          </section>
+    <div className={styles['how-container']}>
+      <h1>How It Works</h1>
 
-          <section>
-            <h2 className="text-2xl font-mono text-green-500">How Evolutions Work</h2>
-            <p className="text-green-500">
-              Every purchase moves the token closer to its next evolution. As the price reaches new milestones, 
-              the token automatically transforms - its name, symbol, and identity evolve through smart contracts:
-            </p>
-            <div className="overflow-x-auto my-6 bg-black/25 rounded-lg border border-green-500/20">
-              <table className="w-full text-green-500 border-collapse">
-                <thead>
-                  <tr className="border-b border-green-500/20">
-                    <th className="text-left p-4 font-mono">Level</th>
-                    <th className="text-left p-4 font-mono">Name</th>
-                    <th className="text-right p-4 font-mono">Price</th>
-                    <th className="text-right p-4 font-mono">Market Cap</th>
-                    <th className="text-right p-4 font-mono">State</th>
-                  </tr>
-                </thead>
-                <tbody className="font-mono">
-                  <tr className="border-b border-green-500/10">
-                    <td className="p-4">1</td>
-                    <td className="p-4 whitespace-nowrap">¯\_(ツ)_/¯</td>
-                    <td className="text-right p-4">Free</td>
-                    <td className="text-right p-4">-</td>
-                    <td className="text-right p-4 text-green-500">Achieved</td>
-                  </tr>
-                  <tr className="border-b border-green-500/10">
-                    <td className="p-4">2</td>
-                    <td className="p-4 whitespace-nowrap">¯\__(ツ)__/¯</td>
-                    <td className="text-right p-4">$0.000037</td>
-                    <td className="text-right p-4">$36.50K</td>
-                    <td className="text-right p-4 text-green-500">Achieved</td>
-                  </tr>
-                  <tr className="border-b border-green-500/10">
-                    <td className="p-4">3</td>
-                    <td className="p-4 whitespace-nowrap">¯\____(ツ)____/¯</td>
-                    <td className="text-right p-4">$0.000073</td>
-                    <td className="text-right p-4">$73.00K</td>
-                    <td className="text-right p-4 text-green-500">Achieved</td>
-                  </tr>
-                  <tr className="border-b border-green-500/10">
-                    <td className="p-4">4</td>
-                    <td className="p-4 whitespace-nowrap">¯\______(ツ)______/¯</td>
-                    <td className="text-right p-4">$0.000146</td>
-                    <td className="text-right p-4">$146.00K</td>
-                    <td className="text-right p-4 text-green-500">Current</td>
-                  </tr>
-                  <tr>
-                    <td className="p-4">5</td>
-                    <td className="p-4 whitespace-nowrap">¯\_________(ツ)________/¯</td>
-                    <td className="text-right p-4">$0.000292</td>
-                    <td className="text-right p-4">$292.00K</td>
-                    <td className="text-right p-4 text-gray-500">Locked</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="text-sm text-green-500/60 mt-4">
-              Each evolution extends the arms of our friend (ツ), representing the growing reach of your community
-            </p>
-          </section>
+      <div className={styles['how-step']}>
+        <h3>1. Connect Your Wallet</h3>
+        <p>
+          Start by connecting your Web3 wallet. We support MetaMask, WalletConnect, 
+          and other popular wallets on Base network.
+        </p>
+      </div>
 
-          <section>
-            <h2 className="text-2xl font-mono text-green-500">Conviction NFTs</h2>
-            <p className="text-green-500">
-              Conviction NFTs are your proof of being an early believer. When you purchase more than 1,001,001 tokens, 
-              you automatically receive a unique NFT that captures that moment in the token's evolution.
-            </p>
-            <p className="text-green-500">
-              These NFTs become increasingly valuable because:
-            </p>
-            <ul className="text-green-500">
-              <li>Earlier purchases are rarer and more historically significant</li>
-              <li>Each evolution stage has a limited number of possible NFTs</li>
-              <li>They prove you were there before major price milestones</li>
-              <li>The dynamic artwork evolves with the token's journey</li>
-              <li>They're permanent on-chain proof of your early conviction</li>
-            </ul>
-          </section>
+      <div className={styles['how-step']}>
+        <h3>2. Choose Your Token Type</h3>
+        <p>
+          Select from our range of token templates: Standard ERC20, Liquidity-backed, 
+          or Advanced tokens with custom mechanics.
+        </p>
+      </div>
 
-          <section>
-            <h2 className="text-2xl font-mono font-bold text-green-500 mb-4">NFT Rewards</h2>
-            <p className="text-green-500/80 font-mono">
-              To be eligible for NFT rewards, you must purchase tokens directly through our protocol - either through the buy function onchain or through the interface. 
-              Trades made on external exchanges or through other means will not count towards NFT eligibility. 
-              This ensures fair distribution and rewards for our direct platform users.
-            </p>
-          </section>
+      <div className={styles['how-step']}>
+        <h3>3. Configure Parameters</h3>
+        <p>
+          Set your token's initial parameters including:
+        </p>
+        <ul>
+          <li>Total supply</li>
+          <li>Token name and symbol</li>
+          <li>Distribution mechanics</li>
+          <li>Trading parameters</li>
+        </ul>
+      </div>
 
-          <section>
-            <h2 className="text-2xl font-mono text-green-500">FAQ</h2>
-            
-            <h3 className="text-xl font-mono text-green-500 mt-6">How much does it cost to launch a token?</h3>
-            <p className="text-green-500">
-              Launching a token is completely free - you only pay the network's gas fees.
-            </p>
+      <div className={styles['how-step']}>
+        <h3>4. Launch & Verify</h3>
+        <p>
+          Deploy your token with one click. Your contract will be automatically 
+          verified on Basescan and listed on our platform.
+        </p>
+      </div>
 
-            <h3 className="text-xl font-mono text-green-500 mt-6">How does the initial bonding curve work?</h3>
-            <p className="text-green-500">
-              The bonding curve raises 8 ETH to establish initial liquidity, reaching approximately a $120,000 market cap. 
-              After the raise, 200 million tokens and 8 ETH are permanently locked in the Uniswap liquidity pools, 
-              ensuring sustainable trading for the community.
-            </p>
-
-            <h3 className="text-xl font-mono text-green-500 mt-6">When do I get my Conviction NFT?</h3>
-            <p className="text-green-500">
-              NFTs are automatically minted when you purchase more than 1,001,001 tokens in a single transaction.
-            </p>
-
-            <h3 className="text-xl font-mono text-green-500 mt-6">Who controls the evolution process?</h3>
-            <p className="text-green-500">
-              Everything happens automatically through smart contracts. There's no team intervention - the community's 
-              trading activity directly drives evolution.
-            </p>
-
-            <h3 className="text-xl font-mono text-green-500 mt-6">What happens after the final evolution?</h3>
-            <p className="text-green-500">
-              The token maintains its final form but continues trading freely on the market. The achievement of reaching
-              the final evolution is permanently recorded in its history.
-            </p>
-
-            <h3 className="text-xl font-mono text-green-500 mt-6">Can I see the code?</h3>
-            <p className="text-green-500">
-              Yes! Our protocol is fully open source and available for review on{' '}
-              <a 
-                href="https://github.com/Thrive-Point-Group/higherrrrrrr-protocol" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="underline hover:text-green-400"
-              >
-                GitHub
-              </a>.
-            </p>
-          </section>
-        </div>
+      <div className={styles['how-step']}>
+        <h3>5. Manage Your Token</h3>
+        <p>
+          Access your dashboard to monitor performance, manage parameters, and 
+          interact with your community through our platform.
+        </p>
       </div>
     </div>
   );

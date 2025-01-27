@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg 
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="600"
+    height="800"
+    viewBox="0 0 600 800"
+    version="1.1"
+>
+  <style>
+    @keyframes strokeFlicker {
+      0%   { stroke-dashoffset: 0; }
+      50%  { stroke-dashoffset: 11; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .flicker-stroke {
+      stroke-dasharray: 11,11;
+      animation: strokeFlicker 0.095s infinite steps(6);
+    }
+    @keyframes colorPulse1 {
+      0%   { fill: #FF3AF7; }
+      25%  { fill: #FF8500; }
+      50%  { fill: #ADFF2F; }
+      75%  { fill: #00C3FF; }
+      100% { fill: #FF3AF7; }
+    }
+    .pulse-bg { 
+      animation: colorPulse1 3.8s infinite;
+      filter: saturate(120%);
+    }
+    @keyframes colorPulse2 {
+      0%   { fill: #FF8500; }
+      25%  { fill: #FF00EA; }
+      50%  { fill: #FFFF00; }
+      75%  { fill: #00FFC0; }
+      100% { fill: #FF8500; }
+    }
+    .pulse-bg2 { 
+      animation: colorPulse2 3.8s infinite;
+      filter: saturate(120%);
+    }
+    .glow-box {
+      filter: url(#intenseNeonGlow);
+    }
+    .pixel-font {
+      font-family: monospace;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .card-title {
+      fill: #FFFCE8;
+      font-size: 24px;
+      text-anchor: middle;
+    }
+    .stat-text {
+      fill: #FFC0CB;
+      font-size: 18px;
+    }
+    .desc-text {
+      fill: #00FF00;
+      font-size: 16px;
+      font-family: sans-serif;
+      text-anchor: middle;
+    }
+    .rareness-text {
+      fill: #00FF00;
+      font-size: 20px;
+      font-weight: bold;
+      text-anchor: middle;
+    }
+    .rarity-line {
+      fill: #FF00EA;
+      font-size: 24px;
+      font-weight: bold;
+      text-anchor: middle;
+    }
+    .footer-text {
+      fill: #FFD700;
+      font-size: 12px;
+      text-anchor: middle;
+    }
+    text { user-select: none; }
+  </style>
+
+  <defs>
+    <filter id="rainbowBG" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.021"
+        numOctaves="1"
+        seed="9"
+        result="noiseBase"
+      />
+      <feColorMatrix
+        in="noiseBase"
+        type="hueRotate"
+        values="0"
+        result="colorSwirl"
+      >
+        <animate
+          attributeName="values"
+          from="0"
+          to="360"
+          dur="5.8s"
+          repeatCount="indefinite"
+        />
+      </feColorMatrix>
+      <feColorMatrix
+        in="colorSwirl"
+        type="matrix"
+        values="
+          1.2 0   0   0   0
+          0   1.2 0   0   0
+          0   0   1.2 0   0
+          0   0   0   1   0
+        "
+        result="enhancedSwirl"
+      />
+      <feBlend in="SourceGraphic" in2="enhancedSwirl" mode="overlay"/>
+    </filter>
+    
+    <filter id="intenseNeonGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow 
+        dx="0" dy="0"
+        stdDeviation="10.5"
+        flood-color="#22C55E"
+        flood-opacity="1"
+      />
+    </filter>
+
+    <pattern id="starPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#000"/>
+      <circle cx="20" cy="20" r="1" fill="#FFF"/>
+      
+    </pattern>
+
+    <linearGradient id="eyeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FF0000"/>
+      <stop offset="100%" stop-color="#FF00FF"/>
+    </linearGradient>
+  </defs>
+
+  <rect
+    x="0" y="0"
+    width="600" height="800"
+    fill="#000"
+    filter="url(#rainbowBG)"
+  />
+  
+  <g class="pixel-font">
+    <rect
+      x="10" y="10"
+      width="580" height="780"
+      rx="20" ry="20"
+      fill="none"
+      stroke="#00FFC0"
+      stroke-width="10.5"
+      class="flicker-stroke"
+    />
+
+    <rect
+      x="30" y="20"
+      width="540" height="60"
+      rx="10" ry="10"
+      class="pulse-bg"
+      stroke="#5A3419"
+      stroke-width="4"
+    />
+    <text class="card-title" x="300" y="58">HIGHER^7 CULT MEMBER</text>
+    
+    <rect
+      x="30" y="90"
+      width="540" height="40"
+      rx="5" ry="5"
+      class="pulse-bg2"
+      stroke="#5A3419"
+      stroke-width="3"
+    />
+    <text class="stat-text" x="70"  y="116">HP: 69</text>
+    <text class="stat-text" x="190" y="116">ATK: 420</text>
+    <text class="stat-text" x="320" y="116">SPD: 1337</text>
+    <text class="stat-text" x="460" y="116">ELE: LSD</text>
+
+    <rect
+      x="80" y="160"
+      width="440" height="280"
+      rx="10" ry="10"
+      fill="#000"
+      stroke="#FFFF00"
+      stroke-width="4.333333333333333"
+      class="flicker-stroke"
+    />
+    
+    <rect
+      x="80" y="160"
+      width="440" height="280"
+      rx="10" ry="10"
+      fill="url(#starPattern)"
+      opacity="0.78"
+    />
+
+    <path
+      d="M250,210 c-20,-20 -45,-20 -40,0"
+      fill="none" stroke="#FF0000" stroke-width="4"
+    />
+    <path
+      d="M320,210 c20,-20 45,-20 40,0"
+      fill="none" stroke="#FF0000" stroke-width="4"
+    />
+
+    <ellipse cx="260" cy="250" rx="13" ry="26" fill="url(#eyeGrad)"/>
+    <circle cx="260" cy="250" r="4" fill="#000"/>
+    <ellipse cx="320" cy="250" rx="13" ry="26" fill="url(#eyeGrad)"/>
+    <circle cx="320" cy="250" r="4" fill="#000"/>
+
+    <path
+      d="M137.474 19.2L184.862 7.0005L171.82 53.8766L162.398 44.3588L158.903 40.828L155.35 44.3008L89.4148 108.749L89.4106 108.753C87.094 111.023 83.3658 111.078 80.9764 108.867L80.9751 108.866L54.1559 84.0601L50.7263 80.8879L47.3289 84.0945L15.2929 114.331C15.2925 114.332 15.292 114.332 15.2916 114.333C14.1082 115.447 12.607 116 11.0913 116C9.45082 116 7.85937 115.368 6.66925 114.121L6.66222 114.114C4.36451 111.715 4.4588 107.926 6.8841 105.636C6.88422 105.636 6.88434 105.636 6.88446 105.635L46.4774 68.2616L46.481 68.2581C48.8083 66.0569 52.4792 66.0371 54.8318 68.2171L54.8344 68.2194L81.5162 92.908L85.0071 96.1381L88.4076 92.8131L146.773 35.7443L150.37 32.2271L146.831 28.6517L137.474 19.2Z"
+      fill="#00FF00" stroke="#00FF00" stroke-width="10"
+      transform="translate(280,300) scale(0.16)"
+      opacity="0.9"
+    />
+
+    <text x="300" y="400" fill="#00FFFF" font-size="32" text-anchor="middle">↓↓↓</text>
+
+    <text x="160" y="300" fill="#00FF00" font-size="24" text-anchor="middle">8===D</text>
+    <text x="440" y="300" fill="#00FF00" font-size="24" text-anchor="middle">~~~~~</text>
+
+    <rect
+      x="60" y="460"
+      width="480" height="150"
+      rx="10" ry="10"
+      fill="#000"
+      class="glow-box"
+    />
+    <text class="desc-text">
+      <tspan x="300" y="500">Summoned from the cryptic depths</tspan>
+      <tspan x="300" y="525">of degenerate lore, this artifact</tspan>
+      <tspan x="300" y="550">binds the faithful to Higherrrrrrr.</tspan>
+      <tspan x="300" y="575">Wen reveal? Wen pump?</tspan>
+      <tspan x="300" y="600">Only the chosen may ascend.</tspan>
+    </text>
+
+    <rect
+      x="150" y="620"
+      width="300" height="70"
+      rx="8" ry="8"
+      fill="#000"
+      class="glow-box"
+    />
+    <text class="rareness-text" x="300" y="650">Rareness Score: 96.19</text>
+    <text class="rarity-line" x="300" y="675">Rare AF</text>
+
+    <text class="footer-text" x="300" y="770">© 2025 Cult of Higherrrrrrr | All Rites Reserved</text>
+  </g>
+</svg>

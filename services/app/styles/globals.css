@@ -4,34 +4,44 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  font-family: "Pixelify Mono", monospace !important;
-}
-
 :root {
   --background: #000000;
   --foreground: #4ade80;
   --countdown-color: rgb(34 197 94);
+  --text-primary: #22c55e;
+  --text-muted: rgba(34, 197, 94, 0.6);
+  --border-color: rgba(34, 197, 94, 0.2);
+  --transition-speed: 0.2s;
+  --bg-dark: #0a0a0f;
+  --bg-darker: #05050a;
+  --neon-green: #39ff14;
+  --neon-pink: #ff00c3;
+  --neon-purple: #b100ff;
+  --neon-blue: #00c3ff;
+  --accent-color: var(--neon-green);
+  --glow-neon-green: 0 0 8px rgba(57, 255, 20, 0.7);
+  --glow-neon-pink: 0 0 8px rgba(255, 0, 195, 0.7);
+}
+
+* {
+  font-family: "Pixelify Mono", monospace !important;
+  scrollbar-width: thin;
+  scrollbar-color: theme("colors.green.800") theme("colors.black");
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: theme("colors.green.800") theme("colors.black");
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
 }
 
 ::selection {
   background-color: theme("colors.green.800");
 }
 
-.digit > * {
-  filter: none !important;
-}
-
+/* Terminal styles */
 .terminal-text {
   text-shadow: 
     0 0 2px rgba(74, 222, 128, 0.4),
@@ -39,10 +49,69 @@ body {
   line-height: 1.6;
 }
 
-/* Add subtle grid background */
+.digit > * {
+  filter: none !important;
+}
+
+/* Background grid */
 .bg-black {
   background-color: #000000;
   background-image: radial-gradient(rgba(0, 30, 0, 0.4) 2px, transparent 0);
   background-size: 32px 32px;
   background-position: -16px -16px;
+}
+
+/* Links */
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color var(--transition-speed);
+}
+
+a:hover {
+  color: var(--text-muted);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: var(--text-primary);
+  color: var(--background);
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background var(--transition-speed);
+}
+
+.btn:hover {
+  background: #16a34a;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1rem;
+  transition: border-color var(--transition-speed);
+}
+
+.card:hover {
+  border-color: var(--text-primary);
+}
+
+/* Forms */
+input, select, textarea {
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--text-primary);
+  outline: none;
 }

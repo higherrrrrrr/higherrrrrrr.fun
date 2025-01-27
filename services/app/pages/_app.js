@@ -6,6 +6,7 @@ import Launch from './launch';
 import { useEffect } from 'react';
 import posthog from 'posthog-js';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 
 const queryClient = new QueryClient();
 
@@ -46,8 +47,13 @@ export default function App({ Component, pageProps }) {
   return (
     <QueryClientProvider client={queryClient}>
       <Web3Provider>
+        <Head>
+          <title>Higherrrrrrr Alpha</title>
+        </Head>
         <MainLayout>
-          <ShowComponent {...pageProps} />
+          <div className="min-h-screen bg-black text-green-500 font-mono">
+            <ShowComponent {...pageProps} />
+          </div>
         </MainLayout>
       </Web3Provider>
     </QueryClientProvider>

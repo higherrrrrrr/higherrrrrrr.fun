@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import styles from '../styles/Plex.module.css'
 
 export default function TrustScorePage() {
   const router = useRouter()
@@ -15,8 +16,7 @@ export default function TrustScorePage() {
   ])
   const [tweetId, setTweetId] = useState('')
   const [output, setOutput] = useState(
-    'Bitcoin was introduced in a white paper titled "Bitcoin: A Peer-to-Peer Electronic Cash System," published on October 31, 2008. The author of this paper used the pseudonym "Satoshi Nakamoto." Despite extensive research and speculation, the true identity behind this name remains unknown. Over the years, various individuals have been proposed as Satoshi Nakamoto—some by investigators, some through their own claims—but conclusive proof has never been provided to the satisfaction of the broader community or independent experts.\n\n' +
-    'Satoshi Nakamoto, under this pseudonym, released the first version of the Bitcoin software in January 2009. He continued to contribute to the project\'s development and communicate through emails and online forums until around 2010. After that time, his direct involvement ceased, and control of the code repository and project leadership passed to other contributors. Since then, the Bitcoin community and its ecosystem have grown substantially, but the mystery of Satoshi Nakamoto\'s true identity endures.'
+    'Bitcoin was introduced in a white paper titled "Bitcoin: A Peer-to-Peer Electronic Cash System," published on October 31, 2008...'
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -41,11 +41,8 @@ export default function TrustScorePage() {
       }
 
       setMessages(data.tweet.generation.messages)
-      
       setOutput(data.tweet.text)
-      
       setTweetId(id)
-
     } catch (err) {
       setError('Failed to load tweet data: ' + err.message)
     } finally {
@@ -118,100 +115,92 @@ export default function TrustScorePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <main className="max-w-4xl mx-auto px-4 py-16">
-        <div className="mb-12 space-y-6">
-          <div>
-            <div className="mb-4">
-              <h1 className="text-4xl font-mono text-[#2FE878] mb-2">
-                Plex: Simple and Transparent AI Bot Verification
-              </h1>
-              <span className="inline-block px-4 py-1.5 bg-[#2FE878]/10 border border-[#2FE878] text-[#2FE878] text-base font-mono rounded-md">
-                ALPHA
-              </span>
-            </div>
-            <p className="text-[#2FE878] leading-relaxed opacity-80">
-              A lightweight tool for verifying the authenticity of AI-generated messages. 
-              Plex analyzes statistical patterns to help distinguish genuine AI outputs from potentially manipulated ones.
-            </p>
-          </div>
-
-          <div className="border-l-2 border-[#2FE878]/20 pl-4">
-            <p className="text-[#2FE878] text-sm leading-relaxed opacity-80">
-              <span className="text-[#2FE878] opacity-100 font-bold">Important:</span> For accurate results, 
-              include the complete conversation context leading up to the output you want to verify, *including the system prompt*. 
-              The system relies on the full context to properly analyze response patterns and determine authenticity.
-            </p>
-          </div>
-
-          <div className="flex gap-4">
-            <a 
-              href="https://github.com/Thrive-Point-Group/plex"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-[#2FE878] hover:text-[#2FE878]/80 transition-colors"
-            >
-              <span className="mr-2">📚</span>View on GitHub
-            </a>
-            <a 
-              href="https://mirror.xyz/0xBA525e4c0d544eFc01af4382CA5a589b7e0656Ce/ijSvx1DGWBRW-yiVEkhkoB3jnrc4KkGRmMtNUi2izdU"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-[#2FE878] hover:text-[#2FE878]/80 transition-colors"
-            >
-              <span className="mr-2">📖</span>Read about Building Trustworthy AI
-            </a>
-          </div>
+    <div className={styles['plex-container']}>
+      <main className={styles['plex-main']}>
+        <div className={styles['header-section']}>
+          <h1>Plex: Simple and Transparent AI Bot Verification</h1>
+          <span className={styles['alpha-badge']}>ALPHA</span>
+          <p className={styles['description']}>
+            A lightweight tool for verifying the authenticity of AI-generated messages. 
+            Plex analyzes statistical patterns to help distinguish genuine AI outputs from potentially manipulated ones.
+          </p>
         </div>
-        
-        <div className="border border-[#2FE878]/20 rounded-lg p-6 mb-8">
-          <h2 className="text-[#2FE878] text-xl font-mono mb-6">Import from Tweet</h2>
-          <div className="flex gap-4">
+
+        <div className={styles['important-section']}>
+          <p className={styles['important-text']}>
+            <span className={styles['important-highlight']}>Important:</span> For accurate results, 
+            include the complete conversation context leading up to the output you want to verify, *including the system prompt*. 
+            The system relies on the full context to properly analyze response patterns and determine authenticity.
+          </p>
+        </div>
+
+        <div className={styles['links-section']}>
+          <a 
+            href="https://github.com/Thrive-Point-Group/plex"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles['link']}
+          >
+            <span className={styles['link-icon']}>📚</span>View on GitHub
+          </a>
+          <a 
+            href="https://mirror.xyz/0xBA525e4c0d544eFc01af4382CA5a589b7e0656Ce/ijSvx1DGWBRW-yiVEkhkoB3jnrc4KkGRmMtNUi2izdU"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles['link']}
+          >
+            <span className={styles['link-icon']}>📖</span>Read about Building Trustworthy AI
+          </a>
+        </div>
+
+        <div className={styles['import-section']}>
+          <h2>Import from Tweet</h2>
+          <div className={styles['import-input-section']}>
             <input
               type="text"
               value={tweetId}
               onChange={(e) => setTweetId(e.target.value)}
               placeholder="Enter Tweet ID..."
-              className="flex-1 bg-black border border-[#2FE878]/20 rounded px-3 py-2 font-mono focus:border-[#2FE878] focus:outline-none"
+              className={styles['import-input']}
             />
             <button
               onClick={importFromTweet}
-              className="bg-black hover:bg-[#2FE878]/10 border border-[#2FE878]/20 text-[#2FE878] rounded px-4 transition-colors font-mono"
+              className={styles['import-button']}
             >
               Import
             </button>
           </div>
-          <p className="mt-2 text-[#2FE878]/60 text-sm">
+          <p className={styles['import-description']}>
             Import conversation from Higherrrrrrr agents (coming when agents launch)
           </p>
         </div>
 
-        <div className="border border-[#2FE878]/20 rounded-lg p-6 mb-8">
-          <h2 className="text-[#2FE878] text-xl font-mono mb-6">Messages</h2>
+        <div className={styles['messages-section']}>
+          <h2>Messages</h2>
           
-          <div className="space-y-4">
+          <div className={styles['messages-container']}>
             {messages.map((msg, index) => (
-              <div key={index} className="flex gap-4 items-start">
+              <div key={index} className={styles['message-row']}>
                 <select
                   value={msg.role}
                   onChange={(e) => handleMessageChange(index, 'role', e.target.value)}
-                  className="bg-black border border-[#2FE878]/20 rounded px-3 py-2 w-32 text-[#2FE878] font-mono focus:border-[#2FE878] focus:outline-none"
+                  className={styles['message-select']}
                 >
                   {index === 0 && <option value="system">System</option>}
                   <option value="user">User</option>
                   <option value="assistant">Assistant</option>
                 </select>
-                <div className="flex-1 relative">
+                <div className={styles['message-input-container']}>
                   <textarea
                     value={msg.content}
                     onChange={(e) => handleMessageChange(index, 'content', e.target.value)}
                     placeholder={`Enter ${msg.role} message...`}
-                    className="w-full bg-black border border-[#2FE878]/20 rounded p-3 min-h-[100px] resize-y font-mono focus:border-[#2FE878] focus:outline-none"
+                    className={styles['message-input']}
                   />
                   {messages.length > 1 && (
                     <button 
                       onClick={() => removeMessage(index)}
-                      className="absolute right-3 top-3 text-[#2FE878] hover:text-[#2FE878]/80 font-mono"
+                      className={styles['remove-button']}
                     >
                       ×
                     </button>
@@ -222,43 +211,43 @@ export default function TrustScorePage() {
             
             <button 
               onClick={addMessage}
-              className="w-full bg-black hover:bg-[#2FE878]/10 border border-[#2FE878]/20 text-[#2FE878] rounded py-2 transition-colors font-mono"
+              className={styles['add-button']}
             >
               + Add Message
             </button>
           </div>
         </div>
 
-        <div className="border border-[#2FE878]/20 rounded-lg p-6 mb-8">
-          <h2 className="text-[#2FE878] text-xl font-mono mb-6">Output</h2>
+        <div className={styles['output-section']}>
+          <h2>Output</h2>
           <textarea
             value={output}
             onChange={(e) => setOutput(e.target.value)}
             placeholder="Enter the AI output the AI produced..."
-            className="w-full bg-black border border-[#2FE878]/20 rounded p-3 min-h-[150px] resize-y font-mono focus:border-[#2FE878] focus:outline-none"
+            className={styles['output-input']}
           />
         </div>
 
         <button 
           onClick={calculateTrust}
           disabled={loading || !output.trim()}
-          className="w-full border border-[#2FE878] bg-[#2FE878]/10 hover:bg-[#2FE878]/20 text-[#2FE878] py-3 rounded-lg text-lg font-mono disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className={styles['calculate-button']}
         >
           {loading ? 'Calculating...' : 'Calculate Trust Score'}
         </button>
 
         {error && (
-          <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg space-y-3">
-            <p className="text-red-500 font-mono">
+          <div className={styles['error-section']}>
+            <p className={styles['error-text']}>
               {error}
             </p>
             {error.includes('repetitive') && (
-              <div className="text-gray-400 text-sm space-y-2">
+              <div className={styles['repetitive-section']}>
                 <p>
                   Why did this happen? The trust score couldn't be calculated because the output shows unusual 
                   repetition patterns. This can occur when:
                 </p>
-                <ul className="list-disc list-inside pl-4 space-y-1">
+                <ul className={styles['repetitive-list']}>
                   <li>The text contains many repeated phrases or sequences</li>
                   <li>The output was potentially manipulated or corrupted</li>
                   <li>The response shows patterns inconsistent with typical AI language models</li>
@@ -272,37 +261,37 @@ export default function TrustScorePage() {
         )}
 
         {result && (
-          <div className="mt-8 border border-[#2FE878]/20 rounded-lg p-6">
-            <h2 className="text-xl font-mono text-[#2FE878] mb-6">Trust Score Results</h2>
-            <div className="flex items-center gap-4 mb-4">
-              <div className="text-5xl font-mono text-[#2FE878]">
+          <div className={styles['result-section']}>
+            <h2>Trust Score Results</h2>
+            <div className={styles['result-row']}>
+              <div className={styles['result-score']}>
                 {isFinite(result.trust_score) ? 
                   (result.trust_score * 100).toFixed(1) + '%' : 
                   'N/A'}
               </div>
-              <div className={`px-3 py-1 rounded font-mono ${
-                result.trust_classification === 'HIGH' ? 'bg-[#2FE878]/10 text-[#2FE878]' :
-                result.trust_classification === 'MEDIUM' ? 'bg-yellow-500/10 text-yellow-500' :
-                'bg-red-500/10 text-red-500'
+              <div className={`${styles['result-badge']} ${
+                result.trust_classification === 'HIGH' ? styles['high-badge'] :
+                result.trust_classification === 'MEDIUM' ? styles['medium-badge'] :
+                styles['low-badge']
               }`}>
                 {result.trust_classification}
               </div>
             </div>
-            <p className="text-gray-400 mb-4 font-mono">{result.trust_description}</p>
-            <div className="text-gray-500 font-mono">
+            <p className={styles['result-description']}>{result.trust_description}</p>
+            <div className={styles['result-perplexity']}>
               Perplexity: {isFinite(result.perplexity) ? 
                 result.perplexity.toFixed(2) : 
                 'Unable to calculate'}
             </div>
             {result.using_default_key && (
-              <div className="mt-4 text-yellow-500/80 text-sm font-mono">
+              <div className={styles['result-note']}>
                 Note: Using default API key (rate limited)
               </div>
             )}
             
-            <div className="mt-6 pt-6 border-t border-[#2FE878]/20">
-              <h3 className="text-[#2FE878] text-sm font-mono mb-3">Understanding the Score</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
+            <div className={styles['result-understanding']}>
+              <h3>Understanding the Score</h3>
+              <p>
                 The trust score is calculated by analyzing the statistical patterns in the AI's output. 
                 A high perplexity (above 100) suggests unusual patterns, while lower values indicate more 
                 natural, model-consistent responses. The score considers factors like token probability 
