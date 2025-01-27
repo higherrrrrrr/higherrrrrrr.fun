@@ -28,7 +28,7 @@ That’s how **Higherrrrrrr** keeps the game going for degens.
   - **0.5%** of the **SOL side** is added as single-sided liquidity to help stabilize the token price.  
 - **Conviction NFTs:** Holding **≥ 0.042069%** of the supply (420,690 tokens) grants you special NFTs (or “relics”) every time the token “evolves.”  
 - **Distribution & Allocations:**  
-  - **Team**: 20% total in a multisig (7.77% current team w/ vesting, 12.33% future expansions)  
+  - **Team**: 15% total in a multisig (7.77% current team w/ vesting, 7.23% future expansions)  
   - **Migration LP Support\***: 5%  
   - **Base V1 Supporters\***: 15%  
   - **Single-Sided Launch Pool**: 60%  
@@ -51,13 +51,13 @@ We aim to combine a dash of degenerate humor with robust on-chain engineering to
 
 ## 3. Distribution: Community Focus
 
-### 3.1 Team & Future Expansions (20%)
+### 3.1 Team & Future Expansions (15%)
 
 - **Current Team (7.77%)**  
   - 3.33% to Carl (the main dev), the remainder to other team/advisors, all under a **12-month linear vesting schedule**.  
   - Held in a **Squads multisig**—no day-one dumps.  
 
-- **Future Reserve (12.33%)**  
+- **Future Reserve (7.23%)**  
   - Marketing, strategic OTC sales, future contributors.  
   - Also locked in the **Squads multisig**; requires team/community approval for usage.
 
@@ -132,11 +132,11 @@ A **1%** fee applies to every swap. It’s split into:
 
 ## 7. Team Vesting & Security
 
-### 7.1 Team Reserves (20%)
+### 7.1 Team Reserves (15%)
 
 - **7.77%** for current team/advisors:  
   - 12-month linear vesting schedule.  
-- **12.33%** for future expansions, marketing, or partnerships.
+- **7.23%** for future expansions, marketing, or partnerships.
 
 All team tokens live in a **Squads multisig**, ensuring no single actor can dump or misappropriate.
 
@@ -182,7 +182,7 @@ A separate **migration-focused** liquidity pool will be seeded with 5% of the su
 
 - **Token Supply**: 1,000,000,000 total, no extra minting.  
 - **Distribution**:  
-  - 20% Team/Expansions (7.77% for current team w/ vesting, 12.33% for future uses)  
+  - 15% Team/Expansions (7.77% for current team w/ vesting, 7.23% for future uses)  
   - 5% Migration LP Support\*  
   - 15% Base V1 Supporters\*  
   - 60% Single-Sided Launch  
