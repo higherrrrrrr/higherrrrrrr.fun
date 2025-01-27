@@ -136,7 +136,7 @@ export default function Home() {
 
   // Add countdown timer effect
   useEffect(() => {
-    const targetDate = new Date('2025-01-31T15:00:00-08:00').getTime();
+    const targetDate = new Date('2024-02-01T10:00:00-08:00').getTime();
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
