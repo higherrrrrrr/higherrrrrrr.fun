@@ -3,14 +3,28 @@ import { getApiUrl } from './getApiUrl';
 
 /**
  * Get token details
- * @param {string} address Token address
+ * @param {string} addressOrSlug Token address or slug
  * @returns {Promise<Object>} Token details
  */
-export async function getToken(address) {
+export async function getToken(addressOrSlug) {
   try {
-    const response = await fetch(`${getApiUrl()}/token/${address}`);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.json();
+    // First try to get from API
+    try {
+      const response = await fetch(`${getApiUrl()}/token/${addressOrSlug}`);
+      if (response.ok) return await response.json();
+    } catch (error) {
+      console.debug('Token not found in API, checking featured projects');
+    }
+
+    // If not found, check featured projects
+    const featuredProjects = (await import('../data/featuredProjects')).default;
+    const featuredToken = featuredProjects.find(
+      p => p.slug === addressOrSlug || p.tokenAddress === addressOrSlug
+    );
+    
+    if (featuredToken) return featuredToken;
+    
+    throw new Error('Token not found');
   } catch (error) {
     console.error('Failed to fetch token:', error);
     throw error;

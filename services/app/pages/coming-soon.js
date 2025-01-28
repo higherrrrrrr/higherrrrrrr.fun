@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import { getContractAddress } from '../api/contract';
 import { ConnectKitButton } from '../components/Web3Provider';
+import { CountdownTimer } from '../components/CountdownTimer';
 
 const LAUNCH_DATE = new Date("2024-11-26T17:00:00-08:00");
 
