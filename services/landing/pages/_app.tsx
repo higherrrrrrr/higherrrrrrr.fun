@@ -1,5 +1,6 @@
 import { AppProps } from "next/app";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import "../styles/globals.css";
 
 const ClientProviders = dynamic(() => import("../components/ClientProviders").then((mod) => mod.ClientProviders), {
@@ -17,6 +18,9 @@ function AnnouncementBanner() {
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ClientProviders>
+      <Head>
+        <title>higherrrrrrr.fun</title>
+      </Head>
       <AnnouncementBanner />
       <Component {...pageProps} />
     </ClientProviders>

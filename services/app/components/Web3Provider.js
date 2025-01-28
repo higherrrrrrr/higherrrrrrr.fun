@@ -12,51 +12,51 @@ export const useFactory = () => useContext(FactoryContext);
 const ALCHEMY_RPC = 'https://rpc.higherrrrrrr.fun/';
 const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
 
-// Completely override Base chain with our RPC
+// Updated Base chain configuration
 const baseChain = {
   ...base,
+  id: 8453, // Explicit chain ID
   rpcUrls: {
     default: {
       http: [ALCHEMY_RPC],
-      webSocket: []
+      webSocket: [`wss://${ALCHEMY_RPC.replace('https://', '')}`],
     },
     public: {
       http: [ALCHEMY_RPC],
-      webSocket: []
-    },
-    alchemy: {
-      http: [ALCHEMY_RPC],
-      webSocket: []
+      webSocket: [`wss://${ALCHEMY_RPC.replace('https://', '')}`],
     }
   }
 };
 
 const chains = [baseChain];
 
-// Create config with Rabby support and default connectors
+// Updated wagmi configuration
 const wagmiConfig = createConfig({
   ...getDefaultConfig({
     appName: "Higherrrrrrr",
     chains,
     transports: {
-      [baseChain.id]: http(ALCHEMY_RPC),
+      [baseChain.id]: http(ALCHEMY_RPC, {
+        batch: true,
+        retryCount: 3,
+        retryDelay: 1000,
+      }),
     },
     walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
   }),
   connectors: [
-    // Filter out any injected connectors from default config
     ...getDefaultConfig({
       appName: "Higherrrrrrr",
       chains,
       walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
     }).connectors.filter(connector => 
-     connector.id !== 'injected' && connector.id !== 'rabby'
+      connector.id !== 'injected' && connector.id !== 'rabby'
     ),
-    // Add our custom Rabby connector
     new InjectedConnector({
       chains,
       options: {
         name: 'Rabby',
+        shimDisconnect: true,
         getProvider: () => typeof window !== 'undefined' ? window.ethereum : undefined,
       },
     }),
@@ -91,7 +91,7 @@ function Web3ProviderInner({ children }) {
 
     init();
 
-    // Cleanup function
+    // Fixed cleanup function syntax
     return () => {
       mounted = false;
     };

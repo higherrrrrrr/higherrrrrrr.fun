@@ -15,7 +15,6 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
           rel="stylesheet"
         />
-        <title>higherrrrrrr.fun</title>
       </Head>
       <body>
         <Main />
