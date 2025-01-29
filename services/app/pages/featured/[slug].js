@@ -198,7 +198,7 @@ export default function FeaturedProjectPage() {
 
       <div className="min-h-screen bg-black text-green-500 font-mono flex flex-col">
         {/* Hero Section */}
-        <div className="hero-bg p-6 md:p-12 relative overflow-hidden">
+        <div className="p-6 md:p-12 relative overflow-hidden">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
             {/* Glitch Title */}
             <h1

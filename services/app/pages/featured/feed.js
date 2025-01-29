@@ -112,17 +112,6 @@ export default function FeaturedFeed() {
   return (
     <>
       <style>{glitchStyles}</style>
-      <style>
-        {`
-          .hero-bg {
-            background: linear-gradient(
-              135deg, 
-              rgba(0,128,0,0.2), 
-              rgba(0,0,0,0.7) 70%
-            );
-          }
-        `}
-      </style>
 
       <div className="min-h-screen bg-black text-green-500 font-mono flex flex-col">
         {/* HERO SECTION */}
