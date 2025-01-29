@@ -31,7 +31,7 @@ That’s how **Higherrrrrrr** keeps the game going for degens.
   - **Team**: 15% total in a multisig (7.77% current team w/ vesting, 7.23% future expansions)  
   - **Migration LP Support\***: 5%  
   - **Base V1 Supporters\***: 15%  
-  - **Single-Sided Launch Pool**: 60%  
+  - **Single-Sided Launch Pool**: 65%  
 - **Evolutionary Mechanics:** Certain market cap (or price) thresholds trigger on-chain relics and name/art updates.  
 - **New Creator Tokens:** For other tokens launched on Higherrrrrrr, the 0.5% SOL fee may be **split** (e.g., 0.25% to protocol revenue, 0.25% to that token’s floor).
 
@@ -71,7 +71,7 @@ We aim to combine a dash of degenerate humor with robust on-chain engineering to
 - Reserved for those who supported Higherrrrrrr V1 on Base.  
 - See [Appendix](#appendix) for details.
 
-### 3.4 Single-Sided Launch Pool (60%)
+### 3.4 Single-Sided Launch Pool (65%)
 
 - Placed on Orca as a single-sided liquidity deposit for open trading.  
 - Ensures broad distribution from day one, minimal slippage, and no insider advantage.
@@ -156,7 +156,7 @@ A total of **15%** is reserved for these loyal participants. We’ll provide ins
 
 ### 9.1 Single-Sided Liquidity
 
-We deposit **60%** of the supply into Orca on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
+We deposit **65%** of the supply into Orca on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
 
 ### 9.2 Migration LP Support\* (5%)
 
@@ -185,7 +185,7 @@ A separate **migration-focused** liquidity pool will be seeded with 5% of the su
   - 15% Team/Expansions (7.77% for current team w/ vesting, 7.23% for future uses)  
   - 5% Migration LP Support\*  
   - 15% Base V1 Supporters\*  
-  - 60% Single-Sided Launch  
+  - 65% Single-Sided Launch  
 - **Evolutions**: On-chain comedic name changes, referencing `evolution.svg`.  
 - **Conviction NFTs**: Addresses ≥ 0.042069% (420,690 tokens) claim relics on each threshold.  
 - **Fees**:  
@@ -205,7 +205,7 @@ We invite you to jump in and help push **Higherrrrrrr** to comedic extremes. Sta
 ## Appendix
 
 ### Base V1 Supporters\* (15%)
-This allocation is reserved for the `$HARDER` and `$IDK` communities that supported the original Higherrrrrrr V1 launch on Base. We’ll finalize the airdrop or bridging mechanism for these tokens soon.
+This allocation is reserved for the token communities that supported the original Higherrrrrrr V1 launch on Base. We’ll finalize the airdrop or bridging mechanism for these tokens soon.
 
 ### Migration LP Support\* (5%)
 Designated for the **HARDER/CULT** liquidity pool. The HARDER side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures a robust cross-token liquidity pool.

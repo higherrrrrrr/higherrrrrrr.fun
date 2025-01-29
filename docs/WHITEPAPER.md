@@ -110,7 +110,7 @@ To ensure a balanced and transparent distribution, the CULT token supply is allo
    - See the [Appendix](#15-appendix) for details.
 
 
-4. **60% to Single-Sided Launch Pool**  
+4. **65% to Single-Sided Launch Pool**  
    - Placed into an Orca CL pool for open trading.  
    - Ensures fair “price discovery” from day one, with no insider advantage.
 
@@ -310,7 +310,7 @@ By blending a playful, threshold-based aesthetic with stable, trust-minimized to
 
 ### 15.1. Base V1 Supporters (15%)
 
-Refers to the **$HARDER** and **$IDK** communities who supported the original Higherrrrrrr V1 launch on Base. These tokens are allocated via airdrops or bridging claims, specifically rewarding loyal holders.
+Refers to the higherrrrrrr token communities who supported the original Higherrrrrrr V1 launch on Base. These tokens are allocated via airdrops or bridging claims, specifically rewarding loyal holders.
 
 ### 15.2. Migration LP Support (5%)
 
