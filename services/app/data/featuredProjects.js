@@ -8,6 +8,7 @@ const featuredProjects = [
       launchDate: '2025-02-01T18:00:00Z',
       website: 'https://www.lamboo.fun/',
       twitter: 'https://x.com/Lamboo_Brainlet',
+      telegram: 'https://t.me/+h9Q_lwzKty42ODRk',
       customContent: `
         <h2 class="text-xl font-bold mt-4">About Wen Lamboo</h2>
         <p class="mt-2">
@@ -35,6 +36,7 @@ const featuredProjects = [
       launchDate: '2025-02-07T23:00:00Z',
       website: 'https://higherrrrrrr.fun/',
       twitter: 'https://x.com/higherrrrrrrfun',
+      telegram: 'https://t.me/+Y0XJwPzrdUc2OGRh',
       customContent: `
         <h2 class="text-xl font-bold mt-4">About Harder</h2>
         <p class="mt-2">
@@ -50,6 +52,7 @@ const featuredProjects = [
       launchDate: '2025-02-07T23:00:00Z',
       website: 'https://higherrrrrrr.fun/',
       twitter: 'https://x.com/higherrrrrrrfun',
+      telegram: 'https://t.me/+Y0XJwPzrdUc2OGRh',
       customContent: `
         <h2 class="text-xl font-bold mt-4">About CULT</h2>
         <p class="mt-2">
