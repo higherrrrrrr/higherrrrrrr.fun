@@ -30,6 +30,7 @@
     "react": "^18",
     "react-7-segment-display": "^1.1.2",
     "react-dom": "^18",
+    "react-icons": "^5.4.0",
     "util": "^0.12.5",
     "viem": "^1.19.11",
     "wagmi": "1.4.10"
