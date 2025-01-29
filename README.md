@@ -2,6 +2,7 @@
 
 **Welcome to the Higherrrrrrr repo!** This project provides a **Solana-based launchpad** for community-driven tokens, featuring:
 
+
 - **Dynamic Token Metadata** (on-chain “evolutions” tied to price or market milestones)  
 - **Conviction NFTs** (awarded to big holders when thresholds are crossed)  
 - **Flexible Fee Splits** (supporting token burns, protocol revenue, and single-sided liquidity)  
