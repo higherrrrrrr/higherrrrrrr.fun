@@ -1,13 +1,23 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/contract-address',
-        destination: 'http://localhost:5000/api/contract-address',
-      },
-    ];
-  },
-};
+const path = require('path');
 
-module.exports = nextConfig;
+const nextConfig = {
+  output: 'standalone',
+  reactStrictMode: false,
+  images: {
+    domains: ['storage.googleapis.com']
+  },
+  webpack: (config) => {
+    config.resolve.fallback = { 
+      fs: false,
+      net: false,
+      tls: false
+    };
+    return config;
+  },
+  // Add this to ensure path aliases work
+  experimental: {
+    esmExternals: 'loose'
+  }
+}
+
+module.exports = nextConfig
