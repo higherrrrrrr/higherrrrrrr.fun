@@ -84,9 +84,9 @@ We aim to combine a dash of degenerate humor with robust on-chain engineering to
 
 When the token crosses certain thresholds (price or market cap), we update the token’s metadata via **Metaplex**—shifting its name, art, or references. Think of it as “leveling up” each time the cult hits a new milestone.
 
-### 4.2 The `evolution.svg` File
+### 4.2 The `images/evolution.svg` File
 
-We store a file named `evolution.svg` that morphs at each threshold—introducing new relics, colors, or inside jokes. It’s basically a “cult tapestry” that gets upgraded over time.
+We store a file named `images/evolution.svg` that morphs at each threshold—introducing new relics, colors, or inside jokes. It’s basically a “cult tapestry” that gets upgraded over time.
 
 ### 4.3 Why Evolve?
 
