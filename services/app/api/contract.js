@@ -20,35 +20,32 @@ const setFactoryAddressCookie = (address) => {
   document.cookie = `factory_address=${address};max-age=604800;path=/`;
 };
 
-// Development mock data
-const MOCK_CONTRACT = {
-  factory_address: "0x1234567890123456789012345678901234567890" // Replace with your test address
-};
-
 export async function getContractAddress() {
-  // For development, return mock data
-  if (process.env.NODE_ENV === 'development') {
-    return MOCK_CONTRACT;
+  // Check cookie first
+  const cachedAddress = getFactoryAddressCookie();
+  if (cachedAddress) {
+    return { factory_address: cachedAddress };
   }
 
-  // Production code remains the same
-  try {
-    const response = await fetch('/api/contract-address', {
-      method: 'GET',
+  // If no cookie, fetch from API
+  const response = await fetch(
+    `${getApiUrl()}/contract-address`,
+    {
       headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+        'Authorization': getAuthHeader()
+      }
     }
+  );
 
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching contract address:', error);
-    throw error;
+  const data = await response.json();
+  console.log('Factory address:', data);
+
+  // Cache the result if valid
+  if (data.factory_address) {
+    setFactoryAddressCookie(data.factory_address);
   }
+
+  return data;
 }
 
 export async function getLatestTokens(limit = 10) {
