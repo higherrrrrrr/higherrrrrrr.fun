@@ -1,98 +1,83 @@
-# higherrrrrrr.fun monorepo
+# Higherrrrrrr – Memecoin Launchpad & Evolutionary Token Framework
 
-Higherrrrrrr is a next-generation social trading platform that introduces novel mechanics for community engagement and trading experiences.
+**Welcome to the Higherrrrrrr repo!** This project provides a **Solana-based launchpad** for community-driven tokens, featuring:
 
-Good place to start is the [documentation](./documentation/README.md) that goes over the entire project. Each software component has its own README.
+- **Dynamic Token Metadata** (on-chain "evolutions" tied to price or market milestones)  
+- **Conviction NFTs** (awarded to big holders when thresholds are crossed)  
+- **Flexible Fee Splits** (supporting token burns, protocol revenue, and single-sided liquidity)  
+- **Secure, Modular Architecture** (anchor-based smart contracts, PDAs, audits, etc.)
 
-## Project Structure
+Whether you're a developer integrating new token projects or just exploring how the platform works, this repo has everything you need to **get started**.
 
-```
-├── documentation/     # All project design docs and whitepapers (Start here)
-├── scripts/           # Build and deployment scripts
-├── services/         
-│   ├── evm/          # Ethereum Virtual Machine related services
-│   │   ├── alpha/    # Frontend for alpha EVM interface
-│   │   ├── api/      # Core API services
-│   │   ├── higherrrrrrr-protocol/ # Core protocol implementation
-│   │   ├── ponder/   # Data indexing service
-│   │   ├── rpc/      # RPC node interface
-│   │   └── subgraphs/# GraphQL APIs for data querying
-│   └── landing/      # Landing page
-├── .gitignore       
-├── .gitmodules      
-├── LICENSE          
-└── README.md        
-```
-
-## Core Components
-
-### EVM Services
-
-- **Alpha**: Frontend interface for EVM protocol interactions
-- **API**: RESTful services for platform interaction
-- **Higherrrrrrr Protocol**: Core smart contracts and protocol logic
-- **Ponder**: Data indexing service for efficient querying
-- **RPC**: Node interface for blockchain interaction
-- **Subgraphs**: GraphQL APIs for data analytics and queries
-
-### Frontend
-
-- **Landing**: Project landing page
+---
 
 ## Getting Started
 
-Clone the repository:
-```bash
-git clone git@github.com:higherrrrrrr/higherrrrrrr.fun.git
-cd higherrrrrrr.fun
-```
+1. **Clone the Repo**  
+   ```bash
+   git clone https://github.com/higherrrrrrr/higherrrrrrr.fun.git
+   cd higherrrrrrr
+   ```
+   
+2. **Read the Docs**  
+   - The main documents live in the `docs/` directory, and additional guides for advanced topics are in dedicated Markdown files.  
+   - For a **technical deep dive**, check out:  
+     - [`docs/technical-design-document.md`](./docs/technical-design-document.md) – Extended architecture, logic, and data structures.  
+     - [`docs/tokenomics.md`](./docs/tokenomics.md) – Overview of the deflationary model, supply distribution, and threshold-based mechanics.  
+     - [`docs/creator-guide.md`](./docs/creator-guide.md) – Quickstart for launching your own Cult Coin or meme token using Higherrrrrrr.  
+     - Other references (e.g., `docs/whitepaper.md`, `docs/security-posture.md`) for deeper context.  
 
-Each service contains its own README with specific setup and development instructions.
+3. **Services & Their Readmes**  
+   - All major services live in the [`/services`](./services) folder.  
+   - Each service has its **own** `README` explaining what it does, how to configure it, and how to run it. For example:  
+     - `services/service-name/README.md`  
+   - This modular design helps you integrate or modify only the parts relevant to your project's needs.
 
-## Contributing
+4. **Run or Test Locally**  
+   - If you plan to develop locally (e.g., on a Solana devnet), follow the instructions in each service's README for setup, environment variables, and testing scripts.  
+   - Typical steps involve installing dependencies via `yarn` or `npm` and using Anchor's CLI to deploy the program in a local validator or on devnet.
 
-We welcome contributions! Here's how to get started:
+5. **Join the Community**  
+   - For questions, ideas, or general discussion, check out the official Higherrrrrrr social channels (Discord, Telegram, Twitter, etc.).  
+   - We encourage open-source collaboration and welcome PRs, bug reports, and feature suggestions.
 
-### Branch Naming Convention
-- Features: `feature/description`
-- Bugfixes: `fix/description`
-- Documentation: `docs/description`
-- Performance: `perf/description`
+=======
 
-### Commit Messages
-Follow the Conventional Commits specification:
-- `feat:` New features
-- `fix:` Bug fixes
-- `docs:` Documentation changes
-- `style:` Code style changes (formatting, semicolons, etc)
-- `refactor:` Code changes that neither fix bugs nor add features
-- `perf:` Performance improvements
-- `test:` Adding or modifying tests
-- `chore:` Changes to build process or auxiliary tools
+- **Dynamic Token Metadata** (on-chain “evolutions” tied to price or market milestones)  
+- **Conviction NFTs** (awarded to big holders when thresholds are crossed)  
+- **Flexible Fee Splits** (supporting token burns, protocol revenue, and single-sided liquidity)  
+- **Secure, Modular Architecture** (anchor-based smart contracts, PDAs, audits, etc.)
 
-### Pull Request Process
-1. Update documentation for any new features
-2. Update the CHANGELOG.md if applicable
-3. Get approval from at least one core team member
-4. Ensure CI passes and no conflicts exist
-5. Squash commits into a single meaningful commit
-6. Rebase on latest main branch
+Whether you’re a developer integrating new token projects or just exploring how the platform works, this repo has everything you need to **get started**.
 
-### Code Style
-- Use ESLint and Prettier configurations provided
-- Write meaningful variable names
-- Comment complex logic
-- Write unit tests for new features
-- Follow existing patterns in the codebase
+---
 
-## Support
+## Getting Started
 
-Join our Telegram community: [https://t.me/+S2iLDGxRggU5Y2Jh](https://t.me/+S2iLDGxRggU5Y2Jh)
+1. **Clone the Repo**  
+   ```bash
+   git clone https://github.com/higherrrrrrr/higherrrrrrr.fun.git
+   cd higherrrrrrr
+   ```
+   
+2. **Read the Docs**  
+   - The main documents live at the root level (`./README.md`, `./TECHNICAL-DESIGN-DOCUMENT.md`, etc.), and additional guides for advanced topics are in dedicated Markdown files.  
+   - For a **technical deep dive**, check out:  
+     - [`TECHNICAL-DESIGN-DOCUMENT.md`](./TECHNICAL-DESIGN-DOCUMENT.md) – Extended architecture, logic, and data structures.  
+     - [`TOKENOMICS.md`](./TOKENOMICS.md) – Overview of the deflationary model, supply distribution, and threshold-based mechanics.  
+     - [`CREATOR-GUIDE.md`](./CREATOR-GUIDE.md) – Quickstart for launching your own Cult Coin or meme token using Higherrrrrrr.  
+     - Other references (e.g., `WHITEPAPER.md`, `SECURITY-POSTURE.md`) for deeper context.  
 
-## License
+3. **Services & Their Readmes**  
+   - All major services live in the [`/services`](./services) folder.  
+   - Each service has its **own** `README` explaining what it does, how to configure it, and how to run it. For example:  
+     - `services/service-name/README.md`  
+   - This modular design helps you integrate or modify only the parts relevant to your project’s needs.
 
-This project is licensed under the WAGMI License (MIT compatible).
+4. **Run or Test Locally**  
+   - If you plan to develop locally (e.g., on a Solana devnet), follow the instructions in each service’s README for setup, environment variables, and testing scripts.  
+   - Typical steps involve installing dependencies via `yarn` or `npm` and using Anchor’s CLI to deploy the program in a local validator or on devnet.
 
-## Contributors
-
-[![Contributors](https://contrib.rocks/image?repo=higherrrrrrr/higherrrrrrr.fun)](https://github.com/higherrrrrrr/higherrrrrrr.fun/graphs/contributors)
+5. **Join the Community**  
+   - For questions, ideas, or general discussion, check out the official Higherrrrrrr social channels (Discord, Telegram, Twitter, etc.).  
+   - We encourage open-source collaboration and welcome PRs, bug reports, and feature suggestions.

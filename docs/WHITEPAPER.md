@@ -19,6 +19,7 @@
 12. [Deployment & Adoption](#12-deployment--adoption)  
 13. [Beyond the Current Scope](#13-beyond-the-current-scope)  
 14. [Conclusion](#14-conclusion)  
+15. [Appendix](#15-appendix)
 
 ---
 
@@ -95,21 +96,21 @@ After any pre-launch allocations (e.g., team, community, or liquidity pool), the
 
 To ensure a balanced and transparent distribution, the CULT token supply is allocated as follows:
 
-1. **20% to Team (Held in Squads Multisig)**
+1. **15% to Team (Held in Squads Multisig)**
    - **7.77%** earmarked for the **current team**:
      - **3.33%** specifically allocated to **Carl** (lead developer).  
      - ~**4.44%** for other current team members and advisors.  
-   - **12.33%** reserved for **future expansions**, marketing, strategic OTC sales, and broader ecosystem initiatives.  
-   - **Vesting**: The 7.77% allocated to current team/advisors will vest linearly over **12 months**. This ensures alignment and continuous development. All of these funds remain in the **Squads multisig**, requiring multiple signatures for any disbursement. The 12.33% expansion reserve is likewise held in the same multisig, released only by team or governance approval.
+   - **7.23%** reserved for **future expansions**, marketing, strategic OTC sales, and broader ecosystem initiatives.  
+   - **Vesting**: The 7.77% allocated to current team/advisors vests linearly over **12 months**. The 7.23% reserve is held in the same multisig, used only with team/governance approval.
 
-2. **5% to Seed HARDER/CULT Liquidity**  
-   - Establishes a **HARDER/CULT** LP with similar fee mechanics (0.5% burned on the token side, 0.5% of SOL or HARDER side can be directed to the floor support for CULT).  
-   - **Note:** The “HARDER” tokens traded against CULT will be burned on their side to maintain deflationary principles, while the CULT side supports the floor for CULT.
+2. **Migration LP Support* : 5%**  
+   - See the [Appendix](#15-appendix) for details.
 
-3. **15% to $HARDER & $IDK Communities**  
-   - Airdrops, bridging claims, or other distribution methods to reward existing HARDER/IDK holders.
+3. **Base V1 Supporters* : 15%**  
+   - See the [Appendix](#15-appendix) for details.
 
-4. **60% to Single-Sided Launch Pool**  
+
+4. **65% to Single-Sided Launch Pool**  
    - Placed into an Orca CL pool for open trading.  
    - Ensures fair “price discovery” from day one, with no insider advantage.
 
@@ -256,7 +257,7 @@ If the community desires maximum trustlessness, the upgrade authority can be set
 
 ### 12.2. Team Vesting & Multi-Sig
 
-- For CULT, **20%** goes to a multi-sig: **7.77%** vested linearly over 12 months for the current team, **12.33%** for expansions.  
+- For CULT, **15%** goes to a multi-sig: **7.77%** vested linearly over 12 months for the current team, **7.23%** for expansions.  
 - Other teams can define vesting schedules differently or adopt their own multi-sig structures.  
 - All team allocations remain under multi-sig control, ensuring no single person can move large balances unilaterally.
 
@@ -275,6 +276,7 @@ Future expansions could include:
 - **Additional NFT Tiers** for smaller holders (partial “stamps” or progressive collectibles).  
 - **Dynamic Liquidity Strategies** adjusting single-sided pool positions based on market volatility.  
 - **Composable Fee Logic** integrating with other on-chain programs for yield farming or stablecoin issuance.
+
 
 ---
 
@@ -295,9 +297,21 @@ Future expansions could include:
    - 0.5% burned from the token side, 0.5% of SOL split among floor support, protocol revenue, or other addresses. Even for CULT, this ratio can be fine-tuned.  
 
 5. **Team Allocation & Vesting**  
-   - Example: 20% total for team & expansions, locked in multi-sigs with vesting for current contributors.  
+   - Example: 15% total for team & expansions, locked in multi-sigs with vesting for current contributors.  
 
 6. **Optional Multi-Sig or Immutability**  
    - The program can remain upgradable or be fully locked once the community is satisfied.  
 
 By blending a playful, threshold-based aesthetic with stable, trust-minimized tokenomics—and by permitting the fluid redirection of fees—**Higherrrrrrrr** aspires to be the model for **configurable, evolution-focused tokens** on Solana.
+
+---
+
+## 15. Appendix
+
+### 15.1. Base V1 Supporters (15%)
+
+Refers to the higherrrrrrr token communities who supported the original Higherrrrrrr V1 launch on Base. These tokens are allocated via airdrops or bridging claims, specifically rewarding loyal holders.
+
+### 15.2. Migration LP Support (5%)
+
+Specifically designates supply for the **HARDER/CULT** liquidity pool. The HARDER side burns on each trade, while the CULT side directs 0.5% of CULT fees to the floor mechanic for HARDER. This ensures a robust, cross-token link.
