@@ -40,7 +40,7 @@ export default function MainLayout({ children }) {
               How it Works
             </Link>
             <Link href="/featured/feed" className="hover:text-green-300 transition-colors">
-              Featured
+              HighLites
             </Link>
             <a 
               href="https://x.com/higherrrrrrrfun"

@@ -53,6 +53,80 @@ const glitchStyles = `
   }
 `;
 
+/* Snake animation - hover-based effects */
+const snakeStyles = `
+  .snake-border {
+    position: relative;
+    border: 2px solid rgba(0, 255, 0, 0.15);
+    transition: transform 0.3s;
+  }
+  
+  .snake-border:hover {
+    transform: scale(1.02);
+  }
+
+  .snake-border::after {
+    content: "";
+    position: absolute;
+    top: 16px; left: 16px; right: 16px; bottom: 16px;
+    border: 2px solid rgba(0, 255, 0, 0.15);
+    border-radius: 8px;
+    pointer-events: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .snake-border:hover::after {
+    border-color: rgba(0, 255, 0, 0.3);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.1);
+  }
+  
+  .snake-border:hover::before {
+    content: "";
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 8px;
+    pointer-events: none;
+    background: linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 0,
+                linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 100%,
+                linear-gradient(0deg, #00ff00 50%, transparent 50%) 0 0,
+                linear-gradient(0deg, #00ff00 50%, transparent 50%) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
+    animation: snake-travel 6s infinite linear;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+  }
+
+  @keyframes snake-travel {
+    0% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+    12.5% {
+      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
+    }
+    25% {
+      background-position: 100% 0, -100% 100%, 0 100%, 100% 0;
+    }
+    37.5% {
+      background-position: 100% 0, -100% 100%, 0 100%, 100% -100%;
+    }
+    50% {
+      background-position: 0 0, 0 100%, 0 100%, 100% -100%;
+    }
+    62.5% {
+      background-position: 0 0, 0 100%, 0 0, 100% -100%;
+    }
+    75% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+    87.5% {
+      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
+    }
+    100% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+  }
+`;
+
 /*
   2) Helper function to format the countdown string 
      (e.g. "3d 12h 25m 42s") or "Launched!"
@@ -112,6 +186,7 @@ export default function FeaturedFeed() {
   return (
     <>
       <style>{glitchStyles}</style>
+      <style>{snakeStyles}</style>
 
       <div className="min-h-screen bg-black text-green-500 font-mono flex flex-col">
         {/* HERO SECTION */}
@@ -138,14 +213,7 @@ export default function FeaturedFeed() {
 
               return (
                 <Link key={project.slug} href={`/featured/${project.slug}`}>
-                  <div
-                    className="
-                      border border-green-500/30 rounded-lg p-4
-                      transition-transform transition-colors cursor-pointer
-                      hover:border-green-500 hover:scale-[1.02]
-                      flex flex-col gap-4
-                    "
-                  >
+                  <div className="snake-border p-6 bg-black/20 rounded">
                     {/* Image + text */}
                     <div className="flex items-start gap-4">
                       {project.imageUrl && (
@@ -163,7 +231,7 @@ export default function FeaturedFeed() {
                       </div>
                     </div>
 
-                    {/* Countdown text: bold & bright */}
+                    {/* Countdown text */}
                     <div className="mt-1 text-green-300 font-bold text-sm">
                       <span className="mr-2">Launch:</span>
                       {countdownStr}

@@ -1,5 +1,49 @@
 import Head from "next/head";
 
+const glitchStyles = `
+  .glitch {
+    position: relative;
+    display: inline-block;
+    color: #00ff00;
+    text-shadow: 0 0 2px #00ff00;
+    line-height: 1;
+  }
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    opacity: 0.9;
+  }
+  .glitch::before {
+    color: #0ff;
+    animation: glitch-top 2s infinite linear alternate-reverse;
+  }
+  .glitch::after {
+    color: #f0f;
+    animation: glitch-bottom 2s infinite linear alternate-reverse;
+  }
+  @keyframes glitch-top {
+    0%   { clip: rect(0, 9999px, 0, 0);    transform: translate(2px, -2px); }
+    20%  { clip: rect(15px, 9999px, 16px, 0); transform: translate(-2px, 0); }
+    40%  { clip: rect(5px, 9999px, 40px, 0);  transform: translate(-2px, -2px); }
+    60%  { clip: rect(30px, 9999px, 10px, 0); transform: translate(0, 2px); }
+    80%  { clip: rect(10px, 9999px, 30px, 0); transform: translate(2px, -1px); }
+    100% { clip: rect(8px, 9999px, 14px, 0);  transform: translate(-1px, 2px); }
+  }
+  @keyframes glitch-bottom {
+    0%   { clip: rect(55px, 9999px, 56px, 0); transform: translate(-2px, 0); }
+    20%  { clip: rect(30px, 9999px, 34px, 0); transform: translate(-1px, 2px); }
+    40%  { clip: rect(10px, 9999px, 90px, 0); transform: translate(-1px, -1px); }
+    60%  { clip: rect(40px, 9999px, 60px, 0); transform: translate(1px, 2px); }
+    80%  { clip: rect(20px, 9999px, 50px, 0); transform: translate(0, 1px); }
+    100% { clip: rect(70px, 9999px, 80px, 0); transform: translate(2px, -2px); }
+  }
+`;
+
 const Theology = () => {
   return (
     <div className="terminal-wrapper">
@@ -10,10 +54,16 @@ const Theology = () => {
           content="A manifesto on crypto, religion, and community building"
         />
       </Head>
+      <style>{glitchStyles}</style>
 
       <main className="mb-8 mt-4 flex items-center justify-center">
         <div className="max-w-3xl mx-auto py-2 px-4">
-          <h1 className="text-green-500 text-4xl font-bold mb-6 text-left">Manifesto</h1>
+          <h1
+            className="glitch text-4xl font-bold mb-6 text-left"
+            data-text="Manifesto"
+          >
+            Manifesto
+          </h1>
           <div className="terminal-text text-green-500">
             <p className="mb-4">
               The greatest movements in human history weren't built on rational economic incentives. They were built on belief. When you look critically at the largest projects in crypto, it becomes clear that we're not building protocols - we're creating new ideologies.
