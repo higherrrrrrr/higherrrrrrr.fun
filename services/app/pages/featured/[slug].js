@@ -61,6 +61,74 @@ const glitchStyles = `
   }
 `;
 
+/* Snake animation - constant version for all elements */
+const snakeStyles = `
+  .snake-border {
+    position: relative;
+    border: 2px solid rgba(0, 255, 0, 0.15);
+    transition: transform 0.3s;
+  }
+  
+  .snake-border:hover {
+    transform: scale(1.02);
+  }
+
+  .snake-border::after {
+    content: "";
+    position: absolute;
+    top: 16px; left: 16px; right: 16px; bottom: 16px;
+    border: 2px solid rgba(0, 255, 0, 0.15);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  
+  .snake-border::before {
+    content: "";
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 8px;
+    pointer-events: none;
+    background: linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 0,
+                linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 100%,
+                linear-gradient(0deg, #00ff00 50%, transparent 50%) 0 0,
+                linear-gradient(0deg, #00ff00 50%, transparent 50%) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
+    animation: snake-travel 6s infinite linear;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+  }
+
+  @keyframes snake-travel {
+    0% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+    12.5% {
+      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
+    }
+    25% {
+      background-position: 100% 0, -100% 100%, 0 100%, 100% 0;
+    }
+    37.5% {
+      background-position: 100% 0, -100% 100%, 0 100%, 100% -100%;
+    }
+    50% {
+      background-position: 0 0, 0 100%, 0 100%, 100% -100%;
+    }
+    62.5% {
+      background-position: 0 0, 0 100%, 0 0, 100% -100%;
+    }
+    75% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+    87.5% {
+      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
+    }
+    100% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+  }
+`;
+
 /* Helper to format the countdown string */
 function formatCountdown(msLeft) {
   if (msLeft <= 0) return 'Launched!';
@@ -121,81 +189,7 @@ export default function FeaturedProjectPage() {
   return (
     <>
       <style>{glitchStyles}</style>
-      <style>
-        {`
-          /* Hero gradient */
-          .hero-bg {
-            background: linear-gradient(
-              135deg, 
-              rgba(0,128,0,0.2), 
-              rgba(0,0,0,0.7) 70%
-            );
-          }
-
-          /* Pulsing neon border for the image */
-          .neon-border {
-            border: 2px solid #00ff00;
-            border-radius: 8px;
-            padding: 4px;
-            animation: pulseGlow 2s infinite alternate;
-          }
-          @keyframes pulseGlow {
-            0% {
-              box-shadow: 0 0 5px #0f0, inset 0 0 5px #0f0;
-            }
-            100% {
-              box-shadow: 0 0 15px #0f0, inset 0 0 15px #0f0;
-            }
-          }
-
-          /* Animated neon border */
-          .neon-border-animated {
-            position: relative;
-            border-radius: 8px;
-            padding: 4px;
-          }
-
-          .neon-border-animated::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid #00ff00;
-            border-radius: 8px;
-            animation: borderMove 4s linear infinite;
-            box-shadow: 0 0 15px #0f0;
-          }
-
-          /* Timer box specific styles */
-          .timer-box {
-            padding: 1rem;
-            width: 200px;
-            min-width: 200px;
-            background: rgba(0, 0, 0, 0.3); /* Optional: slight background to help text stand out */
-          }
-
-          @keyframes borderMove {
-            0% {
-              clip-path: inset(0 98% 0 0);
-            }
-            25% {
-              clip-path: inset(0 0 98% 0);
-            }
-            50% {
-              clip-path: inset(0 0 0 98%);
-            }
-            75% {
-              clip-path: inset(98% 0 0 0);
-            }
-            100% {
-              clip-path: inset(0 98% 0 0);
-            }
-          }
-        `}
-      </style>
-
+      <style>{snakeStyles}</style>
       <div className="min-h-screen bg-black text-green-500 font-mono flex flex-col">
         {/* Hero Section */}
         <div className="p-6 md:p-12 relative overflow-hidden">
@@ -255,11 +249,10 @@ export default function FeaturedProjectPage() {
         {/* Main Content */}
         <div className="flex-1">
           <div className="max-w-5xl mx-auto px-4 md:px-8 py-16">
-            {/* Row: left = image, right = timer neon box */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-12 mb-16">
-              {/* Neon image */}
+              {/* Image with constant snake border */}
               {project.imageUrl && (
-                <div className="neon-border-animated">
+                <div className="snake-border p-4 bg-black/20 rounded">
                   <img
                     src={project.imageUrl}
                     alt={project.name}
@@ -268,14 +261,16 @@ export default function FeaturedProjectPage() {
                 </div>
               )}
 
-              {/* Countdown box */}
-              <div className="neon-border-animated timer-box flex flex-col items-center md:items-start">
-                <h2 className="text-2xl font-bold text-green-400 mb-2">
-                  Launch Countdown
-                </h2>
-                <p className="text-2xl text-green-400 font-bold font-mono">
-                  {countdownStr}
-                </p>
+              {/* Countdown box with constant snake border */}
+              <div className="snake-border bg-black/20 rounded">
+                <div className="flex flex-col items-center md:items-start p-8">
+                  <h2 className="text-2xl font-bold text-green-400 mb-4">
+                    Launch Countdown
+                  </h2>
+                  <p className="text-2xl text-green-400 font-bold font-mono">
+                    {countdownStr}
+                  </p>
+                </div>
               </div>
             </div>
 
