@@ -157,6 +157,11 @@ export default function HowItWorks() {
               the final evolution is permanently recorded in its history.
             </p>
 
+            <h3 className="text-xl font-mono text-green-500 mt-6">What are the fees?</h3>
+            <p className="text-green-500">
+              Higherrrrrrr is free to launch. Every trade has a 1% fee that is split 50/50 between the creator and the higherrrrrrr platform.
+            </p>
+
             <h3 className="text-xl font-mono text-green-500 mt-6">Can I see the code?</h3>
             <p className="text-green-500">
               Yes! Our protocol is fully open source and available for review on{' '}
