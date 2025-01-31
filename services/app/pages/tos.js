@@ -19,22 +19,22 @@ const TOS = () => {
            ********************************************************************/}
 
           <h1 className="text-3xl font-bold mt-16 mb-4">
-            Terms of Use
+            TERMS OF USE
           </h1>
           <p className="mb-4 italic">
             Last Updated: 16 January 2025
           </p>
 
           <p className="mb-4">
-            These Terms of Use constitute a legally binding agreement between you (“<strong>you</strong>” or “<strong>your</strong>”) and <strong>Thrive Point Group LLC</strong> (“<strong>Thrive Point</strong>,” “<strong>we</strong>,” “<strong>our</strong>,” or “<strong>us</strong>”), the operator of <strong>Higherrrrrrr</strong> (the “<strong>Platform</strong>”). These Terms govern your use of the Higherrrrrrr Services made available to you on or through the Platform or otherwise. Higherrrrrrr Services may be provided by Thrive Point Group LLC or any affiliated entity (“<strong>Higherrrrrrr Affiliates</strong>”).
+            These Terms of Use constitute a legally binding agreement between you ("<strong>you</strong>" or "<strong>your</strong>") and <strong>Thrive Point Group LLC</strong> ("<strong>Thrive Point</strong>," "<strong>we</strong>," "<strong>our</strong>," or "<strong>us</strong>"), a Delaware limited liability company, the operator of <strong>Higherrrrrrr</strong> (the "<strong>Platform</strong>"). These Terms govern your use of the Higherrrrrrr Services made available to you on or through the Platform. Higherrrrrrr Services may be provided by Thrive Point Group LLC or any affiliated entity ("<strong>Higherrrrrrr Affiliates</strong>").
           </p>
 
           <p className="mb-4">
-            By accessing the Higherrrrrrr Platform and/or using the Higherrrrrrr Services, you agree that you have read, understood and accepted these Terms, together with any additional documents or policies referenced herein or made available to you (collectively, the “<strong>Higherrrrrrr Terms</strong>”). You acknowledge and agree that you will be bound by and will comply with these Terms, as updated and amended from time to time.
+            By accessing the Higherrrrrrr Platform and/or using the Higherrrrrrr Services, you agree that you have read, understood and accepted these Terms, together with any additional documents or policies referenced herein or made available to you (collectively, the "<strong>Higherrrrrrr Terms</strong>"). You acknowledge and agree that you will be bound by and will comply with these Terms, as updated and amended from time to time.
           </p>
 
           <p className="mb-4">
-            <strong>If you do not understand and accept these Terms in their entirety, you should not use the Higherrrrrrr Platform.</strong>
+            <strong>If you do not understand or accept these Terms in their entirety, you should not use the Higherrrrrrr Platform.</strong>
           </p>
 
           {/********************************************************************
@@ -45,7 +45,7 @@ const TOS = () => {
             RISK WARNING
           </h2>
           <p className="mb-4">
-            The value of digital assets, tokens, cryptocurrencies, or similar assets (“<strong>Digital Assets</strong>”) can fluctuate significantly, and there is a material risk of economic loss when buying, selling, holding, or investing in Digital Assets. You should therefore consider whether trading or holding Digital Assets is suitable for you, taking into account your personal circumstances and finances.
+            The value of digital assets, tokens, cryptocurrencies, or similar assets ("<strong>Digital Assets</strong>") can fluctuate significantly, and there is a material risk of economic loss when buying, selling, holding, or investing in Digital Assets. You should therefore consider whether trading or holding Digital Assets is suitable for you, taking into account your personal circumstances and finances.
           </p>
           <p className="mb-4">
             Please ensure that you fully understand the risks involved before using the Higherrrrrrr Platform or Higherrrrrrr Services.
@@ -65,7 +65,7 @@ const TOS = () => {
             1. Introduction
           </h2>
           <p className="mb-4">
-            1.1. Higherrrrrrr is a platform designed to assist with the creation, showcasing, and/or exchange of Digital Assets. Thrive Point Group LLC and its affiliates (collectively, the “Higherrrrrrr group”) provide you with this platform and related services to create and interact with Digital Assets.
+            1.1. Higherrrrrrr is a platform designed to assist with the creation, showcasing, and/or exchange of Digital Assets. Thrive Point Group LLC and its affiliates (collectively, the "Higherrrrrrr group") provide you with this platform and related services to create and interact with Digital Assets.
           </p>
           <p className="mb-4">
             1.2. By using the Higherrrrrrr Platform, you are entering into a legally binding agreement with us. These Terms will govern your use of the Higherrrrrrr Platform.
@@ -197,7 +197,7 @@ const TOS = () => {
             8. Submission of Instructions
           </h2>
           <p className="mb-4">
-            8.1. You must ensure that any instructions (“<strong>Instructions</strong>”) submitted through the Platform are complete and accurate. We are not required to verify the accuracy, authenticity, or validity of any instruction. If in doubt, we may refuse or defer acting upon any instruction.
+            8.1. You must ensure that any instructions ("Instructions") submitted through the Platform are complete and accurate. We are not required to verify the accuracy, authenticity, or validity of any instruction. If in doubt, we may refuse or defer acting upon any instruction.
           </p>
           <p className="mb-4">
             8.2. Instructions are irrevocable once submitted unless we provide written consent. An instruction is only deemed received by us when it has reached our server.
@@ -348,7 +348,7 @@ const TOS = () => {
             16. Higherrrrrrr IP
           </h2>
           <p className="mb-4">
-            All intellectual property rights (“IP”) belonging to or licensed (on a sublicensable basis) to Thrive Point Group LLC or Higherrrrrrr prior to, during, or after the execution of these Terms (“<strong>Higherrrrrrr IP</strong>”) remain vested in Thrive Point Group LLC or its affiliates, as applicable.
+            All intellectual property rights ("IP") belonging to or licensed (on a sublicensable basis) to Thrive Point Group LLC or Higherrrrrrr prior to, during, or after the execution of these Terms ("Higherrrrrrr IP") remain vested in Thrive Point Group LLC or its affiliates, as applicable.
           </p>
 
           {/********************************************************************
@@ -384,7 +384,7 @@ const TOS = () => {
             19. Created IP
           </h2>
           <p className="mb-4">
-            19.1. Any new intellectual property you create in conjunction with the Platform or its services (“Created IP”) shall automatically vest in us upon creation.
+            19.1. Any new intellectual property you create in conjunction with the Platform or its services ("Created IP") shall automatically vest in us upon creation.
           </p>
           <p className="mb-4">
             19.2. You agree to assign, and procure the assignment by your representatives or contractors, of all present or future rights in such Created IP to us, with full title guarantee.
@@ -398,7 +398,7 @@ const TOS = () => {
             20. User Material
           </h2>
           <p className="mb-4">
-            20.1. We are not responsible for any material, data, posts, or comments (“User Material”) created or provided by you or others. Use such material at your own risk.
+            20.1. We are not responsible for any material, data, posts, or comments ("User Material") created or provided by you or others. Use such material at your own risk.
           </p>
           <p className="mb-4">
             20.2. We reserve the right at our sole discretion to remove, modify, or reject any content you submit that we deem inappropriate, unauthorized, or otherwise in breach of these Terms or applicable laws. We may take action including warnings, removal of content, recovering damages or other compensation, or suspending your access to the Platform.
@@ -425,7 +425,7 @@ const TOS = () => {
               use the Platform in violation of any Prohibited Use Policy or for commercial purposes without our express written consent;
             </li>
             <li>
-              engage in “market manipulation” activities such as “pump and dump,” “wash trading,” or any conduct designed to artificially affect the price or trading volume of Digital Assets;
+              engage in "market manipulation" activities such as "pump and dump," "wash trading," or any conduct designed to artificially affect the price or trading volume of Digital Assets;
             </li>
             <li>
               engage in fraudulent or illegal activity, or cause suspicion of such activity;
@@ -495,7 +495,7 @@ const TOS = () => {
             23. Technology Disclaimers
           </h2>
           <p className="mb-4">
-            23.1. The Higherrrrrrr Platform is provided on an “as is” and “as available” basis, without representation or warranty of any kind, whether express or implied. We disclaim any implied warranties of title, merchantability, fitness for a particular purpose, and non-infringement.
+            23.1. The Higherrrrrrr Platform is provided on an "as is" and "as available" basis, without representation or warranty of any kind, whether express or implied. We disclaim any implied warranties of title, merchantability, fitness for a particular purpose, and non-infringement.
           </p>
           <p className="mb-4">
             23.2. We may suspend access to the Platform for scheduled or emergency maintenance. We do not guarantee specific turnaround times for transaction processing or functionality.
@@ -518,7 +518,7 @@ const TOS = () => {
             24. Indemnity
           </h2>
           <p className="mb-4">
-            24.1. You agree to indemnify and hold harmless Thrive Point Group LLC, Higherrrrrrr, and its affiliates from and against any and all claims, actions, losses, liabilities, damages, costs, and expenses (including reasonable attorneys’ fees) (“Losses”) arising out of or in connection with:
+            24.1. You agree to indemnify and hold harmless Thrive Point Group LLC, Higherrrrrrr, and its affiliates from and against any and all claims, actions, losses, liabilities, damages, costs, and expenses (including reasonable attorneys' fees) ("Losses") arising out of or in connection with:
           </p>
           <ul className="list-disc list-inside ml-4 mb-4">
             <li>your use of or access to the Higherrrrrrr Platform;</li>
@@ -644,7 +644,7 @@ const TOS = () => {
             30.11. Nothing herein shall be deemed an agency, partnership, or joint venture.
           </p>
           <p className="mb-4">
-            30.12. We will not be liable for delays or failures caused by events beyond our control (“Force Majeure”).
+            30.12. We will not be liable for delays or failures caused by events beyond our control ("Force Majeure").
           </p>
           <p className="mb-4">
             30.13. No waiver by us of any breach shall be a waiver of any subsequent breach.
@@ -670,7 +670,7 @@ const TOS = () => {
             31. Wallets
           </h2>
           <p className="mb-4">
-            31.1. Your digital asset wallet (“<strong>Wallet</strong>”), whether provided through a third-party integration or self-custody, remains under your sole responsibility. 
+            31.1. Your digital asset wallet ("Wallet"), whether provided through a third-party integration or self-custody, remains under your sole responsibility. 
           </p>
           <p className="mb-4">
             31.2. Thrive Point Group LLC and its affiliates are not liable for any losses or damages arising from the operation or security of your Wallet, whether it is integrated by a third party or otherwise.
@@ -690,6 +690,15 @@ const TOS = () => {
           <p className="mt-8 italic text-sm">
             © {new Date().getFullYear()} Thrive Point Group LLC – higherrrrrrr.fun<br/>
             <br/>
+          </p>
+
+          <h2 className="text-xl font-semibold mt-8 mb-2">
+            CONTACT INFORMATION
+          </h2>
+          <p className="mb-4">
+            For questions or concerns regarding these Terms, please contact:<br />
+            📩 carl@higherrrrrrr.fun<br />
+            📍 Thrive Point Group LLC, Wilmington, Delaware
           </p>
         </div>
       </main>
