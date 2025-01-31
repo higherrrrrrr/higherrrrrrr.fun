@@ -22,12 +22,6 @@ export default function Home() {
   const loadingRef = useRef(null);
   const [tokenStates, setTokenStates] = useState({});
   const [viewMode, setViewMode] = useState('trending'); // 'latest' or 'trending'
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
 
   // Intersection Observer setup
   useEffect(() => {
@@ -134,96 +128,10 @@ export default function Home() {
     fetchTokenStates();
   }, [displayedTokens]);
 
-  // Add countdown timer effect
-  useEffect(() => {
-    const targetDate = new Date('2025-01-31T15:00:00-08:00').getTime();
-
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = targetDate - now;
-
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000)
-        });
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
-      {/* Solana Countdown Section */}
-      <div className="w-full border-b border-green-500/20 pb-8">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center py-8">
-            <h2 className="text-2xl md:text-4xl font-bold mb-8">SOLANA LAUNCH IN</h2>
-            <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto mb-12">
-              <div className="flex flex-col items-center">
-                <div className="text-2xl md:text-4xl font-bold mb-2 border border-green-500/20 rounded-lg p-3 min-w-[80px] bg-black/50">
-                  {timeLeft.days.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs md:text-sm text-green-500/60">DAYS</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="text-2xl md:text-4xl font-bold mb-2 border border-green-500/20 rounded-lg p-3 min-w-[80px] bg-black/50">
-                  {timeLeft.hours.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs md:text-sm text-green-500/60">HOURS</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="text-2xl md:text-4xl font-bold mb-2 border border-green-500/20 rounded-lg p-3 min-w-[80px] bg-black/50">
-                  {timeLeft.minutes.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs md:text-sm text-green-500/60">MINUTES</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="text-2xl md:text-4xl font-bold mb-2 border border-green-500/20 rounded-lg p-3 min-w-[80px] bg-black/50">
-                  {timeLeft.seconds.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs md:text-sm text-green-500/60">SECONDS</div>
-              </div>
-            </div>
-
-            {/* Features Grid */}
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-4xl mx-auto">
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">🎨 Living Token Standard</h3>
-                <p className="text-sm opacity-80">Dynamic tokens that evolve with your cult. Watch your community transform and grow.</p>
-              </div>
-              
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">🔥 Conviction NFTs</h3>
-                <p className="text-sm opacity-80">Sacred proofs of your belief. True believers are blessed at every evolution.</p>
-              </div>
-              
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">🎯 Pre-mint Access</h3>
-                <p className="text-sm opacity-80">Guaranteed allocation for creators. Be among the first to launch an evolving token.</p>
-              </div>
-              
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold">🚀 Growth Mechanics</h3>
-                <p className="text-sm opacity-80">Tokens that evolve with your following. Each milestone unlocks new potential.</p>
-              </div>
-            </div>
-
-            <p className="mt-8 text-sm md:text-base opacity-80">
-              The evolution of cult coins begins here.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Base Tokens Section */}
       <div className="w-full pt-8">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8">Base Tokens</h2>
-
           <div>
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-bold">

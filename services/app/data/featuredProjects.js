@@ -13,7 +13,7 @@ const featuredProjects = [
       <h2 class="text-xl font-bold mt-4">About Wen Lamboo</h2>
       
       <p class="mt-4">
-      Buckle up degen, and fill your gas tank with hopium, because ‘Wen Lamboo’ is hurtling into the Higher-verse!
+      Buckle up degen, and fill your gas tank with hopium, because 'Wen Lamboo' is hurtling into the Higher-verse!
       <p class="mt-4">
        This is no simple a meme, but an on-chain reality, a manifestation of our collective desire for Lamborghinis.  Local Lambotonist Magpie is here to share his roadmap to Valhalla.
       <p class="mt-4">
@@ -135,6 +135,12 @@ const featuredProjects = [
     website: 'https://higherrrrrrr.fun/',
     twitter: 'https://x.com/higherrrrrrrfun',
     telegram: 'https://t.me/+Y0XJwPzrdUc2OGRh',
+    tvChannel: {
+      number: '42069',
+      name: 'CULT TV',
+      twitchChannel: 'carlcortright',
+      projectSlug: 'cult'
+    },
     customContent: `
       <h2 class="text-xl font-bold mt-4">About CULT</h2>
       <p class="mt-2">
