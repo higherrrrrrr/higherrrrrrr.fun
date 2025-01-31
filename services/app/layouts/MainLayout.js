@@ -61,7 +61,7 @@ export default function MainLayout({ children }) {
               How it Works
             </Link>
             <Link href="/featured/feed" className="hover:text-green-300 transition-colors">
-              Featured
+              HighLites
             </Link>
             <a 
               href="https://x.com/higherrrrrrrfun"
@@ -109,13 +109,13 @@ export default function MainLayout({ children }) {
 
           <div className="w-[180px]">
             <Link href="/launch" className="w-full">
-              <button className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors whitespace-nowrap text-base">
+              <button className="snake-border w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-all duration-200 whitespace-nowrap text-base">
                 Create
               </button>
             </Link>
           </div>
           <div className="w-[180px] h-12">
-            <ConnectKitButton />
+            <ConnectKitButton className="snake-border" />
           </div>
         </div>
 
@@ -206,12 +206,7 @@ export default function MainLayout({ children }) {
               GitHub
             </a>
           </div>
-
-          {/* Center text */}
-          <div className="text-green-500/50 font-mono text-xs md:text-sm">
-            8=====D ~~~~~ 👧
-          </div>
-
+          
           {/* Right text */}
           <div className="text-green-500/50 font-mono text-xs md:text-sm">
             Built on <span className="line-through mx-1">Base</span> Solana

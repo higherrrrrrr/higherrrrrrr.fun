@@ -208,4 +208,4 @@ We invite you to jump in and help push **Higherrrrrrr** to comedic extremes. Sta
 This allocation is reserved for the token communities that supported the original Higherrrrrrr V1 launch on Base. We’ll finalize the airdrop or bridging mechanism for these tokens soon.
 
 ### Migration LP Support\* (5%)
-Designated for the **HARDER/CULT** liquidity pool. The HARDER side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures a robust cross-token liquidity pool.
+Designated for the **Migrated Tokens/CULT** liquidity pools. The Migrated Tokens side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures robust cross-token liquidity pools for migrated tokens from Base.
