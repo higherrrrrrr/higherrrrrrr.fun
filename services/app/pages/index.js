@@ -143,24 +143,25 @@ export default function Home() {
   const loadingRef = useRef(null);
   const [tokenStates, setTokenStates] = useState({});
   const [viewMode, setViewMode] = useState('trending'); // 'latest' or 'trending'
-
-  // Simple countdown
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0,
+    seconds: 0
   });
 
   const [highliteProjects, setHighliteProjects] = useState([]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore && !isLoadingFeed) {
-        setPage((prev) => prev + 1);
-      }
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingFeed) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
 
     if (loadingRef.current) {
       observer.observe(loadingRef.current);
@@ -275,11 +276,11 @@ export default function Home() {
     setHighliteProjects(getHighliteProjects());
   }, []);
 
-  // Add this useEffect for auto-updating countdown
+  // Auto-update countdown for featured projects
   useEffect(() => {
     const timer = setInterval(() => {
-      setHighliteProjects(prev => 
-        prev.map(proj => {
+      setHighliteProjects((prev) =>
+        prev.map((proj) => {
           if (proj.timeLeftMs <= 0) return { ...proj, timeLeftMs: 0 };
           return { ...proj, timeLeftMs: Math.max(proj.timeLeftMs - 1000, 0) };
         })
@@ -290,169 +291,65 @@ export default function Home() {
   }, []);
 
   return (
-    <>
-      <div className="min-h-screen bg-black text-green-500 font-mono">
-        {/* SOLANA Countdown => glitch heading */}
-        <div className="w-full border-b border-green-500/20 pb-8">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center py-8">
-              <h2 className="text-2xl md:text-4xl font-bold mb-8">
-                <GlitchText>SOLANA LAUNCH IN</GlitchText>
-              </h2>
-              <CountdownTimer timeLeft={timeLeft} />
+    <div className="min-h-screen bg-black text-green-500 font-mono">
+      {/* Base Tokens Section */}
+      <div className="w-full pt-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-8">Base Tokens</h2>
 
-              {/* Features Grid */}
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-4xl mx-auto">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold">🎨 Living Token Standard</h3>
-                  <p className="text-sm opacity-80">Dynamic tokens that evolve with your cult. Watch your community transform and grow.</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold">🔥 Conviction NFTs</h3>
-                  <p className="text-sm opacity-80">Sacred proofs of your belief. True believers are blessed at every evolution.</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold">🎯 Pre-mint Access</h3>
-                  <p className="text-sm opacity-80">Guaranteed allocation for creators. Be among the first to launch an evolving token.</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold">🚀 Growth Mechanics</h3>
-                  <p className="text-sm opacity-80">Tokens that evolve with your following. Each milestone unlocks new potential.</p>
-                </div>
-              </div>
-
-              <p className="mt-8 text-sm md:text-base opacity-80">
-                The evolution of cult coins begins here.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* HighLites */}
-        <div className="w-full pt-16 pb-16 border-b border-green-500/20">
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-12">
-              <h2 className="text-3xl font-bold">HighLites</h2>
-              <Link 
-                href="/featured/feed"
-                className="px-4 py-2 border border-green-500/30 rounded hover:border-green-500 transition-colors"
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold">
+                {viewMode === 'latest' ? 'Latest Tokens' : 'Trending Tokens'}
+              </h3>
+              <select
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value)}
+                className="bg-black border border-green-500/20 text-green-500 px-4 py-2 rounded-lg focus:outline-none focus:border-green-500/40"
               >
-                View All
-              </Link>
+                <option value="trending">Trending</option>
+                <option value="latest">Latest</option>
+              </select>
             </div>
+            <p className="text-sm text-green-500/60 mb-8">
+              {viewMode === 'latest' 
+                ? 'newest token launches'
+                : 'sorted by last 6hr volume'
+              }
+            </p>
 
-            {/* Scaled down cards while maintaining proportions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {highliteProjects.map((project) => (
-                <Link key={project.slug} href={`/featured/${project.slug}`} className="w-[280px] mx-auto">
-                  <div className="snake-border p-8 bg-black/20 rounded h-full flex flex-col">
-                    <div className="snake-line"></div>
-                    {project.imageUrl && (
-                      <div className="aspect-square mb-6 overflow-hidden rounded">
-                        <img
-                          src={project.imageUrl}
-                          alt={project.name}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
-                    <h3 className="text-2xl font-bold mb-3">{project.name}</h3>
-                    <p className="text-sm text-green-500/70 mb-6 flex-grow">
-                      {project.description}
-                    </p>
-                    <div className="text-green-300 font-mono text-sm">
-                      <span className="opacity-70 mr-2">Launch:</span>
-                      {formatCountdown(project.timeLeftMs)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {isLoadingFeed
+                ? [...Array(6)].map((_, i) => (
+                    <div key={i} className="snake-border p-4 bg-black/20 rounded">
+                      <div className="snake-line"></div>
+                      <TokenCard isLoading />
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  ))
+                : displayedTokens.map((token) => (
+                    <div
+                      key={token.address}
+                      className="snake-border p-4 bg-black/20 rounded"
+                    >
+                      <div className="snake-line"></div>
+                      <TokenCard
+                        token={token}
+                        tokenState={tokenStates[token.address]}
+                        isLoading={!tokenStates[token.address]}
+                      />
+                    </div>
+                  ))}
             </div>
-          </div>
-        </div>
 
-        {/* Ascending */}
-        <div className="w-full pt-8 pb-8 border-b border-green-500/20">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold">Ascending</h2>
-              <p className="text-green-500/60 text-sm">Coming Sewn…</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-              <div className="snake-border rounded text-center">
-                <div className="snake-line"></div>
-                <div className="p-8">
-                  <h3 className="text-lg font-bold text-green-300">
-                    Coming Sewn
-                  </h3>
-                </div>
+            {/* Infinite scroll loader */}
+            {hasMore && (
+              <div ref={loadingRef} className="text-center py-12 text-green-500/50">
+                {isLoadingFeed ? 'Loading more tokens...' : 'Scroll for more'}
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Base Tokens => trending or latest */}
-        <div className="w-full pt-8">
-          <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Base Tokens</h2>
-            <div>
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-2xl font-bold">
-                  {viewMode === 'latest' ? 'Latest Tokens' : 'Trending Tokens'}
-                </h3>
-                <select
-                  value={viewMode}
-                  onChange={(e) => setViewMode(e.target.value)}
-                  className="bg-black border border-green-500/30 text-green-500 px-4 py-2 rounded-lg 
-                             hover:border-green-500 focus:outline-none focus:border-green-500/40"
-                >
-                  <option value="trending">Trending</option>
-                  <option value="latest">Latest</option>
-                </select>
-              </div>
-
-              <p className="text-sm text-green-500/60 mb-8">
-                {viewMode === 'latest'
-                  ? 'newest token launches'
-                  : 'sorted by last 6hr volume'}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {isLoadingFeed
-                  ? [...Array(6)].map((_, i) => (
-                      <div key={i} className="snake-border p-4 bg-black/20 rounded">
-                        <div className="snake-line"></div>
-                        <TokenCard isLoading />
-                      </div>
-                    ))
-                  : displayedTokens.map((token, i) => (
-                      <div
-                        key={token.address}
-                        className="snake-border p-4 bg-black/20 rounded"
-                      >
-                        <div className="snake-line"></div>
-                        <TokenCard
-                          token={token}
-                          tokenState={tokenStates[token.address]}
-                          isLoading={!tokenStates[token.address]}
-                        />
-                      </div>
-                    ))}
-              </div>
-
-              {/* Infinite scroll loader */}
-              {hasMore && (
-                <div ref={loadingRef} className="text-center py-12 text-green-500/50">
-                  {isLoadingFeed ? 'Loading more tokens...' : 'Scroll for more'}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
