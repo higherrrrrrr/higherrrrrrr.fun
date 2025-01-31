@@ -13,7 +13,7 @@ const featuredProjects = [
       <h2 class="text-xl font-bold mt-4">About Wen Lamboo</h2>
       
       <p class="mt-4">
-      Buckle up degen, and fill your gas tank with hopium, because ‘Wen Lamboo’ is hurtling into the Higher-verse!
+      Buckle up degen, and fill your gas tank with hopium, because 'Wen Lamboo' is hurtling into the Higher-verse!
       <p class="mt-4">
        This is no simple a meme, but an on-chain reality, a manifestation of our collective desire for Lamborghinis.  Local Lambotonist Magpie is here to share his roadmap to Valhalla.
       <p class="mt-4">
@@ -138,7 +138,7 @@ const featuredProjects = [
     customContent: `
       <h2 class="text-xl font-bold mt-4">About CULT</h2>
       <p class="mt-2">
-        CULT is Higherrrrrrr's native protocol token and self-burning agent of chaos. 1B tokens, 0.5% burned + 0.5% SOL floor fuel on every trade. Hold 420,690 $CULT for Conviction NFTs when the cult evolves. Launch: 65% fair pool, 15% to Base OGs, 15% team locked in a multi-sig (7.77% for current team w/ vesting, 7.23% for future uses). Ascend or gtfo.
+        CULT is Higherrrrrrr's native protocol token and self-burning agent of chaos. 1B tokens, 0.5% burned + 0.5% SOL floor fuel on every trade. Hold 420,690 $CULT for Conviction NFTs when the cult evolves. Launch: 65% fair pool, 15% to Base OGs via airdrop, 15% team locked in a multi-sig (7.77% for current team w/ vesting, 7.23% for future uses), and 5% for migrated token LPs,. Ascend or gtfo.
         <p class="mt-8"></p>
       <p class="mb-4">
         <strong>Why launch $CULT?</strong><br/>
@@ -153,11 +153,37 @@ const featuredProjects = [
         We will be airdropping 15% of the $CULT supply to the faithful, those that have supported Higherrrrrrr from the beginning on Base. We plan do to a snapshot and reward all token communities using Higherrrrrrr on Base. Don't ape a bunch of smol cap tokens degens, we will be normalizing for MC - BELIEVE IN SOMETHING.
       </p>
       <p class="mb-4">
-        <strong>Why pair 5% of $CULT with $HARDER in an LP?</strong><br/>
-        Well degen, we BELIEVE in the CULT OF HARDER! Put more simply for the slower in the group, pairing the tokens inherently links the succes of each together, if $CULT does well, so does $HARDER and vice versa. A degen match cultivated in chaos.
+        <strong>Why pair 5% of $CULT with Migrated Tokens in an LP?</strong><br/>
+        Well degen, we BELIEVE in the CULT OF HIGHER^7! Put more simply for the slower in the group, pairing the tokens inherently links the succes of each together, if $CULT does well, so do migrated tokens and vice versa. A degen match cultivated in chaos.
       </p>
     `,
-  }
+  },
+  {
+    slug: 'idk',
+    name: 'IDK',
+    imageUrl: '/images/featured/idk.png',
+    description: "The first hyper-meta, self-aware token that perfectly encapsulates the vibe of modern markets.",
+    launchDate: '2025-02-07T23:00:00Z',
+    website: 'https://lolidkkkkk.deform.cc/idk/',
+    twitter: 'https://x.com/idkcto_',
+    telegram: 'https://lolidkkkkk.deform.cc/idk/',
+    warpcast: 'https://warpcast.com/idkcto',
+    customContent: `
+      <h2 class="text-xl font-bold mt-4">About IDK</h2>
+      <p class="mt-2">
+        IDK is the first hyper-meta, self-aware token that perfectly encapsulates the vibe of modern markets.
+        It expands infinitely as the community does... or doesn't. It's a living shrug that laughs in the face 
+        of decentralization, financialization, and logic itself.
+      </p>
+      
+      <p class="mt-8"></p>
+      <p class="mb-4">
+        <strong>Migration</strong><br/>
+        Migrated $IDK will enter price discovery using a single-sided CULT LP provided by the Higher^7 team. 
+        This will enable deep liquidity for $IDK on Solana via the $IDK/$CULT pair.
+      </p>
+    `,
+  },
 ];
 
 export default featuredProjects;
