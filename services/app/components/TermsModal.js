@@ -20,14 +20,14 @@ export default function TermsModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-black border border-green-500/30 rounded-lg max-w-2xl w-full p-6 md:p-8">
-        <h2 className="text-2xl font-bold text-green-500 mb-6">Before You Enter...</h2>
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 mt-16">
+      <div className="bg-black border border-green-500/30 rounded-lg max-w-2xl w-full p-6 md:p-8 max-h-[calc(100vh-8rem)] flex flex-col mx-auto">
+        <h2 className="text-2xl font-bold text-green-500 mb-6 text-center">Before You Enter...</h2>
         
-        <div className="space-y-4 text-green-500/80 mb-8">
-          <p className="mb-4">Hey anon, please read this quick disclaimer:</p>
+        <div className="space-y-4 text-green-500/80 mb-8 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-green-500/20 scrollbar-track-transparent">
+          <p className="mb-4 text-center">Hey anon, please read this quick disclaimer:</p>
           
-          <ul className="list-disc pl-5 space-y-3">
+          <ul className="list-disc pl-5 space-y-3 max-w-xl mx-auto">
             <li>
               This is a token launchpad, not an exchange or financial advisor. We don't make 
               recommendations or give investment advice.
@@ -48,7 +48,7 @@ export default function TermsModal() {
             </li>
           </ul>
 
-          <p className="mt-6 text-sm">
+          <p className="mt-6 text-sm text-center">
             For the full terms, check out our{' '}
             <Link href="/tos" className="text-green-500 hover:text-green-400 underline">
               Terms of Service
@@ -56,7 +56,7 @@ export default function TermsModal() {
           </p>
         </div>
 
-        <div className="flex justify-end gap-4">
+        <div className="flex justify-center gap-4 mt-auto pt-4 border-t border-green-500/20">
           <a 
             href="https://google.com" 
             className="px-6 py-2 border border-green-500/50 text-green-500 rounded hover:bg-green-500/10"
