@@ -5,6 +5,7 @@ import { ConnectKitButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import TVPanel from '../components/TVPanel';
 import featuredProjects from '../data/featuredProjects';
+import TermsModal from '../components/TermsModal';
 
 export default function MainLayout({ children }) {
   const [isMobile, setIsMobile] = useState(false);
@@ -38,6 +39,7 @@ export default function MainLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
+      <TermsModal />
       {/* Make header sticky */}
       <header className="sticky top-0 z-50 bg-black border-b border-green-500/20 flex flex-col md:flex-row justify-between items-center p-3 md:p-6 max-w-[1920px] mx-auto w-full gap-4 md:gap-0">
         <div className="flex items-center gap-6">
@@ -204,6 +206,13 @@ export default function MainLayout({ children }) {
               className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
             >
               GitHub
+            </a>
+            <a
+              href="/tos"
+              rel="noopener noreferrer"
+              className="text-green-500/50 hover:text-green-500 font-mono text-xs md:text-sm transition-colors"
+            >
+              Terms of Service
             </a>
           </div>
           
