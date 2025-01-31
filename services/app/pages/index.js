@@ -6,6 +6,10 @@ import { getTopTradingTokens, getLatestTokens } from '../api/tokens';
 import { getTokenState } from '../onchain/tokenState';
 import TokenCard from '../components/TokenCard';
 import featuredProjects from '../data/featuredProjects';
+import { CountdownTimer } from '../components/CountdownTimer';
+import { highliteTokens, ascendingTokens } from '../data/tokens';
+import { GlitchText } from '../components/GlitchText';
+import { formatCountdown } from '../utils/formatters';
 
 // Constants
 const TOKENS_PER_PAGE = 24;
@@ -13,49 +17,6 @@ const TOKENS_PER_PAGE = 24;
 /*
   1) Glitch effect for "SOLANA LAUNCH IN"
 */
-const glitchStyles = `
-  .glitch {
-    position: relative;
-    display: inline-block;
-    color: #00ff00;
-    text-shadow: 0 0 2px #00ff00;
-    line-height: 1;
-  }
-  .glitch::before,
-  .glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 0;
-    top: 0;
-    overflow: hidden;
-    clip: rect(0, 900px, 0, 0);
-    opacity: 0.9;
-  }
-  .glitch::before {
-    color: #0ff;
-    animation: glitch-top 2s infinite linear alternate-reverse;
-  }
-  .glitch::after {
-    color: #f0f;
-    animation: glitch-bottom 2s infinite linear alternate-reverse;
-  }
-  @keyframes glitch-top {
-    0%   { clip: rect(0, 9999px, 0, 0);    transform: translate(2px, -2px); }
-    20%  { clip: rect(15px, 9999px, 16px, 0); transform: translate(-2px, 0); }
-    40%  { clip: rect(5px, 9999px, 40px, 0);  transform: translate(-2px, -2px); }
-    60%  { clip: rect(30px, 9999px, 10px, 0); transform: translate(0, 2px); }
-    80%  { clip: rect(10px, 9999px, 30px, 0); transform: translate(2px, -1px); }
-    100% { clip: rect(8px, 9999px, 14px, 0);  transform: translate(-1px, 2px); }
-  }
-  @keyframes glitch-bottom {
-    0%   { clip: rect(55px, 9999px, 56px, 0); transform: translate(-2px, 0); }
-    20%  { clip: rect(30px, 9999px, 34px, 0); transform: translate(-1px, 2px); }
-    40%  { clip: rect(10px, 9999px, 90px, 0); transform: translate(-1px, -1px); }
-    60%  { clip: rect(40px, 9999px, 60px, 0); transform: translate(1px, 2px); }
-    80%  { clip: rect(20px, 9999px, 50px, 0); transform: translate(0, 1px); }
-    100% { clip: rect(70px, 9999px, 80px, 0); transform: translate(2px, -2px); }
-  }
-`;
 
 /*
   2) "Snake" traveling line border
@@ -158,42 +119,6 @@ const snakeStyles = `
   }
 `;
 
-/*
-  3) "HighLites" data: Wen Lamboo, Harder, Cult
-*/
-const highliteTokens = [
-  {
-    address: 'wen-lamboo',
-    name: 'Wen Lamboo',
-    marketCap: 420690,
-    description: 'When do we get our Lamboo? Possibly right now.',
-  },
-  {
-    address: 'harder',
-    name: 'Harder',
-    marketCap: 696969,
-    description: 'Evolve. Expand. Ejaculate liquidity. The first on-chain evolutionary token.',
-  },
-  {
-    address: 'cult',
-    name: 'Cult',
-    marketCap: 666666,
-    description: 'Agent of chaos. Self-burning degeneracy at its finest.',
-  },
-];
-
-/*
-  4) Ascending placeholders
-*/
-const ascendingTokens = [
-  {
-    address: '0xACE1',
-    name: 'Coming Sewn',
-    marketCap: 99999,
-    description: 'Placeholder for future Ascending tokens.',
-  },
-];
-
 function getHighliteProjects() {
   const nowMs = Date.now();
   return featuredProjects
@@ -207,17 +132,6 @@ function getHighliteProjects() {
     })
     .sort((a, b) => a.timeLeftMs - b.timeLeftMs)
     .slice(0, 3); // Only take first 3 projects for HighLites
-}
-
-function formatCountdown(msLeft) {
-  if (msLeft <= 0) return 'Launched!';
-
-  const days = Math.floor(msLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((msLeft / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((msLeft / (1000 * 60)) % 60);
-  const seconds = Math.floor((msLeft / 1000) % 60);
-
-  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
 export default function Home() {
@@ -377,81 +291,39 @@ export default function Home() {
 
   return (
     <>
-      {/* Inject glitch & snake styles */}
-      <style>{glitchStyles}</style>
-      <style>{snakeStyles}</style>
-
       <div className="min-h-screen bg-black text-green-500 font-mono">
         {/* SOLANA Countdown => glitch heading */}
         <div className="w-full border-b border-green-500/20 pb-8">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center py-8">
-              <h2
-                className="glitch text-2xl md:text-4xl font-bold mb-8"
-                data-text="SOLANA LAUNCH IN"
-              >
-                SOLANA LAUNCH IN
+              <h2 className="text-2xl md:text-4xl font-bold mb-8">
+                <GlitchText>SOLANA LAUNCH IN</GlitchText>
               </h2>
+              <CountdownTimer timeLeft={timeLeft} />
 
-              {/* Countdown boxes */}
-              <div className="flex gap-4 justify-center items-center">
-                {/* Days */}
-                <div className="flex flex-col items-center">
-                  <div className="timer-snake-border text-2xl md:text-4xl font-bold mb-2 rounded-lg p-3 min-w-[80px] bg-black/50">
-                    {timeLeft.days.toString().padStart(2, '0')}
-                  </div>
-                  <div className="text-xs md:text-sm text-green-500/60">DAYS</div>
-                </div>
-                {/* Hours */}
-                <div className="flex flex-col items-center">
-                  <div className="timer-snake-border text-2xl md:text-4xl font-bold mb-2 rounded-lg p-3 min-w-[80px] bg-black/50">
-                    {timeLeft.hours.toString().padStart(2, '0')}
-                  </div>
-                  <div className="text-xs md:text-sm text-green-500/60">HOURS</div>
-                </div>
-                {/* Minutes */}
-                <div className="flex flex-col items-center">
-                  <div className="timer-snake-border text-2xl md:text-4xl font-bold mb-2 rounded-lg p-3 min-w-[80px] bg-black/50">
-                    {timeLeft.minutes.toString().padStart(2, '0')}
-                  </div>
-                  <div className="text-xs md:text-sm text-green-500/60">MINUTES</div>
-                </div>
-                {/* Seconds */}
-                <div className="flex flex-col items-center">
-                  <div className="timer-snake-border text-2xl md:text-4xl font-bold mb-2 rounded-lg p-3 min-w-[80px] bg-black/50">
-                    {timeLeft.seconds.toString().padStart(2, '0')}
-                  </div>
-                  <div className="text-xs md:text-sm text-green-500/60">SECONDS</div>
-                </div>
-              </div>
-
-              {/* Some bullet points */}
+              {/* Features Grid */}
               <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-4xl mx-auto">
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">🎨 Living Token Standard</h3>
-                  <p className="text-sm opacity-80">
-                    Dynamic tokens that evolve with your cult. Watch your community transform and grow.
-                  </p>
+                  <p className="text-sm opacity-80">Dynamic tokens that evolve with your cult. Watch your community transform and grow.</p>
                 </div>
+                
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">🔥 Conviction NFTs</h3>
-                  <p className="text-sm opacity-80">
-                    Sacred proofs of your belief. True believers are blessed at every evolution.
-                  </p>
+                  <p className="text-sm opacity-80">Sacred proofs of your belief. True believers are blessed at every evolution.</p>
                 </div>
+                
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">🎯 Pre-mint Access</h3>
-                  <p className="text-sm opacity-80">
-                    Guaranteed allocation for creators. Be among the first to launch an evolving token.
-                  </p>
+                  <p className="text-sm opacity-80">Guaranteed allocation for creators. Be among the first to launch an evolving token.</p>
                 </div>
+                
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">🚀 Growth Mechanics</h3>
-                  <p className="text-sm opacity-80">
-                    Tokens that evolve with your following. Each milestone unlocks new potential.
-                  </p>
+                  <p className="text-sm opacity-80">Tokens that evolve with your following. Each milestone unlocks new potential.</p>
                 </div>
               </div>
+
               <p className="mt-8 text-sm md:text-base opacity-80">
                 The evolution of cult coins begins here.
               </p>
@@ -477,6 +349,7 @@ export default function Home() {
               {highliteProjects.map((project) => (
                 <Link key={project.slug} href={`/featured/${project.slug}`} className="w-[280px] mx-auto">
                   <div className="snake-border p-8 bg-black/20 rounded h-full flex flex-col">
+                    <div className="snake-line"></div>
                     {project.imageUrl && (
                       <div className="aspect-square mb-6 overflow-hidden rounded">
                         <img
@@ -510,6 +383,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               <div className="snake-border rounded text-center">
+                <div className="snake-line"></div>
                 <div className="p-8">
                   <h3 className="text-lg font-bold text-green-300">
                     Coming Sewn
@@ -550,6 +424,7 @@ export default function Home() {
                 {isLoadingFeed
                   ? [...Array(6)].map((_, i) => (
                       <div key={i} className="snake-border p-4 bg-black/20 rounded">
+                        <div className="snake-line"></div>
                         <TokenCard isLoading />
                       </div>
                     ))
@@ -558,6 +433,7 @@ export default function Home() {
                         key={token.address}
                         className="snake-border p-4 bg-black/20 rounded"
                       >
+                        <div className="snake-line"></div>
                         <TokenCard
                           token={token}
                           tokenState={tokenStates[token.address]}

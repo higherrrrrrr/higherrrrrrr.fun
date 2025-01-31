@@ -68,13 +68,13 @@ export default function MainLayout({ children }) {
         <div className="flex gap-3 md:gap-4">
           <div className="w-[180px]">
             <Link href="/launch" className="w-full">
-              <button className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors whitespace-nowrap text-base">
+              <button className="snake-border w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-all duration-200 whitespace-nowrap text-base">
                 Create
               </button>
             </Link>
           </div>
           <div className="w-[180px] h-12">
-            <ConnectKitButton />
+            <ConnectKitButton className="snake-border" />
           </div>
         </div>
 

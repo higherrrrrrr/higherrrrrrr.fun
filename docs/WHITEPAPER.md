@@ -314,4 +314,4 @@ Refers to the higherrrrrrr token communities who supported the original Higherrr
 
 ### 15.2. Migration LP Support (5%)
 
-Specifically designates supply for the **HARDER/CULT** liquidity pool. The HARDER side burns on each trade, while the CULT side directs 0.5% of CULT fees to the floor mechanic for HARDER. This ensures a robust, cross-token link.
+Specifically designates supply for the **Migrated Tokens/CULT** liquidity pools. The Migrated Tokens side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures robust cross-token liquidity pools for migrated tokens from Base.

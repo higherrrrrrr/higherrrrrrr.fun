@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import featuredProjects from '../../data/featuredProjects';
 import { FaGlobe, FaTelegramPlane } from 'react-icons/fa';
+import { GlitchText } from '../../components/GlitchText';
 
 /* Simple X (Twitter) icon */
 const XIcon = ({ className }) => (
@@ -16,118 +17,6 @@ const XIcon = ({ className }) => (
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
 );
-
-/* 
-  Glitch text CSS (same snippet) 
-*/
-const glitchStyles = `
-  .glitch {
-    position: relative;
-    color: #00ff00;
-    text-shadow: 0 0 2px #00ff00;
-  }
-  .glitch::before,
-  .glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 0;
-    overflow: hidden;
-    clip: rect(0, 900px, 0, 0);
-    opacity: 0.9;
-  }
-  .glitch::before {
-    animation: glitch-top 2s infinite linear alternate-reverse;
-    color: #0ff;
-  }
-  .glitch::after {
-    animation: glitch-bottom 2s infinite linear alternate-reverse;
-    color: #f0f;
-  }
-  @keyframes glitch-top {
-    0%   { clip: rect(0, 9999px, 0, 0);    transform: translate(2px, -2px); }
-    20%  { clip: rect(15px, 9999px, 16px, 0); transform: translate(-2px, 0); }
-    40%  { clip: rect(5px, 9999px, 40px, 0);  transform: translate(-2px, -2px); }
-    60%  { clip: rect(30px, 9999px, 10px, 0); transform: translate(0, 2px); }
-    80%  { clip: rect(10px, 9999px, 30px, 0); transform: translate(2px, -1px); }
-    100% { clip: rect(8px, 9999px, 14px, 0);  transform: translate(-1px, 2px); }
-  }
-  @keyframes glitch-bottom {
-    0%   { clip: rect(55px, 9999px, 56px, 0); transform: translate(-2px, 0); }
-    20%  { clip: rect(30px, 9999px, 34px, 0); transform: translate(-1px, 2px); }
-    40%  { clip: rect(10px, 9999px, 90px, 0); transform: translate(-1px, -1px); }
-    60%  { clip: rect(40px, 9999px, 60px, 0); transform: translate(1px, 2px); }
-    80%  { clip: rect(20px, 9999px, 50px, 0); transform: translate(0, 1px); }
-    100% { clip: rect(70px, 9999px, 80px, 0); transform: translate(2px, -2px); }
-  }
-`;
-
-/* Snake animation - constant version for all elements */
-const snakeStyles = `
-  .snake-border {
-    position: relative;
-    border: 2px solid rgba(0, 255, 0, 0.15);
-    transition: transform 0.3s;
-  }
-  
-  .snake-border:hover {
-    transform: scale(1.02);
-  }
-
-  .snake-border::after {
-    content: "";
-    position: absolute;
-    top: 16px; left: 16px; right: 16px; bottom: 16px;
-    border: 2px solid rgba(0, 255, 0, 0.15);
-    border-radius: 8px;
-    pointer-events: none;
-  }
-  
-  .snake-border::before {
-    content: "";
-    position: absolute;
-    top: -2px; left: -2px; right: -2px; bottom: -2px;
-    border-radius: 8px;
-    pointer-events: none;
-    background: linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 0,
-                linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 100%,
-                linear-gradient(0deg, #00ff00 50%, transparent 50%) 0 0,
-                linear-gradient(0deg, #00ff00 50%, transparent 50%) 100% 0;
-    background-repeat: no-repeat;
-    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-    animation: snake-travel 6s infinite linear;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
-  }
-
-  @keyframes snake-travel {
-    0% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
-    }
-    12.5% {
-      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
-    }
-    25% {
-      background-position: 100% 0, -100% 100%, 0 100%, 100% 0;
-    }
-    37.5% {
-      background-position: 100% 0, -100% 100%, 0 100%, 100% -100%;
-    }
-    50% {
-      background-position: 0 0, 0 100%, 0 100%, 100% -100%;
-    }
-    62.5% {
-      background-position: 0 0, 0 100%, 0 0, 100% -100%;
-    }
-    75% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
-    }
-    87.5% {
-      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
-    }
-    100% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
-    }
-  }
-`;
 
 /* Helper to format the countdown string */
 function formatCountdown(msLeft) {
@@ -188,19 +77,13 @@ export default function FeaturedProjectPage() {
 
   return (
     <>
-      <style>{glitchStyles}</style>
-      <style>{snakeStyles}</style>
       <div className="min-h-screen bg-black text-green-500 font-mono flex flex-col">
         {/* Hero Section */}
         <div className="p-6 md:p-12 relative overflow-hidden">
           <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-            {/* Glitch Title */}
-            <h1
-              className="text-4xl md:text-5xl font-bold mb-3 glitch"
-              data-text={project.name}
-            >
+            <GlitchText className="text-4xl md:text-5xl font-bold mb-3">
               {project.name}
-            </h1>
+            </GlitchText>
 
             {/* Description */}
             <p className="text-green-500/80 max-w-2xl mb-6">
@@ -253,6 +136,7 @@ export default function FeaturedProjectPage() {
               {/* Image with constant snake border */}
               {project.imageUrl && (
                 <div className="snake-border p-4 bg-black/20 rounded">
+                  <div className="snake-line"></div>
                   <img
                     src={project.imageUrl}
                     alt={project.name}
@@ -263,6 +147,7 @@ export default function FeaturedProjectPage() {
 
               {/* Countdown box with constant snake border */}
               <div className="snake-border bg-black/20 rounded">
+                <div className="snake-line"></div>
                 <div className="flex flex-col items-center md:items-start p-8">
                   <h2 className="text-2xl font-bold text-green-400 mb-4">
                     Launch Countdown

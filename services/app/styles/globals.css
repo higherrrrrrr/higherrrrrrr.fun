@@ -4,45 +4,43 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  font-family: "Pixelify Mono", monospace !important;
+@layer base {
+  * {
+    font-family: "Pixelify Mono", monospace !important;
+  }
+
+  :root {
+    --background: #000000;
+    --foreground: #4ade80;
+    --countdown-color: rgb(34 197 94);
+  }
+
+  body {
+    @apply text-green-500 bg-black;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme(colors.green.800) theme(colors.black);
+  }
+
+  ::selection {
+    @apply bg-green-800;
+  }
 }
 
-:root {
-  --background: #000000;
-  --foreground: #4ade80;
-  --countdown-color: rgb(34 197 94);
-}
+@layer components {
+  .digit > * {
+    filter: none !important;
+  }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-}
+  .terminal-text {
+    @apply whitespace-pre-wrap text-shadow-terminal;
+  }
 
-* {
-  scrollbar-width: thin;
-  scrollbar-color: theme("colors.green.800") theme("colors.black");
-}
-
-::selection {
-  background-color: theme("colors.green.800");
-}
-
-.digit > * {
-  filter: none !important;
-}
-
-.terminal-text {
-  text-shadow: 
-    0 0 2px rgba(74, 222, 128, 0.4),
-    0 0 4px rgba(74, 222, 128, 0.2);
-  line-height: 1.6;
-}
-
-/* Add subtle grid background */
-.bg-black {
-  background-color: #000000;
-  background-image: radial-gradient(rgba(0, 30, 0, 0.4) 2px, transparent 0);
-  background-size: 32px 32px;
-  background-position: -16px -16px;
+  .grid-pattern {
+    background-image: radial-gradient(rgba(0, 30, 0, 0.4) 2px, transparent 0);
+    background-size: 32px 32px;
+    background-position: -16px -16px;
+  }
 }
