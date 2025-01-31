@@ -86,7 +86,6 @@ export default function TVPanel() {
       <div className="p-4 border-t border-green-500/30 overflow-y-auto">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-green-500 text-sm font-bold">CHANNEL GUIDE</h3>
-          <span className="text-green-500/70 text-xs">LIVE NOW</span>
         </div>
         
         <div className="space-y-2">

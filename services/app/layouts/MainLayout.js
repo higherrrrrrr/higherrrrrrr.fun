@@ -4,10 +4,26 @@ import { useEffect, useState } from 'react';
 import { ConnectKitButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import TVPanel from '../components/TVPanel';
+import featuredProjects from '../data/featuredProjects';
 
 export default function MainLayout({ children }) {
   const [isMobile, setIsMobile] = useState(false);
-  const [tvEnabled, setTvEnabled] = useState(true);
+  const [tvEnabled, setTvEnabled] = useState(() => {
+    // Only run this on client-side
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('tvEnabled');
+      // If no stored value (first visit), return true
+      return stored === null ? true : stored === 'true';
+    }
+    return true; // Default to true for SSR
+  });
+
+  // Save TV state to localStorage when it changes
+  const toggleTV = () => {
+    const newState = !tvEnabled;
+    setTvEnabled(newState);
+    localStorage.setItem('tvEnabled', newState);
+  };
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
@@ -80,7 +96,7 @@ export default function MainLayout({ children }) {
             <button
               id="tv-toggle"
               type="button"
-              onClick={() => setTvEnabled(!tvEnabled)}
+              onClick={toggleTV}
               className={`
                 relative inline-flex items-center h-6 px-2 py-1 rounded-full border
                 ${tvEnabled ? 'bg-green-500 border-green-500 text-black' : 'bg-black text-green-500 border-green-500/50'}
