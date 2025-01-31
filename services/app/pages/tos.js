@@ -698,7 +698,7 @@ const TOS = () => {
           <p className="mb-4">
             For questions or concerns regarding these Terms, please contact:<br />
             📩 carl@higherrrrrrr.fun<br />
-            📍 Thrive Point Group LLC, Wilmington, Delaware
+            📍 Thrive Point Group LLC, San Francisco, California
           </p>
         </div>
       </main>
