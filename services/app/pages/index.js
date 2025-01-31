@@ -144,14 +144,6 @@ export default function Home() {
   const [tokenStates, setTokenStates] = useState({});
   const [viewMode, setViewMode] = useState('trending'); // 'latest' or 'trending'
 
-  // Simple countdown
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
-
   const [highliteProjects, setHighliteProjects] = useState([]);
 
   // Intersection Observer for infinite scroll
@@ -250,27 +242,6 @@ export default function Home() {
     fetchTokenStates();
   }, [displayedTokens]);
 
-  // Countdown effect
-  useEffect(() => {
-    const targetDate = new Date('2025-01-31T15:00:00-08:00').getTime();
-    const timer = setInterval(() => {
-      const now = Date.now();
-      const diff = targetDate - now;
-      if (diff <= 0) {
-        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-      setTimeLeft({
-        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((diff % (1000 * 60)) / 1000),
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   useEffect(() => {
     setHighliteProjects(getHighliteProjects());
   }, []);
@@ -292,14 +263,13 @@ export default function Home() {
   return (
     <>
       <div className="min-h-screen bg-black text-green-500 font-mono">
-        {/* SOLANA Countdown => glitch heading */}
+        {/* Hero section - removed countdown */}
         <div className="w-full border-b border-green-500/20 pb-8">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center py-8">
               <h2 className="text-2xl md:text-4xl font-bold mb-8">
-                <GlitchText>SOLANA LAUNCH IN</GlitchText>
+                <GlitchText>HIGHER⁷</GlitchText>
               </h2>
-              <CountdownTimer timeLeft={timeLeft} />
 
               {/* Features Grid */}
               <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-4xl mx-auto">
