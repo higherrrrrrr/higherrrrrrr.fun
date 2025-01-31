@@ -48,21 +48,6 @@ export default function TermsModal() {
             </li>
           </ul>
 
-          <div className="mt-8 pt-4 border-t border-green-500/20">
-            <h3 className="text-lg font-bold text-green-500 mb-3">Platform Fees</h3>
-            <p className="mb-2">
-              A 1% fee is applied to all trades on the platform:
-            </p>
-            <ul className="list-disc pl-5">
-              <li>
-                This fee helps maintain and improve the platform
-              </li>
-              <li>
-                Fee is automatically deducted from each trade
-              </li>
-            </ul>
-          </div>
-
           <p className="mt-6 text-sm">
             For the full terms, check out our{' '}
             <Link href="/tos" className="text-green-500 hover:text-green-400 underline">
