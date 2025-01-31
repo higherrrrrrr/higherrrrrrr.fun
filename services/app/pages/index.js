@@ -314,11 +314,11 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Scaled down cards while maintaining proportions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* Updated grid layout */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {highliteProjects.map((project) => (
-                <Link key={project.slug} href={`/featured/${project.slug}`} className="w-[280px] mx-auto">
-                  <div className="snake-border p-8 bg-black/20 rounded h-full flex flex-col">
+                <Link key={project.slug} href={`/featured/${project.slug}`} className="block w-full">
+                  <div className="snake-border p-6 bg-black/20 rounded h-full flex flex-col">
                     <div className="snake-line"></div>
                     {project.imageUrl && (
                       <div className="aspect-square mb-6 overflow-hidden rounded">
@@ -329,7 +329,7 @@ export default function Home() {
                         />
                       </div>
                     )}
-                    <h3 className="text-2xl font-bold mb-3">{project.name}</h3>
+                    <h3 className="text-xl md:text-2xl font-bold mb-3">{project.name}</h3>
                     <p className="text-sm text-green-500/70 mb-6 flex-grow">
                       {project.description}
                     </p>
