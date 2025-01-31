@@ -135,6 +135,12 @@ const featuredProjects = [
     website: 'https://higherrrrrrr.fun/',
     twitter: 'https://x.com/higherrrrrrrfun',
     telegram: 'https://t.me/+Y0XJwPzrdUc2OGRh',
+    tvChannel: {
+      number: '42069',
+      name: 'CULT TV',
+      twitchChannel: 'carlcortright',
+      projectSlug: 'cult'
+    },
     customContent: `
       <h2 class="text-xl font-bold mt-4">About CULT</h2>
       <p class="mt-2">
