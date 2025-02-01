@@ -284,9 +284,5 @@ Allocations designated for early adopters and loyal community members, distribut
 
 ### 15.2. Migration LP Support (5%)
 
-A reserved allocation to ensure robust liquidity support, linking the token’s value to its paired liquidity pool, and enabling efficient fee collection from LP fees.
-
----
-
-This revised white paper now fully details our innovative fee collection mechanism—from aggregated Orca LP fees distributed evenly between protocol and creator—to the strict pre‑mine (35%) and pool (65%) distribution split, ensuring both transparency and security across the **Higherrrrrrrr** ecosystem.
+Specifically designates supply for the **Migrated Tokens/CULT** liquidity pools. The Migrated Tokens side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures robust cross-token liquidity pools for migrated tokens from Base.
 
