@@ -1,0 +1,12 @@
+[workspace]
+members = [
+  "programs/protocol",
+]
+
+[profile.release]
+lto = true
+overflow-checks = true
+
+[features]
+no-entrypoint = []
+
