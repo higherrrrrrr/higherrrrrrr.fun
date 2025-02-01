@@ -7,4 +7,8 @@ edition = "2021"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-anchor-lang = "0.27.0"   # or whatever version anchor init generated
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
+orca-whirlpools-core = "0.1"   
+orca-whirlpools-client = "0.1"  
+mpl-token-metadata = "1.9.9"
