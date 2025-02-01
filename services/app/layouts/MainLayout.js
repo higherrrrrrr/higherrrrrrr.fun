@@ -1,7 +1,7 @@
 // layouts/MainLayout.js
 
 import { useEffect, useState } from 'react';
-import { ConnectKitButton } from '../components/Web3Provider';
+import { ConnectButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import TVPanel from '../components/TVPanel';
 import TermsModal from '../components/TermsModal';
@@ -109,7 +109,7 @@ export default function MainLayout({ children }) {
               </Link>
             </div>
             <div className="w-[180px] h-12">
-              <ConnectKitButton className="snake-border" />
+              <ConnectButton className="snake-border" />
             </div>
           </div>
 

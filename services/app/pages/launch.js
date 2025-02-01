@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useContractWrite, useWaitForTransaction } from 'wagmi';
-import { parseEther, decodeEventLog } from 'viem';
+import { ethers } from 'ethers';  // Import full ethers
 import { higherrrrrrrFactoryAbi, higherrrrrrrFactoryAddress } from '../onchain/generated';
 import { getEthPrice } from '../api/price';
 import { getContractAddress } from '../api/contract';
-import { ethers } from 'ethers';
 import { useConnectModal } from '../components/Web3Provider';
-import { useAccount } from 'wagmi';
+import { useWallet } from '../hooks/useWallet';
+import { useContract } from '../hooks/useContract';
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
+
+// Use parseEther from ethers instead of ethers/lib/utils
+const parseEther = ethers.parseEther;
+const formatEther = ethers.formatEther;
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 const DEFAULT_PRICE_LEVELS = [
@@ -56,14 +60,16 @@ const formatEth = (num) => {
 // keccak256("NewToken(address,address)")
 const NEW_TOKEN_EVENT_SIGNATURE = "0x46960970e01c8cbebf9e58299b0acf8137b299ef06eb6c4f5be2c0443d5e5f22";
 
-export default function LaunchPage() {
+export default function Launch() {
+  const { address } = useWallet();
+  const { getSignerContract } = useContract(higherrrrrrrFactoryAddress, higherrrrrrrFactoryAbi);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const router = useRouter();
   const { openConnectModal } = useConnectModal();
-  const { address: userAddress } = useAccount();
   const [factoryAddress, setFactoryAddress] = useState('');
   const [ethPrice, setEthPrice] = useState(0);
   const [priceUnit, setPriceUnit] = useState('ETH');
-  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     symbol: '',
     priceLevels: DEFAULT_PRICE_LEVELS
@@ -104,58 +110,33 @@ export default function LaunchPage() {
     return '';
   };
 
-  
+  const handleLaunch = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-  const { write: createToken, data: createData } = useContractWrite({
-    address: factoryAddress,
-    abi: higherrrrrrrFactoryAbi,
-    functionName: 'createHigherrrrrrr'
-  });
+      const contract = await getSignerContract();
+      if (!contract) throw new Error('Contract not initialized');
 
-  console.log(createData?.hash)
-
-  const { isLoading } = useWaitForTransaction({
-    hash: createData?.hash,
-    onSuccess: (data) => {
-      console.log('Transaction successful, looking for NewToken event in logs:', data.logs);
-      
-      // Look for the token deployment event
-      const deployEvent = data.logs.find(log => {
-        try {
-          return log.topics[0] === NEW_TOKEN_EVENT_SIGNATURE;
-        } catch (error) {
-          console.log('Failed to check log:', error);
-          return false;
-        }
+      const tx = await contract.launch({
+        value: parseEther('0.01') // Adjust based on your requirements
       });
 
-      console.log('Found NewToken event:', deployEvent);
-
-      if (deployEvent) {
-        // The token address is the first indexed parameter
-        const tokenAddress = `0x${deployEvent.topics[1].slice(26)}`;
-        console.log('Found deployed token at:', tokenAddress);
-        router.push(`/token/${tokenAddress}`);
-      } else {
-        console.log('Could not find NewToken event in logs:', data.logs);
-      }
-    },
-    onError: (error) => {
-      if (error.message.includes('User denied')) {
-        console.log('User rejected transaction');
-        setError('Transaction was rejected');
-      } else {
-        console.error('Transaction failed:', error);
-        setError('Transaction failed: ' + error.message);
-      }
+      await tx.wait();
+      router.push('/dashboard');
+    } catch (err) {
+      console.error('Launch error:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-  });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
     // Check for wallet connection first
-    if (!userAddress) {
+    if (!address) {
       openConnectModal();
       return;
     }
@@ -176,9 +157,7 @@ export default function LaunchPage() {
       name: level.name
     }));
 
-    createToken({
-      args: [name, formData.symbol, uri, levels]
-    });
+    handleLaunch();
   };
 
   const handlePriceLevelChange = (index, field, value) => {
@@ -365,7 +344,7 @@ export default function LaunchPage() {
           disabled={isLoading || !!error}
           className="w-full px-4 py-2 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-mono font-bold rounded transition-colors text-sm md:text-base"
         >
-          {!userAddress ? "Connect Wallet to Launch" :
+          {!address ? "Connect Wallet to Launch" :
            isLoading ? "Creating Token..." : 
            "Launch Token"}
         </button>

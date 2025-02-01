@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useAccount, useSignMessage } from 'wagmi';
+import { useWallet } from '../../../hooks/useWallet';
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { getTokenCreator, getToken, updateToken, upsertToken, generateExampleTweet, connectTwitter, disconnectTwitter } from '../../../api/token';
 import Link from 'next/link';
 import posthog from 'posthog-js'
 import Cookies from 'js-cookie';
+import { ethers } from 'ethers';
 
 function usePostHogFeatureFlag(flagName, defaultValue = true) {
   const [enabled, setEnabled] = useState(defaultValue);
@@ -117,8 +119,9 @@ function ListInput({ items = [], onChange, placeholder, label }) {
 }
 
 export default function EditTokenPage() {
+  const { address } = useWallet();
+  const { primaryWallet } = useDynamicContext();
   const router = useRouter();
-  const { address } = router.query;
   const { address: userAddress } = useAccount();
   const [isCreator, setIsCreator] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -156,7 +159,12 @@ export default function EditTokenPage() {
   const [twitterUsername, setTwitterUsername] = useState('');
   const [showAutomationModal, setShowAutomationModal] = useState(false);
 
-  const { signMessageAsync } = useSignMessage();
+  const signMessage = async (message) => {
+    if (!primaryWallet?.provider) return null;
+    const provider = new ethers.BrowserProvider(primaryWallet.provider);
+    const signer = await provider.getSigner();
+    return signer.signMessage(message);
+  };
 
   useEffect(() => {
     const checkCreator = async () => {
@@ -239,7 +247,7 @@ export default function EditTokenPage() {
       // Create and sign the message
       const timestamp = Math.floor(Date.now() / 1000);
       const message = `we're going higherrrrrrr`;
-      const signature = await signMessageAsync({ message });
+      const signature = await signMessage(message);
 
       // Update token with signed request
       await upsertToken(address, {
@@ -336,7 +344,7 @@ export default function EditTokenPage() {
       if (twitterUsername) {
         // For disconnect, we still need signature
         const message = `we're going higherrrrrrr`;
-        const signature = await signMessageAsync({ message });
+        const signature = await signMessage(message);
         await disconnectTwitter(address, signature);
         setTwitterUsername('');
       } else {
