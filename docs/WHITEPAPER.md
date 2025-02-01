@@ -1,7 +1,3 @@
-Below is the complete, updated white paper incorporating the new fee‐collection details (aggregated LP fees from our Orca pool deposit) as well as the locked pre‑mine distribution (35% pre‑mine, 65% pool). You can copy and paste the text in full:
-
----
-
 # Higherrrrrrrr (CULT) Protocol White Paper
 
 > **A Solana-Based Memecoin Launchpad and Evolutionary Token Framework**  
