@@ -5,10 +5,11 @@ use crate::{
     state::fee_vault::FeeVault
 };
 
-/// Initialize the FeeVault with references to protocol/creator vaults
+/// Initialize the FeeVault with references to protocol/creator vaults.
 pub fn handle_init_fee_vault(ctx: Context<InitFeeVault>) -> Result<()> {
     let vault = &mut ctx.accounts.fee_vault;
     vault.protocol_sol_vault = ctx.accounts.protocol_sol_vault.key();
+    vault.creator_sol_vault = ctx.accounts.creator_sol_vault.key();
     vault.creator_token_vault = ctx.accounts.creator_token_vault.key();
     vault.protocol_pubkey = ctx.accounts.protocol_pubkey;
     vault.creator_pubkey = ctx.accounts.creator_pubkey;
@@ -17,7 +18,7 @@ pub fn handle_init_fee_vault(ctx: Context<InitFeeVault>) -> Result<()> {
     Ok(())
 }
 
-/// Allows the protocol to withdraw SOL fees from their vault
+/// Allows the protocol to withdraw SOL fees from their vault.
 pub fn handle_withdraw_protocol_sol(
     ctx: Context<WithdrawProtocolSol>,
     amount: u64
@@ -39,7 +40,7 @@ pub fn handle_withdraw_protocol_sol(
     Ok(())
 }
 
-/// Allows the creator to withdraw the token-side fees
+/// Allows the creator to withdraw the token-side fees.
 pub fn handle_withdraw_creator_tokens(
     ctx: Context<WithdrawCreatorTokens>,
     amount: u64
@@ -62,8 +63,27 @@ pub fn handle_withdraw_creator_tokens(
     Ok(())
 }
 
+/// Distributes the aggregated LP fees from the Orca pool fee account evenly between the protocol and the creator.
+pub fn handle_distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
+    let total_fees = **ctx.accounts.lp_fee_account.lamports.borrow();
+    require!(total_fees > 0, ErrorCode::InsufficientBalance);
+    let half = total_fees / 2;
+    let protocol_share = total_fees - half; // handles any odd lamport remainder
 
-// -------------- Context structs --------------
+    // Drain the LP fee account.
+    **ctx.accounts.lp_fee_account.lamports.borrow_mut() = 0;
+    **ctx.accounts.creator_sol_vault.lamports.borrow_mut() += half;
+    **ctx.accounts.protocol_sol_vault.lamports.borrow_mut() += protocol_share;
+
+    msg!(
+        "Distributed LP fees: {} lamports to creator, {} lamports to protocol",
+        half,
+        protocol_share
+    );
+    Ok(())
+}
+
+// -------------------- Context structs --------------------
 
 #[derive(Accounts)]
 pub struct InitFeeVault<'info> {
@@ -73,12 +93,16 @@ pub struct InitFeeVault<'info> {
     #[account(
         init,
         payer = payer,
-        space = 8 + (5 * 32)
+        space = 8 + (5 * 32) + 32  // Added extra 32 bytes for creator_sol_vault
     )]
     pub fee_vault: Account<'info, FeeVault>,
 
     #[account(mut)]
     pub protocol_sol_vault: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub creator_sol_vault: AccountInfo<'info>,
+
     #[account(mut)]
     pub creator_token_vault: AccountInfo<'info>,
 
@@ -129,4 +153,26 @@ pub struct WithdrawCreatorTokens<'info> {
 
     #[account(address = anchor_spl::token::ID)]
     pub token_program: Program<'info, Token>,
+}
+
+/// Context for distributing LP fees.
+#[derive(Accounts)]
+pub struct DistributeLPFees<'info> {
+    #[account(mut)]
+    pub fee_vault: Account<'info, FeeVault>,
+
+    /// The Orca pool fee account holding aggregated LP fees (SOL).
+    #[account(mut)]
+    pub lp_fee_account: AccountInfo<'info>,
+
+    /// The protocol's SOL vault (must match fee_vault.protocol_sol_vault).
+    #[account(mut, address = fee_vault.protocol_sol_vault)]
+    pub protocol_sol_vault: AccountInfo<'info>,
+
+    /// The creator's SOL vault (must match fee_vault.creator_sol_vault).
+    #[account(mut, address = fee_vault.creator_sol_vault)]
+    pub creator_sol_vault: AccountInfo<'info>,
+
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: Program<'info, System>,
 }

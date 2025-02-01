@@ -14,14 +14,13 @@ use crate::state::{
 };
 
 // Import the Whirlpool state type from orca_whirlpools_core.
-// (Ensure that orca_whirlpools_core is included as a dependency.)
 use orca_whirlpools_core::state::Whirlpool;
 
 /// Executes a swap via Orca Whirlpools Client and triggers metadata evolution if thresholds are crossed:
 /// 
 /// 1. Calculates a token fee (0.5% of `amount_in`) and transfers it to the creator’s token vault.
 /// 2. Uses the remaining tokens to perform a swap via Orca Whirlpools Client.
-/// 3. Simulates SOL fee extraction and transfers the SOL fee to the protocol SOL vault.
+/// 3. (Note: LP fees are now accumulated in the Orca pool fee account and will be distributed via a separate instruction.)
 /// 4. Reads the current price from the pool (Whirlpool) account by decoding its on‑chain state,
 ///    then triggers metadata evolution if the price meets a threshold.
 pub fn handle_trade_via_orca(
@@ -73,25 +72,8 @@ pub fn handle_trade_via_orca(
     whirlpools_swap(cpi_ctx, swap_params)?;
     msg!("Called Orca Whirlpools swap with {} tokens (min_out: {})", amount_to_swap, min_out);
 
-    // --- 4. (Optional) SOL Fee Extraction (simulated) ---
-    let simulated_sol_out = min_out
-        .checked_add(100)
-        .ok_or(crate::errors::ErrorCode::Overflow)?;
-    let sol_fee = simulated_sol_out
-        .checked_div(200)
-        .ok_or(crate::errors::ErrorCode::Overflow)?;
-    msg!("Simulated SOL fee: {} lamports", sol_fee);
-    {
-        let user_lamports = &mut ctx.accounts.user.try_borrow_mut_lamports()?;
-        let vault_lamports = &mut ctx.accounts.protocol_sol_vault.try_borrow_mut_lamports()?;
-        **user_lamports = user_lamports
-            .checked_sub(sol_fee)
-            .ok_or(crate::errors::ErrorCode::Overflow)?;
-        **vault_lamports = vault_lamports
-            .checked_add(sol_fee)
-            .ok_or(crate::errors::ErrorCode::Overflow)?;
-    }
-    msg!("Transferred {} lamports as SOL fee to the protocol vault", sol_fee);
+    // --- 4. Note on fee handling ---
+    msg!("LP fees are now being accumulated in the Orca pool fee account. Use the fee distribution instruction to split these fees.");
 
     // --- 5. Get current price from the pool and trigger evolution ---
     let current_price = get_current_price(&ctx.accounts.whirlpool)?;
@@ -197,11 +179,7 @@ pub fn handle_create_single_sided_liquidity(
     msg!("Transferred {} tokens from the creator to the Orca pool token vault.", amount);
 
     // --- 2. Simulate a CPI call to Orca for adding liquidity ---
-    // In a complete implementation, you might use a CPI call like:
-    // orca_whirlpools_client::cpi::increase_liquidity(cpi_ctx_orca, liquidity_amount, lower_tick, upper_tick)?;
-    // Here, we log the action to simulate the liquidity increase.
     msg!("Calling Orca program to add single-sided liquidity (simulated)...");
-    // (Insert CPI call logic here when ready)
     msg!("Single-sided liquidity successfully added.");
     Ok(())
 }

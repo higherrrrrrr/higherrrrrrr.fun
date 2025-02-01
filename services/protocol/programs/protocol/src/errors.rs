@@ -14,5 +14,6 @@ pub enum ErrorCode {
     #[msg("Invalid price data or aggregator input")]
     InvalidPriceData,
 
-    // Add more as needed...
+    #[msg("Invalid distribution percentages; pre-mine must be 35% and pool must be 65% with exactly one pool distribution.")]
+    InvalidDistributionPercentage,
 }

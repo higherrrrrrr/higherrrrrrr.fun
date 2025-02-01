@@ -92,8 +92,13 @@ pub fn handle(
     msg!("Evolution thresholds set (immutable)");
 
     // --- 6. Validate Distribution Percentages ---
-    let total_percent: u8 = distributions.iter().map(|d| d.percentage).sum();
-    require!(total_percent == 100, ErrorCode::InvalidPriceData);
+    let pre_mine_percent: u8 = distributions.iter().filter(|d| !d.is_pool).map(|d| d.percentage).sum();
+    let pool_percent: u8 = distributions.iter().filter(|d| d.is_pool).map(|d| d.percentage).sum();
+    let pool_count = distributions.iter().filter(|d| d.is_pool).count();
+    require!(
+        pre_mine_percent == 35 && pool_percent == 65 && pool_count == 1,
+        ErrorCode::InvalidDistributionPercentage
+    );
 
     // --- 7. Distribute Tokens ---
     // Count how many distributions are NOT for the pool.
@@ -134,7 +139,7 @@ pub fn handle(
                 dist.percentage
             );
         } else {
-            // For non-pool distributions, use the next remaining account.
+            // For non-pool distributions (pre-mine), use the next remaining account.
             let recipient_account = remaining_iter.next().unwrap();
             require!(
                 recipient_account.key == dist.recipient,
@@ -162,7 +167,7 @@ pub fn handle(
     token_state.pool = pool_deposit_opt.unwrap();
 
     msg!(
-        "Created memecoin {} with symbol {}, total supply locked at {}. Distribution complete.",
+        "Created memecoin {} with symbol {}, total supply locked at {}. Pre-mine distribution is locked at 35% and pool distribution at 65%.",
         name,
         symbol,
         total_supply
