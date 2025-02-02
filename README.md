@@ -1,83 +1,127 @@
-# Higherrrrrrr – Memecoin Launchpad & Evolutionary Token Framework
+# Higherrrrrrr Protocol
 
-**Welcome to the Higherrrrrrr repo!** This project provides a **Solana-based launchpad** for community-driven tokens, featuring:
+A revolutionary memecoin launchpad & token evolution framework built on Solana. This project enables the creation of tokens that evolve based on market performance, featuring on-chain metadata updates, conviction NFTs, and advanced trading mechanics.
 
-- **Dynamic Token Metadata** (on-chain "evolutions" tied to price or market milestones)  
-- **Conviction NFTs** (awarded to big holders when thresholds are crossed)  
-- **Flexible Fee Splits** (supporting token burns, protocol revenue, and single-sided liquidity)  
-- **Secure, Modular Architecture** (anchor-based smart contracts, PDAs, audits, etc.)
+## 🏗️ Project Structure
 
-Whether you're a developer integrating new token projects or just exploring how the platform works, this repo has everything you need to **get started**.
+```
+/services
+  /api             # Backend REST API service
+  /app             # Next.js frontend application
+  /evm             # EVM-related services & migrations
+    /characters    # AI character configurations
+    /ponder       # Indexing service for protocol events
+    /rpc          # Custom RPC caching proxy
+    /subgraphs    # TheGraph subgraphs for indexing
+  /landing        # Landing page website
+  /protocol       # Solana smart contracts (Anchor)
+```
 
----
+## 🚀 Key Features
 
-## Getting Started
+- **Token Evolution Framework**: Tokens that autonomously evolve based on price milestones
+- **Conviction NFTs**: Special NFTs awarded to significant holders through market achievements
+- **Single-sided Liquidity**: Advanced liquidity provision mechanisms via Orca
+- **Real-time Indexing**: TheGraph & Ponder services for protocol data
+- **AI-powered Social**: Character-driven social media automation
+- **Performance Optimized**: Custom RPC caching and advanced data indexing
 
-1. **Clone the Repo**  
-   ```bash
-   git clone https://github.com/higherrrrrrr/higherrrrrrr.fun.git
-   cd higherrrrrrr
-   ```
-   
-2. **Read the Docs**  
-   - The main documents live in the `docs/` directory, and additional guides for advanced topics are in dedicated Markdown files.  
-   - For a **technical deep dive**, check out:  
-     - [`docs/technical-design-document.md`](./docs/technical-design-document.md) – Extended architecture, logic, and data structures.  
-     - [`docs/tokenomics.md`](./docs/tokenomics.md) – Overview of the deflationary model, supply distribution, and threshold-based mechanics.  
-     - [`docs/creator-guide.md`](./docs/creator-guide.md) – Quickstart for launching your own Cult Coin or meme token using Higherrrrrrr.  
-     - Other references (e.g., `docs/whitepaper.md`, `docs/security-posture.md`) for deeper context.  
+## 🛠 Technology Stack
 
-3. **Services & Their Readmes**  
-   - All major services live in the [`/services`](./services) folder.  
-   - Each service has its **own** `README` explaining what it does, how to configure it, and how to run it. For example:  
-     - `services/service-name/README.md`  
-   - This modular design helps you integrate or modify only the parts relevant to your project's needs.
+- **Frontend**: Next.js, TailwindCSS, wagmi
+- **Backend**: Flask, PostgreSQL
+- **Blockchain**:
+  - Solana (Anchor Framework)
+  - Base Network (EVM)
+- **Infrastructure**:
+  - TheGraph for indexing
+  - Ponder for EVM event processing
+  - NGINX for RPC caching
+  - OpenRouter for AI integration
 
-4. **Run or Test Locally**  
-   - If you plan to develop locally (e.g., on a Solana devnet), follow the instructions in each service's README for setup, environment variables, and testing scripts.  
-   - Typical steps involve installing dependencies via `yarn` or `npm` and using Anchor's CLI to deploy the program in a local validator or on devnet.
+## 🏃‍♂️ Running the Project
 
-5. **Join the Community**  
-   - For questions, ideas, or general discussion, check out the official Higherrrrrrr social channels (Discord, Telegram, Twitter, etc.).  
-   - We encourage open-source collaboration and welcome PRs, bug reports, and feature suggestions.
+### Prerequisites
 
-=======
+- Node.js 18+
+- Python 3.11+
+- Rust & Solana CLI
+- Docker & Docker Compose
+- Postgres 14+
 
-- **Dynamic Token Metadata** (on-chain “evolutions” tied to price or market milestones)  
-- **Conviction NFTs** (awarded to big holders when thresholds are crossed)  
-- **Flexible Fee Splits** (supporting token burns, protocol revenue, and single-sided liquidity)  
-- **Secure, Modular Architecture** (anchor-based smart contracts, PDAs, audits, etc.)
+### API Service
 
-Whether you’re a developer integrating new token projects or just exploring how the platform works, this repo has everything you need to **get started**.
+```bash
+cd services/api
+cp .env.example .env  # Configure environment variables
+pip install -r requirements.txt
+flask run
+```
 
----
+### Frontend App
 
-## Getting Started
+```bash
+cd services/app
+yarn install
+yarn dev
+```
 
-1. **Clone the Repo**  
-   ```bash
-   git clone https://github.com/higherrrrrrr/higherrrrrrr.fun.git
-   cd higherrrrrrr
-   ```
-   
-2. **Read the Docs**  
-   - The main documents live at the root level (`./README.md`, `./TECHNICAL-DESIGN-DOCUMENT.md`, etc.), and additional guides for advanced topics are in dedicated Markdown files.  
-   - For a **technical deep dive**, check out:  
-     - [`TECHNICAL-DESIGN-DOCUMENT.md`](./TECHNICAL-DESIGN-DOCUMENT.md) – Extended architecture, logic, and data structures.  
-     - [`TOKENOMICS.md`](./TOKENOMICS.md) – Overview of the deflationary model, supply distribution, and threshold-based mechanics.  
-     - [`CREATOR-GUIDE.md`](./CREATOR-GUIDE.md) – Quickstart for launching your own Cult Coin or meme token using Higherrrrrrr.  
-     - Other references (e.g., `WHITEPAPER.md`, `SECURITY-POSTURE.md`) for deeper context.  
+### Protocol (Solana Contracts)
 
-3. **Services & Their Readmes**  
-   - All major services live in the [`/services`](./services) folder.  
-   - Each service has its **own** `README` explaining what it does, how to configure it, and how to run it. For example:  
-     - `services/service-name/README.md`  
-   - This modular design helps you integrate or modify only the parts relevant to your project’s needs.
+```bash
+cd services/protocol
+anchor build
+anchor deploy
+```
 
-4. **Run or Test Locally**  
-   - If you plan to develop locally (e.g., on a Solana devnet), follow the instructions in each service’s README for setup, environment variables, and testing scripts.  
-   - Typical steps involve installing dependencies via `yarn` or `npm` and using Anchor’s CLI to deploy the program in a local validator or on devnet.
+### EVM Services
 
-5. **Join the Community**  
-   - For questions, ideas, or general discussion, check out the official Higherrrrrrr social channels (Discord, Telegram, Twitter, etc.).  
-   - We encourage open-source collaboration and welcome PRs, bug reports, and feature suggestions.
+```bash
+# Run indexer
+cd services/evm/ponder
+npm install
+npm run dev
+
+# Run RPC cache
+cd services/evm/rpc
+docker build -t rpc-cache .
+docker run -p 8080:8080 rpc-cache
+```
+
+## 🔐 Security
+
+- Smart contract security details are documented in [SECURITY-POSTURE.md](services/protocol/docs/SECURITY-POSTURE.md)
+- Regular audits and AI-based security scanning
+- Bug bounty program for critical vulnerabilities
+
+## 📈 Tokenomics
+
+See [TOKENOMICS.md](services/protocol/docs/TOKENOMICS.md) for detailed information about:
+- Token distribution & vesting
+- Evolution mechanics
+- Fee structures
+- Liquidity mechanics
+
+## 📄 Legal
+
+This project is licensed under the WAGMI License (MIT-Compatible).
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
+
+## 🌐 Resources
+
+- [Documentation](https://docs.higherrrrrrr.fun)
+- [Website](https://higherrrrrrr.fun)
+- [Twitter](https://twitter.com/higherrrrrrrfun)
+- [Telegram](https://t.me/higherrrrrrrfun)
+
+## ⚠️ Disclaimer
+
+This project is experimental and should be used at your own risk. Always conduct thorough research before interacting with any blockchain protocols.
