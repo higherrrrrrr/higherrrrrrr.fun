@@ -6,7 +6,6 @@ import { getTopTradingTokens, getLatestTokens } from '../api/tokens';
 import { getTokenState } from '../onchain/tokenState';
 import TokenCard from '../components/TokenCard';
 import featuredProjects from '../data/featuredProjects';
-import { CountdownTimer } from '../components/CountdownTimer';
 import { highliteTokens, ascendingTokens } from '../data/tokens';
 import { GlitchText } from '../components/GlitchText';
 import { formatCountdown } from '../utils/formatters';

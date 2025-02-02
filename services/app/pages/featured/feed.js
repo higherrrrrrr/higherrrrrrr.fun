@@ -66,6 +66,15 @@ export default function FeaturedFeed() {
         </div>
       </div>
 
+      {/* DISCLAIMER BANNER */}
+      <div className="max-w-4xl mx-auto px-4 md:px-8 py-4">
+        <div className="border border-green-500/30 bg-green-500/5 rounded-lg p-4">
+          <p className="text-sm text-green-500/80 text-center">
+            ⚠️ Launch countdowns are managed by project creators and may be adjusted based on market conditions or other factors at their discretion. Rarely launches will be rescheduled by the Higherrrrrrrr team and those will be clearly communicated.
+          </p>
+        </div>
+      </div>
+
       {/* MAIN CONTENT: Project Feed */}
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12 w-full">
         <div className="grid gap-6">
@@ -94,9 +103,19 @@ export default function FeaturedFeed() {
                   </div>
 
                   {/* Countdown text */}
-                  <div className="mt-1 text-green-300 font-bold text-sm">
+                  <div className="mt-1 text-green-300 font-bold text-sm flex items-center gap-2">
                     <span className="mr-2">Launch:</span>
                     {countdownStr}
+                    {/* Info icon with tooltip */}
+                    <div className="group relative">
+                      <div className="cursor-help text-green-500/70 hover:text-green-500 transition-colors text-base">
+                        ℹ
+                      </div>
+                      <div className="invisible group-hover:visible absolute bottom-full right-0 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-10">
+                        Launch times may be adjusted by project creators based on market conditions. Changes by the Higherrrrrrr team will be clearly communicated.
+                        <div className="absolute -bottom-1 right-3 w-2 h-2 bg-black border-r border-b border-green-500/30 transform rotate-45"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Link>

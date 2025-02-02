@@ -27,7 +27,17 @@ function formatCountdown(msLeft) {
   const minutes = Math.floor((msLeft / (1000 * 60)) % 60);
   const seconds = Math.floor((msLeft / 1000) % 60);
 
-  return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  const timeStr = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  
+  return (
+    <span className="group relative inline-block">
+      {timeStr}
+      <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-10">
+        Launch times may be adjusted by project creators based on market conditions. Changes by the Higherrrrrrr team will be clearly communicated.
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black border-r border-b border-green-500/30 rotate-45"></div>
+      </div>
+    </span>
+  );
 }
 
 export default function FeaturedProjectPage() {
@@ -152,9 +162,21 @@ export default function FeaturedProjectPage() {
                   <h2 className="text-2xl font-bold text-green-400 mb-4">
                     Launch Countdown
                   </h2>
-                  <p className="text-2xl text-green-400 font-bold font-mono">
-                    {countdownStr}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-2xl text-green-400 font-bold font-mono">
+                      {countdownStr}
+                    </p>
+                    {/* Info icon with tooltip */}
+                    <div className="group">
+                      <div className="cursor-help text-green-500/70 hover:text-green-500 transition-colors text-base">
+                        ℹ
+                      </div>
+                      <div className="invisible group-hover:visible absolute bottom-full right-0 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-10">
+                        Launch times may be adjusted by project creators based on market conditions. Changes by the Higherrrrrrr team will be clearly communicated.
+                        <div className="absolute -bottom-1 right-3 w-2 h-2 bg-black border-r border-b border-green-500/30 transform rotate-45"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
