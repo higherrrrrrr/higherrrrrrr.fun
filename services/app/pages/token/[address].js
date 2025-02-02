@@ -3,28 +3,52 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../onchain';
-import { useContractWrite, useWaitForTransaction, useContractRead, useAccount, useBalance } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
 import { higherrrrrrrAbi } from '../../onchain/generated';
 import { getEthPrice } from '../../api/price';
 import { getLatestTokens } from '../../api/contract';
 import Link from 'next/link';
-import { ConnectKitButton, useConnectModal } from '../../components/Web3Provider';
+import { ConnectButton, useConnectModal } from '../../components/Web3Provider';
 import { getTokenCreator, getToken } from '../../api/token';
 import { getBuyQuote, getSellQuote } from '../../onchain/quotes';
 import { ethers } from 'ethers';
+import { useWallet } from '../../hooks/useWallet';
+import { useContract } from '../../hooks/useContract';
+import { useDynamicContext, usePrimaryWallet, useChains } from '@dynamic-labs/sdk-react-core';
+import { useTransaction } from '../../hooks/useTransaction';
+import { formatTokenAmount } from '../../utils/formatters';
+import NetworkSwitcher from '../../components/NetworkSwitcher';
+import { createPublicClient, custom } from 'viem';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
+
+// Helper function to format USD price with appropriate decimals
+const formatUsdPrice = (price) => {
+  if (price < 0.000001) return price.toExponential(2);
+  if (price < 0.01) return price.toFixed(6);
+  if (price < 1) return price.toFixed(4);
+  return price.toFixed(2);
+};
+
+// Helper function to format market cap
+const formatMarketCap = (cap) => {
+  if (cap >= 1_000_000_000) return `$${(cap / 1_000_000_000).toFixed(2)}B`;
+  if (cap >= 1_000_000) return `$${(cap / 1_000_000).toFixed(2)}M`;
+  if (cap >= 1_000) return `$${(cap / 1_000).toFixed(2)}K`;
+  return `$${cap.toFixed(2)}`;
+};
 
 export default function TokenPage({ addressProp }) {
   const router = useRouter();
   const { openConnectModal } = useConnectModal();
   const { address: routerAddress } = router.query;
+  const { address: userAddress } = useWallet();
+  const { primaryWallet } = useDynamicContext();
+  const { getContract, getSignerContract } = useContract(addressProp || routerAddress, higherrrrrrrAbi);
+  const { executeTransaction, isLoading, error: txError } = useTransaction();
   
-  // Use prop address if provided, otherwise use router address
-  const address = addressProp || routerAddress;
-  
+  const [isCalculatingNft, setIsCalculatingNft] = useState(false);
   const [tokenState, setTokenState] = useState(null);
   const [loading, setLoading] = useState(true);
   const [ethPrice, setEthPrice] = useState(0);
@@ -36,18 +60,74 @@ export default function TokenPage({ addressProp }) {
   const [quote, setQuote] = useState(null);
   const [error, setError] = useState('');
   const [userBalance, setUserBalance] = useState('0');
-
-  // Get the user's address
-  const { address: userAddress } = useAccount();
+  const [ethBalance, setEthBalance] = useState('0');
 
   // Add token details state
   const [tokenDetails, setTokenDetails] = useState(null);
 
+  // Use prop address if provided, otherwise use router address
+  const tokenAddress = addressProp || routerAddress;
+
+  // Add currentChainType detection
+  const currentChainType = primaryWallet?.connector
+    ? primaryWallet.connector.name.toLowerCase().includes('phantom')
+      ? 'solana'
+      : 'base'
+    : null;
+
+  // Add this helper function
+  const getRequiredChain = (addr) => {
+    if (!addr) return 'base'; // default to base if no address
+    // You'll need to implement logic to determine if a token is on Base or Solana
+    // This is just a placeholder example
+    return 'base'; // or 'solana'
+  };
+
+  // Add before the trade button
+  const requiredChain = getRequiredChain(tokenAddress);
+
+  // Add formatted values using useMemo
+  const formattedValues = useMemo(() => {
+    if (!tokenState || !ethPrice) return {
+      price: '$0.00',
+      marketCap: '$0.00',
+      supply: '0',
+      supplyPercentage: '0%'
+    };
+
+    // Add debug logging
+    console.log('Token State:', tokenState);
+    console.log('ETH Price:', ethPrice);
+    console.log('Current Price:', tokenState.currentPrice);
+
+    // Parse values carefully
+    const priceInEth = parseFloat(tokenState.currentPrice) || 0;
+    const priceInUsd = priceInEth * (ethPrice?.price_usd || ethPrice || 0);
+    
+    const totalSupply = parseFloat(tokenState.totalSupply) || 0;
+    const marketCapUsd = priceInUsd * totalSupply;
+    
+    const supplyPercentage = (totalSupply / MAX_SUPPLY * 100).toFixed(2);
+
+    // Add debug logging for calculated values
+    console.log('Price in ETH:', priceInEth);
+    console.log('Price in USD:', priceInUsd);
+    console.log('Total Supply:', totalSupply);
+    console.log('Market Cap USD:', marketCapUsd);
+
+    return {
+      price: `$${formatUsdPrice(priceInUsd)}`,
+      marketCap: formatMarketCap(marketCapUsd),
+      supply: totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0}),
+      supplyPercentage: `${supplyPercentage}%`
+    };
+  }, [tokenState, ethPrice]);
+
   // Add the balance effect
   useEffect(() => {
     const updateBalance = async () => {
-      if (userAddress && address) {
-        const balance = await getTokenBalance(address, userAddress);
+      if (userAddress && addressProp) {
+        const balance = await getTokenBalance(addressProp, userAddress);
         setUserBalance(balance);
       } else {
         setUserBalance('0');
@@ -59,101 +139,207 @@ export default function TokenPage({ addressProp }) {
     // Set up periodic refresh
     const balanceInterval = setInterval(updateBalance, 15000);
     return () => clearInterval(balanceInterval);
-  }, [userAddress, address]);
+  }, [userAddress, addressProp]);
 
-  // Add back ethBalance hook
-  const { data: ethBalance } = useBalance({
-    address: userAddress,
-    watch: true,
-  });
-
+  // Fetch balance when wallet is connected
   useEffect(() => {
-    const checkCreator = async () => {
-      if (userAddress) {
-        try {
-          const creatorData = await getTokenCreator(address);
-          setCreator(creatorData);
-          setIsCreator(
-            creatorData.creator.toLowerCase() === userAddress.toLowerCase()
-          );
-        } catch (error) {
-          console.error('Failed to check creator status:', error);
-          setIsCreator(false);
-        } 
+    const fetchEthBalance = async () => {
+      if (!userAddress || !primaryWallet?.connector) {
+        console.log('No wallet connection available');
+        setEthBalance('0');
+        return;
+      }
+
+      try {
+        // Get the current chain's provider
+        const provider = await primaryWallet.connector.getProvider();
+        
+        // Create a viem client
+        const client = createPublicClient({
+          transport: custom(provider)
+        });
+
+        // Get balance using viem
+        const balance = await client.getBalance({
+          address: userAddress
+        });
+
+        console.log('ETH balance fetched:', formatEther(balance));
+        setEthBalance(formatEther(balance));
+      } catch (error) {
+        console.error('Error fetching ETH balance:', error);
+        setEthBalance('0');
       }
     };
-    checkCreator();
-  }, [address]);
+
+    if (userAddress && primaryWallet?.connector) {
+      fetchEthBalance();
+      const interval = setInterval(fetchEthBalance, 15000);
+      return () => clearInterval(interval);
+    }
+  }, [primaryWallet?.connector, userAddress]);
+
+  const checkCreator = async () => {
+    try {
+      if (!primaryWallet?.address) {
+        setIsCreator(false);
+        return;
+      }
+
+      const userAddress = primaryWallet.address.toLowerCase();
+      const tokenAddress = addressProp || routerAddress;
+      
+      if (!tokenAddress) {
+        setIsCreator(false);
+        return;
+      }
+
+      const creatorResponse = await getTokenCreator(tokenAddress);
+      console.log('Creator response:', creatorResponse); // Debug log
+      
+      // If response is an object with a creator property
+      const creatorAddress = typeof creatorResponse === 'object' && creatorResponse.creator
+        ? creatorResponse.creator
+        : typeof creatorResponse === 'string'
+          ? creatorResponse
+          : null;
+
+      if (!creatorAddress || typeof creatorAddress !== 'string') {
+        console.log('Could not extract creator address from response:', creatorResponse);
+        setIsCreator(false);
+        return;
+      }
+
+      setIsCreator(creatorAddress.toLowerCase() === userAddress);
+    } catch (error) {
+      console.error('Failed to check creator status:', error);
+      setIsCreator(false);
+    }
+  };
+
+  useEffect(() => {
+    if (primaryWallet?.address) {
+      checkCreator();
+    }
+  }, [primaryWallet?.address, addressProp, routerAddress]);
 
   // Add effect to fetch token details
   useEffect(() => {
     const fetchTokenDetails = async () => {
-      if (!address) return;
+      if (!addressProp) return;
       try {
-        const details = await getToken(address);
+        const details = await getToken(addressProp);
         setTokenDetails(details);
       } catch (error) {
         console.error('Failed to fetch token details:', error);
       }
     };
     fetchTokenDetails();
-  }, [address]);
+  }, [addressProp]);
 
-  // Buy contract interaction
-  const { write: buyToken, data: buyData } = useContractWrite({
-    address: address,
-    abi: higherrrrrrrAbi,
-    functionName: 'buy'
-  });
+  // Add debug logging to track loading states
+  useEffect(() => {
+    const fetchTokenData = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching token data for:', addressProp || routerAddress);
+        
+        // Get token details
+        const tokenData = await getToken(addressProp || routerAddress);
+        console.log('Token data:', tokenData);
+        setToken(tokenData);
 
-  // Sell contract interaction
-  const { write: sellToken, data: sellData } = useContractWrite({
-    address: address,
-    abi: higherrrrrrrAbi,
-    functionName: 'sell'
-  });
+        // Get token state
+        const state = await getTokenState(addressProp || routerAddress);
+        console.log('Token state:', state);
+        setTokenState(state);
 
-  // Handle transaction states
-  const { isLoading: isBuyLoading } = useWaitForTransaction({
-    hash: buyData?.hash,
-    onSuccess: () => {
-      refreshTokenState();
-      // Clear trade state
-      setAmount('');
-      setQuote(null);
-      setError('');
-    }
-  });
+        // Get ETH price
+        const price = await getEthPrice();
+        console.log('ETH price:', price);
+        setEthPrice(price);
 
-  const { isLoading: isSellLoading } = useWaitForTransaction({
-    hash: sellData?.hash,
-    onSuccess: () => {
-      refreshTokenState();
-      // Clear trade state
-      setAmount('');
-      setQuote(null);
-      setError('');
-    }
-  });
-
-  const isLoading = isBuyLoading || isSellLoading;
-
-  async function refreshTokenState() {
-    if (typeof address === 'string') {
-      const state = await getTokenState(address);
-      setTokenState(state);
-      
-      // Also refresh balance if user is connected
-      if (userAddress) {
-        const balance = await getTokenBalance(address, userAddress);
-        setUserBalance(balance);
+      } catch (error) {
+        console.error('Error fetching token data:', error);
+        setError('Failed to load token data');
+      } finally {
+        setLoading(false);
       }
+    };
+
+    if (addressProp || routerAddress) {
+      fetchTokenData();
     }
-  }
+  }, [addressProp, routerAddress]);
+
+  // Handle buy transaction
+  const handleBuy = async () => {
+    if (!userAddress) {
+      openConnectModal();
+      return;
+    }
+
+    try {
+      await executeTransaction(async () => {
+        const contract = await getSignerContract();
+        if (!contract) throw new Error('Contract not initialized');
+
+        const tx = await contract.buy({
+          value: ethers.parseEther(amount)
+        });
+        await tx.wait();
+        
+        // Refresh states after successful transaction
+        refreshTokenState();
+        setAmount('');
+        setQuote(null);
+        setError('');
+      });
+    } catch (err) {
+      console.error('Buy error:', err);
+      setError(err.message);
+    }
+  };
+
+  // Handle sell transaction
+  const handleSell = async () => {
+    if (!userAddress) {
+      openConnectModal();
+      return;
+    }
+
+    try {
+      await executeTransaction(async () => {
+        const contract = await getSignerContract();
+        if (!contract) throw new Error('Contract not initialized');
+
+        const tx = await contract.sell(ethers.parseEther(amount));
+        await tx.wait();
+        
+        // Refresh states after successful transaction
+        refreshTokenState();
+        setAmount('');
+        setQuote(null);
+        setError('');
+      });
+    } catch (err) {
+      console.error('Sell error:', err);
+      setError(err.message);
+    }
+  };
+
+  // Handle transaction based on buy/sell mode
+  const handleTransaction = () => {
+    if (isBuying) {
+      handleBuy();
+    } else {
+      handleSell();
+    }
+  };
 
   // Update useEffect to use the new address variable
   useEffect(() => {
-    if (address) {
+    if (addressProp) {
       // Initial load
       setLoading(true);
       Promise.all([
@@ -173,7 +359,7 @@ export default function TokenPage({ addressProp }) {
 
       return () => clearInterval(tokenRefreshTimer);
     }
-  }, [address]);
+  }, [addressProp]);
 
   // Refresh ETH price periodically
   useEffect(() => {
@@ -190,7 +376,7 @@ export default function TokenPage({ addressProp }) {
 
   // Clean up quote effect
   useEffect(() => {
-    if (!amount || !address) {
+    if (!amount || !addressProp) {
       setQuote(null);
       return;
     }
@@ -204,7 +390,7 @@ export default function TokenPage({ addressProp }) {
 
           if (isBuying) {
             // For buys, input is ETH amount, quote will be token amount
-            const quoteWei = await getBuyQuote(address, amountWei);
+            const quoteWei = await getBuyQuote(addressProp, amountWei);
             if (quoteWei === BigInt(0)) {
               if (attempt === MAX_RETRIES) {
                 console.error('Got zero buy quote after all retries');
@@ -219,7 +405,7 @@ export default function TokenPage({ addressProp }) {
             return; // Success - exit retry loop
           } else {
             // For sells, input is token amount, quote will be ETH amount
-            const quoteWei = await getSellQuote(address, amountWei);
+            const quoteWei = await getSellQuote(addressProp, amountWei);
             if (quoteWei === BigInt(0)) {
               if (attempt === MAX_RETRIES) {
                 console.error('Got zero sell quote after all retries');
@@ -237,7 +423,7 @@ export default function TokenPage({ addressProp }) {
           if (attempt === MAX_RETRIES) {
             console.error('Error in quote effect after all retries:', {
               error,
-              address,
+              address: addressProp,
               amount,
               isBuying,
               attempt
@@ -252,7 +438,7 @@ export default function TokenPage({ addressProp }) {
     };
 
     updateQuote();
-  }, [amount, address, isBuying]);
+  }, [amount, addressProp, isBuying]);
 
   // Update the isQuoteAvailable check
   const isQuoteAvailable = useMemo(() => {
@@ -260,173 +446,37 @@ export default function TokenPage({ addressProp }) {
     return true;
   }, [amount, quote]);
 
-  // Update the transaction handler to use the correct amounts
-  const handleTransaction = () => {
-    if (!userAddress) {
-      openConnectModal();
-      return;
-    }
-
-    setError(''); // Clear previous errors
-    const marketType = tokenState?.marketType || 0;
-
-    if (isBuying) {
-      // For buys: amount is in ETH, use it directly as value
-      if (!amount) return;
-      buyToken({
-        value: ethers.parseEther(amount), // Use input amount as ETH value
-        args: [
-          userAddress,
-          userAddress,
-          '',
-          marketType,
-          parseEther(MIN_ETH_AMOUNT),
-          0
-        ]
-      });
-    } else {
-      // For sells: amount is in tokens, use it as token amount
-      if (!amount) return;
-      sellToken({
-        args: [
-          parseEther(amount), // Use input amount as token amount
-          userAddress,
-          '',
-          marketType,
-          parseEther(MIN_ETH_AMOUNT),
-          0
-        ]
-      });
-    }
-  };
-
-  // Define MIN_ETH_AMOUNT as a string instead of bigint
-  const MIN_ETH_AMOUNT = "0.0000001";
-
-  // Update handlePercentageClick function
-  const handlePercentageClick = (percentage) => {
-    if (!userAddress) return;
-    
-    if (isBuying) {
-      // For buying: calculate percentage of ETH balance
-      if (!ethBalance?.formatted) return;
-      // If it's 100% (APE), use 98% instead to leave room for gas
-      const actualPercentage = percentage === 1 ? 0.98 : percentage;
-      const maxEthToSpend = parseFloat(ethBalance.formatted) * actualPercentage;
-      // For buys, we input ETH amount directly
-      setAmount(maxEthToSpend.toFixed(6));
-    } else {
-      // For selling: calculate percentage of token balance
-      // For selling we can use full percentage since gas is paid in ETH
-      const amount = (parseFloat(userBalance) * percentage).toFixed(6);
-      setAmount(amount.toString());
-    }
-  };
-
-  // Add this helper function at the top with other functions
-  async function getTokenBuyQuoteForEth(tokenAddress, ethAmount) {
-    try {
-      const contract = {
-        address: tokenAddress,
-        abi: higherrrrrrrAbi,
-      };
+  async function refreshTokenState() {
+    if (typeof addressProp === 'string') {
+      const state = await getTokenState(addressProp);
+      setTokenState(state);
       
-      const data = await readContract({
-        ...contract,
-        functionName: 'getTokensForEth',
-        args: [parseEther(ethAmount.toString())],
-      });
-      
-      return formatEther(data);
-    } catch (error) {
-      console.error('Error getting token buy quote:', error);
-      return '0';
+      // Also refresh balance if user is connected
+      if (userAddress) {
+        const balance = await getTokenBalance(addressProp, userAddress);
+        setUserBalance(balance);
+      }
     }
   }
 
-  // Add this with the other handlers
-  const handleAmountChange = (value) => {
-    // Allow empty input
-    if (value === '') {
-      setAmount('');
-      return;
-    }
-
-    // Parse the input value
-    const numValue = value.replace(/,/g, ''); // Remove commas
-    if (isNaN(numValue) || !isFinite(parseFloat(numValue))) {
-      return;
-    }
-
-    setAmount(numValue);
-  };
-
-  // Add this helper function near the other formatting functions
-  const formatTokenAmount = (amount) => {
-    const num = parseFloat(amount);
-    if (isNaN(num)) return '0';
-    
-    // Always use regular decimal notation
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 6,
-      useGrouping: true,
-      notation: 'standard'
-    });
-  };
-
-  // Add this helper function near the other calculation functions
-  const calculateEthForTokenAmount = async (tokenAddress, targetTokens) => {
-    try {
-      setIsCalculatingNft(true);
-      const TARGET = parseEther((targetTokens).toString());
-      
-      // First get a sell quote for this amount to approximate the range
-      const sellQuote = await getSellQuote(tokenAddress, TARGET);
-      if (!sellQuote || sellQuote === BigInt(0)) {
-        throw new Error("Could not get initial sell quote");
-      }
-      
-      // Use sell quote to establish reasonable bounds
-      // Start with ±20% of the sell quote for the search range
-      let low = (sellQuote * BigInt(1)) / BigInt(100);   // 1% of sell quote
-      let high = (sellQuote * BigInt(420)) / BigInt(100); // 420% of sell quote
-      
-      // Binary search with tighter bounds
-      for (let i = 0; i < 20; i++) { // Fewer iterations needed now
-        const mid = (low + high) / BigInt(2);
-        const quote = await getBuyQuote(tokenAddress, mid);
-        
-        // If we're within 1% of target, this is good enough
-        if (quote > TARGET * BigInt(990) / BigInt(1000) && 
-            quote < TARGET * BigInt(1010) / BigInt(1000)) {
-          // Add 5% slippage buffer to final amount
-          const withSlippage = (mid * BigInt(105)) / BigInt(100);
-          return formatEther(withSlippage);
-        }
-        
-        if (quote < TARGET) {
-          low = mid;
-        } else {
-          high = mid;
-        }
-      }
-      throw new Error("Could not converge on exact amount");
-    } catch (error) {
-      console.error('Error calculating ETH for tokens:', error);
-      return null;
-    } finally {
-      setIsCalculatingNft(false);
-    }
-  };
-
-  // Add these to your state declarations at the top
-  const [isCalculatingNft, setIsCalculatingNft] = useState(false);
-
+  // Add loading state check
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <div className="text-green-500 font-mono">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
+          <p>Loading token data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center text-red-600">
+          <p>{error}</p>
+        </div>
       </div>
     );
   }
@@ -434,22 +484,6 @@ export default function TokenPage({ addressProp }) {
   if (!tokenState) {
     return <div className="text-red-500 font-mono">Token not found</div>;
   }
-
-  // Helper function to format USD price with appropriate decimals
-  const formatUsdPrice = (price) => {
-    if (price < 0.000001) return price.toExponential(2);
-    if (price < 0.01) return price.toFixed(6);
-    if (price < 1) return price.toFixed(4);
-    return price.toFixed(2);
-  };
-
-  // Helper function to format market cap
-  const formatMarketCap = (cap) => {
-    if (cap >= 1_000_000_000) return `$${(cap / 1_000_000_000).toFixed(2)}B`;
-    if (cap >= 1_000_000) return `$${(cap / 1_000_000).toFixed(2)}M`;
-    if (cap >= 1_000) return `$${(cap / 1_000).toFixed(2)}K`;
-    return `$${cap.toFixed(2)}`;
-  };
 
   // Calculate values
   const priceInEth = parseFloat(tokenState.currentPrice);
@@ -469,6 +503,17 @@ export default function TokenPage({ addressProp }) {
     }, -1);
   };
 
+  const handleNftCalculation = async () => {
+    try {
+      setIsCalculatingNft(true);
+      // Your NFT calculation logic here
+    } catch (error) {
+      console.error('Error calculating NFT:', error);
+    } finally {
+      setIsCalculatingNft(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
       {/* Ticker Bar */}
@@ -482,7 +527,7 @@ export default function TokenPage({ addressProp }) {
                 </div>
                 {isCreator && (
                   <Link 
-                    href={`/token/${address}/edit`}
+                    href={`/token/${addressProp}/edit`}
                     className="inline-flex items-center px-3 py-1 border border-green-500 text-green-500 hover:bg-green-500/10 rounded-lg transition-colors text-sm"
                   >
                     <span>Edit</span>
@@ -499,21 +544,21 @@ export default function TokenPage({ addressProp }) {
               <div>
                 <div className="text-sm text-green-500/50">Price</div>
                 <div className="text-lg">
-                  ${formatUsdPrice(usdPrice)}
+                  {formattedValues.price}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-green-500/50">Market Cap</div>
                 <div className="text-lg">
-                  {formatMarketCap(marketCapUsd)}
+                  {formattedValues.marketCap}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-green-500/50">Supply</div>
                 <div className="text-lg">
-                  {totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}
+                  {formattedValues.supply}
                   <div className="text-sm text-green-500/70">
-                    {((totalSupply / 1_000_000_000) * 100).toFixed(2)}%
+                    {formattedValues.supplyPercentage}
                   </div>
                 </div>
               </div>
@@ -567,7 +612,7 @@ export default function TokenPage({ addressProp }) {
                     title="Telegram"
                   >
                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.041-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
                     </svg>
                   </a>
                 )}
@@ -605,7 +650,7 @@ export default function TokenPage({ addressProp }) {
           <div className="flex flex-wrap gap-2 pt-1">
             <button 
               onClick={() => {
-                navigator.clipboard.writeText(address);
+                navigator.clipboard.writeText(addressProp);
               }}
               className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
             >
@@ -617,7 +662,7 @@ export default function TokenPage({ addressProp }) {
 
             {tokenState?.marketType === 1 && (
               <a
-                href={`https://dexscreener.com/base/${address}`}
+                href={`https://dexscreener.com/base/${addressProp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
@@ -630,7 +675,7 @@ export default function TokenPage({ addressProp }) {
             )}
 
             <a
-              href={`https://basescan.org/token/${address}`}
+              href={`https://basescan.org/token/${addressProp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
@@ -837,7 +882,7 @@ export default function TokenPage({ addressProp }) {
               {/* NFT Buy Button */}
               <button
                 onClick={async () => {
-                  const ethAmount = await calculateEthForTokenAmount(address, 1_001_001);
+                  const ethAmount = await calculateEthForTokenAmount(addressProp, 1_001_001);
                   if (ethAmount) {
                     setIsBuying(true); // Ensure we're in buy mode
                     handleAmountChange(ethAmount);
@@ -924,28 +969,33 @@ export default function TokenPage({ addressProp }) {
               </div>
             )}
 
+            {/* Add before the trade button */}
+            {primaryWallet && currentChainType !== requiredChain && (
+              <NetworkSwitcher targetChain={requiredChain}>
+                Switch to {requiredChain} to trade this token
+              </NetworkSwitcher>
+            )}
+
             {!userAddress ? (
-              <ConnectKitButton />
+              <ConnectButton />
             ) : (
               <button
                 onClick={handleTransaction}
                 disabled={
                   tokenState.paused || 
                   isLoading || 
-                  !amount || // require amount
-                  (isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0')) || // check ETH balance
-                  (!isBuying && parseFloat(amount) > parseFloat(userBalance)) // check token balance
+                  !amount || 
+                  currentChainType !== requiredChain ||
+                  (isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0')) ||
+                  (!isBuying && parseFloat(amount) > parseFloat(userBalance))
                 }
                 className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
               >
                 {isLoading 
-                  ? (isBuying ? "Buying..." : "Selling...") 
-                  : (isBuying 
-                      ? quote 
-                        ? `Buy ~${formatTokenAmount(formatEther(quote))} ${tokenState.symbol}` 
-                        : `Buy ${tokenState.symbol}`
-                      : `Sell ${formatTokenAmount(amount)} ${tokenState.symbol}`
-                    )
+                  ? 'Processing...' 
+                  : isBuying 
+                    ? 'Buy' 
+                    : 'Sell'
                 }
               </button>
             )}
@@ -968,17 +1018,18 @@ export default function TokenPage({ addressProp }) {
             </thead>
             <tbody>
               {tokenState.priceLevels.map((level, index) => {
-                const levelUsdPrice = parseFloat(level.price) * ethPrice;
-                const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
+                const levelPriceEth = parseFloat(level.price);
+                const levelUsdPrice = levelPriceEth * (ethPrice?.price_usd || 0);
+                const levelMarketCap = levelUsdPrice * MAX_SUPPLY; // Use MAX_SUPPLY constant
                 const currentPriceEth = parseFloat(tokenState.currentPrice);
                 
                 // Current level is the one where price >= this level's price but < next level's price
                 const nextLevel = tokenState.priceLevels[index + 1];
                 const nextLevelPrice = nextLevel ? parseFloat(nextLevel.price) : Infinity;
-                const isCurrentLevel = currentPriceEth >= parseFloat(level.price) && currentPriceEth < nextLevelPrice;
+                const isCurrentLevel = currentPriceEth >= levelPriceEth && currentPriceEth < nextLevelPrice;
                 
                 // A level is achieved if the current price is higher than its price
-                const isAchieved = currentPriceEth >= parseFloat(level.price) && !isCurrentLevel;
+                const isAchieved = currentPriceEth >= levelPriceEth;
 
                 return (
                   <tr key={index} className={`border-b border-green-500/10 ${isCurrentLevel ? 'bg-green-500/10' : ''}`}>

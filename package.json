@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "react-twitter-widgets": "^1.11.0"
+    "@dynamic-labs/sdk-react-core": "^1.0.0",
+    "@dynamic-labs/ethereum": "^1.0.0",
+    "@dynamic-labs/solana": "^1.0.0"
   }
 }
