@@ -5,7 +5,7 @@ const featuredProjects = [
     name: 'Wen Lamboo',
     imageUrl: '/images/featured/wen-lamboo.jpg',
     description: 'Higher community member Magpie answers Crypto\'s favorite question: Wen $LAMBOO?',
-    launchDate: '2025-04-20T20:20:00Z',
+    launchDate: '2025-02-05T20:20:00Z',
     website: 'https://www.lamboo.fun/',
     twitter: 'https://x.com/Lamboo_Brainlet',
     telegram: 'https://t.me/+h9Q_lwzKty42ODRk',
@@ -107,7 +107,7 @@ const featuredProjects = [
     name: 'Harder',
     imageUrl: '/images/featured/harder.png',
     description: 'The first on-chain evolutionary token. Evolve. Expand. Ejaculate liquidity.',
-    launchDate: '2025-04-20T20:20:00Z',
+    launchDate: '2025-02-19T20:20:00Z',
     website: 'https://higherrrrrrr.fun/',
     twitter: 'https://x.com/higherrrrrrrfun',
     telegram: 'https://t.me/+Y0XJwPzrdUc2OGRh',
@@ -131,7 +131,7 @@ const featuredProjects = [
     name: 'CULT',
     imageUrl: '/images/featured/cult.svg',
     description: 'Higherrrrrrr\'s native protocol token and self-burning agent of chaos.',
-    launchDate: '2025-04-20T20:20:00Z',
+    launchDate: '2025-02-12T20:20:00Z',
     website: 'https://higherrrrrrr.fun/',
     twitter: 'https://x.com/higherrrrrrrfun',
     telegram: 'https://t.me/+Y0XJwPzrdUc2OGRh',
@@ -164,32 +164,32 @@ const featuredProjects = [
       </p>
     `,
   },
-  {
-    slug: 'idk',
-    name: 'IDK',
-    imageUrl: '/images/featured/idk.png',
-    description: "The first hyper-meta, self-aware token that perfectly encapsulates the vibe of modern markets.",
-    launchDate: '2025-04-20T20:20:00Z',
-    website: 'https://lolidkkkkk.deform.cc/idk/',
-    twitter: 'https://x.com/idkcto_',
-    telegram: 'https://lolidkkkkk.deform.cc/idk/',
-    warpcast: 'https://warpcast.com/idkcto',
-    customContent: `
-      <h2 class="text-xl font-bold mt-4">About IDK</h2>
-      <p class="mt-2">
-        IDK is the first hyper-meta, self-aware token that perfectly encapsulates the vibe of modern markets.
-        It expands infinitely as the community does... or doesn't. It's a living shrug that laughs in the face 
-        of decentralization, financialization, and logic itself.
-      </p>
+  // {
+  //   slug: 'idk',
+  //   name: 'IDK',
+  //   imageUrl: '/images/featured/idk.png',
+  //   description: "The first hyper-meta, self-aware token that perfectly encapsulates the vibe of modern markets.",
+  //   launchDate: '2025-04-20T20:20:00Z',
+  //   website: 'https://lolidkkkkk.deform.cc/idk/',
+  //   twitter: 'https://x.com/idkcto_',
+  //   telegram: 'https://lolidkkkkk.deform.cc/idk/',
+  //   warpcast: 'https://warpcast.com/idkcto',
+  //   customContent: `
+  //     <h2 class="text-xl font-bold mt-4">About IDK</h2>
+  //     <p class="mt-2">
+  //       IDK is the first hyper-meta, self-aware token that perfectly encapsulates the vibe of modern markets.
+  //       It expands infinitely as the community does... or doesn't. It's a living shrug that laughs in the face 
+  //       of decentralization, financialization, and logic itself.
+  //     </p>
       
-      <p class="mt-8"></p>
-      <p class="mb-4">
-        <strong>Migration</strong><br/>
-        Migrated $IDK will enter price discovery using a single-sided CULT LP provided by the Higher^7 team. 
-        This will enable deep liquidity for $IDK on Solana via the $IDK/$CULT pair.
-      </p>
-    `,
-  },
+  //     <p class="mt-8"></p>
+  //     <p class="mb-4">
+  //       <strong>Migration</strong><br/>
+  //       Migrated $IDK will enter price discovery using a single-sided CULT LP provided by the Higher^7 team. 
+  //       This will enable deep liquidity for $IDK on Solana via the $IDK/$CULT pair.
+  //     </p>
+  //   `,
+  // },
 ];
 
 export default featuredProjects;
