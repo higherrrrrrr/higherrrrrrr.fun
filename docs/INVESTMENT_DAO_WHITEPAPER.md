@@ -1,4 +1,4 @@
-# Higherrrrrrrr Investment DAOs Protocol White Paper
+# [DRAFT] Higherrrrrrrr Investment DAOs Protocol White Paper
 
 > **A Solana-Based Investment DAO Framework with Automated Rebalancing, Dynamic Supply, and Integrated Trading**  
 > *Where creator-seeded share pricing, algorithmic rebalancing via the Jupyter aggregator, inflation-based fee incentives, and a unified trading interface converge—with flexible configurations and seamless integration into the Higherrrrrrrr ecosystem.*
