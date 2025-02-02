@@ -177,9 +177,8 @@ We highly encourage community contributions! Please read [CONTRIBUTING.md](./CON
 
 ## 🌐 Resources
 
-- **Documentation**: [https://docs.higherrrrrrr.fun](https://docs.higherrrrrrr.fun) (Placeholder - documentation is under development)
+- **Github**: [https://github.com/higherrrrrrr/higherrrrrrr.fun](https://github.com/higherrrrrrr/higherrrrrrr.fun) (Placeholder - documentation is under development)
 - **Website**: [https://higherrrrrrr.fun](https://higherrrrrrr.fun)
-- **Alpha Platform**: [https://alpha.higherrrrrrr.fun](https://alpha.higherrrrrrr.fun)
 - **Twitter**: [https://twitter.com/higherrrrrrrfun](https://twitter.com/higherrrrrrrfun)
 - **Telegram**: [https://t.me/higherrrrrrrfun](https://t.me/higherrrrrrrfun)
 - **GitHub Issues**: [https://github.com/higherrrrrrr/higherrrrrrrrr.fun/issues](https://github.com/higherrrrrrr/higherrrrrrrrr.fun/issues) (For bug reports and feature requests)
