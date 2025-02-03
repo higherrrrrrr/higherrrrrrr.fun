@@ -1,10 +1,10 @@
 // layouts/MainLayout.js
 
 import { useEffect, useState } from 'react';
-import { ConnectKitButton } from '../components/Web3Provider';
 import Link from 'next/link';
 import TVPanel from '../components/TVPanel';
 import TermsModal from '../components/TermsModal';
+import { DynamicConnectButton } from '@dynamic-labs/sdk-react';
 
 export default function MainLayout({ children }) {
   const [isMobile, setIsMobile] = useState(false);
@@ -103,13 +103,17 @@ export default function MainLayout({ children }) {
 
             <div className="w-[180px]">
               <Link href="/launch" className="w-full">
-                <button className="snake-border w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-all duration-200 whitespace-nowrap text-base">
+                <button className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-all duration-200 whitespace-nowrap text-base flex items-center justify-center">
                   Create
                 </button>
               </Link>
             </div>
             <div className="w-[180px] h-12">
-              <ConnectKitButton className="snake-border" />
+              <DynamicConnectButton 
+                buttonClassName="dynamic-connect-button__button"
+                textClassName="dynamic-connect-button__text"
+                buttonTextOverride="Connect Wallet"
+              />
             </div>
           </div>
 
