@@ -4,6 +4,7 @@ use crate::{
     errors::ErrorCode,
     state::{
         evolution_data::{EvolutionData, EvolutionItem},
+        meme_token_state::MemeTokenState,
     },
 };
 use mpl_token_metadata::instruction as mpl_instruction;
@@ -15,6 +16,8 @@ pub fn handle_set_evolutions(
     ctx: Context<SetEvolutions>,
     items: Vec<EvolutionItem>,
 ) -> Result<()> {
+    // Enforce maximum evolution count of 420.
+    require!(items.len() <= 420, ErrorCode::InvalidDistributionPercentage); // Alternatively, define a dedicated error.
     let evo_data = &mut ctx.accounts.evolution_data;
     require_keys_eq!(evo_data.owner, ctx.accounts.owner.key(), ErrorCode::Unauthorized);
 
@@ -36,7 +39,7 @@ pub fn handle_update_meme_metadata(
     let mut chosen_uri = None;
     let mut highest_threshold = 0u64;
 
-    // Determine the highest threshold that is <= current_price
+    // Determine the highest threshold that is <= current_price.
     for item in &evo_data.evolutions {
         if current_price >= item.price_threshold && item.price_threshold >= highest_threshold {
             chosen_name = Some(item.new_name.clone());
@@ -53,7 +56,10 @@ pub fn handle_update_meme_metadata(
     let final_name = chosen_name.unwrap();
     let final_uri = chosen_uri.unwrap();
 
-    // Construct the Metaplex CPI to update name/URI
+    // Preserve the original symbol from the meme token state.
+    let original_symbol = ctx.accounts.meme_token_state.symbol.clone();
+
+    // Construct the Metaplex CPI to update name/URI while keeping the symbol unchanged.
     let ix = mpl_instruction::update_metadata_accounts_v2(
         *ctx.accounts.token_metadata_program.key,
         ctx.accounts.metadata.key(),
@@ -61,7 +67,7 @@ pub fn handle_update_meme_metadata(
         None,
         Some(DataV2 {
             name: final_name.clone(),
-            symbol: "".to_string(), // keep or set an updated symbol if you like
+            symbol: original_symbol,
             uri: final_uri.clone(),
             seller_fee_basis_points: 0,
             creators: None,
@@ -106,7 +112,7 @@ pub struct SetEvolutions<'info> {
     #[account(address = system_program::ID)]
     pub system_program: Program<'info, System>,
 
-    // Possibly reference the token mint if needed
+    /// The token mint account (used for PDA derivation).
     pub token_mint: AccountInfo<'info>,
 }
 
@@ -114,6 +120,10 @@ pub struct SetEvolutions<'info> {
 pub struct UpdateMemeMetadata<'info> {
     #[account(mut)]
     pub evolution_data: Account<'info, EvolutionData>,
+
+    /// Added to fetch the token’s symbol.
+    #[account(mut)]
+    pub meme_token_state: Account<'info, MemeTokenState>,
 
     #[account(mut)]
     pub mint: Account<'info, Mint>,
@@ -126,4 +136,3 @@ pub struct UpdateMemeMetadata<'info> {
     #[account(address = mpl_token_metadata::id())]
     pub token_metadata_program: AccountInfo<'info>,
 }
-

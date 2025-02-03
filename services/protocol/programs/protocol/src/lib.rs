@@ -23,12 +23,28 @@ pub mod protocol {
     }
 
     // -------------------- Step 2: Create Token --------------------
+    /// Creates a new memecoin by initializing the mint, setting evolution thresholds and distributions,
+    /// and locking the mint authority.
+    ///
+    /// Parameters:
+    /// - `name`: The name of the token.
+    /// - `symbol`: The token symbol.
+    /// - `decimals`: The decimal places.
+    /// - `total_supply`: The total token supply.
+    /// - `image`: A default image URI.
+    /// - `token_type`: The type of token evolution: Regular, TextEvolution, or ImageEvolution.
+    /// - `evolutions`: A vector of evolution items (price thresholds with new name/URI).
+    /// - `distributions`: A vector of distribution instructions.
     pub fn create_meme_token(
         ctx: Context<CreateMemeToken>,
         name: String,
         symbol: String,
         decimals: u8,
         total_supply: u64,
+        image: String,
+        token_type: state::meme_token_state::TokenType,
+        evolutions: Vec<state::evolution_data::EvolutionItem>,
+        distributions: Vec<instructions::create_meme_token::DistributionInstruction>,
     ) -> Result<()> {
         instructions::create_meme_token::handle(
             ctx,
@@ -36,6 +52,10 @@ pub mod protocol {
             symbol,
             decimals,
             total_supply,
+            image,
+            token_type,
+            evolutions,
+            distributions,
         )
     }
 
@@ -103,8 +123,7 @@ pub mod protocol {
     ) -> Result<()> {
         instructions::fee_distribution::handle_withdraw_creator_tokens(ctx, amount)
     }
-
-    /// New instruction: Distribute aggregated LP fees from the Orca pool fee account evenly.
+    /// Distributes aggregated LP fees from the Orca pool fee account evenly.
     pub fn distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
         instructions::fee_distribution::handle_distribute_lp_fees(ctx)
     }

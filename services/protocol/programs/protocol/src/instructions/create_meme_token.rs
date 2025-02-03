@@ -1,5 +1,3 @@
-// File: instructions/create_meme_token.rs
-
 use anchor_lang::prelude::*;
 use anchor_spl::token::{
     self, InitializeMint, MintTo, SetAuthority, AuthorityType, Transfer,
@@ -7,14 +5,13 @@ use anchor_spl::token::{
 use crate::{
     errors::ErrorCode,
     state::{
-        meme_token_state::MemeTokenState,
+        meme_token_state::{MemeTokenState, TokenType},
         evolution_data::{EvolutionData, EvolutionItem},
     },
 };
 
 /// A distribution instruction defines one recipient and the percentage of tokens they receive.
-/// The sum of percentages must equal 100. If `is_pool` is true, then instead of using the provided
-/// recipient account, the protocol will initialize a proper liquidity pool via CPI.
+/// When `is_pool` is true, it represents the LP distribution. For non–LP distributions, the sum must not exceed 35%.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct DistributionInstruction {
     pub recipient: Pubkey,
@@ -23,13 +20,14 @@ pub struct DistributionInstruction {
 }
 
 /// The main handler for creating and locking a new SPL token.
-/// This instruction:
+/// This instruction does the following:
 /// 1. Initializes the mint and mints the full supply to a temporary recipient account.
 /// 2. Sets immutable evolution thresholds.
 /// 3. Distributes the minted supply according to a custom distribution:
-///    - For each distribution not flagged as pool, tokens are transferred to the provided recipient account.
-///    - For the distribution flagged as pool, a CPI call to Orca is made to initialize a real pool deposit;
-///      tokens are then transferred into the dedicated pool vault and the pool’s address is recorded.
+///    - For each distribution _not_ flagged as pool, tokens are transferred to the provided recipient account.
+///    - The non–LP distributions must total at most 35% of the supply.
+///    - The remaining tokens (i.e. LP allocation = 100 – non–LP) are assigned to the liquidity pool.
+///    - If a pool distribution is provided, its percentage must equal the computed LP allocation.
 /// 4. Locks the mint authority.
 pub fn handle(
     ctx: Context<CreateMemeToken>,
@@ -37,8 +35,10 @@ pub fn handle(
     symbol: String,
     decimals: u8,
     total_supply: u64,
-    evolutions: Vec<EvolutionItem>,               // evolution thresholds (immutable)
-    distributions: Vec<DistributionInstruction>,    // custom distribution instructions
+    image: String,
+    token_type: TokenType,
+    evolutions: Vec<EvolutionItem>,            // evolution thresholds (immutable)
+    distributions: Vec<DistributionInstruction>, // custom distribution instructions
 ) -> Result<()> {
     // --- 1. Populate MemeTokenState ---
     let token_state = &mut ctx.accounts.meme_token_state;
@@ -48,8 +48,10 @@ pub fn handle(
     token_state.symbol = symbol.clone();
     token_state.total_supply = total_supply;
     token_state.decimals = decimals;
-    // The pool field will be set below if a distribution is flagged as pool.
-
+    token_state.image = image;
+    token_state.token_type = token_type;
+    // The pool field will be set below after LP distribution is processed.
+    
     // --- 2. Initialize the SPL Mint ---
     let cpi_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
@@ -59,7 +61,7 @@ pub fn handle(
         },
     );
     token::initialize_mint(cpi_ctx, decimals, &ctx.accounts.mint_authority.key(), None)?;
-
+    
     // --- 3. Mint the full supply to the temporary recipient account ---
     let raw_amount = total_supply
         .checked_mul(10u64.pow(decimals as u32))
@@ -73,7 +75,7 @@ pub fn handle(
         },
     );
     token::mint_to(cpi_ctx_mint_to, raw_amount)?;
-
+    
     // --- 4. Lock the mint authority ---
     let cpi_ctx_set_auth = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
@@ -83,94 +85,138 @@ pub fn handle(
         },
     );
     token::set_authority(cpi_ctx_set_auth, AuthorityType::MintTokens, None)?;
-
+    
     // --- 5. Initialize EvolutionData (immutable) ---
     let evo_data = &mut ctx.accounts.evolution_data;
     evo_data.owner = *ctx.accounts.creator.key;
     evo_data.evolution_count = evolutions.len() as u8;
     evo_data.evolutions = evolutions;
     msg!("Evolution thresholds set (immutable)");
+    
+    // --- 6. Validate Distribution Percentages and determine LP allocation ---
+    // Sum up non–LP (user–specified) percentages.
+    let non_pool_percent: u8 = distributions
+        .iter()
+        .filter(|d| !d.is_pool)
+        .map(|d| d.percentage)
+        .sum();
 
-    // --- 6. Validate Distribution Percentages ---
-    let pre_mine_percent: u8 = distributions.iter().filter(|d| !d.is_pool).map(|d| d.percentage).sum();
-    let pool_percent: u8 = distributions.iter().filter(|d| d.is_pool).map(|d| d.percentage).sum();
-    let pool_count = distributions.iter().filter(|d| d.is_pool).count();
+    // Ensure non–LP distributions do not exceed 35%.
     require!(
-        pre_mine_percent == 35 && pool_percent == 65 && pool_count == 1,
+        non_pool_percent <= 35,
         ErrorCode::InvalidDistributionPercentage
     );
 
+    // Compute the LP (pool) percentage as the remaining percentage.
+    let computed_pool_percent = 100 - non_pool_percent;
+
+    // Check if a pool distribution instruction was provided.
+    let pool_instructions: Vec<&DistributionInstruction> =
+        distributions.iter().filter(|d| d.is_pool).collect();
+
+    // Allow at most one pool distribution.
+    if pool_instructions.len() > 1 {
+        return Err(ErrorCode::InvalidDistributionPercentage.into());
+    }
+
+    // If a pool instruction exists, its percentage must equal the computed LP percentage.
+    if pool_instructions.len() == 1 {
+        require!(
+            pool_instructions[0].percentage == computed_pool_percent,
+            ErrorCode::InvalidDistributionPercentage
+        );
+    }
+    
     // --- 7. Distribute Tokens ---
-    // Count how many distributions are NOT for the pool.
+    // Process non–LP distributions.
     let non_pool_count = distributions.iter().filter(|d| !d.is_pool).count();
-    // The remaining_accounts must equal non_pool_count.
     require!(
         ctx.remaining_accounts.len() == non_pool_count,
         ErrorCode::InsufficientBalance
     );
     let mut remaining_iter = ctx.remaining_accounts.iter();
-    // Hold the pool deposit key here.
-    let mut pool_deposit_opt: Option<Pubkey> = None;
 
-    // Iterate through each distribution instruction.
-    for dist in distributions.iter() {
-        // Calculate the allocation.
+    for dist in distributions.iter().filter(|d| !d.is_pool) {
+        // Calculate allocation for this non–LP distribution.
         let allocation = raw_amount
             .checked_mul(dist.percentage as u64)
             .and_then(|v| v.checked_div(100))
             .ok_or(ErrorCode::Overflow)?;
-        if dist.is_pool {
-            // For the pool distribution, call the CPI to initialize the pool deposit.
-            let pool_key = initialize_pool(ctx, allocation)?;
-            pool_deposit_opt = Some(pool_key);
-            // Transfer the tokens to the dedicated pool vault.
-            let cpi_ctx_pool = CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
-                Transfer {
-                    from: ctx.accounts.recipient_ata.to_account_info(),
-                    to: ctx.accounts.pool_vault.to_account_info(),
-                    authority: ctx.accounts.creator.to_account_info(),
-                },
-            );
-            token::transfer(cpi_ctx_pool, allocation)?;
-            msg!(
-                "Transferred {} tokens ({}%) to Pool vault",
-                allocation,
-                dist.percentage
-            );
-        } else {
-            // For non-pool distributions (pre-mine), use the next remaining account.
-            let recipient_account = remaining_iter.next().unwrap();
-            require!(
-                recipient_account.key == dist.recipient,
-                ErrorCode::Unauthorized
-            );
-            let cpi_ctx_transfer = CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
-                Transfer {
-                    from: ctx.accounts.recipient_ata.to_account_info(),
-                    to: recipient_account.clone(),
-                    authority: ctx.accounts.creator.to_account_info(),
-                },
-            );
-            token::transfer(cpi_ctx_transfer, allocation)?;
-            msg!(
-                "Transferred {} tokens ({}%) to {}",
-                allocation,
-                dist.percentage,
-                recipient_account.key
-            );
-        }
+        // Get the recipient account from remaining accounts.
+        let recipient_account = remaining_iter.next().unwrap();
+        require!(
+            recipient_account.key == dist.recipient,
+            ErrorCode::Unauthorized
+        );
+        let cpi_ctx_transfer = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.recipient_ata.to_account_info(),
+                to: recipient_account.clone(),
+                authority: ctx.accounts.creator.to_account_info(),
+            },
+        );
+        token::transfer(cpi_ctx_transfer, allocation)?;
+        msg!(
+            "Transferred {} tokens ({}%) to {}",
+            allocation,
+            dist.percentage,
+            recipient_account.key
+        );
     }
-    // --- 8. Ensure a pool deposit was defined ---
-    require!(pool_deposit_opt.is_some(), ErrorCode::Unauthorized);
-    token_state.pool = pool_deposit_opt.unwrap();
 
+    // Process the LP distribution.
+    let pool_allocation = raw_amount
+        .checked_mul(computed_pool_percent as u64)
+        .and_then(|v| v.checked_div(100))
+        .ok_or(ErrorCode::Overflow)?;
+
+    // Whether or not a pool instruction was provided, we need to initialize the pool and transfer tokens.
+    if let Some(pool_dist) = distributions.iter().find(|d| d.is_pool) {
+        // Use the provided pool instruction.
+        let pool_key = initialize_pool(ctx, pool_allocation)?;
+        let cpi_ctx_pool = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.recipient_ata.to_account_info(),
+                to: ctx.accounts.pool_vault.to_account_info(),
+                authority: ctx.accounts.creator.to_account_info(),
+            },
+        );
+        token::transfer(cpi_ctx_pool, pool_allocation)?;
+        msg!(
+            "Transferred {} tokens ({}%) to Pool vault as specified",
+            pool_allocation,
+            pool_dist.percentage
+        );
+        token_state.pool = pool_key;
+    } else {
+        // No pool instruction provided; automatically use the computed LP allocation.
+        let pool_key = initialize_pool(ctx, pool_allocation)?;
+        let cpi_ctx_pool = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.recipient_ata.to_account_info(),
+                to: ctx.accounts.pool_vault.to_account_info(),
+                authority: ctx.accounts.creator.to_account_info(),
+            },
+        );
+        token::transfer(cpi_ctx_pool, pool_allocation)?;
+        msg!(
+            "Automatically transferred {} tokens ({}%) to Pool vault",
+            pool_allocation,
+            computed_pool_percent
+        );
+        token_state.pool = pool_key;
+    }
+    
     msg!(
-        "Created memecoin {} with symbol {}, total supply locked at {}. Pre-mine distribution is locked at 35% and pool distribution at 65%.",
+        "Created memecoin {} with symbol {}, total supply locked at {}. Non–LP distributions: {}%, LP distribution: {}%",
         name,
         symbol,
-        total_supply
+        total_supply,
+        non_pool_percent,
+        computed_pool_percent
     );
     Ok(())
 }
@@ -178,17 +224,16 @@ pub fn handle(
 /// **initialize_pool**
 ///
 /// Calls Orca’s CPI to create a new concentrated liquidity pool for the token and wSOL pair.
-/// It uses the additional accounts provided in the CreateMemeToken context. In a full implementation,
-/// this function will create the pool, set up its associated token vaults, fee account, and authorities.
-/// For demonstration, we call the CPI function from orca_whirlpools_client.
+/// This function uses the additional accounts provided in the CreateMemeToken context.
+/// For demonstration purposes, it calls the CPI function from orca_whirlpools_client.
 fn initialize_pool<'info>(
     ctx: &Context<CreateMemeToken>,
     _allocation: u64,
 ) -> Result<Pubkey> {
-    // Example initial price: set the sqrt_price_x96 to represent price 1 (i.e. 1<<96)
+    // Example initial price: set sqrt_price_x96 to represent price 1 (i.e. 1 << 96).
     let initial_sqrt_price_x96: u128 = 1 << 96;
     let tick_spacing: u16 = 64; // Example tick spacing; adjust as needed.
-
+    
     // Build the CPI context for pool initialization.
     let cpi_ctx = CpiContext::new(
         ctx.accounts.orca_whirlpools_program.to_account_info(),
@@ -206,11 +251,11 @@ fn initialize_pool<'info>(
             token_program: ctx.accounts.token_program.to_account_info(),
         },
     );
-
+    
     // Call the CPI function to initialize the pool.
     orca_whirlpools_client::cpi::init_pool(cpi_ctx, initial_sqrt_price_x96, tick_spacing)?;
     msg!("Orca pool successfully created via CPI.");
-
+    
     // Return the new pool account's key.
     Ok(ctx.accounts.pool_account.key())
 }
@@ -224,14 +269,16 @@ pub struct CreateMemeToken<'info> {
     #[account(
         init,
         payer = creator,
-        space = 8 +  // discriminator
-               32 + // creator
-               32 + // mint
-               (4 + name.len()) + // name
-               (4 + symbol.len()) + // symbol
-               8 +  // total_supply
-               1 +  // decimals
-               32,  // pool deposit (pool)
+        space = 8 +                // discriminator
+               32 +               // creator
+               32 +               // mint
+               (4 + name.len()) + // name (dynamic)
+               (4 + symbol.len()) + // symbol (dynamic)
+               8 +                // total_supply
+               1 +                // decimals
+               32 +               // pool deposit (pool)
+               (4 + 256) +        // image string (assumed max 256 bytes)
+               1                 // token_type (enum stored as 1 byte)
     )]
     pub meme_token_state: Account<'info, MemeTokenState>,
 
@@ -276,7 +323,7 @@ pub struct CreateMemeToken<'info> {
         payer = creator,
         seeds = [b"evolution_data", mint.key().as_ref()],
         bump,
-        space = 8 + 32 + 1 + 4 + (32 * 10)
+        space = 8 + 32 + 1 + 4 + (420 * 80) // updated size for a maximum of 420 evolutions
     )]
     pub evolution_data: Account<'info, EvolutionData>,
 
