@@ -123,7 +123,6 @@ pub mod protocol {
     ) -> Result<()> {
         instructions::fee_distribution::handle_withdraw_creator_tokens(ctx, amount)
     }
-
     /// Distributes aggregated LP fees from the Orca pool fee account evenly.
     pub fn distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
         instructions::fee_distribution::handle_distribute_lp_fees(ctx)

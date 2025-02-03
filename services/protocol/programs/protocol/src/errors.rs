@@ -16,4 +16,7 @@ pub enum ErrorCode {
 
     #[msg("Invalid distribution percentages; pre-mine must be 35% and pool must be 65% with exactly one pool distribution.")]
     InvalidDistributionPercentage,
+
+    #[msg("Token account mint does not match expected memecoin mint.")]
+    InvalidTokenAccount,
 }

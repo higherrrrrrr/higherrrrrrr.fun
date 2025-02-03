@@ -12,39 +12,14 @@ use crate::state::{
 };
 use orca_whirlpools_core::state::Whirlpool;
 
-/// Executes a swap via Orca Whirlpools Client and triggers metadata evolution if thresholds are crossed:
-/// 
-/// 1. Calculates a token fee (0.5% of `amount_in`) and transfers it to the creator’s token vault.
-/// 2. Uses the remaining tokens to perform a swap via Orca Whirlpools Client.
-/// 3. (LP fees are accumulated in the Orca pool fee account and will be distributed via a separate instruction.)
-/// 4. Decodes the current price from the pool and triggers metadata evolution if a threshold is met.
+/// Executes a swap via Orca Whirlpools Client and triggers metadata evolution if thresholds are crossed
 pub fn handle_trade_via_orca(
     ctx: Context<TradeViaOrca>,
     amount_in: u64,
     min_out: u64,
     _unused_current_price: u64, // no longer used externally
 ) -> Result<()> {
-    // --- 1. Calculate fees ---
-    let token_fee = amount_in
-        .checked_div(200)
-        .ok_or(crate::errors::ErrorCode::Overflow)?;
-    let amount_to_swap = amount_in
-        .checked_sub(token_fee)
-        .ok_or(crate::errors::ErrorCode::Overflow)?;
-
-    // --- 2. Transfer token fee to the creator's token vault ---
-    let cpi_transfer_ctx = CpiContext::new(
-        ctx.accounts.token_program.to_account_info(),
-        token::Transfer {
-            from: ctx.accounts.user_in_token_account.to_account_info(),
-            to: ctx.accounts.creator_token_vault.to_account_info(),
-            authority: ctx.accounts.user.to_account_info(),
-        },
-    );
-    token::transfer(cpi_transfer_ctx, token_fee)?;
-    msg!("Transferred {} tokens as fee to the creator token vault", token_fee);
-
-    // --- 3. Perform swap via Orca Whirlpools Client ---
+    // --- 1. Perform swap via Orca Whirlpools Client ---
     let whirlpool_swap_accounts = WhirlpoolSwapAccounts {
         whirlpool: ctx.accounts.whirlpool.to_account_info(),
         token_vault_a: ctx.accounts.orca_pool_token_a.to_account_info(),
@@ -60,17 +35,17 @@ pub fn handle_trade_via_orca(
     );
 
     let swap_params = SwapParams {
-        amount: amount_to_swap,
+        amount: amount_in,
         other_amount_threshold: min_out,
     };
 
     whirlpools_swap(cpi_ctx, swap_params)?;
-    msg!("Called Orca Whirlpools swap with {} tokens (min_out: {})", amount_to_swap, min_out);
+    msg!("Called Orca Whirlpools swap with {} tokens (min_out: {})", amount_in, min_out);
 
-    // --- 4. Note on fee handling ---
+    // --- 2. Note on fee handling ---
     msg!("LP fees are now being accumulated in the Orca pool fee account. Use the fee distribution instruction to split these fees.");
 
-    // --- 5. Get current price from the pool and trigger evolution ---
+    // --- 3. Get current price from the pool and trigger evolution ---
     let current_price = get_current_price(&ctx.accounts.whirlpool)?;
     msg!("Decoded current price: {}", current_price);
     // Pass the preserved symbol from meme_token_state.

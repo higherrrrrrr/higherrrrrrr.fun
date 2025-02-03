@@ -1,5 +1,3 @@
-// programs/protocol/src/instructions/conviction_nfts.rs
-
 use anchor_lang::prelude::*;
 use crate::{
     errors::ErrorCode,
@@ -16,22 +14,33 @@ use borsh::BorshDeserialize;
 /// Handler for registering big holders.
 pub fn handle_register_holder(ctx: Context<RegisterHolder>) -> Result<()> {
     let registry = &mut ctx.accounts.conviction_registry;
-    let user_balance = ctx.accounts.user_token_account.amount;
+    let user_token_account = &ctx.accounts.user_token_account;
 
+    // Ensure the user's token account is for the correct mint.
+    require!(
+        user_token_account.mint == ctx.accounts.meme_token_state.mint,
+        ErrorCode::InvalidTokenAccount
+    );
+
+    let user_balance = user_token_account.amount;
     let decimals = ctx.accounts.meme_token_state.decimals;
     let total_supply = ctx.accounts.meme_token_state.total_supply;
     let raw_supply = total_supply
         .checked_mul(10u64.pow(decimals as u32))
         .ok_or(ErrorCode::Overflow)?;
 
-    // Corrected threshold: 0.042069% is (raw_supply * 42069) / 100,000,000
+    // Calculate the minimum balance required for registration.
+    // 0.042069% is (raw_supply * 42069) / 100,000,000
     let conviction_min = (raw_supply as u128)
         .checked_mul(42069u128)
         .ok_or(ErrorCode::Overflow)?
         .checked_div(100_000_000u128)
         .ok_or(ErrorCode::Overflow)? as u64;
 
-    require!(user_balance >= conviction_min, ErrorCode::InsufficientBalance);
+    require!(
+        user_balance >= conviction_min,
+        ErrorCode::InsufficientBalance
+    );
 
     if !registry.holders.contains(&ctx.accounts.user.key()) {
         registry.holders.push(ctx.accounts.user.key());
@@ -42,6 +51,7 @@ pub fn handle_register_holder(ctx: Context<RegisterHolder>) -> Result<()> {
     }
     Ok(())
 }
+
 
 /// Handler for distributing conviction NFTs. 
 /// For each holder registered in the registry, we expect three extra accounts:
@@ -83,7 +93,7 @@ pub fn handle_distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>)
         let holder_nft_token_account = extra_iter.next().unwrap();
 
         // Deserialize the token account to read the balance.
-        let token_account = anchor_spl::token::TokenAccount::try_deserialize(
+        let token_account = TokenAccount::try_deserialize(
             &mut &holder_token_account_info.data.borrow()[..]
         ).map_err(|_| ErrorCode::InvalidPriceData)?;
 
