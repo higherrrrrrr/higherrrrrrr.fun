@@ -5,7 +5,7 @@ use crate::{
     state::fee_vault::FeeVault
 };
 
-/// Initialize the FeeVault with references to protocol/creator vaults.
+/// Initialize the FeeVault with references to protocol and creator vaults.
 pub fn handle_init_fee_vault(ctx: Context<InitFeeVault>) -> Result<()> {
     let vault = &mut ctx.accounts.fee_vault;
     vault.protocol_sol_vault = ctx.accounts.protocol_sol_vault.key();
@@ -14,18 +14,20 @@ pub fn handle_init_fee_vault(ctx: Context<InitFeeVault>) -> Result<()> {
     vault.protocol_pubkey = ctx.accounts.protocol_pubkey;
     vault.creator_pubkey = ctx.accounts.creator_pubkey;
     vault.lp_token_vault = ctx.accounts.lp_token_vault.key();
-
     Ok(())
 }
 
-/// Allows the protocol to withdraw SOL fees from their vault.
+/// Allows the protocol to withdraw SOL fees from its vault.
 pub fn handle_withdraw_protocol_sol(
     ctx: Context<WithdrawProtocolSol>,
     amount: u64
 ) -> Result<()> {
     let fee_vault = &ctx.accounts.fee_vault;
-    require_keys_eq!(fee_vault.protocol_pubkey, ctx.accounts.protocol_signer.key(), 
-        ErrorCode::Unauthorized);
+    require_keys_eq!(
+        fee_vault.protocol_pubkey,
+        ctx.accounts.protocol_signer.key(),
+        ErrorCode::Unauthorized
+    );
 
     let from_info = &ctx.accounts.protocol_sol_vault;
     let to_info = &ctx.accounts.recipient_account;
@@ -40,14 +42,17 @@ pub fn handle_withdraw_protocol_sol(
     Ok(())
 }
 
-/// Allows the creator to withdraw the token-side fees.
+/// Allows the creator to withdraw token fees.
 pub fn handle_withdraw_creator_tokens(
     ctx: Context<WithdrawCreatorTokens>,
     amount: u64
 ) -> Result<()> {
     let fee_vault = &ctx.accounts.fee_vault;
-    require_keys_eq!(fee_vault.creator_pubkey, ctx.accounts.creator_signer.key(),
-        ErrorCode::Unauthorized);
+    require_keys_eq!(
+        fee_vault.creator_pubkey,
+        ctx.accounts.creator_signer.key(),
+        ErrorCode::Unauthorized
+    );
 
     let cpi_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
@@ -58,19 +63,25 @@ pub fn handle_withdraw_creator_tokens(
         },
     );
     anchor_spl::token::transfer(cpi_ctx, amount)?;
-
     msg!("Withdrew {} tokens to recipient token account", amount);
     Ok(())
 }
 
 /// Distributes the aggregated LP fees from the Orca pool fee account evenly between the protocol and the creator.
 pub fn handle_distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
+    // FIX: Verify that the LP fee account provided matches the one stored in FeeVault.
+    require!(
+        ctx.accounts.lp_fee_account.key() == ctx.accounts.fee_vault.lp_token_vault,
+        ErrorCode::InvalidLPFeeAccount
+    );
+
     let total_fees = **ctx.accounts.lp_fee_account.lamports.borrow();
     require!(total_fees > 0, ErrorCode::InsufficientBalance);
-    let half = total_fees / 2;
-    let protocol_share = total_fees - half; // handles any odd lamport remainder
 
-    // Drain the LP fee account.
+    let half = total_fees / 2;
+    let protocol_share = total_fees - half;
+
+    // Safely drain the LP fee account after verifying its identity.
     **ctx.accounts.lp_fee_account.lamports.borrow_mut() = 0;
     **ctx.accounts.creator_sol_vault.lamports.borrow_mut() += half;
     **ctx.accounts.protocol_sol_vault.lamports.borrow_mut() += protocol_share;
@@ -83,7 +94,7 @@ pub fn handle_distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
     Ok(())
 }
 
-// -------------------- Context structs --------------------
+// -------------------- Context Structs --------------------
 
 #[derive(Accounts)]
 pub struct InitFeeVault<'info> {
@@ -93,7 +104,7 @@ pub struct InitFeeVault<'info> {
     #[account(
         init,
         payer = payer,
-        space = 8 + (5 * 32) + 32  // Added extra 32 bytes for creator_sol_vault
+        space = 8 + (5 * 32) + 32  // Allocated space for FeeVault fields.
     )]
     pub fee_vault: Account<'info, FeeVault>,
 
@@ -112,7 +123,7 @@ pub struct InitFeeVault<'info> {
     #[account(mut)]
     pub lp_token_vault: AccountInfo<'info>,
 
-    #[account(address = system_program::ID)]
+    #[account(address = solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 
     #[account(address = anchor_spl::token::ID)]
@@ -133,7 +144,7 @@ pub struct WithdrawProtocolSol<'info> {
     #[account(mut)]
     pub recipient_account: AccountInfo<'info>,
 
-    #[account(address = system_program::ID)]
+    #[account(address = solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 }
 

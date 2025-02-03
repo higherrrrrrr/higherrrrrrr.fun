@@ -19,4 +19,7 @@ pub enum ErrorCode {
 
     #[msg("Token account mint does not match expected memecoin mint.")]
     InvalidTokenAccount,
+
+    #[msg("LP fee account provided does not match the expected account.")]
+    InvalidLPFeeAccount,
 }
