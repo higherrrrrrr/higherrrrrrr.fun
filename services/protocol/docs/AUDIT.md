@@ -196,7 +196,7 @@ No issues found.
 No major issues.  
 
 #### programs/protocol/Cargo.toml & Xargo.toml
-- **Cargo.toml** references `anchor-lang = "0.26.0"` and Orca-related crates.  
+- **Cargo.toml** references `anchor-lang = "0.30.1"` and Orca-related crates.  
 - **Xargo.toml** is default, no custom standard library changes.  
 
 No issues.  
