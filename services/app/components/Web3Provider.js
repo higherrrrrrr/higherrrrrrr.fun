@@ -6,64 +6,139 @@ import { getContractAddress } from '../api/contract';
 import { http } from 'viem';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 
-// Create contexts
-export const FactoryContext = createContext();
+export const FactoryContext = createContext(null);
 export const useFactory = () => useContext(FactoryContext);
 
-// Configuration
-const ALCHEMY_RPC = process.env.NEXT_PUBLIC_ALCHEMY_RPC;
-const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+const ALCHEMY_RPC = 'https://rpc.higherrrrrrr.fun/';
+const WALLETCONNECT_PROJECT_ID = 'a893723ca57a205513119f91ba5c09c8';
 
-// Define Base chain with complete configuration
+// Completely override Base chain with our RPC
 const baseChain = {
-  id: 8453,
-  name: 'Base',
-  network: 'base',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
-  },
+  ...base,
   rpcUrls: {
     default: {
       http: [ALCHEMY_RPC],
-      webSocket: [],
+      webSocket: []
     },
     public: {
       http: [ALCHEMY_RPC],
-      webSocket: [],
+      webSocket: []
     },
-  },
-  blockExplorers: {
-    default: { name: 'Basescan', url: 'https://basescan.org' },
-  },
-  contracts: {
-    multicall3: {
-      address: '0xca11bde05977b3631167028862be2a173976ca11',
-      blockCreated: 5022,
-    },
-  },
+    alchemy: {
+      http: [ALCHEMY_RPC],
+      webSocket: []
+    }
+  }
 };
 
 const chains = [baseChain];
 
-const wagmiConfig = createConfig(
-  getDefaultConfig({
-    appName: "Higher",
+// Create config with Rabby support and default connectors
+const wagmiConfig = createConfig({
+  ...getDefaultConfig({
+    appName: "Higherrrrrrr",
     chains,
-    walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
     transports: {
-      [baseChain.id]: http(ALCHEMY_RPC)
-    }
-  })
-);
+      [baseChain.id]: http(ALCHEMY_RPC),
+    },
+    walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
+  }),
+  connectors: [
+    // Filter out any injected connectors from default config
+    ...getDefaultConfig({
+      appName: "Higherrrrrrr",
+      chains,
+      walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
+    }).connectors.filter(connector => 
+     connector.id !== 'injected' && connector.id !== 'rabby'
+    ),
+    // Add our custom Rabby connector
+    new InjectedConnector({
+      chains,
+      options: {
+        name: 'Rabby',
+        getProvider: () => typeof window !== 'undefined' ? window.ethereum : undefined,
+      },
+    }),
+  ],
+});
 
 function Web3ProviderInner({ children }) {
   const [factoryAddress, setFactoryAddress] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    getContractAddress().then(setFactoryAddress);
+    let mounted = true;
+
+    async function init() {
+      try {
+        const { factory_address } = await getContractAddress();
+        console.log('Factory address:', factory_address);
+        
+        if (mounted) {
+          setFactoryAddress(factory_address);
+          setIsInitialized(true);
+        }
+      } catch (error) {
+        console.error('Failed to initialize Web3Provider:', error);
+        if (mounted) {
+          setError(error);
+          setIsInitialized(true); // Still mark as initialized even on error
+        }
+      }
+    }
+
+    init();
+
+    // Cleanup function
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  // Show loading state
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="text-green-500/50 p-4 font-mono">Initializing Web3...</div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="text-red-500 p-4 font-mono">
+          Failed to initialize: {error.message}
+          <button 
+            onClick={() => window.location.reload()}
+            className="ml-2 underline"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Only render children when we have the factory address
+  if (!factoryAddress) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="text-red-500 p-4 font-mono">
+          No factory address found
+          <button 
+            onClick={() => window.location.reload()}
+            className="ml-2 underline"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <FactoryContext.Provider value={factoryAddress}>

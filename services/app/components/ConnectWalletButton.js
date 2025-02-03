@@ -8,18 +8,12 @@ import "@usecapsule/react-sdk/styles.css";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { motion } from "framer-motion";
 import { useAccount, useDisconnect, useEnsName } from "wagmi";
-import { ConnectButton as DefaultConnectButton } from '@rainbow-me/rainbowkit';
 
-// Base button component with consistent styling
+// Button component for consistency
 export function Button({ children, className = "", ...props }) {
   return (
     <button
-      className={`
-        w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono 
-        font-bold rounded transition-all duration-200 whitespace-nowrap text-base
-        flex items-center justify-center
-        ${className}
-      `}
+      className={`min-w-[200px] border border-green-600 hover:bg-green-600 hover:text-black py-2 transition-colors ${className}`}
       {...props}
     >
       {children}
@@ -46,12 +40,12 @@ export function ConnectWalletButton() {
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
-          className="absolute right-0 mt-2 w-[180px] bg-black border border-green-500/20 rounded p-2 z-50"
+          className="absolute right-0 mt-2 min-w-[200px] bg-black border border-green-600 p-2"
         >
           <MenuItem>
             <button
               onClick={() => disconnect()}
-              className="w-full text-left px-2 py-1 hover:bg-green-500/10 text-green-500 font-mono text-sm"
+              className="w-full text-left px-2 py-1 hover:bg-green-800 text-white"
             >
               Disconnect
             </button>
@@ -88,22 +82,5 @@ export function ConnectWalletButton() {
         ]}
       />
     </Menu>
-  );
-}
-
-export function ConnectKitButton() {
-  return (
-    <DefaultConnectButton.Custom>
-      {({ isConnected, show, truncatedAddress, ensName }) => {
-        return (
-          <button
-            onClick={show}
-            className="w-full h-12 px-4 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-all duration-200 whitespace-nowrap text-base flex items-center justify-center"
-          >
-            {isConnected ? (ensName ?? truncatedAddress) : "Connect Wallet"}
-          </button>
-        );
-      }}
-    </DefaultConnectButton.Custom>
   );
 }
