@@ -6,7 +6,7 @@ load_dotenv()
 class Config:
     API_KEY = os.getenv('API_KEY')
     AUTH_TOKEN = os.getenv('AUTH_TOKEN')
-    CONTRACT_ADDRESS = os.getenv('CONTRACT_ADDRESS')
+    CONTRACT_ADDRESS = os.getenv('CONTRACT_ADDRESS', "0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1")
     HIGHLIGHTED_TOKENS = os.getenv('HIGHLIGHTED_TOKENS')
     RPC_URL = os.getenv('RPC_URL', 'https://mainnet.base.org')
     TOKENS_SUBGRAPH_URL = os.getenv('TOKENS_SUBGRAPH_URL', 'https://subgraph.satsuma-prod.com/2ed3e01ead05/carls-team/tokens/version/v0.0.1/api')
