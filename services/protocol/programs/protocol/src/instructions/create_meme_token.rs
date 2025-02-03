@@ -1,5 +1,3 @@
-// File: instructions/create_meme_token.rs
-
 use anchor_lang::prelude::*;
 use anchor_spl::token::{
     self, InitializeMint, MintTo, SetAuthority, AuthorityType, Transfer,
@@ -7,7 +5,7 @@ use anchor_spl::token::{
 use crate::{
     errors::ErrorCode,
     state::{
-        meme_token_state::MemeTokenState,
+        meme_token_state::{MemeTokenState, TokenType},
         evolution_data::{EvolutionData, EvolutionItem},
     },
 };
@@ -37,6 +35,8 @@ pub fn handle(
     symbol: String,
     decimals: u8,
     total_supply: u64,
+    image: String,
+    token_type: TokenType,
     evolutions: Vec<EvolutionItem>,               // evolution thresholds (immutable)
     distributions: Vec<DistributionInstruction>,    // custom distribution instructions
 ) -> Result<()> {
@@ -48,8 +48,10 @@ pub fn handle(
     token_state.symbol = symbol.clone();
     token_state.total_supply = total_supply;
     token_state.decimals = decimals;
+    token_state.image = image;
+    token_state.token_type = token_type;
     // The pool field will be set below if a distribution is flagged as pool.
-
+    
     // --- 2. Initialize the SPL Mint ---
     let cpi_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
@@ -59,7 +61,7 @@ pub fn handle(
         },
     );
     token::initialize_mint(cpi_ctx, decimals, &ctx.accounts.mint_authority.key(), None)?;
-
+    
     // --- 3. Mint the full supply to the temporary recipient account ---
     let raw_amount = total_supply
         .checked_mul(10u64.pow(decimals as u32))
@@ -73,7 +75,7 @@ pub fn handle(
         },
     );
     token::mint_to(cpi_ctx_mint_to, raw_amount)?;
-
+    
     // --- 4. Lock the mint authority ---
     let cpi_ctx_set_auth = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
@@ -83,14 +85,14 @@ pub fn handle(
         },
     );
     token::set_authority(cpi_ctx_set_auth, AuthorityType::MintTokens, None)?;
-
+    
     // --- 5. Initialize EvolutionData (immutable) ---
     let evo_data = &mut ctx.accounts.evolution_data;
     evo_data.owner = *ctx.accounts.creator.key;
     evo_data.evolution_count = evolutions.len() as u8;
     evo_data.evolutions = evolutions;
     msg!("Evolution thresholds set (immutable)");
-
+    
     // --- 6. Validate Distribution Percentages ---
     let pre_mine_percent: u8 = distributions.iter().filter(|d| !d.is_pool).map(|d| d.percentage).sum();
     let pool_percent: u8 = distributions.iter().filter(|d| d.is_pool).map(|d| d.percentage).sum();
@@ -99,7 +101,7 @@ pub fn handle(
         pre_mine_percent == 35 && pool_percent == 65 && pool_count == 1,
         ErrorCode::InvalidDistributionPercentage
     );
-
+    
     // --- 7. Distribute Tokens ---
     // Count how many distributions are NOT for the pool.
     let non_pool_count = distributions.iter().filter(|d| !d.is_pool).count();
@@ -111,7 +113,7 @@ pub fn handle(
     let mut remaining_iter = ctx.remaining_accounts.iter();
     // Hold the pool deposit key here.
     let mut pool_deposit_opt: Option<Pubkey> = None;
-
+    
     // Iterate through each distribution instruction.
     for dist in distributions.iter() {
         // Calculate the allocation.
@@ -165,7 +167,7 @@ pub fn handle(
     // --- 8. Ensure a pool deposit was defined ---
     require!(pool_deposit_opt.is_some(), ErrorCode::Unauthorized);
     token_state.pool = pool_deposit_opt.unwrap();
-
+    
     msg!(
         "Created memecoin {} with symbol {}, total supply locked at {}. Pre-mine distribution is locked at 35% and pool distribution at 65%.",
         name,
@@ -188,7 +190,7 @@ fn initialize_pool<'info>(
     // Example initial price: set the sqrt_price_x96 to represent price 1 (i.e. 1<<96)
     let initial_sqrt_price_x96: u128 = 1 << 96;
     let tick_spacing: u16 = 64; // Example tick spacing; adjust as needed.
-
+    
     // Build the CPI context for pool initialization.
     let cpi_ctx = CpiContext::new(
         ctx.accounts.orca_whirlpools_program.to_account_info(),
@@ -206,11 +208,11 @@ fn initialize_pool<'info>(
             token_program: ctx.accounts.token_program.to_account_info(),
         },
     );
-
+    
     // Call the CPI function to initialize the pool.
     orca_whirlpools_client::cpi::init_pool(cpi_ctx, initial_sqrt_price_x96, tick_spacing)?;
     msg!("Orca pool successfully created via CPI.");
-
+    
     // Return the new pool account's key.
     Ok(ctx.accounts.pool_account.key())
 }
@@ -224,14 +226,16 @@ pub struct CreateMemeToken<'info> {
     #[account(
         init,
         payer = creator,
-        space = 8 +  // discriminator
-               32 + // creator
-               32 + // mint
-               (4 + name.len()) + // name
-               (4 + symbol.len()) + // symbol
-               8 +  // total_supply
-               1 +  // decimals
-               32,  // pool deposit (pool)
+        space = 8 +                // discriminator
+               32 +               // creator
+               32 +               // mint
+               (4 + name.len()) + // name (dynamic)
+               (4 + symbol.len()) + // symbol (dynamic)
+               8 +                // total_supply
+               1 +                // decimals
+               32 +               // pool deposit (pool)
+               (4 + 256) +        // image string (assumed max 256 bytes)
+               1                 // token_type (enum stored as 1 byte)
     )]
     pub meme_token_state: Account<'info, MemeTokenState>,
 
@@ -276,7 +280,7 @@ pub struct CreateMemeToken<'info> {
         payer = creator,
         seeds = [b"evolution_data", mint.key().as_ref()],
         bump,
-        space = 8 + 32 + 1 + 4 + (32 * 10)
+        space = 8 + 32 + 1 + 4 + (420 * 80) // updated size for a maximum of 420 evolutions
     )]
     pub evolution_data: Account<'info, EvolutionData>,
 

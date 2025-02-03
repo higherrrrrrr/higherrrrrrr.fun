@@ -1,3 +1,5 @@
+// programs/protocol/src/instructions/conviction_nfts.rs
+
 use anchor_lang::prelude::*;
 use crate::{
     errors::ErrorCode,
@@ -9,13 +11,9 @@ use crate::{
 use anchor_spl::token::{TokenAccount, Token, MintTo};
 use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token;
+use borsh::BorshDeserialize;
 
-//
-// Updated: Fixed threshold calculation (using denominator 100,000,000)
-//       and implemented a minimal NFT minting routine via CPI to token::mint_to.
-//
-
-// The handler for registering big holders
+/// Handler for registering big holders.
 pub fn handle_register_holder(ctx: Context<RegisterHolder>) -> Result<()> {
     let registry = &mut ctx.accounts.conviction_registry;
     let user_balance = ctx.accounts.user_token_account.amount;
@@ -45,9 +43,11 @@ pub fn handle_register_holder(ctx: Context<RegisterHolder>) -> Result<()> {
     Ok(())
 }
 
-// The handler for distributing NFTs to big holders.
-// NOTE: We now expect that for each holder, two extra accounts are passed in the remaining_accounts:
-//       (1) the NFT mint account and (2) the holder’s NFT token account.
+/// Handler for distributing conviction NFTs. 
+/// For each holder registered in the registry, we expect three extra accounts:
+///   1. Holder’s memecoin token account (to re-check current balance)
+///   2. NFT Mint Account
+///   3. Holder’s NFT Token Account
 pub fn handle_distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>) -> Result<()> {
     let registry = &mut ctx.accounts.conviction_registry;
     let token_state = &ctx.accounts.meme_token_state;
@@ -62,24 +62,38 @@ pub fn handle_distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>)
         .checked_div(100_000_000u128)
         .ok_or(ErrorCode::Overflow)? as u64;
 
-    // Verify that we have two extra accounts for each registered holder.
-    let expected_extra_accounts = registry.holders.len() * 2;
+    // Expect for each holder: 3 extra accounts:
+    // 1. Holder’s memecoin token account (for balance check)
+    // 2. NFT Mint Account
+    // 3. Holder’s NFT Token Account
+    let expected_extra_accounts = registry.holders.len() * 3;
     require!(
         ctx.remaining_accounts.len() as usize == expected_extra_accounts,
-        ErrorCode::InsufficientBalance // (or a custom error saying "Incorrect NFT account count")
+        ErrorCode::InsufficientBalance // Alternatively, you could define a custom error here.
     );
 
-    // Iterate over the holders and mint an NFT for each.
-    // We assume that for each holder, the next two accounts are:
-    //   [NFT Mint Account, Holder's NFT Token Account]
     let mut new_list: Vec<Pubkey> = Vec::new();
     let mut extra_iter = ctx.remaining_accounts.iter();
     for holder_pubkey in &registry.holders {
-        // In a real scenario, you would check the holder's current balance.
-        // Here we assume the holder still qualifies (or use a helper to recheck).
-        // Mint an NFT to the holder
+        // (1) Get the holder’s memecoin token account to verify current balance.
+        let holder_token_account_info = extra_iter.next().unwrap();
+        // (2) Get the NFT mint account.
         let nft_mint_account = extra_iter.next().unwrap();
+        // (3) Get the holder’s NFT token account.
         let holder_nft_token_account = extra_iter.next().unwrap();
+
+        // Deserialize the token account to read the balance.
+        let token_account = anchor_spl::token::TokenAccount::try_deserialize(
+            &mut &holder_token_account_info.data.borrow()[..]
+        ).map_err(|_| ErrorCode::InvalidPriceData)?;
+
+        if token_account.amount < conviction_min {
+            msg!("Holder {} no longer qualifies (balance {} < threshold {}). Skipping NFT mint.", 
+                holder_pubkey, token_account.amount, conviction_min);
+            continue;
+        }
+
+        // Mint the NFT to the qualified holder.
         mint_conviction_nft(ctx, *holder_pubkey, nft_mint_account, holder_nft_token_account)?;
         new_list.push(*holder_pubkey);
     }
@@ -90,22 +104,15 @@ pub fn handle_distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>)
 }
 
 /// A minimal function to mint an NFT to the given holder.
-///
-/// This implementation assumes that:
+/// Assumes:
 /// - The NFT mint account is already created and owned by `ctx.accounts.authority`.
-/// - The caller passed the NFT mint and the holder’s associated token account in the remaining accounts.
 /// - The NFT has 0 decimals and a supply of 1.
-///
-/// In a production implementation you would include the full account creation, initialize the mint,
-/// and call the appropriate Metaplex instructions to set metadata.
 fn mint_conviction_nft(
     ctx: &Context<DistributeConvictionNfts>,
     holder: Pubkey,
     nft_mint: &AccountInfo,
     holder_nft_token_account: &AccountInfo,
 ) -> Result<()> {
-    // Mint 1 NFT (with decimals=0) to the holder’s NFT token account.
-    // We use ctx.accounts.authority as the mint authority.
     let cpi_ctx = CpiContext::new(
         ctx.accounts.token_program.to_account_info(),
         MintTo {
@@ -158,15 +165,14 @@ pub struct DistributeConvictionNfts<'info> {
     #[account(mut)]
     pub meme_token_state: Account<'info, MemeTokenState>,
 
-    // The following accounts must be passed in via remaining_accounts:
-    // For each holder in `conviction_registry.holders`:
-    //   [NFT Mint Account, Holder's NFT Token Account]
+    // The following accounts must be provided in remaining_accounts.
+    // For each holder in `conviction_registry.holders`, provide:
+    //   1. Holder's memecoin token account (for balance check)
+    //   2. NFT Mint Account
+    //   3. Holder's NFT Token Account
     #[account(address = anchor_spl::token::ID)]
     pub token_program: Program<'info, Token>,
 
-    // Also include the system program (if needed for NFT creation) and
-    // the Metaplex token metadata program (if you wish to call metadata CPIs).
-    // (They are not used in this minimal implementation.)
     #[account(address = solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
     #[account(address = mpl_token_metadata::id())]
