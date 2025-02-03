@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 members = [
   "programs/protocol",
 ]
@@ -6,7 +7,3 @@ members = [
 [profile.release]
 lto = true
 overflow-checks = true
-
-[features]
-no-entrypoint = []
-
