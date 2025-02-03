@@ -1,4 +1,3 @@
-```markdown
 # Higherrrrrrr Protocol Full Audit
 
 **Audit Title:** Higherrrrrrr Protocol Full Audit  
@@ -340,4 +339,3 @@ No critical vulnerabilities were identified. The main areas for improvement lie 
 This audit is a best-effort assessment of the **Higherrrrrrr** protocol at the time of review. It does not guarantee the absence of undiscovered vulnerabilities or that the implementation meets all business goals. Always follow best security practices, maintain a bug bounty program, and have a robust monitoring system in production.  
 
 **End of Report**  
-```
