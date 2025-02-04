@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../../onchain';
-import { useContractWrite, useAccount, useBalance, useWaitForTransactionReceipt } from 'wagmi';
+import { useWriteContract, useAccount, useBalance, useWaitForTransactionReceipt } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
 import { higherrrrrrrAbi } from '../../../onchain/generated';
@@ -64,7 +64,6 @@ function TokenPage({ addressProp }) {
 
   const { data: ethBalance } = useBalance({
     address: userAddress,
-    watch: true,
   });
 
   useEffect(() => {
@@ -98,17 +97,9 @@ function TokenPage({ addressProp }) {
     fetchTokenDetails();
   }, [address]);
 
-  const { write: buyToken, data: buyData } = useContractWrite({
-    address: address,
-    abi: higherrrrrrrAbi,
-    functionName: 'buy'
-  });
+  const { writeContract: buyToken, data: buyData } = useWriteContract();
 
-  const { write: sellToken, data: sellData } = useContractWrite({
-    address: address,
-    abi: higherrrrrrrAbi,
-    functionName: 'sell'
-  });
+  const { writeContract: sellToken, data: sellData } = useWriteContract();
 
   const { isLoading: isBuyLoading } = useWaitForTransactionReceipt({
     hash: buyData?.hash,
@@ -257,6 +248,9 @@ function TokenPage({ addressProp }) {
     if (isBuying) {
       if (!amount) return;
       buyToken({
+        address,
+        abi: higherrrrrrrAbi,
+        functionName: 'buy',
         value: ethers.parseEther(amount),
         args: [
           userAddress,
@@ -270,6 +264,9 @@ function TokenPage({ addressProp }) {
     } else {
       if (!amount) return;
       sellToken({
+        address,
+        abi: higherrrrrrrAbi,
+        functionName: 'sell',
         args: [
           parseEther(amount),
           userAddress,

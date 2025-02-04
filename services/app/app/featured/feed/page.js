@@ -1,3 +1,5 @@
+"use client";
+
 // pages/featured/feed.js
 
 import { useState, useEffect } from 'react';

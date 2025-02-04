@@ -1,4 +1,6 @@
-import { useRouter } from 'next/router';
+"use client";
+
+import { useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import featuredProjects from '../../../data/featuredProjects';
 import { FaGlobe, FaTelegramPlane } from 'react-icons/fa';
@@ -39,8 +41,8 @@ function formatCountdown(msLeft) {
 }
 
 export default function FeaturedProjectPage() {
-  const router = useRouter();
-  const { slug } = router.query;
+  const params = useParams();
+  const slug = params.slug;
 
   // Find the matching project
   const project = featuredProjects.find((p) => p.slug === slug);
