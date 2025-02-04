@@ -26,7 +26,9 @@
     "framer-motion": "^10.16.16",
     "js-cookie": "^3.0.5",
     "next": "14.0.4",
+    "node-cron": "^3.0.3",
     "posthog-js": "^1.195.0",
+    "process": "^0.11.10",
     "react": "^18",
     "react-7-segment-display": "^1.1.2",
     "react-dom": "^18",
@@ -38,6 +40,7 @@
   },
   "devDependencies": {
     "@typechain/ethers-v6": "^0.5.1",
+    "@types/node-cron": "^3.0.11",
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",

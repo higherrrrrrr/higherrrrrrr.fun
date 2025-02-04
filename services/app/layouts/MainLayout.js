@@ -52,6 +52,9 @@ export default function MainLayout({ children }) {
               <Link href="/featured/feed" className="text-green-500 hover:text-green-400 transition-colors font-mono">
                 HighLites
               </Link>
+              <Link href="/search" className="text-green-500 hover:text-green-400 transition-colors font-mono">
+                Search
+              </Link>
             </nav>
           </div>
 
@@ -88,6 +91,9 @@ export default function MainLayout({ children }) {
               </Link>
               <Link href="/featured/feed" className="text-green-500 hover:text-green-400 transition-colors font-mono">
                 HighLites
+              </Link>
+              <Link href="/search" className="text-green-500 hover:text-green-400 transition-colors font-mono">
+                Search
               </Link>
             </div>
             <div className="flex items-center gap-2 justify-center w-full">
