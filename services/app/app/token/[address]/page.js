@@ -227,46 +227,84 @@ function TokenPage({ addressProp }) {
     return true;
   }, [amount, quote]);
 
-  const handleTransaction = () => {
+  const handleTransaction = async () => {
     if (!userAddress) {
       setShowAuthFlow(true);
       return;
     }
 
-    setError('');
-    const marketType = tokenState?.marketType || 0;
+    try {
+      setError('');
+      const marketType = tokenState?.marketType || 0;
 
-    if (isBuying) {
-      if (!amount) return;
-      buyToken({
-        address,
-        abi: higherrrrrrrAbi,
-        functionName: 'buy',
-        value: ethers.parseEther(amount),
-        args: [
-          userAddress,
-          userAddress,
-          '',
-          marketType,
-          parseEther(MIN_ETH_AMOUNT),
-          0
-        ]
-      });
-    } else {
-      if (!amount) return;
-      sellToken({
-        address,
-        abi: higherrrrrrrAbi,
-        functionName: 'sell',
-        args: [
-          parseEther(amount),
-          userAddress,
-          '',
-          marketType,
-          parseEther(MIN_ETH_AMOUNT),
-          0
-        ]
-      });
+      if (isBuying) {
+        if (!amount) {
+          setError('Please enter an amount');
+          return;
+        }
+        
+        console.log('Buying with params:', {
+          address,
+          value: amount,
+          args: [
+            userAddress,
+            userAddress,
+            '',
+            marketType,
+            parseEther(MIN_ETH_AMOUNT),
+            0
+          ]
+        });
+
+        await buyToken({
+          address,
+          abi: higherrrrrrrAbi,
+          functionName: 'buy',
+          value: parseEther(amount),
+          args: [
+            userAddress,
+            userAddress,
+            '',
+            marketType,
+            parseEther(MIN_ETH_AMOUNT),
+            0
+          ]
+        });
+      } else {
+        if (!amount) {
+          setError('Please enter an amount');
+          return;
+        }
+
+        console.log('Selling with params:', {
+          address,
+          args: [
+            parseEther(amount),
+            userAddress,
+            '',
+            marketType,
+            parseEther(MIN_ETH_AMOUNT),
+            0
+          ]
+        });
+
+        await sellToken({
+          address,
+          abi: higherrrrrrrAbi,
+          functionName: 'sell',
+          args: [
+            parseEther(amount),
+            userAddress,
+            '',
+            marketType,
+            parseEther(MIN_ETH_AMOUNT),
+            0
+          ]
+        });
+      }
+    } catch (err) {
+      console.error('Transaction error:', err);
+      setError(err.message || 'Transaction failed');
     }
   };
 

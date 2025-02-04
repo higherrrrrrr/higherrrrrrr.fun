@@ -1,4 +1,3 @@
-// components/DynamicConnectButton.jsx
 'use client';
 
 import React, { useState } from 'react';
@@ -6,11 +5,12 @@ import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { DYNAMIC_CONFIG } from '../config/dynamic';
 
 const DynamicConnectButton = ({ className, children }) => {
-  const { handleLogOut, setShowAuthFlow, primaryWallet, user } = useDynamicContext();
+  const { handleLogOut, setShowAuthFlow, primaryWallet } = useDynamicContext();
   const [error, setError] = useState(null);
-  
-  // Use the theme colors from config for consistent styling
-  const defaultClassName = `w-full px-4 py-3 bg-[${DYNAMIC_CONFIG.theme.colors.primary}] hover:bg-[${DYNAMIC_CONFIG.theme.colors.primary}]/80 text-[${DYNAMIC_CONFIG.theme.colors.secondary}] font-mono font-bold rounded transition-colors`;
+
+  // Compact button with thicker border and aligned text
+  const defaultClassName =
+    'px-4 py-2 border-2 border-green-500/20 rounded hover:border-green-500/40 transition-colors hover:bg-green-500/5 text-green-500 font-mono text-sm inline-flex items-center justify-center';
   const buttonClassName = className || defaultClassName;
 
   const handleConnect = async () => {
@@ -18,7 +18,6 @@ const DynamicConnectButton = ({ className, children }) => {
       setError(null);
       setShowAuthFlow(true);
     } catch (err) {
-      console.error('Failed to connect wallet:', err);
       setError('Failed to connect wallet. Please try again.');
     }
   };
@@ -28,7 +27,6 @@ const DynamicConnectButton = ({ className, children }) => {
       setError(null);
       await handleLogOut();
     } catch (err) {
-      console.error('Failed to disconnect wallet:', err);
       setError('Failed to disconnect wallet. Please try again.');
     }
   };
@@ -43,25 +41,14 @@ const DynamicConnectButton = ({ className, children }) => {
 
   if (primaryWallet) {
     return (
-      <button
-        onClick={handleDisconnect}
-        className={buttonClassName}
-      >
-        {children || (
-          <span>
-            {user?.primaryWallet?.address?.slice(0, 6)}...
-            {user?.primaryWallet?.address?.slice(-4)}
-          </span>
-        )}
+      <button onClick={handleDisconnect} className={buttonClassName}>
+        {children || "Disconnect Wallet"}
       </button>
     );
   }
 
   return (
-    <button
-      onClick={handleConnect}
-      className={buttonClassName}
-    >
+    <button onClick={handleConnect} className={buttonClassName}>
       {children || "Connect Wallet"}
     </button>
   );
