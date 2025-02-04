@@ -5,42 +5,34 @@
   "scripts": {
     "dev": "next dev",
     "build": "DISABLE_ESLINT_PLUGIN=true next build",
-    "start": "next start",
-    "generate": "wagmi generate"
+    "start": "next start"
   },
   "dependencies": {
+    "@dynamic-labs/ethereum": "^4.3.0",
+    "@dynamic-labs/sdk-react-core": "^4.3.0",
+    "@dynamic-labs/solana": "^4.3.0",
     "@headlessui/react": "^1.7.17",
-    "@heroicons/react": "^2.2.0",
     "@tailwindcss/typography": "^0.5.15",
-    "@tanstack/react-query": "5.14.2",
-    "@uniswap/sdk-core": "^6.1.0",
-    "@uniswap/v3-core": "^1.0.1",
-    "@uniswap/v3-periphery": "^1.4.4",
-    "@uniswap/v3-sdk": "^3.19.0",
-    "@wagmi/cli": "^2.1.18",
-    "call-bind": "^1.0.8",
-    "clsx": "^2.0.0",
-    "connectkit": "1.5.3",
+    "@tanstack/query-core": "^5.66.0",
+    "@tanstack/react-query": "^5.66.0",
     "date-fns": "^2.30.0",
-    "ethers": "6.9.0",
+    "encoding": "^0.1.13",
+    "ethers": "^6.13.5",
     "framer-motion": "^10.16.16",
+    "isomorphic-unfetch": "^4.0.2",
     "js-cookie": "^3.0.5",
-    "next": "14.0.4",
+    "next": "^15.1.6",
+    "pino-pretty": "^13.0.0",
     "posthog-js": "^1.195.0",
-    "react": "^18",
-    "react-7-segment-display": "^1.1.2",
-    "react-dom": "^18",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
     "react-twitter-widgets": "^1.11.0",
-    "util": "^0.12.5",
-    "viem": "^1.19.11",
-    "wagmi": "1.4.10"
+    "viem": "^2.22.21",
+    "wagmi": "^2.14.9"
   },
   "devDependencies": {
-    "@typechain/ethers-v6": "^0.5.1",
-    "autoprefixer": "^10.0.1",
-    "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "typechain": "^8.3.2"
+    "autoprefixer": "^10.4.20",
+    "tailwindcss": "^3.3.0"
   }
 }

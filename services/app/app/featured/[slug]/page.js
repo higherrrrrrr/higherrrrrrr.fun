@@ -1,10 +1,10 @@
-// pages/featured/[slug].js
+"use client";
 
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
-import featuredProjects from '../../data/featuredProjects';
+import featuredProjects from '../../../data/featuredProjects';
 import { FaGlobe, FaTelegramPlane } from 'react-icons/fa';
-import { GlitchText } from '../../components/GlitchText';
+import { GlitchText } from '../../../components/GlitchText';
 
 /* Simple X (Twitter) icon */
 const XIcon = ({ className }) => (

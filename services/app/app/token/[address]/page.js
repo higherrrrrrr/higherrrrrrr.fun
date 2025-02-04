@@ -1,29 +1,34 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/router';
-import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../onchain';
-import { useContractWrite, useWaitForTransaction, useContractRead, useAccount, useBalance } from 'wagmi';
+import { useParams, useSearchParams } from 'next/navigation';
+import { getTokenState, getProgressToNextLevel, getTokenBalance } from '../../../onchain';
+import { useContractWrite, useAccount, useBalance, useWaitForTransactionReceipt } from 'wagmi';
 import { formatDistanceToNow } from 'date-fns';
 import { parseEther, formatEther } from 'viem';
-import { higherrrrrrrAbi } from '../../onchain/generated';
-import { getEthPrice } from '../../api/price';
-import { getLatestTokens } from '../../api/contract';
+import { higherrrrrrrAbi } from '../../../onchain/generated';
+import { getEthPrice } from '../../../api/price';
 import Link from 'next/link';
-import { ConnectKitButton, useConnectModal } from '../../components/Web3Provider';
-import { getTokenCreator, getToken } from '../../api/token';
-import { getBuyQuote, getSellQuote } from '../../onchain/quotes';
+import DynamicConnectButton from '../../../components/DynamicConnectButton';
+import { getTokenCreator, getToken } from '../../../api/token';
+import { getBuyQuote, getSellQuote } from '../../../onchain/quotes';
 import { ethers } from 'ethers';
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 
 const MAX_SUPPLY = 1_000_000_000; // 1B tokens
 
-export default function TokenPage({ addressProp }) {
-  const router = useRouter();
-  const { openConnectModal } = useConnectModal();
-  const { address: routerAddress } = router.query;
+function TokenPageWrapper({ addressProp }) {
+  return (
+    <TokenPage addressProp={addressProp} />
+  );
+}
+
+function TokenPage({ addressProp }) {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const { showAuthFlow } = useDynamicContext();
   
-  // Use prop address if provided, otherwise use router address
-  const address = addressProp || routerAddress;
+  const address = addressProp || params.address;
   
   const [tokenState, setTokenState] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,13 +42,10 @@ export default function TokenPage({ addressProp }) {
   const [error, setError] = useState('');
   const [userBalance, setUserBalance] = useState('0');
 
-  // Get the user's address
   const { address: userAddress } = useAccount();
 
-  // Add token details state
   const [tokenDetails, setTokenDetails] = useState(null);
 
-  // Add the balance effect
   useEffect(() => {
     const updateBalance = async () => {
       if (userAddress && address) {
@@ -56,12 +58,10 @@ export default function TokenPage({ addressProp }) {
 
     updateBalance();
     
-    // Set up periodic refresh
     const balanceInterval = setInterval(updateBalance, 15000);
     return () => clearInterval(balanceInterval);
   }, [userAddress, address]);
 
-  // Add back ethBalance hook
   const { data: ethBalance } = useBalance({
     address: userAddress,
     watch: true,
@@ -85,7 +85,6 @@ export default function TokenPage({ addressProp }) {
     checkCreator();
   }, [address]);
 
-  // Add effect to fetch token details
   useEffect(() => {
     const fetchTokenDetails = async () => {
       if (!address) return;
@@ -99,37 +98,32 @@ export default function TokenPage({ addressProp }) {
     fetchTokenDetails();
   }, [address]);
 
-  // Buy contract interaction
   const { write: buyToken, data: buyData } = useContractWrite({
     address: address,
     abi: higherrrrrrrAbi,
     functionName: 'buy'
   });
 
-  // Sell contract interaction
   const { write: sellToken, data: sellData } = useContractWrite({
     address: address,
     abi: higherrrrrrrAbi,
     functionName: 'sell'
   });
 
-  // Handle transaction states
-  const { isLoading: isBuyLoading } = useWaitForTransaction({
+  const { isLoading: isBuyLoading } = useWaitForTransactionReceipt({
     hash: buyData?.hash,
     onSuccess: () => {
       refreshTokenState();
-      // Clear trade state
       setAmount('');
       setQuote(null);
       setError('');
     }
   });
 
-  const { isLoading: isSellLoading } = useWaitForTransaction({
+  const { isLoading: isSellLoading } = useWaitForTransactionReceipt({
     hash: sellData?.hash,
     onSuccess: () => {
       refreshTokenState();
-      // Clear trade state
       setAmount('');
       setQuote(null);
       setError('');
@@ -143,7 +137,6 @@ export default function TokenPage({ addressProp }) {
       const state = await getTokenState(address);
       setTokenState(state);
       
-      // Also refresh balance if user is connected
       if (userAddress) {
         const balance = await getTokenBalance(address, userAddress);
         setUserBalance(balance);
@@ -151,10 +144,8 @@ export default function TokenPage({ addressProp }) {
     }
   }
 
-  // Update useEffect to use the new address variable
   useEffect(() => {
     if (address) {
-      // Initial load
       setLoading(true);
       Promise.all([
         refreshTokenState(),
@@ -166,7 +157,6 @@ export default function TokenPage({ addressProp }) {
         .catch(console.error)
         .finally(() => setLoading(false));
 
-      // Set up periodic refresh of token state
       const tokenRefreshTimer = setInterval(() => {
         refreshTokenState().catch(console.error);
       }, 15000);
@@ -175,7 +165,6 @@ export default function TokenPage({ addressProp }) {
     }
   }, [address]);
 
-  // Refresh ETH price periodically
   useEffect(() => {
     const interval = setInterval(() => {
       getEthPrice()
@@ -188,7 +177,6 @@ export default function TokenPage({ addressProp }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Clean up quote effect
   useEffect(() => {
     if (!amount || !address) {
       setQuote(null);
@@ -203,7 +191,6 @@ export default function TokenPage({ addressProp }) {
           const amountWei = ethers.parseEther(amount);
 
           if (isBuying) {
-            // For buys, input is ETH amount, quote will be token amount
             const quoteWei = await getBuyQuote(address, amountWei);
             if (quoteWei === BigInt(0)) {
               if (attempt === MAX_RETRIES) {
@@ -216,9 +203,8 @@ export default function TokenPage({ addressProp }) {
             }
             setQuote(quoteWei);
             setError('');
-            return; // Success - exit retry loop
+            return;
           } else {
-            // For sells, input is token amount, quote will be ETH amount
             const quoteWei = await getSellQuote(address, amountWei);
             if (quoteWei === BigInt(0)) {
               if (attempt === MAX_RETRIES) {
@@ -231,7 +217,7 @@ export default function TokenPage({ addressProp }) {
             }
             setQuote(quoteWei);
             setError('');
-            return; // Success - exit retry loop
+            return;
           }
         } catch (error) {
           if (attempt === MAX_RETRIES) {
@@ -254,27 +240,24 @@ export default function TokenPage({ addressProp }) {
     updateQuote();
   }, [amount, address, isBuying]);
 
-  // Update the isQuoteAvailable check
   const isQuoteAvailable = useMemo(() => {
     if (!amount || !quote) return false;
     return true;
   }, [amount, quote]);
 
-  // Update the transaction handler to use the correct amounts
   const handleTransaction = () => {
     if (!userAddress) {
-      openConnectModal();
+      showAuthFlow();
       return;
     }
 
-    setError(''); // Clear previous errors
+    setError('');
     const marketType = tokenState?.marketType || 0;
 
     if (isBuying) {
-      // For buys: amount is in ETH, use it directly as value
       if (!amount) return;
       buyToken({
-        value: ethers.parseEther(amount), // Use input amount as ETH value
+        value: ethers.parseEther(amount),
         args: [
           userAddress,
           userAddress,
@@ -285,11 +268,10 @@ export default function TokenPage({ addressProp }) {
         ]
       });
     } else {
-      // For sells: amount is in tokens, use it as token amount
       if (!amount) return;
       sellToken({
         args: [
-          parseEther(amount), // Use input amount as token amount
+          parseEther(amount),
           userAddress,
           '',
           marketType,
@@ -300,30 +282,22 @@ export default function TokenPage({ addressProp }) {
     }
   };
 
-  // Define MIN_ETH_AMOUNT as a string instead of bigint
   const MIN_ETH_AMOUNT = "0.0000001";
 
-  // Update handlePercentageClick function
   const handlePercentageClick = (percentage) => {
     if (!userAddress) return;
     
     if (isBuying) {
-      // For buying: calculate percentage of ETH balance
       if (!ethBalance?.formatted) return;
-      // If it's 100% (APE), use 98% instead to leave room for gas
       const actualPercentage = percentage === 1 ? 0.98 : percentage;
       const maxEthToSpend = parseFloat(ethBalance.formatted) * actualPercentage;
-      // For buys, we input ETH amount directly
       setAmount(maxEthToSpend.toFixed(6));
     } else {
-      // For selling: calculate percentage of token balance
-      // For selling we can use full percentage since gas is paid in ETH
       const amount = (parseFloat(userBalance) * percentage).toFixed(6);
       setAmount(amount.toString());
     }
   };
 
-  // Add this helper function at the top with other functions
   async function getTokenBuyQuoteForEth(tokenAddress, ethAmount) {
     try {
       const contract = {
@@ -344,16 +318,13 @@ export default function TokenPage({ addressProp }) {
     }
   }
 
-  // Add this with the other handlers
   const handleAmountChange = (value) => {
-    // Allow empty input
     if (value === '') {
       setAmount('');
       return;
     }
 
-    // Parse the input value
-    const numValue = value.replace(/,/g, ''); // Remove commas
+    const numValue = value.replace(/,/g, '');
     if (isNaN(numValue) || !isFinite(parseFloat(numValue))) {
       return;
     }
@@ -361,12 +332,10 @@ export default function TokenPage({ addressProp }) {
     setAmount(numValue);
   };
 
-  // Add this helper function near the other formatting functions
   const formatTokenAmount = (amount) => {
     const num = parseFloat(amount);
     if (isNaN(num)) return '0';
     
-    // Always use regular decimal notation
     return num.toLocaleString(undefined, {
       minimumFractionDigits: 0,
       maximumFractionDigits: 6,
@@ -375,32 +344,25 @@ export default function TokenPage({ addressProp }) {
     });
   };
 
-  // Add this helper function near the other calculation functions
   const calculateEthForTokenAmount = async (tokenAddress, targetTokens) => {
     try {
       setIsCalculatingNft(true);
       const TARGET = parseEther((targetTokens).toString());
       
-      // First get a sell quote for this amount to approximate the range
       const sellQuote = await getSellQuote(tokenAddress, TARGET);
       if (!sellQuote || sellQuote === BigInt(0)) {
         throw new Error("Could not get initial sell quote");
       }
       
-      // Use sell quote to establish reasonable bounds
-      // Start with ±20% of the sell quote for the search range
-      let low = (sellQuote * BigInt(1)) / BigInt(100);   // 1% of sell quote
-      let high = (sellQuote * BigInt(420)) / BigInt(100); // 420% of sell quote
+      let low = (sellQuote * BigInt(1)) / BigInt(100);
+      let high = (sellQuote * BigInt(420)) / BigInt(100);
       
-      // Binary search with tighter bounds
-      for (let i = 0; i < 20; i++) { // Fewer iterations needed now
+      for (let i = 0; i < 20; i++) {
         const mid = (low + high) / BigInt(2);
         const quote = await getBuyQuote(tokenAddress, mid);
         
-        // If we're within 1% of target, this is good enough
         if (quote > TARGET * BigInt(990) / BigInt(1000) && 
             quote < TARGET * BigInt(1010) / BigInt(1000)) {
-          // Add 5% slippage buffer to final amount
           const withSlippage = (mid * BigInt(105)) / BigInt(100);
           return formatEther(withSlippage);
         }
@@ -420,7 +382,6 @@ export default function TokenPage({ addressProp }) {
     }
   };
 
-  // Add these to your state declarations at the top
   const [isCalculatingNft, setIsCalculatingNft] = useState(false);
 
   if (loading) {
@@ -435,7 +396,6 @@ export default function TokenPage({ addressProp }) {
     return <div className="text-red-500 font-mono">Token not found</div>;
   }
 
-  // Helper function to format USD price with appropriate decimals
   const formatUsdPrice = (price) => {
     if (price < 0.000001) return price.toExponential(2);
     if (price < 0.01) return price.toFixed(6);
@@ -443,7 +403,6 @@ export default function TokenPage({ addressProp }) {
     return price.toFixed(2);
   };
 
-  // Helper function to format market cap
   const formatMarketCap = (cap) => {
     if (cap >= 1_000_000_000) return `$${(cap / 1_000_000_000).toFixed(2)}B`;
     if (cap >= 1_000_000) return `$${(cap / 1_000_000).toFixed(2)}M`;
@@ -451,18 +410,15 @@ export default function TokenPage({ addressProp }) {
     return `$${cap.toFixed(2)}`;
   };
 
-  // Calculate values
   const priceInEth = parseFloat(tokenState.currentPrice);
   const usdPrice = priceInEth * ethPrice;
   const totalSupply = parseFloat(tokenState.totalSupply);
   const marketCapUsd = usdPrice * totalSupply;
 
-  // Update the getCurrentLevelIndex function to use price
   const getCurrentLevelIndex = (tokenState) => {
     if (!tokenState?.priceLevels || !tokenState?.currentPrice) return -1;
     const currentPriceEth = parseFloat(tokenState.currentPrice);
     
-    // Find the highest level where the current price meets or exceeds the level price
     return tokenState.priceLevels.reduce((highestIndex, level, index) => {
       const levelPrice = parseFloat(level.price);
       return currentPriceEth >= levelPrice ? index : highestIndex;
@@ -471,7 +427,6 @@ export default function TokenPage({ addressProp }) {
 
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
-      {/* Ticker Bar */}
       <div className="p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
@@ -494,7 +449,6 @@ export default function TokenPage({ addressProp }) {
               </div>
             </div>
             
-            {/* Grid for stats on mobile, flex on desktop */}
             <div className="grid grid-cols-2 md:flex md:space-x-8 gap-4">
               <div>
                 <div className="text-sm text-green-500/50">Price</div>
@@ -522,10 +476,8 @@ export default function TokenPage({ addressProp }) {
         </div>
       </div>
 
-      {/* Description & Links Section */}
       <div className="max-w-4xl mx-auto px-4 pb-4">
         <div className="flex flex-col gap-4">
-          {/* Social Links */}
           {(tokenDetails?.website || tokenDetails?.twitter || tokenDetails?.telegram || tokenDetails?.warpcast_url) && (
             <div>
               <div className="text-sm text-green-500/50 mb-2">Socials</div>
@@ -591,7 +543,6 @@ export default function TokenPage({ addressProp }) {
             </div>
           )}
 
-          {/* Description */}
           {tokenDetails?.description && (
             <div>
               <div className="text-sm text-green-500/50 mb-2">Description</div>
@@ -601,7 +552,6 @@ export default function TokenPage({ addressProp }) {
             </div>
           )}
 
-          {/* External Links - Always show */}
           <div className="flex flex-wrap gap-2 pt-1">
             <button 
               onClick={() => {
@@ -644,12 +594,9 @@ export default function TokenPage({ addressProp }) {
         </div>
       </div>
 
-      {/* Green divider moved here */}
       <div className="border-b border-green-500/30" />
 
-      {/* Main Content */}
       <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
-        {/* Current Level */}
         <div className="text-center py-12">
           <div className="text-sm text-green-500/50 mb-4">Current Name</div>
           <div className="text-xl md:text-7xl font-bold mb-6 break-words max-w-[90vw] mx-auto">
@@ -660,7 +607,6 @@ export default function TokenPage({ addressProp }) {
           </div>
         </div>
 
-        {/* Progress Bar (only show if on bonding curve and supply < 800M) */}
         {tokenState.marketType === 0 && parseFloat(tokenState.totalSupply) < 800_000_000 && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
@@ -684,7 +630,6 @@ export default function TokenPage({ addressProp }) {
           </div>
         )}
 
-        {/* Level Progress */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Progress to Next Level</span>
@@ -698,10 +643,8 @@ export default function TokenPage({ addressProp }) {
           </div>
         </div>
 
-        {/* Chart Section - Only show for graduated tokens */}
         {tokenState?.marketType === 1 && tokenState?.poolAddress && (
           <div className="relative border border-green-500/30 rounded-lg overflow-hidden">
-            {/* Chart iframe */}
             <iframe
               src={`https://www.geckoterminal.com/base/pools/${tokenState.poolAddress}?embed=1&info=0&swaps=0&chart=1`}
               width="100%"
@@ -717,10 +660,8 @@ export default function TokenPage({ addressProp }) {
           </div>
         )}
 
-        {/* Trading Interface */}
         <div className="border border-green-500/30 rounded-lg p-4 md:p-6 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            {/* Token Trade Header */}
             <div className="flex-shrink-0">
               <h2 className="text-xl font-bold">
                 <div className="flex items-center gap-2">
@@ -732,7 +673,6 @@ export default function TokenPage({ addressProp }) {
               </h2>
             </div>
 
-            {/* Balance Section - Improved layout */}
             <div className="w-full sm:w-auto flex flex-row sm:flex-col items-start sm:items-end justify-between sm:justify-start">
               <div className="text-sm text-green-500/70">Your Balance</div>
               <div>
@@ -753,7 +693,6 @@ export default function TokenPage({ addressProp }) {
               </div>
             </div>
 
-            {/* Buy/Sell Buttons */}
             <div className="w-full sm:w-auto flex space-x-2 justify-end">
               <button
                 onClick={() => {
@@ -784,7 +723,6 @@ export default function TokenPage({ addressProp }) {
             </div>
           </div>
 
-          {/* Amount Input Section */}
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <label className="text-sm text-green-500/70">
@@ -834,12 +772,11 @@ export default function TokenPage({ addressProp }) {
                 APE 🦍
               </button>
               
-              {/* NFT Buy Button */}
               <button
                 onClick={async () => {
                   const ethAmount = await calculateEthForTokenAmount(address, 1_001_001);
                   if (ethAmount) {
-                    setIsBuying(true); // Ensure we're in buy mode
+                    setIsBuying(true);
                     handleAmountChange(ethAmount);
                   }
                 }}
@@ -887,8 +824,8 @@ export default function TokenPage({ addressProp }) {
                   <span>
                     {!isQuoteAvailable ? 'Quote unavailable' : 
                      quote ? (isBuying 
-                       ? `${formatTokenAmount(formatEther(quote))} ${tokenState.symbol}` // For buys, format token amount
-                       : `${parseFloat(formatEther(quote)).toFixed(6)} ETH` // For sells, keep ETH precision
+                       ? `${formatTokenAmount(formatEther(quote))} ${tokenState.symbol}`
+                       : `${parseFloat(formatEther(quote)).toFixed(6)} ETH`
                      ) : '...'}
                   </span>
                 </div>
@@ -900,7 +837,6 @@ export default function TokenPage({ addressProp }) {
                   </span>
                 </div>
                 
-                {/* Add balance warnings */}
                 {isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0') && (
                   <div className="text-red-500 text-sm mt-2 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -925,16 +861,16 @@ export default function TokenPage({ addressProp }) {
             )}
 
             {!userAddress ? (
-              <ConnectKitButton />
+              <DynamicConnectButton />
             ) : (
               <button
                 onClick={handleTransaction}
                 disabled={
                   tokenState.paused || 
                   isLoading || 
-                  !amount || // require amount
-                  (isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0')) || // check ETH balance
-                  (!isBuying && parseFloat(amount) > parseFloat(userBalance)) // check token balance
+                  !amount ||
+                  (isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0')) ||
+                  (!isBuying && parseFloat(amount) > parseFloat(userBalance))
                 }
                 className="w-full px-4 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded transition-colors"
               >
@@ -952,7 +888,6 @@ export default function TokenPage({ addressProp }) {
           </div>
         </div>
 
-        {/* Levels Table */}
         <div className="border border-green-500/30 rounded-lg overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -972,12 +907,10 @@ export default function TokenPage({ addressProp }) {
                 const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
                 const currentPriceEth = parseFloat(tokenState.currentPrice);
                 
-                // Current level is the one where price >= this level's price but < next level's price
                 const nextLevel = tokenState.priceLevels[index + 1];
                 const nextLevelPrice = nextLevel ? parseFloat(nextLevel.price) : Infinity;
                 const isCurrentLevel = currentPriceEth >= parseFloat(level.price) && currentPriceEth < nextLevelPrice;
                 
-                // A level is achieved if the current price is higher than its price
                 const isAchieved = currentPriceEth >= parseFloat(level.price) && !isCurrentLevel;
 
                 return (
@@ -1020,4 +953,6 @@ export default function TokenPage({ addressProp }) {
       </div>
     </div>
   );
-} 
+}
+
+export default TokenPageWrapper; 

@@ -1,6 +1,7 @@
 // pages/index.js
 
-import { useState, useEffect, useRef } from 'react';
+'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getTopTradingTokens, getLatestTokens } from '../api/tokens';
 import { getTokenState } from '../onchain/tokenState';
@@ -139,25 +140,25 @@ export default function Home() {
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const loadingRef = useRef(null);
   const [tokenStates, setTokenStates] = useState({});
-  const [viewMode, setViewMode] = useState('trending'); // 'latest' or 'trending'
-
+  const [viewMode, setViewMode] = useState('trending');
   const [highliteProjects, setHighliteProjects] = useState([]);
 
-  // Intersection Observer for infinite scroll
+  // Replace useRef-based infinite scroll with scroll event listener
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore && !isLoadingFeed) {
+    const handleScroll = () => {
+      if (!hasMore || isLoadingFeed) return;
+
+      const scrolledToBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+
+      if (scrolledToBottom) {
         setPage((prev) => prev + 1);
       }
-    }, { threshold: 0.1 });
+    };
 
-    if (loadingRef.current) {
-      observer.observe(loadingRef.current);
-    }
-
-    return () => observer.disconnect();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMore, isLoadingFeed]);
 
   // Fetch tokens (trending or latest)
@@ -412,9 +413,9 @@ export default function Home() {
                     ))}
               </div>
 
-              {/* Infinite scroll loader */}
+              {/* Update infinite scroll loader - remove ref */}
               {hasMore && (
-                <div ref={loadingRef} className="text-center py-12 text-green-500/50">
+                <div className="text-center py-12 text-green-500/50">
                   {isLoadingFeed ? 'Loading more tokens...' : 'Scroll for more'}
                 </div>
               )}

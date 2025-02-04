@@ -44,3 +44,14 @@
     background-position: -16px -16px;
   }
 }
+
+.dynamic-shadow-dom button.dynamic-connect-button {
+  background-color: #00FF00;
+  color: #000;
+  font-weight: bold;
+  border-radius: 4px;
+}
+.dynamic-shadow-dom button.dynamic-connect-button span {
+  background-color: #fff;
+  padding: 2px 5px;
+}

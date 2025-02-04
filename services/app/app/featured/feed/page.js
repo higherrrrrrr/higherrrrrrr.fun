@@ -1,10 +1,12 @@
+"use client";
+
 // pages/featured/feed.js
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import featuredProjects from '../../data/featuredProjects';
-import { GlitchText } from '../../components/GlitchText';
-import { formatCountdown } from '../../utils/formatters';
+import featuredProjects from '../../../data/featuredProjects';
+import { GlitchText } from '../../../components/GlitchText';
+import { formatCountdown } from '../../../utils/formatters';
 
 /*
   1) Helper function to format the countdown string 

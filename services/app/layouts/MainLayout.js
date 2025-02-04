@@ -1,26 +1,29 @@
-import { useState, useEffect } from 'react';
-import { ConnectKitButton } from '../components/Web3Provider';
-import Link from 'next/link';
-import TVPanel from '../components/TVPanel';
-import TermsModal from '../components/TermsModal';
+"use client";
 
-export default function MainLayout({ children }) {
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import TVPanel from "../components/TVPanel";
+import TermsModal from "../components/TermsModal";
+import DynamicConnectButton from "../components/DynamicConnectButton"; // Import the connect button
+
+const MainLayout = ({ children }) =>  {
   // Determine mobile viewport
   const [isMobile, setIsMobile] = useState(false);
+
   // Read saved TV mode state from localStorage
   const [tvEnabled, setTvEnabled] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('tvEnabled');
-      return stored === null ? false : stored === 'true';
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("tvEnabled");
+      return stored === null ? false : stored === "true";
     }
     return false;
   });
-
+ 
   const toggleTV = () => {
     const newState = !tvEnabled;
     setTvEnabled(newState);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('tvEnabled', newState);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("tvEnabled", newState);
     }
   };
 
@@ -28,8 +31,8 @@ export default function MainLayout({ children }) {
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
@@ -41,15 +44,24 @@ export default function MainLayout({ children }) {
         <header className="sticky top-0 z-50 bg-black border-b border-green-500/30 flex flex-col md:flex-row justify-between items-center p-3 md:p-6 max-w-[1920px] mx-auto w-full gap-4 md:gap-0">
           {/* Left side - Logo and Navigation */}
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-3xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer">
+            <Link
+              href="/"
+              className="text-3xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer"
+            >
               HIGHER⁷
             </Link>
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/how-it-works" className="text-green-500 hover:text-green-400 transition-colors font-mono">
+              <Link
+                href="/how-it-works"
+                className="text-green-500 hover:text-green-400 transition-colors font-mono"
+              >
                 How it Works
               </Link>
-              <Link href="/featured/feed" className="text-green-500 hover:text-green-400 transition-colors font-mono">
+              <Link
+                href="/featured/feed"
+                className="text-green-500 hover:text-green-400 transition-colors font-mono"
+              >
                 HighLites
               </Link>
             </nav>
@@ -64,29 +76,38 @@ export default function MainLayout({ children }) {
                 onClick={toggleTV}
                 className={`
                   px-2 py-1 rounded-full border border-green-500 font-mono text-xs
-                  ${tvEnabled ? 'bg-green-500 text-black' : 'bg-black text-green-500'}
+                  ${tvEnabled ? "bg-green-500 text-black" : "bg-black text-green-500"}
                 `}
               >
-                {tvEnabled ? 'ON' : 'OFF'}
+                {tvEnabled ? "ON" : "OFF"}
               </button>
             </div>
-            <Link href="/launch" className="block">
+            {/* <Link href="/launch" className="block">
               <button className="h-10 px-6 bg-green-500 hover:bg-green-400 text-black font-mono font-bold rounded transition-colors">
                 Create
               </button>
-            </Link>
+            </Link> */}
+
+            {/* -- DYNAMIC CONNECT BUTTON -- */}
+            {/* This replaces the old ConnectKitButton. */}
             <div className="h-10">
-              <ConnectKitButton />
+              <DynamicConnectButton />
             </div>
           </div>
 
           {/* Mobile Navigation */}
           <nav className="flex md:hidden flex-col items-center gap-4 w-full mt-4">
             <div className="flex items-center gap-4 justify-center w-full">
-              <Link href="/how-it-works" className="text-green-500 hover:text-green-400 transition-colors font-mono">
+              <Link
+                href="/how-it-works"
+                className="text-green-500 hover:text-green-400 transition-colors font-mono"
+              >
                 How It Works
               </Link>
-              <Link href="/featured/feed" className="text-green-500 hover:text-green-400 transition-colors font-mono">
+              <Link
+                href="/featured/feed"
+                className="text-green-500 hover:text-green-400 transition-colors font-mono"
+              >
                 HighLites
               </Link>
             </div>
@@ -96,12 +117,12 @@ export default function MainLayout({ children }) {
                 onClick={toggleTV}
                 aria-pressed={tvEnabled}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                  tvEnabled ? 'bg-green-500' : 'bg-gray-600'
+                  tvEnabled ? "bg-green-500" : "bg-gray-600"
                 }`}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-black transition-transform ${
-                    tvEnabled ? 'translate-x-6' : 'translate-x-1'
+                    tvEnabled ? "translate-x-6" : "translate-x-1"
                   }`}
                 />
               </button>
@@ -111,7 +132,7 @@ export default function MainLayout({ children }) {
       )}
 
       {/* MAIN CONTENT */}
-      <main className={`flex-grow relative ${tvEnabled && isMobile ? 'pt-14' : ''}`}>
+      <main className={`flex-grow relative ${tvEnabled && isMobile ? "pt-14" : ""}`}>
         {tvEnabled ? (
           isMobile ? (
             // Mobile TV mode: full viewport TV panel
@@ -135,9 +156,7 @@ export default function MainLayout({ children }) {
           )
         ) : (
           // Normal (non-TV) layout
-          <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">{children}</div>
         )}
       </main>
 
@@ -145,11 +164,12 @@ export default function MainLayout({ children }) {
       {(!tvEnabled || !isMobile) && (
         <footer className="border-t border-green-500/30 mt-auto">
           <div className="max-w-[1920px] mx-auto px-3 md:px-6 py-3 md:py-4">
-            {/* Mobile: Stack vertically, Desktop: Space between */}
             <div className="flex flex-col md:flex-row md:justify-between items-center gap-3 md:gap-0">
-              {/* Links - Full width on mobile, wrap if needed */}
               <div className="flex flex-wrap justify-center md:justify-start gap-4 md:gap-6">
-                <Link href="/plex" className="text-green-500/60 hover:text-green-500 font-mono text-xs">
+                <Link
+                  href="/plex"
+                  className="text-green-500/60 hover:text-green-500 font-mono text-xs"
+                >
                   Plex
                 </Link>
                 <a
@@ -176,11 +196,13 @@ export default function MainLayout({ children }) {
                 >
                   GitHub
                 </a>
-                <Link href="/tos" className="text-green-500/60 hover:text-green-500 font-mono text-xs">
+                <Link
+                  href="/tos"
+                  className="text-green-500/60 hover:text-green-500 font-mono text-xs"
+                >
                   Terms of Service
                 </Link>
               </div>
-              {/* Built on text */}
               <div className="text-green-500/60 font-mono text-xs">
                 Built on <span className="line-through mx-1">Base</span> Solana
               </div>
@@ -190,4 +212,6 @@ export default function MainLayout({ children }) {
       )}
     </div>
   );
-}
+};
+
+export default MainLayout;
