@@ -26,7 +26,7 @@ function TokenPageWrapper({ addressProp }) {
 function TokenPage({ addressProp }) {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { showAuthFlow } = useDynamicContext();
+  const { setShowAuthFlow } = useDynamicContext();
   
   const address = addressProp || params.address;
   
@@ -247,7 +247,7 @@ function TokenPage({ addressProp }) {
 
   const handleTransaction = () => {
     if (!userAddress) {
-      showAuthFlow();
+      setShowAuthFlow(true);
       return;
     }
 

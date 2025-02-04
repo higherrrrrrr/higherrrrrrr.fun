@@ -8,7 +8,7 @@ const ENVIRONMENT_IDS = {
 };
 
 export const DYNAMIC_CONFIG = {
-  environmentId: ENVIRONMENT_IDS[ENV],
+  environmentId: "0b53ea18-7f91-4cb4-ba13-4706021bcedb",
   walletConnectors: [], // We'll import these in the provider
   initialAuthenticationMode: "connect-only",
   networkValidationMode: "always",
@@ -27,8 +27,8 @@ export const DYNAMIC_CONFIG = {
   theme: {
     mode: "dark",
     colors: {
-      primary: "#22c55e",
-      secondary: "#000000",
+      primary: '#000000',
+      secondary: '#FFFFFF',
       text: "#22c55e",
       background: "#000000",
     },
