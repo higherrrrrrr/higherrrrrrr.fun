@@ -1,9 +1,8 @@
 import { base } from 'wagmi/chains';
 
-const ENV = process.env.NEXT_PUBLIC_ENV || 'development';
 
 export const DYNAMIC_CONFIG = {
-  environmentId: ENV === 'production' ? "0b53ea18-7f91-4cb4-ba13-4706021bcedb" : "dev-environment-id",
+  environmentId: "0b53ea18-7f91-4cb4-ba13-4706021bcedb",
   walletConnectors: [], // Wallet connectors will be provided by the provider
   initialAuthenticationMode: "connect-only",
   networkValidationMode: "always",
