@@ -65,8 +65,7 @@ const PoolABI = [
 ] as const;
 
 export async function getTokenState(tokenAddress: string): Promise<TokenState> {
-  console.log('Getting state for token:', tokenAddress);
-  
+
   try {
     // Get token data
     const [name, symbol, totalSupply, currentPrice, maxSupply, marketType, bondingCurve, convictionNFT, 

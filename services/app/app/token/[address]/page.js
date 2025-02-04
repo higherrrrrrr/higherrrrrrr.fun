@@ -76,7 +76,6 @@ function TokenPage({ addressProp }) {
             creatorData.creator.toLowerCase() === userAddress.toLowerCase()
           );
         } catch (error) {
-          console.error('Failed to check creator status:', error);
           setIsCreator(false);
         } 
       }
@@ -91,7 +90,7 @@ function TokenPage({ addressProp }) {
         const details = await getToken(address);
         setTokenDetails(details);
       } catch (error) {
-        console.error('Failed to fetch token details:', error);
+        // Silently fail
       }
     };
     fetchTokenDetails();
@@ -199,7 +198,6 @@ function TokenPage({ addressProp }) {
             const quoteWei = await getSellQuote(address, amountWei);
             if (quoteWei === BigInt(0)) {
               if (attempt === MAX_RETRIES) {
-                console.error('Got zero sell quote after all retries');
                 setQuote(null);
                 setError('Failed to get quote');
                 return;
@@ -212,13 +210,6 @@ function TokenPage({ addressProp }) {
           }
         } catch (error) {
           if (attempt === MAX_RETRIES) {
-            console.error('Error in quote effect after all retries:', {
-              error,
-              address,
-              amount,
-              isBuying,
-              attempt
-            });
             setQuote(null);
             setError('Failed to get quote');
             return;
@@ -310,7 +301,6 @@ function TokenPage({ addressProp }) {
       
       return formatEther(data);
     } catch (error) {
-      console.error('Error getting token buy quote:', error);
       return '0';
     }
   }
@@ -372,7 +362,6 @@ function TokenPage({ addressProp }) {
       }
       throw new Error("Could not converge on exact amount");
     } catch (error) {
-      console.error('Error calculating ETH for tokens:', error);
       return null;
     } finally {
       setIsCalculatingNft(false);

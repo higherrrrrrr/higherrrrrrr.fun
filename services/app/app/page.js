@@ -180,7 +180,6 @@ export default function Home() {
           setHasMore((trendingTokens || []).length > TOKENS_PER_PAGE);
         }
       } catch (error) {
-        console.error(`Failed to fetch ${viewMode} tokens:`, error);
         setTopTokens([]);
         setDisplayedTokens([]);
         setHasMore(false);
@@ -222,7 +221,6 @@ export default function Home() {
               state: { ...state, progress },
             };
           } catch (err) {
-            console.error(`Error fetching state for ${token.address}:`, err);
             return { address: token.address, state: null };
           }
         });
@@ -236,7 +234,7 @@ export default function Home() {
         });
         setTokenStates(states);
       } catch (err) {
-        console.error('Error fetching token states:', err);
+        // Silently fail
       }
     };
     fetchTokenStates();
