@@ -1,7 +1,9 @@
+"use client";
+
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useAccount, useSignMessage } from 'wagmi';
-import { getTokenCreator, getToken, updateToken, upsertToken, generateExampleTweet, connectTwitter, disconnectTwitter } from '../../../api/token';
+import { getTokenCreator, getToken, updateToken, upsertToken, generateExampleTweet, connectTwitter, disconnectTwitter } from '@/api/token';
 import Link from 'next/link';
 import posthog from 'posthog-js'
 import Cookies from 'js-cookie';
