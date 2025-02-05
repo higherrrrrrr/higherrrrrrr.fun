@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use solana_program::program::invoke;
+use anchor_lang::solana_program::program::invoke;
 use crate::{
     errors::ErrorCode,
     state::{
@@ -7,8 +7,8 @@ use crate::{
         meme_token_state::MemeTokenState,
     },
 };
-use mpl_token_metadata::instruction as mpl_instruction;
-use mpl_token_metadata::state::DataV2;
+use mpl_token_metadata::instructions as mpl_instruction;
+use mpl_token_metadata::types::DataV2;
 use anchor_spl::token::Mint;
 
 /// Handler for `set_evolutions` instruction
@@ -133,6 +133,6 @@ pub struct UpdateMemeMetadata<'info> {
     #[account(mut)]
     pub metadata_update_authority: Signer<'info>,
 
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     pub token_metadata_program: AccountInfo<'info>,
 }

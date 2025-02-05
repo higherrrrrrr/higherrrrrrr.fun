@@ -1,25 +1,30 @@
+// programs/protocol/src/instructions/trade_orca.rs
+
+extern crate orca_whirlpools_client;
+extern crate orca_whirlpools_core;
+
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::program::invoke;
 use anchor_spl::token::{self, TokenAccount, Transfer};
 use orca_whirlpools_client::cpi::swap as whirlpools_swap;
 use orca_whirlpools_client::cpi::SwapParams;
 use orca_whirlpools_client::accounts::Swap as WhirlpoolSwapAccounts;
-use mpl_token_metadata::instruction as mpl_instruction;
-use mpl_token_metadata::state::DataV2;
+use mpl_token_metadata::instructions as mpl_instruction;
+use mpl_token_metadata::types::DataV2;
 use crate::state::{
     meme_token_state::MemeTokenState,
     evolution_data::EvolutionData,
 };
 use orca_whirlpools_core::state::Whirlpool;
 
-/// Executes a swap via Orca Whirlpools Client and triggers metadata evolution if thresholds are crossed
+/// Executes a swap via Orca Whirlpools Client and then (if applicable) triggers metadata evolution.
 pub fn handle_trade_via_orca(
     ctx: Context<TradeViaOrca>,
     amount_in: u64,
     min_out: u64,
-    _unused_current_price: u64, // no longer used externally
+    _unused_current_price: u64, // not used externally
 ) -> Result<()> {
-    // --- 1. Perform swap via Orca Whirlpools Client ---
+    // --- 1. Build the CPI context for the swap ---
     let whirlpool_swap_accounts = WhirlpoolSwapAccounts {
         whirlpool: ctx.accounts.whirlpool.to_account_info(),
         token_vault_a: ctx.accounts.orca_pool_token_a.to_account_info(),
@@ -34,21 +39,21 @@ pub fn handle_trade_via_orca(
         whirlpool_swap_accounts,
     );
 
+    // --- 2. Set swap parameters ---
+    // Note: We include a new field `sqrt_price_limit` (set here to 1<<96, representing a default "no-limit" price)
     let swap_params = SwapParams {
         amount: amount_in,
         other_amount_threshold: min_out,
+        sqrt_price_limit: Some(1u128 << 96),
     };
 
+    // --- 3. Perform the swap ---
     whirlpools_swap(cpi_ctx, swap_params)?;
     msg!("Called Orca Whirlpools swap with {} tokens (min_out: {})", amount_in, min_out);
 
-    // --- 2. Note on fee handling ---
-    msg!("LP fees are now being accumulated in the Orca pool fee account. Use the fee distribution instruction to split these fees.");
-
-    // --- 3. Get current price from the pool and trigger evolution ---
+    // --- 4. Retrieve the current price and trigger evolution (if needed) ---
     let current_price = get_current_price(&ctx.accounts.whirlpool)?;
     msg!("Decoded current price: {}", current_price);
-    // Pass the preserved symbol from meme_token_state.
     trigger_evolution(
         &ctx.accounts.evolution_data,
         &ctx.accounts.metadata,
@@ -61,9 +66,9 @@ pub fn handle_trade_via_orca(
     Ok(())
 }
 
-/// Uses Orca Whirlpools Core to decode the pool state and compute the current price.
-/// The Whirlpool account stores sqrt_price_x96 as a Q64.96 fixed-point number.
-/// Price = (sqrt_price_x96^2) / 2^192.
+/// Decodes the current price from the Whirlpool account.
+/// The Whirlpool account stores sqrt_price_x96 as a Q64.96 fixed‑point number.
+/// Price is calculated as (sqrt_price_x96^2) >> 192.
 fn get_current_price(whirlpool: &AccountInfo) -> Result<u64> {
     let whirlpool_state = Whirlpool::try_from_slice(&whirlpool.data.borrow())
         .map_err(|_| crate::errors::ErrorCode::InvalidPriceData)?;
@@ -75,7 +80,8 @@ fn get_current_price(whirlpool: &AccountInfo) -> Result<u64> {
     Ok(price as u64)
 }
 
-/// Checks evolution data against the current price and, if a threshold is met, updates token metadata via a CPI call.
+/// Checks the evolution data against the current price and, if a threshold is crossed,
+/// updates the token metadata via a Metaplex CPI call.
 fn trigger_evolution<'info>(
     evolution_data: &Account<EvolutionData>,
     metadata: &AccountInfo<'info>,
@@ -88,6 +94,7 @@ fn trigger_evolution<'info>(
     let mut chosen_uri: Option<String> = None;
     let mut highest_threshold: u64 = 0;
 
+    // Iterate through evolution thresholds to determine the highest threshold passed.
     for item in &evolution_data.evolutions {
         if current_price >= item.price_threshold && item.price_threshold >= highest_threshold {
             chosen_name = Some(item.new_name.clone());
@@ -104,6 +111,7 @@ fn trigger_evolution<'info>(
     let final_name = chosen_name.unwrap();
     let final_uri = chosen_uri.unwrap();
 
+    // Build the Metaplex update instruction.
     let ix = mpl_instruction::update_metadata_accounts_v2(
         *token_metadata_program.key,
         metadata.key(),
@@ -111,7 +119,7 @@ fn trigger_evolution<'info>(
         None,
         Some(DataV2 {
             name: final_name.clone(),
-            symbol: original_symbol, // Preserve the original symbol.
+            symbol: original_symbol, // preserve the original symbol
             uri: final_uri.clone(),
             seller_fee_basis_points: 0,
             creators: None,
@@ -127,13 +135,17 @@ fn trigger_evolution<'info>(
         metadata_update_authority.to_account_info().clone(),
     ];
     invoke(&ix, &accounts)?;
-    msg!("Updated metadata to evolution '{}' at threshold {}", final_name, highest_threshold);
+    msg!(
+        "Updated metadata to evolution '{}' at threshold {}",
+        final_name,
+        highest_threshold
+    );
 
     Ok(())
 }
 
-/// Simulated CPI call to the Orca program to add single-sided liquidity.
-/// In production, replace this with an actual call to the Orca Whirlpools “increase liquidity” instruction.
+/// (Simulated) CPI call to add single-sided liquidity.
+/// In production, replace this with an actual CPI call to the Orca Whirlpools increase liquidity instruction.
 pub fn handle_create_single_sided_liquidity(
     ctx: Context<CreateSingleSidedLiquidity>,
     amount: u64,
@@ -147,13 +159,12 @@ pub fn handle_create_single_sided_liquidity(
         },
     );
     token::transfer(transfer_ctx, amount)?;
-    msg!("Transferred {} tokens from the creator to the Orca pool token vault.", amount);
-    msg!("Calling Orca program to add single-sided liquidity (simulated)...");
-    msg!("Single-sided liquidity successfully added.");
+    msg!("Transferred {} tokens to the Orca pool token vault.", amount);
+    msg!("Simulated call to add single-sided liquidity.");
     Ok(())
 }
 
-// -------------------- Contexts --------------------
+// -------------------- Context Definitions --------------------
 
 #[derive(Accounts)]
 pub struct TradeViaOrca<'info> {
@@ -161,7 +172,7 @@ pub struct TradeViaOrca<'info> {
     #[account(mut)]
     pub user: Signer<'info>,
 
-    /// The user's token account holding tokens to be swapped.
+    /// The user's token account from which tokens will be swapped.
     #[account(mut)]
     pub user_in_token_account: AccountInfo<'info>,
     /// (Optional) The user's token account to receive swapped tokens.
@@ -188,19 +199,19 @@ pub struct TradeViaOrca<'info> {
     /// The token metadata account.
     #[account(mut)]
     pub metadata: AccountInfo<'info>,
-    /// The authority that can update metadata.
+    /// The authority allowed to update metadata.
     #[account(mut)]
     pub metadata_update_authority: Signer<'info>,
 
-    /// The Whirlpool (pool deposit) account.
+    /// The Whirlpool account.
     #[account(mut)]
     pub whirlpool: AccountInfo<'info>,
 
-    /// The protocol SOL vault to accumulate SOL fees.
+    /// The protocol SOL vault (accumulates SOL fees).
     #[account(mut)]
     pub protocol_sol_vault: AccountInfo<'info>,
 
-    /// The creator's token vault to accumulate token fees.
+    /// The creator's token vault (accumulates token fees).
     #[account(mut)]
     pub creator_token_vault: AccountInfo<'info>,
 

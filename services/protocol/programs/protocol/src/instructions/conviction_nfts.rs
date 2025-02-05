@@ -183,8 +183,8 @@ pub struct DistributeConvictionNfts<'info> {
     #[account(address = anchor_spl::token::ID)]
     pub token_program: Program<'info, Token>,
 
-    #[account(address = solana_program::system_program::ID)]
+    #[account(address = anchor_lang::solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
-    #[account(address = mpl_token_metadata::id())]
+    #[account(address = mpl_token_metadata::ID)]
     pub token_metadata_program: AccountInfo<'info>,
 }

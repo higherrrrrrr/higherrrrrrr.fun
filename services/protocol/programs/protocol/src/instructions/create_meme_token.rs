@@ -1,7 +1,11 @@
+extern crate orca_whirlpools_client;
+extern crate orca_whirlpools_core;
+
 use anchor_lang::prelude::*;
 use anchor_spl::token::{
-    self, InitializeMint, MintTo, SetAuthority, AuthorityType, Transfer,
+    self, InitializeMint, MintTo, SetAuthority, Transfer,
 };
+use spl_token::instruction::AuthorityType;
 use crate::{
     errors::ErrorCode,
     state::{

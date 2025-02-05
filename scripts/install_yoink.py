@@ -113,13 +113,16 @@ def run_file_mode(max_file_tokens):
             for line in out.splitlines():
                 fname = line.decode("utf-8", "ignore").strip()
                 if fname and not fname.startswith("."):
+                    # Ignore files in Rust build directories (target/)
+                    if "target" in fname.split(os.sep):
+                        continue
                     files.append(fname)
         except Exception:
             pass
     else:
         for root, dirs, fs in os.walk("."):
-            if any(p.startswith(".") for p in root.split(os.sep) if p != "."):
-                continue
+            # Skip hidden directories and Rust 'target' directories.
+            dirs[:] = [d for d in dirs if not d.startswith(".") and d != "target"]
             for f in fs:
                 if f.startswith("."):
                     continue
