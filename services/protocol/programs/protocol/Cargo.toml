@@ -8,7 +8,10 @@ crate-type = ["cdylib", "lib"]
 
 [dependencies]
 anchor-lang = "0.30.1"
-anchor-spl  = "0.30.1"
-orca_whirlpools_core = "0.1"   
-orca_whirlpools_client = "0.1"  
-mpl-token-metadata = "1.9.9"
+anchor-spl = "0.30.1"
+mpl-token-metadata = "5.1.0"
+orca_whirlpools_client = "1.0.3"
+orca_whirlpools_core = "0.1"
+
+[patch.crates-io]
+getrandom = { version = "0.2.3", default-features = false }

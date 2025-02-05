@@ -123,7 +123,7 @@ pub struct InitFeeVault<'info> {
     #[account(mut)]
     pub lp_token_vault: AccountInfo<'info>,
 
-    #[account(address = solana_program::system_program::ID)]
+    #[account(address = anchor_lang::solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 
     #[account(address = anchor_spl::token::ID)]
@@ -144,7 +144,7 @@ pub struct WithdrawProtocolSol<'info> {
     #[account(mut)]
     pub recipient_account: AccountInfo<'info>,
 
-    #[account(address = solana_program::system_program::ID)]
+    #[account(address = anchor_lang::solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 }
 
@@ -184,6 +184,6 @@ pub struct DistributeLPFees<'info> {
     #[account(mut, address = fee_vault.creator_sol_vault)]
     pub creator_sol_vault: AccountInfo<'info>,
 
-    #[account(address = solana_program::system_program::ID)]
+    #[account(address = anchor_lang::solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 }
