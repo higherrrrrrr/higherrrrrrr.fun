@@ -1,11 +1,13 @@
+// components/DynamicConnectButton.js
+
 'use client';
 
 import React, { useState } from 'react';
-import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
+import { useDynamicContext, DynamicUserProfile } from '@dynamic-labs/sdk-react-core';
 import { DYNAMIC_CONFIG } from '../config/dynamic';
 
 const DynamicConnectButton = ({ className, children }) => {
-  const { handleLogOut, setShowAuthFlow, primaryWallet } = useDynamicContext();
+  const { setShowAuthFlow, primaryWallet, setShowDynamicUserProfile } = useDynamicContext();
   const [error, setError] = useState(null);
 
   // Compact button with thicker border and aligned text
@@ -22,13 +24,8 @@ const DynamicConnectButton = ({ className, children }) => {
     }
   };
 
-  const handleDisconnect = async () => {
-    try {
-      setError(null);
-      await handleLogOut();
-    } catch (err) {
-      setError('Failed to disconnect wallet. Please try again.');
-    }
+  const handleAccountButtonClick = () => {
+    setShowDynamicUserProfile(true);
   };
 
   if (error) {
@@ -39,18 +36,22 @@ const DynamicConnectButton = ({ className, children }) => {
     );
   }
 
-  if (primaryWallet) {
-    return (
-      <button onClick={handleDisconnect} className={buttonClassName}>
-        {children || "Disconnect Wallet"}
-      </button>
-    );
-  }
+  const buttonText = children || (primaryWallet 
+    ? (primaryWallet.address 
+      ? `${primaryWallet.address.substring(0, 6)}...${primaryWallet.address.substring(primaryWallet.address.length - 4)}`
+      : "Account")
+    : "Connect Wallet");
 
   return (
-    <button onClick={handleConnect} className={buttonClassName}>
-      {children || "Connect Wallet"}
-    </button>
+    <>
+      <button 
+        onClick={primaryWallet ? handleAccountButtonClick : handleConnect} 
+        className={buttonClassName}
+      >
+        {buttonText}
+      </button>
+      <DynamicUserProfile />
+    </>
   );
 };
 

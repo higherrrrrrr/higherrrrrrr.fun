@@ -8,6 +8,7 @@ const DynamicProvider = ({ children }) => {
     <DynamicContextProvider
       settings={{
         ...DYNAMIC_CONFIG,
+        theme: 'dark', 
         walletConnectors: [
           EthereumWalletConnectors,
           SolanaWalletConnectors,
