@@ -29,7 +29,9 @@
     "react-icons": "^5.4.0",
     "react-twitter-widgets": "^1.11.0",
     "viem": "^2.22.21",
-    "wagmi": "^2.14.9"
+    "wagmi": "^2.14.9",
+    "bufferutil": "^4.0.7",
+    "utf-8-validate": "^5.0.10"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

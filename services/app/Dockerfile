@@ -1,6 +1,13 @@
+# Build stage
 FROM node:18-alpine AS builder
 
-# Set working directory
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    libc6-compat
+
 WORKDIR /app
 
 # Install dependencies first (better caching)
@@ -18,8 +25,8 @@ ENV DISABLE_ESLINT_PLUGIN true
 # Build the app
 RUN yarn build
 
-# Production image
-FROM node:18-alpine
+# Production stage
+FROM node:18-alpine AS runner
 
 WORKDIR /app
 
