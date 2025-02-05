@@ -11,8 +11,7 @@ export const CURRENT_RPC_URL = typeof window !== 'undefined' &&
   : RPC_URLS.production;
 
 export const getCurrentRpcUrl = () => {
-  const chain = getCurrentChain();
-  return chain.id === 31337 ? RPC_URLS.development : RPC_URLS.production;
+  return CURRENT_RPC_URL;
 };
 
 // Add Uniswap V3 Quoter contract address

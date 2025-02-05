@@ -1,10 +1,10 @@
-// pages/featured/[slug].js
+"use client";
 
-import { useRouter } from 'next/router';
+import { useParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import featuredProjects from '../../data/featuredProjects';
+import featuredProjects from '../../../data/featuredProjects';
 import { FaGlobe, FaTelegramPlane } from 'react-icons/fa';
-import { GlitchText } from '../../components/GlitchText';
+import { GlitchText } from '../../../components/GlitchText';
 
 /* Simple X (Twitter) icon */
 const XIcon = ({ className }) => (
@@ -32,17 +32,17 @@ function formatCountdown(msLeft) {
   return (
     <span className="group relative inline-block">
       {timeStr}
-      <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-10">
+      <span className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-10">
         Launch times may be adjusted by project creators based on market conditions. Changes by the Higherrrrrrr team will be clearly communicated.
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black border-r border-b border-green-500/30 rotate-45"></div>
-      </div>
+        <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black border-r border-b border-green-500/30 rotate-45"></span>
+      </span>
     </span>
   );
 }
 
 export default function FeaturedProjectPage() {
-  const router = useRouter();
-  const { slug } = router.query;
+  const params = useParams();
+  const slug = params.slug;
 
   // Find the matching project
   const project = featuredProjects.find((p) => p.slug === slug);

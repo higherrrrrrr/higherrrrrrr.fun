@@ -40,14 +40,6 @@ export default function TokenCard({ token, tokenState, isLoading }) {
         const currentIndex = tokenState.priceLevels.findIndex(level => level.name === tokenState.name);
         const currentState = tokenState.priceLevels[currentIndex];
         const nextState = tokenState.priceLevels[currentIndex + 1];
-        
-        console.log('State Info:', {
-          currentName: tokenState.name,
-          currentIndex,
-          currentState,
-          nextState,
-          allLevels: tokenState.priceLevels
-        });
 
         setStateInfo({
           current: currentState?.name || tokenState.name,
@@ -68,23 +60,9 @@ export default function TokenCard({ token, tokenState, isLoading }) {
       const priceInEth = parseFloat(tokenState.currentPrice);
       const ethPriceData = await getEthPrice();
       
-      console.log('Market Cap Calculation:', {
-        currentPrice: tokenState.currentPrice,
-        priceInEth,
-        ethPriceData,
-        totalSupply: tokenState.totalSupply,
-        totalSupplyParsed: parseFloat(tokenState.totalSupply)
-      });
-
       const usdPrice = priceInEth * ethPriceData.price_usd;
       const totalSupply = parseFloat(tokenState.totalSupply);
       const marketCapUsd = usdPrice * totalSupply;
-
-      console.log('Final values:', {
-        usdPrice,
-        totalSupply,
-        marketCapUsd
-      });
       
       if (isNaN(marketCapUsd)) {
         return '0';
@@ -92,7 +70,6 @@ export default function TokenCard({ token, tokenState, isLoading }) {
       
       return Math.floor(marketCapUsd).toLocaleString();
     } catch (error) {
-      console.error('Error calculating market cap:', error);
       return '0';
     }
   };
