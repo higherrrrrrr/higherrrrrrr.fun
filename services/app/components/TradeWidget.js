@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
 import { parseEther, formatEther } from 'viem';
 import { higherrrrrrrAbi } from '../onchain/generated';
 import { getBuyQuote, getSellQuote } from '../onchain/quotes';
@@ -29,26 +29,54 @@ export default function TradeWidget({
   
   const { data: ethBalance } = useBalance({
     address: userAddress,
-    chainId: wagmiBase?.id,
+    chainId: wagmiBase.id,
     enabled: !!userAddress,
   });
 
   console.log('ethBalance', ethBalance);
 
-  const { 
-    writeContract: buyToken, 
-    data: buyHash, 
-    isError: isBuyError, 
-    error: buyError,
-    estimateGas: estimateBuyGas 
-  } = useWriteContract({
-    chainId: wagmiBase?.id,
-  });
-  const { writeContract: sellToken, data: sellHash, isError: isSellError, error: sellError } = useWriteContract({
-    chainId: wagmiBase?.id,
-  });
+  useEffect(() => {
+    if (ethBalance) {
+      console.log('ETH Balance Details:', {
+        formatted: ethBalance.formatted,
+        value: ethBalance.value.toString(),
+        symbol: ethBalance.symbol,
+        chainId: chain?.id,
+        expectedChainId: wagmiBase.id,
+        userAddress,
+        isBaseChain: chain?.id === wagmiBase.id
+      });
+    }
+  }, [ethBalance, chain, userAddress]);
 
-  const { isLoading: isBuyLoading } = useWaitForTransactionReceipt({
+  useEffect(() => {
+    if (chain) {
+      console.log('Current Chain:', {
+        id: chain.id,
+        name: chain.name,
+        isBase: chain.id === wagmiBase.id,
+        baseChainId: wagmiBase.id
+      });
+    }
+  }, [chain]);
+
+  const { 
+    writeContract: buyToken,
+    data: buyHash,
+    isPending: isBuyPending,
+    error: buyError,
+    isError: isBuyError
+  } = useWriteContract();
+
+  const { 
+    writeContract: sellToken,
+    data: sellHash,
+    isPending: isSellPending,
+    error: sellError,
+    isError: isSellError
+  } = useWriteContract();
+
+  const { isLoading: isBuyLoading, isSuccess: isBuySuccess } = useWaitForTransactionReceipt({
     hash: buyHash,
     chainId: wagmiBase?.id,
     onSuccess: () => {
@@ -59,7 +87,7 @@ export default function TradeWidget({
     }
   });
 
-  const { isLoading: isSellLoading } = useWaitForTransactionReceipt({
+  const { isLoading: isSellLoading, isSuccess: isSellSuccess } = useWaitForTransactionReceipt({
     hash: sellHash,
     chainId: wagmiBase?.id,
     onSuccess: () => {
@@ -70,7 +98,7 @@ export default function TradeWidget({
     }
   });
 
-  const isLoading = isBuyLoading || isSellLoading;
+  const isLoading = isBuyLoading || isSellLoading || isBuyPending || isSellPending;
 
   useEffect(() => {
     if (chain && wagmiBase && chain.id !== wagmiBase.id) {
@@ -79,6 +107,8 @@ export default function TradeWidget({
       setError('');
     }
   }, [chain]);
+
+  const { switchChain } = useSwitchChain();
 
   const handlePercentageClick = (percentage) => {
     if (!userAddress) return;
@@ -163,9 +193,16 @@ export default function TradeWidget({
       return;
     }
 
+    // Check and switch chain if needed
     if (chain && wagmiBase && chain.id !== wagmiBase.id) {
-      setError('Please switch to Base network');
-      return;
+      try {
+        await switchChain({ chainId: wagmiBase.id });
+        return; // Return here as the chain switch will trigger a re-render
+      } catch (err) {
+        console.error('Failed to switch chain:', err);
+        setError('Failed to switch to Base network. Please switch manually.');
+        return;
+      }
     }
 
     try {
@@ -176,10 +213,11 @@ export default function TradeWidget({
         if (!amount) return;
 
         try {
-          const result = await buyToken({
+          const config = {
             address,
             abi: higherrrrrrrAbi,
             functionName: 'buy',
+            chainId: wagmiBase.id,
             value: parseEther(amount),
             args: [
               userAddress,
@@ -189,17 +227,24 @@ export default function TradeWidget({
               parseEther(MIN_ETH_AMOUNT),
               0
             ]
+          };
+
+          console.log('Transaction Config:', {
+            ...config,
+            value: config.value.toString(),
+            userBalance: ethBalance?.value.toString(),
+            chain: chain?.id,
+            targetChain: wagmiBase.id
           });
-          
-          if (!result) {
-            setError('Transaction failed - no hash returned');
-            return;
-          }
+
+          buyToken(config);
 
         } catch (err) {
           console.error('Buy transaction error:', err);
           if (err.code === 'ACTION_REJECTED') {
             setError('Transaction rejected by user');
+          } else if (err.message?.includes('insufficient funds')) {
+            setError(`Insufficient balance for transaction. Required: ${err.message.match(/want (\d+)/)?.[1] || 'unknown'}, Have: ${ethBalance?.value.toString() || '0'}`);
           } else {
             setError(err.message || 'Buy transaction failed');
           }
@@ -208,7 +253,7 @@ export default function TradeWidget({
         if (!amount) return;
 
         try {
-          const result = await sellToken({
+          const config = {
             address,
             abi: higherrrrrrrAbi,
             functionName: 'sell',
@@ -220,13 +265,9 @@ export default function TradeWidget({
               parseEther(MIN_ETH_AMOUNT),
               0
             ]
-          });
+          };
 
-          if (!result) {
-            console.error('No transaction hash returned');
-            setError('Transaction failed - no hash returned');
-            return;
-          }
+          sellToken(config);
 
         } catch (err) {
           console.error('Sell transaction error:', err);
@@ -511,7 +552,11 @@ export default function TradeWidget({
 
         {!userAddress ? (
           <div className="space-y-4">
-            <DynamicConnectButton />
+            <div className="flex justify-center">
+              <DynamicConnectButton 
+                className="w-full max-w-[300px] px-6 py-3 border-2 border-green-500/20 rounded hover:border-green-500/40 transition-colors hover:bg-green-500/5 text-green-500 font-mono text-sm inline-flex items-center justify-center"
+              />
+            </div>
             <div className="text-sm text-center text-green-500/50">
               Connect your wallet to trade
             </div>

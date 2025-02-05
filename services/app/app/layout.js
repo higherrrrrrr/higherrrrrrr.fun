@@ -13,24 +13,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
 import ClientOnly from "../components/ClientOnly";
 
-// Update the Base chain configuration with custom RPC
-const baseChain = {
-  ...base,
-  rpcUrls: {
-    ...base.rpcUrls,
-    default: {
-      http: ['https://rpc.higherrrrrr.fun'],
-    },
-    public: {
-      http: ['https://rpc.higherrrrrr.fun'],
-    },
-  },
-};
-
 const config = createConfig({
-  chains: [baseChain],
+  chains: [base],
   transports: {
-    [baseChain.id]: http('https://rpc.higherrrrrr.fun'),
+    [base.id]: http("https://base-mainnet.g.alchemy.com/v2/jFjopZDrbRnD8hRKINkO7BOwW9YH9iLD"),
   },
 });
 
