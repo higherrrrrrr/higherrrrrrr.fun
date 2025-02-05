@@ -72,7 +72,7 @@ export default function RootLayout({ children }) {
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://higherrrrrrr.fun/" />
         <meta property="twitter:title" content="HIGHER⁷" />
-        <meta property="twitter:description" content="Trade on higherrrrrrr.fun - the future of social trading" />
+        <meta property="twitter:description" content="Trade on higherrrrrrr.fun - The most fun way to trade on Solana" />
         <meta property="twitter:image" content="https://higherrrrrrr.fun/social-preview.png" />
       </head>
       <body>
