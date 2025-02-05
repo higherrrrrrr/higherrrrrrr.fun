@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import DynamicProvider from "../components/DynamicProvider";
 import TVPanel from "../components/TVPanel";
-import TermsModal from "../components/TermsModal";
 import DynamicConnectButton from "../components/DynamicConnectButton";
 import { WagmiProvider, createConfig } from 'wagmi';
 import { base } from 'wagmi/chains';
@@ -64,7 +63,6 @@ export default function RootLayout({ children }) {
             <QueryClientProvider client={queryClient}>
               <DynamicProvider>
                 <div className="min-h-screen bg-black flex flex-col relative">
-                  <TermsModal />
 
                   {/* HEADER: Render when TV mode is off or on desktop */}
                   {(!tvEnabled || !isMobile) && (

@@ -7,6 +7,7 @@ export const DYNAMIC_CONFIG = {
     mode: "dark",
   },
   walletConnectors: [], // Wallet connectors will be provided by the provider
+  termsOfServiceUrl: "https://higherrrrrrr.fun/tos",
   initialAuthenticationMode: "connect-only",
   networkValidationMode: "always",
   walletConnectPreferredChains: [`eip155:${base.id}`],

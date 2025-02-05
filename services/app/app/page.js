@@ -13,15 +13,6 @@ import { formatCountdown } from '../utils/formatters';
 
 // Constants
 const TOKENS_PER_PAGE = 24;
-
-/*
-  1) Glitch effect for "SOLANA LAUNCH IN"
-*/
-
-/*
-  2) "Snake" traveling line border
-     A single neon line travels around the edge of each card in a loop.
-*/
 const snakeStyles = `
   .snake-border {
     position: relative;
