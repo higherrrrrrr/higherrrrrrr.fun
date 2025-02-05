@@ -54,8 +54,26 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <title>higherrrrrrr.fun</title>
-        <link rel="icon" href="/icon.svg" />
+        <link rel="icon" href="/icon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+        {/* Primary Meta Tags */}
+        <meta name="title" content="HIGHER⁷" />
+        <meta name="description" content="Trade on higherrrrrrr.fun - The most fun way to trade on Solana" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://higherrrrrrr.fun/" />
+        <meta property="og:title" content="HIGHER⁷" />
+        <meta property="og:description" content="Trade on higherrrrrrr.fun - The most fun way to trade on Solana" />
+        <meta property="og:image" content="https://higherrrrrrr.fun/social-preview.png" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://higherrrrrrr.fun/" />
+        <meta property="twitter:title" content="HIGHER⁷" />
+        <meta property="twitter:description" content="Trade on higherrrrrrr.fun - The most fun way to trade on Solana" />
+        <meta property="twitter:image" content="https://higherrrrrrr.fun/social-preview.png" />
       </head>
       <body>
         <ClientOnly>
@@ -64,71 +82,18 @@ export default function RootLayout({ children }) {
               <DynamicProvider>
                 <div className="min-h-screen bg-black flex flex-col relative">
 
-                  {/* HEADER: Render when TV mode is off or on desktop */}
-                  {(!tvEnabled || !isMobile) && (
-                    <header className="sticky top-0 z-50 bg-black border-b border-green-500/30 flex flex-col md:flex-row justify-between items-center p-3 md:p-6 max-w-[1920px] mx-auto w-full gap-4 md:gap-0">
-                      {/* Left side - Logo and Navigation */}
-                      <div className="flex items-center gap-6">
+                  {/* HEADER: Modified mobile header for TV mode */}
+                  {isMobile && tvEnabled ? (
+                    <>
+                      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-green-500/30 flex justify-between items-center px-4 py-3">
                         <Link
                           href="/"
-                          className="text-3xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer"
+                          className="flex items-center gap-2 text-2xl font-mono font-bold text-green-500"
                         >
+                          <img src="/icon.png" alt="Higher Logo" className="w-6 h-6" />
                           HIGHER⁷
                         </Link>
-                        {/* Desktop Navigation */}
-                        <nav className="hidden md:flex items-center gap-6">
-                          <Link
-                            href="/how-it-works"
-                            className="text-green-500 hover:text-green-400 transition-colors font-mono"
-                          >
-                            How it Works
-                          </Link>
-                          <Link
-                            href="/featured/feed"
-                            className="text-green-500 hover:text-green-400 transition-colors font-mono"
-                          >
-                            HighLites
-                          </Link>
-                        </nav>
-                      </div>
-
-                      {/* Right side - Actions */}
-                      <div className="flex gap-3 md:gap-4 items-center">
-                        {/* Desktop TV Toggle */}
-                        <div className="hidden md:flex items-center gap-2">
-                          <span className="text-green-500 font-mono">TV</span>
-                          <button
-                            onClick={toggleTV}
-                            className={`
-                              px-2 py-1 rounded-full border border-green-500 font-mono text-xs
-                              ${tvEnabled ? "bg-green-500 text-black" : "bg-black text-green-500"}
-                            `}
-                          >
-                            {tvEnabled ? "ON" : "OFF"}
-                          </button>
-                        </div>
-                        <div className="h-10">
-                          <DynamicConnectButton />
-                        </div>
-                      </div>
-
-                      {/* Mobile Navigation */}
-                      <nav className="flex md:hidden flex-col items-center gap-4 w-full mt-4">
-                        <div className="flex items-center gap-4 justify-center w-full">
-                          <Link
-                            href="/how-it-works"
-                            className="text-green-500 hover:text-green-400 transition-colors font-mono"
-                          >
-                            How It Works
-                          </Link>
-                          <Link
-                            href="/featured/feed"
-                            className="text-green-500 hover:text-green-400 transition-colors font-mono"
-                          >
-                            HighLites
-                          </Link>
-                        </div>
-                        <div className="flex items-center gap-2 justify-center w-full">
+                        <div className="flex items-center gap-2">
                           <span className="text-sm text-green-500/70 font-mono">TV</span>
                           <button
                             onClick={toggleTV}
@@ -144,16 +109,116 @@ export default function RootLayout({ children }) {
                             />
                           </button>
                         </div>
-                      </nav>
-                    </header>
+                      </header>
+                      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-t border-green-500/30">
+                        <div className="px-4 py-3">
+                          <div className="flex justify-between items-center">
+                            <div className="text-green-500/60 font-mono text-xs">
+                              Built on <span className="line-through mx-1">Base</span> Solana
+                            </div>
+                            <Link
+                              href="/plex"
+                              className="text-green-500/60 hover:text-green-500 font-mono text-xs"
+                            >
+                              Plex
+                            </Link>
+                          </div>
+                        </div>
+                      </footer>
+                    </>
+                  ) : (
+                    // Original header for non-TV mode or desktop
+                    (!tvEnabled || !isMobile) && (
+                      <header className="sticky top-0 z-50 bg-black border-b border-green-500/30 flex flex-col md:flex-row justify-between items-center p-3 md:p-6 max-w-[1920px] mx-auto w-full gap-4 md:gap-0">
+                        {/* Left side - Logo and Navigation */}
+                        <div className="flex items-center gap-6">
+                          <Link
+                            href="/"
+                            className="flex items-center gap-2 text-3xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer"
+                          >
+                            <img src="/icon.png" alt="Higher Logo" className="w-8 h-8" />
+                            HIGHER⁷
+                          </Link>
+                          {/* Desktop Navigation */}
+                          <nav className="hidden md:flex items-center gap-6">
+                            <Link
+                              href="/how-it-works"
+                              className="text-green-500 hover:text-green-400 transition-colors font-mono"
+                            >
+                              How it Works
+                            </Link>
+                            <Link
+                              href="/featured/feed"
+                              className="text-green-500 hover:text-green-400 transition-colors font-mono"
+                            >
+                              HighLites
+                            </Link>
+                          </nav>
+                        </div>
+
+                        {/* Right side - Actions */}
+                        <div className="flex gap-3 md:gap-4 items-center">
+                          {/* Desktop TV Toggle */}
+                          <div className="hidden md:flex items-center gap-2">
+                            <span className="text-green-500 font-mono">TV</span>
+                            <button
+                              onClick={toggleTV}
+                              className={`
+                                px-2 py-1 rounded-full border border-green-500 font-mono text-xs
+                                ${tvEnabled ? "bg-green-500 text-black" : "bg-black text-green-500"}
+                              `}
+                            >
+                              {tvEnabled ? "ON" : "OFF"}
+                            </button>
+                          </div>
+                          <div className="h-10">
+                            <DynamicConnectButton />
+                          </div>
+                        </div>
+
+                        {/* Mobile Navigation */}
+                        <nav className="flex md:hidden flex-col items-center gap-4 w-full mt-4">
+                          <div className="flex items-center gap-4 justify-center w-full">
+                            <Link
+                              href="/how-it-works"
+                              className="text-green-500 hover:text-green-400 transition-colors font-mono"
+                            >
+                              How It Works
+                            </Link>
+                            <Link
+                              href="/featured/feed"
+                              className="text-green-500 hover:text-green-400 transition-colors font-mono"
+                            >
+                              HighLites
+                            </Link>
+                          </div>
+                          <div className="flex items-center gap-2 justify-center w-full">
+                            <span className="text-sm text-green-500/70 font-mono">TV</span>
+                            <button
+                              onClick={toggleTV}
+                              aria-pressed={tvEnabled}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                                tvEnabled ? "bg-green-500" : "bg-gray-600"
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-black transition-transform ${
+                                  tvEnabled ? "translate-x-6" : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        </nav>
+                      </header>
+                    )
                   )}
 
                   {/* MAIN CONTENT */}
-                  <main className={`flex-grow relative ${tvEnabled && isMobile ? "pt-14" : ""}`}>
+                  <main className={`flex-grow relative ${tvEnabled && isMobile ? "pt-12 pb-12" : ""}`}>
                     {tvEnabled ? (
                       isMobile ? (
-                        // Mobile TV mode: full viewport TV panel
-                        <div className="fixed inset-0 z-0">
+                        // Mobile TV mode: full viewport TV panel with padding for header/footer
+                        <div className="fixed inset-x-0 top-12 bottom-12 z-0">
                           <TVPanel className="w-full h-full" />
                         </div>
                       ) : (
