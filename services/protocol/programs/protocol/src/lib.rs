@@ -75,18 +75,14 @@ pub mod protocol {
     }
 
     // -------------------- Step 4: Trading & Single-Sided Liquidity --------------------
+    /// (This instruction still handles swapping via Orca / Meteora trade instructions.)
     pub fn trade_via_orca(
         ctx: Context<TradeViaOrca>,
         amount_in: u64,
         min_out: u64,
         current_price: u64,
     ) -> Result<()> {
-        instructions::trade_orca::handle_trade_via_orca(
-            ctx,
-            amount_in,
-            min_out,
-            current_price,
-        )
+        instructions::trade_orca::handle_trade_via_orca(ctx, amount_in, min_out, current_price)
     }
 
     pub fn create_single_sided_liquidity(
@@ -112,18 +108,19 @@ pub mod protocol {
 
     pub fn withdraw_protocol_sol(
         ctx: Context<WithdrawProtocolSol>,
-        amount: u64
+        amount: u64,
     ) -> Result<()> {
         instructions::fee_distribution::handle_withdraw_protocol_sol(ctx, amount)
     }
 
     pub fn withdraw_creator_tokens(
         ctx: Context<WithdrawCreatorTokens>,
-        amount: u64
+        amount: u64,
     ) -> Result<()> {
         instructions::fee_distribution::handle_withdraw_creator_tokens(ctx, amount)
     }
-    /// Distributes aggregated LP fees from the Orca pool fee account evenly.
+
+    /// Distributes aggregated LP fees from the fee account evenly.
     pub fn distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
         instructions::fee_distribution::handle_distribute_lp_fees(ctx)
     }
