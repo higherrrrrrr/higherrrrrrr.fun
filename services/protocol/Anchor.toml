@@ -17,4 +17,4 @@ url = "https://anchor.projectserum.com"
 test = "anchor test"
 
 [toolchain]
-anchor_version = "0.28.0"
+anchor_version = "0.30.1"
