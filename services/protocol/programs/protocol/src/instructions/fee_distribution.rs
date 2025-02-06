@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Token, Transfer};
 use crate::{
     errors::ErrorCode,
-    state::fee_vault::FeeVault
+    state::fee_vault::FeeVault,
 };
 
 /// Initialize the FeeVault with references to protocol and creator vaults.
@@ -20,7 +20,7 @@ pub fn handle_init_fee_vault(ctx: Context<InitFeeVault>) -> Result<()> {
 /// Allows the protocol to withdraw SOL fees from its vault.
 pub fn handle_withdraw_protocol_sol(
     ctx: Context<WithdrawProtocolSol>,
-    amount: u64
+    amount: u64,
 ) -> Result<()> {
     let fee_vault = &ctx.accounts.fee_vault;
     require_keys_eq!(
@@ -45,7 +45,7 @@ pub fn handle_withdraw_protocol_sol(
 /// Allows the creator to withdraw token fees.
 pub fn handle_withdraw_creator_tokens(
     ctx: Context<WithdrawCreatorTokens>,
-    amount: u64
+    amount: u64,
 ) -> Result<()> {
     let fee_vault = &ctx.accounts.fee_vault;
     require_keys_eq!(
@@ -67,9 +67,10 @@ pub fn handle_withdraw_creator_tokens(
     Ok(())
 }
 
-/// Distributes the aggregated LP fees from the Orca pool fee account evenly between the protocol and the creator.
+/// Distributes the aggregated LP fees from the Meteora pool fee account between the protocol and the creator.
+/// Instead of a 50/50 split, we now use a 60/40 split so that the protocol receives 60% and the creator 40%.
 pub fn handle_distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
-    // FIX: Verify that the LP fee account provided matches the one stored in FeeVault.
+    // Verify that the LP fee account provided matches the one stored in FeeVault.
     require!(
         ctx.accounts.lp_fee_account.key() == ctx.accounts.fee_vault.lp_token_vault,
         ErrorCode::InvalidLPFeeAccount
@@ -78,18 +79,22 @@ pub fn handle_distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
     let total_fees = **ctx.accounts.lp_fee_account.lamports.borrow();
     require!(total_fees > 0, ErrorCode::InsufficientBalance);
 
-    let half = total_fees / 2;
-    let protocol_share = total_fees - half;
+    // Compute protocol share as 60% of total and creator share as the remainder (40%).
+    let protocol_share = total_fees
+        .checked_mul(60)
+        .and_then(|v| v.checked_div(100))
+        .ok_or(ErrorCode::Overflow)?;
+    let creator_share = total_fees - protocol_share;
 
-    // Safely drain the LP fee account after verifying its identity.
+    // Drain the LP fee account.
     **ctx.accounts.lp_fee_account.lamports.borrow_mut() = 0;
-    **ctx.accounts.creator_sol_vault.lamports.borrow_mut() += half;
     **ctx.accounts.protocol_sol_vault.lamports.borrow_mut() += protocol_share;
+    **ctx.accounts.creator_sol_vault.lamports.borrow_mut() += creator_share;
 
     msg!(
-        "Distributed LP fees: {} lamports to creator, {} lamports to protocol",
-        half,
-        protocol_share
+        "Distributed LP fees: {} lamports to protocol, {} lamports to creator",
+        protocol_share,
+        creator_share
     );
     Ok(())
 }
@@ -172,7 +177,7 @@ pub struct DistributeLPFees<'info> {
     #[account(mut)]
     pub fee_vault: Account<'info, FeeVault>,
 
-    /// The Orca pool fee account holding aggregated LP fees (SOL).
+    /// The Meteora pool fee account holding aggregated LP fees (SOL).
     #[account(mut)]
     pub lp_fee_account: AccountInfo<'info>,
 

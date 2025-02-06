@@ -26,7 +26,7 @@ pub struct DistributionInstruction {
 /// 3. Distributes the minted supply according to a custom distribution:
 ///    - For each distribution _not_ flagged as pool, tokens are transferred to the provided recipient account.
 ///    - The non–LP distributions must total at most 35% of the supply.
-///    - The remaining tokens (i.e. LP allocation = 100 – non–LP) are assigned to the liquidity pool.
+///    - The remaining tokens (i.e. LP allocation = 100 – non–LP) are assigned to the liquidity pool.
 ///    - If a pool distribution is provided, its percentage must equal the computed LP allocation.
 /// 4. Locks the mint authority.
 pub fn handle(
@@ -100,25 +100,19 @@ pub fn handle(
         .filter(|d| !d.is_pool)
         .map(|d| d.percentage)
         .sum();
-
-    // Ensure non–LP distributions do not exceed 35%.
     require!(
         non_pool_percent <= 35,
         ErrorCode::InvalidDistributionPercentage
     );
-
     // Compute the LP (pool) percentage as the remaining percentage.
     let computed_pool_percent = 100 - non_pool_percent;
-
     // Check if a pool distribution instruction was provided.
     let pool_instructions: Vec<&DistributionInstruction> =
         distributions.iter().filter(|d| d.is_pool).collect();
-
     // Allow at most one pool distribution.
     if pool_instructions.len() > 1 {
         return Err(ErrorCode::InvalidDistributionPercentage.into());
     }
-
     // If a pool instruction exists, its percentage must equal the computed LP percentage.
     if pool_instructions.len() == 1 {
         require!(
@@ -135,7 +129,6 @@ pub fn handle(
         ErrorCode::InsufficientBalance
     );
     let mut remaining_iter = ctx.remaining_accounts.iter();
-
     for dist in distributions.iter().filter(|d| !d.is_pool) {
         // Calculate allocation for this non–LP distribution.
         let allocation = raw_amount
@@ -164,13 +157,13 @@ pub fn handle(
             recipient_account.key
         );
     }
-
+    
     // Process the LP distribution.
     let pool_allocation = raw_amount
         .checked_mul(computed_pool_percent as u64)
         .and_then(|v| v.checked_div(100))
         .ok_or(ErrorCode::Overflow)?;
-
+    
     // Whether or not a pool instruction was provided, we need to initialize the pool and transfer tokens.
     if let Some(pool_dist) = distributions.iter().find(|d| d.is_pool) {
         // Use the provided pool instruction.
@@ -221,11 +214,7 @@ pub fn handle(
     Ok(())
 }
 
-/// **initialize_pool**
-///
-/// Calls Orca’s CPI to create a new concentrated liquidity pool for the token and wSOL pair.
-/// This function uses the additional accounts provided in the CreateMemeToken context.
-/// For demonstration purposes, it calls the CPI function from orca_whirlpools_client.
+/// initialize_pool using the dynamic_amm CPI (Meteora) to create a new liquidity pool and deposit liquidity correctly.
 fn initialize_pool<'info>(
     ctx: &Context<CreateMemeToken>,
     _allocation: u64,
@@ -234,14 +223,14 @@ fn initialize_pool<'info>(
     let initial_sqrt_price_x96: u128 = 1 << 96;
     let tick_spacing: u16 = 64; // Example tick spacing; adjust as needed.
     
-    // Build the CPI context for pool initialization.
+    // Build the CPI context for pool initialization using dynamic_amm.
     let cpi_ctx = CpiContext::new(
-        ctx.accounts.orca_whirlpools_program.to_account_info(),
-        orca_whirlpools_client::accounts::InitPool {
+        ctx.accounts.dynamic_amm_program.to_account_info(),
+        dynamic_amm::accounts::InitPool {
             pool: ctx.accounts.pool_account.to_account_info(),
             pool_authority: ctx.accounts.pool_authority.to_account_info(),
-            token_vault_a: ctx.accounts.pool_vault.to_account_info(), // our token vault (A side)
-            token_vault_b: ctx.accounts.token_vault_b.to_account_info(), // SOL side vault
+            token_vault_a: ctx.accounts.pool_vault.to_account_info(), // our token vault (A side) for memecoin tokens
+            token_vault_b: ctx.accounts.token_vault_b.to_account_info(), // vault for SOL/wSOL
             fee_account: ctx.accounts.fee_account.to_account_info(),
             token_mint_a: ctx.accounts.mint.to_account_info(),       // memecoin mint
             token_mint_b: ctx.accounts.wsol_mint.to_account_info(),     // wSOL mint
@@ -252,9 +241,9 @@ fn initialize_pool<'info>(
         },
     );
     
-    // Call the CPI function to initialize the pool.
-    orca_whirlpools_client::cpi::init_pool(cpi_ctx, initial_sqrt_price_x96, tick_spacing)?;
-    msg!("Orca pool successfully created via CPI.");
+    // Call the dynamic_amm CPI to initialize the pool.
+    dynamic_amm::cpi::init_pool(cpi_ctx, initial_sqrt_price_x96, tick_spacing)?;
+    msg!("Meteora liquidity pool successfully created via CPI.");
     
     // Return the new pool account's key.
     Ok(ctx.accounts.pool_account.key())
@@ -297,7 +286,7 @@ pub struct CreateMemeToken<'info> {
     #[account(mut)]
     pub pool_vault: AccountInfo<'info>,
 
-    /// The Orca pool account to be created via CPI.
+    /// The liquidity pool account to be created via CPI.
     #[account(mut)]
     pub pool_account: AccountInfo<'info>,
 
@@ -305,7 +294,7 @@ pub struct CreateMemeToken<'info> {
     #[account(mut)]
     pub pool_authority: AccountInfo<'info>,
 
-    /// The token vault for the SOL (B side) of the pool.
+    /// The token vault for the SOL (or wSOL) side of the pool.
     #[account(mut)]
     pub token_vault_b: AccountInfo<'info>,
 
@@ -323,7 +312,7 @@ pub struct CreateMemeToken<'info> {
         payer = creator,
         seeds = [b"evolution_data", mint.key().as_ref()],
         bump,
-        space = 8 + 32 + 1 + 4 + (420 * 80) // updated size for a maximum of 420 evolutions
+        space = 8 + 32 + 1 + 4 + (420 * 80)
     )]
     pub evolution_data: Account<'info, EvolutionData>,
 
@@ -335,7 +324,7 @@ pub struct CreateMemeToken<'info> {
     #[account(address = system_program::ID)]
     pub system_program: Program<'info, System>,
 
-    /// The Orca Whirlpools program (for CPI calls).
-    #[account(address = orca_whirlpools_client::ID)]
-    pub orca_whirlpools_program: AccountInfo<'info>,
+    /// The dynamic AMM program (Meteora) for liquidity pool creation.
+    #[account(address = dynamic_amm::ID)]
+    pub dynamic_amm_program: AccountInfo<'info>,
 }
