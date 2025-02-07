@@ -11,6 +11,7 @@ import { base } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
 import ClientOnly from "../components/ClientOnly";
+import Script from 'next/script';
 
 const config = createConfig({
   chains: [base],
@@ -74,6 +75,12 @@ export default function RootLayout({ children }) {
         <meta property="twitter:title" content="HIGHER⁷" />
         <meta property="twitter:description" content="Trade on higherrrrrrr.fun - The most fun way to trade on Solana" />
         <meta property="twitter:image" content="https://higherrrrrrr.fun/social-preview.png" />
+        
+        {/* Load Twitch script once, at the layout level */}
+        <Script 
+          src="https://embed.twitch.tv/embed/v1.js"
+          strategy="beforeInteractive"
+        />
       </head>
       <body>
         <ClientOnly>
