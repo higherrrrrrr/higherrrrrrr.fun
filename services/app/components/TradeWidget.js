@@ -5,11 +5,24 @@ import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt,
 import { parseEther, formatEther } from 'viem';
 import { higherrrrrrrAbi } from '../onchain/generated';
 import { getBuyQuote, getSellQuote } from '../onchain/quotes';
-import DynamicConnectButton from './DynamicConnectButton';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
+import DynamicConnectButton from './DynamicConnectButton';
 import { base as wagmiBase } from 'wagmi/chains';
+import { formatUsdPrice } from '../utils/format';
 
 const MIN_ETH_AMOUNT = "0.0000001";
+
+function formatTokenAmount(amount) {
+  const num = parseFloat(amount);
+  if (isNaN(num)) return '0';
+  if (num >= 1000000) {
+    return `${(num / 1000000).toFixed(2)}M`;
+  }
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(2)}K`;
+  }
+  return parseFloat(num.toFixed(6)).toString();
+}
 
 export default function TradeWidget({ 
   tokenState, 
@@ -136,18 +149,6 @@ export default function TradeWidget({
     }
 
     setAmount(numValue);
-  };
-
-  const formatTokenAmount = (amount) => {
-    const num = parseFloat(amount);
-    if (isNaN(num)) return '0';
-    
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 6,
-      useGrouping: true,
-      notation: 'standard'
-    });
   };
 
   const calculateEthForTokenAmount = async (tokenAddress, targetTokens) => {
