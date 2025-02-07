@@ -356,7 +356,7 @@ export default function Home() {
         {/* Base Tokens => trending or latest */}
         <div className="w-full pt-8">
           <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Base Tokens</h2>
+            <h2 className="text-3xl font-bold mb-8">Base Tokens [Trade Only]</h2>
             <div>
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-2xl font-bold">

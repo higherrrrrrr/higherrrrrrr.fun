@@ -285,8 +285,12 @@ export default function RootLayout({ children }) {
                               Terms of Service
                             </Link>
                           </div>
-                          <div className="text-green-500/60 font-mono text-xs">
-                            Built on <span className="line-through mx-1">Base</span> Solana
+                          <div className="flex items-center">
+                            <img 
+                              src="/powered-by.svg" 
+                              alt="Powered by Solana" 
+                              className="h-6 opacity-60 hover:opacity-100 transition-opacity"
+                            />
                           </div>
                         </div>
                       </div>
