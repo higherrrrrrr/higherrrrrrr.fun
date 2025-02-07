@@ -291,6 +291,12 @@ export default function RootLayout({ children }) {
                             >
                               Terms of Service
                             </Link>
+                            <Link
+                              href="/base"
+                              className="text-green-500/60 hover:text-green-500 font-mono text-xs"
+                            >
+                              Base Tokens
+                            </Link>
                           </div>
                           <div className="flex items-center">
                             <img 
