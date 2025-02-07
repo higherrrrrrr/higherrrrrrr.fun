@@ -15,3 +15,6 @@ url = "https://anchor.projectserum.com"
 
 [scripts]
 test = "anchor test"
+
+[toolchain]
+anchor_version = "0.30.1"

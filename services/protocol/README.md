@@ -2,7 +2,62 @@
 
 > **Higherrrrrrr** – Where cults meet on-chain engineering!
 
-This project is a Solana program built with Anchor. It implements a meme token with evolving metadata, conviction NFT rewards, unique fee mechanics, and more. Follow these instructions to reset your environment, install all prerequisites, and get started with development.
+This project is a Solana program built with Anchor. It implements a meme token with evolving metadata, conviction NFT rewards, unique fee mechanics, and more. Follow these instructions to set up your development environment from scratch.
+
+---
+
+## Quick Start (Fresh Install)
+
+If you're starting from scratch with no previous Solana/Anchor installations:
+
+1. **Install Rust:**
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+   source "$HOME/.cargo/env"
+   ```
+
+2. **Install Solana CLI:**
+   ```bash
+   sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+   ```
+   Add to your shell profile (e.g. ~/.zshrc or ~/.bashrc):
+   ```bash
+   export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+   ```
+   Then reload your shell:
+   ```bash
+   source ~/.zshrc  # or source ~/.bashrc
+   ```
+
+3. **Install Anchor via AVM:**
+   ```bash
+   cargo install --git https://github.com/coral-xyz/anchor avm --force
+   avm install latest
+   avm use latest
+   ```
+
+4. **Fix Build Command Compatibility:**
+   ```bash
+   sudo ln -s $(which cargo-build-sbf) /usr/local/bin/cargo-build-bpf
+   ```
+
+5. **Verify Installation:**
+   ```bash
+   rustc --version
+   solana --version
+   anchor --version
+   ```
+
+Now you're ready to build the project! Run:
+```bash
+anchor build
+```
+
+---
+
+## Detailed Setup Guide
+
+If you need more details or run into issues, see the sections below.
 
 ---
 
@@ -10,6 +65,7 @@ This project is a Solana program built with Anchor. It implements a meme token w
 
 - [Prerequisites](#prerequisites)
 - [Resetting Your Environment](#resetting-your-environment)
+  - [Complete System Reset](#complete-system-reset)
   - [Resetting Rust](#resetting-rust)
   - [Clearing Node Modules](#clearing-node-modules)
 - [Installation](#installation)
@@ -33,6 +89,37 @@ This project is a Solana program built with Anchor. It implements a meme token w
 ---
 
 ## Resetting Your Environment
+
+### Complete System Reset
+
+For a completely fresh start, follow these steps:
+
+1. **Remove Solana Configuration and Binaries:**
+
+   ```bash
+   # Remove Solana CLI configuration
+   rm -rf ~/.config/solana
+
+   # Remove Solana cache
+   rm -rf ~/.cache/solana
+
+   # Remove Solana installation directory
+   rm -rf ~/.local/share/solana
+   ```
+
+2. **Remove Anchor and AVM Files:**
+
+   ```bash
+   # Remove Anchor cache/config
+   rm -rf ~/.anchor
+
+   # Remove AVM's stored versions
+   rm -rf ~/.avm
+
+   # Uninstall Anchor CLI and AVM if installed via Cargo
+   cargo uninstall anchor-cli
+   cargo uninstall avm
+   ```
 
 ### Resetting Rust
 
@@ -76,7 +163,7 @@ Rust is required for writing Solana programs. The recommended installation metho
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
    ```
 
-2. Reload your shell’s environment:
+2. Reload your shell's environment:
 
    ```bash
    . "$HOME/.cargo/env"
@@ -159,6 +246,28 @@ The Anchor Version Manager (AVM) lets you manage multiple Anchor versions easily
 
 *If you encounter errors regarding dependency versions (e.g. with the `time` crate), see the troubleshooting section below.*
 
+### Fix Build Command Compatibility
+
+If you encounter the error `no such command: 'build-bpf'`, create a symlink to fix the build-sbf/build-bpf compatibility:
+
+1. **Find the cargo-build-sbf path:**
+
+   ```bash
+   which cargo-build-sbf
+   ```
+
+2. **Create the symlink:**
+
+   ```bash
+   sudo ln -s $(which cargo-build-sbf) /usr/local/bin/cargo-build-bpf
+   ```
+
+3. **Verify the symlink:**
+
+   ```bash
+   ls -l /usr/local/bin/cargo-build-bpf
+   ```
+
 ---
 
 ## Building the Project
@@ -222,42 +331,6 @@ The project includes integration tests written in TypeScript.
   solana-keygen new
   ```
 
-- **Deploying the Program:** When you’re ready to deploy to your local cluster, run:
-
-  ```bash
-  anchor deploy
-  ```
-
-- **Troubleshooting Dependency Issues:**  
-  If you encounter errors such as:
+- **Deploying the Program:** When you're ready to deploy to your local cluster, run:
 
   ```
-  error[E0282]: type annotations needed for `Box<_>`
-  ```
-  
-  This is due to an outdated dependency version (e.g. the `time` crate). To fix this when installing via AVM, you may need to:
-  
-  1. Clone the Anchor repo locally,
-  2. Update the dependency (e.g., force `time` to version `>=0.3.35` using a patch override in `Cargo.toml`), and then
-  3. Install Anchor CLI from your local copy:
-     
-     ```bash
-     cargo install --path . --locked --force anchor-cli
-     ```
-     
-  However, using AVM should typically handle version management for you.
-
----
-
-Happy hacking with the Higherrrrrrr Protocol!
-```
-
----
-
-### How to Use This README
-
-1. **Replace your current `README.md`** with the content above.
-2. **Adjust any sections as needed** (for example, tool versions or environment-specific instructions).
-3. **Follow the step‑by‑step instructions** to reset your environment and install all dependencies.
-
-This README provides a comprehensive guide modeled on the official Anchor documentation and covers everything from resetting your environment to building and testing the project. If you need further customization or run into issues, feel free to ask!

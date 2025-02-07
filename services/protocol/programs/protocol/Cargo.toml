@@ -7,8 +7,10 @@ edition = "2021"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
-anchor-lang = "0.30.1"
-anchor-spl  = "0.30.1"
-orca_whirlpools_core = "0.1"   
-orca_whirlpools_client = "0.1"  
+anchor-lang = { version = "0.28.0", features = ["event-cpi"] }
+anchor-spl = "0.28.0"
+solana-program = "1.16.0"
 mpl-token-metadata = "1.9.9"
+dynamic-amm = { git = "https://github.com/mercurial-finance/mercurial-dynamic-amm-sdk", features = [
+    "cpi",
+], rev = "ae46f2a44edbd8231467effd530c1eeecc231a1b" }
