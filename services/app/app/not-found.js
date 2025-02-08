@@ -1,3 +1,4 @@
+'use client'
 import Link from 'next/link';
 import Head from 'next/head';
 import { Suspense } from 'react'
