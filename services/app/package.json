@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "yarn build-knowledge && next build",
+    "build": "next build",
     "build-knowledge": "node scripts/build-knowledge.js",
     "start": "next start",
     "lint": "next lint"
