@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { Suspense } from 'react'
 
 // Add getLayout property to disable default layout
-Error404.getLayout = (page) => page;
+NotFound.getLayout = (page) => page;
 
 function NotFoundContent() {
   return (
