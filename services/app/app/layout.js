@@ -12,6 +12,23 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { http } from 'viem';
 import ClientOnly from "../components/ClientOnly";
 import Script from 'next/script';
+import posthog from 'posthog-js';
+import { usePathname, useSearchParams } from 'next/navigation';
+
+// PostHog initialization
+if (typeof window !== 'undefined') {
+  posthog.init('phc_QObbSAeS9Bc3rBhOtDD0M5JUp5RDmPDQZVsmNQVXnFp', {
+    api_host: 'https://us.i.posthog.com',
+    person_profiles: 'always',
+    loaded: (posthog) => {
+      if (process.env.NODE_ENV === 'development') {
+        posthog.debug();
+      }
+      // Force reload feature flags
+      posthog.reloadFeatureFlags();
+    }
+  });
+}
 
 const config = createConfig({
   chains: [base],
@@ -23,6 +40,16 @@ const config = createConfig({
 const queryClient = new QueryClient();
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Track page views
+  useEffect(() => {
+    if (pathname) {
+      posthog.capture('$pageview');
+    }
+  }, [pathname, searchParams]);
+
   // Determine mobile viewport
   const [isMobile, setIsMobile] = useState(false);
 
