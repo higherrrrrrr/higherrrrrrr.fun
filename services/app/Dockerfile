@@ -9,12 +9,10 @@ RUN apk add python3 make g++ libc6-compat
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --network-timeout 600000 --prefer-offline
 
-# Copy source code in order of change frequency (least to most frequent)
-COPY next.config.js .
-COPY public ./public
-COPY data ./data
-COPY utils ./utils
-COPY app ./app
+# Copy all source files
+# Instead of copying individual directories, copy everything
+# since we have missing dependencies (components, api, onchain directories)
+COPY . .
 
 # Set build environment variables
 ENV NODE_ENV=production \
