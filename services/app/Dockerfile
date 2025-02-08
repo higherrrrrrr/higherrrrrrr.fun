@@ -1,9 +1,6 @@
-FROM node:18-alpine
+FROM node:18
 
 WORKDIR /app
-
-# Install build dependencies
-RUN apk add python3 make g++ libc6-compat
 
 # Install dependencies first (for better caching)
 COPY package.json yarn.lock ./

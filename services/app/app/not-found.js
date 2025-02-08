@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import Head from 'next/head';
+import { Suspense } from 'react'
 
 // Add getLayout property to disable default layout
 Error404.getLayout = (page) => page;
 
-export default function Error404() {
+function NotFoundContent() {
   return (
     <>
       <Head>
@@ -29,5 +30,13 @@ export default function Error404() {
         </Link>
       </div>
     </>
+  );
+}
+
+export default function NotFound() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NotFoundContent />
+    </Suspense>
   );
 } 
