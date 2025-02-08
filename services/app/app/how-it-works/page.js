@@ -48,41 +48,119 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        {/* How It Works Section */}
+        {/* TL;DR Section */}
+        <section id="tldr" className="mb-16">
+          <h1
+            className="text-4xl font-mono mb-8 relative inline-block text-green-500 text-shadow-glitch
+                      before:content-[attr(data-text)] before:absolute before:left-0 before:top-0
+                      before:overflow-hidden before:clip-[rect(0,900px,0,0)] before:opacity-90
+                      before:text-cyan-400 before:animate-glitch-top
+                      after:content-[attr(data-text)] after:absolute after:left-0 after:top-0
+                      before:overflow-hidden before:clip-[rect(0,900px,0,0)] after:opacity-90
+                      after:text-fuchsia-400 after:animate-glitch-bottom"
+            data-text="TL;DR"
+          >
+            TL;DR
+          </h1>
+          <div className="border border-green-500/20 rounded-lg p-6 bg-black/20">
+            <p className="text-green-500 text-lg">
+              Higherrrrrrr is the finest place on the internet to trade shitcoins. We support all meme tokens on Solana, from simple dog coins to complex evolving tokens. Launch for free, trade with transparency, and build your community. Optional advanced features available for projects that want to go higherrrrrrr.
+            </p>
+          </div>
+        </section>
+
+        {/* Detailed How It Works Section */}
         <section id="how-it-works">
-          <h1 className="text-4xl font-mono mb-8 text-green-500">
-            How it Works?
+          <h1
+            className="text-4xl font-mono mb-8 relative inline-block text-green-500 text-shadow-glitch
+                      before:content-[attr(data-text)] before:absolute before:left-0 before:top-0
+                      before:overflow-hidden before:clip-[rect(0,900px,0,0)] before:opacity-90
+                      before:text-cyan-400 before:animate-glitch-top
+                      after:content-[attr(data-text)] after:absolute after:left-0 after:top-0
+                      before:overflow-hidden before:clip-[rect(0,900px,0,0)] after:opacity-90
+                      after:text-fuchsia-400 after:animate-glitch-bottom"
+            data-text="How it Works - The Details"
+          >
+            How it Works - The Details
           </h1>
           <div className="space-y-12">
             <section>
-              <h2 className="text-2xl font-mono text-green-500">Trade Any Meme</h2>
+              <h2 className="text-2xl font-mono text-green-500">Trading Platform</h2>
               <p className="text-green-500">
-                Higherrrrrrr is your gateway to the wildest corners of meme trading. Whether you're into classic memes, evolving tokens, or the next big thing, our platform supports all types of meme coins. From simple dog coins to complex evolutionary tokens, if it's a meme, you can trade it here.
+                At its core, Higherrrrrrr is a trading platform for all types of meme tokens on Solana. Our interface is designed for both casual traders and serious degens, with features like:
               </p>
+              <ul className="list-disc pl-6 text-green-500">
+                <li>Real-time price charts and market data</li>
+                <li>Efficient order execution through Jupiter</li>
+                <li>Transparent fee structure (1% swap fee)</li>
+                <li>Token information and social links</li>
+                <li>Trading history and portfolio tracking</li>
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-mono text-green-500">Token Launch Platform</h2>
               <p className="text-green-500">
-                For creators looking to launch something special, we offer advanced features like evolving metadata, conviction NFTs, and automated social presence - but these are optional. The core platform is open to all meme traders and creators.
+                Launching a token on Higherrrrrrr is straightforward and flexible. Creators can:
+              </p>
+              <ul className="list-disc pl-6 text-green-500">
+                <li>Deploy tokens with custom tokenomics</li>
+                <li>Configure initial supply and distribution</li>
+                <li>Set up single-sided liquidity pools</li>
+                <li>Choose advanced features (optional)</li>
+              </ul>
+              <p className="text-green-500 mt-4">
+                The platform supports both standard tokens and those utilizing our advanced features like evolution mechanics.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-mono text-green-500">Advanced Features (Optional)</h2>
+              <h3 className="text-xl font-mono text-green-500 mt-4">Evolution Mechanics</h3>
               <p className="text-green-500">
-                For projects seeking something extra, we offer cutting-edge features like evolving tokens that change based on market milestones, conviction NFTs for dedicated holders, and AI-powered social media integration. These tools are available but not required - use what fits your vision.
+                Tokens can be configured to evolve based on market cap milestones. Each evolution can update:
               </p>
+              <ul className="list-disc pl-6 text-green-500">
+                <li>Token name and symbol</li>
+                <li>Token artwork and metadata</li>
+                <li>Community perks and features</li>
+              </ul>
+
+              <h3 className="text-xl font-mono text-green-500 mt-4">Conviction NFTs</h3>
+              <p className="text-green-500">
+                Projects can enable Conviction NFTs, which are awarded to holders with significant token positions (0.042069% of supply). These NFTs:
+              </p>
+              <ul className="list-disc pl-6 text-green-500">
+                <li>Evolve with the token</li>
+                <li>Prove early supporter status</li>
+                <li>Can unlock special perks</li>
+              </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-mono text-green-500">Community First</h2>
+              <h2 className="text-2xl font-mono text-green-500">Tokenomics & Fees</h2>
               <p className="text-green-500">
-                At Higherrrrrrr, we believe that memes are fundamentally about community. Our platform is designed to amplify the social aspects of trading, with features like HiLites spotlighting interesting projects and integrated social tools to help communities grow organically.
+                Our platform uses a simple and transparent fee structure:
               </p>
+              <ul className="list-disc pl-6 text-green-500">
+                <li>1% swap fee on all trades</li>
+                <li>0.5% burned (deflationary)</li>
+                <li>0.5% to liquidity and development</li>
+                <li>Optional creator fee configurations</li>
+              </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-mono text-green-500">Fair Launch & Trading</h2>
+              <h2 className="text-2xl font-mono text-green-500">Community Features</h2>
               <p className="text-green-500">
-                Whether you're launching a new token or trading existing ones, our platform ensures fair and transparent mechanics. Creators can configure tokenomics that make sense for their project, while traders benefit from clear pricing and efficient execution.
+                Community building tools include:
               </p>
+              <ul className="list-disc pl-6 text-green-500">
+                <li>HiLites for featured projects</li>
+                <li>Custom project pages and lore</li>
+                <li>Integrated social features</li>
+                <li>Community analytics and insights</li>
+              </ul>
             </section>
 
             <section>

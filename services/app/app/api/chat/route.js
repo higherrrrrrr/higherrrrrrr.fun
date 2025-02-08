@@ -1,44 +1,51 @@
 // pages/api/chat.js
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from 'openai';
+import { getKnowledgeBase } from '../../../utils/knowledgeBase';
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
-  }
-
-  const { conversation } = req.body;
-  if (!conversation || !Array.isArray(conversation)) {
-    res.status(400).json({ error: "Invalid conversation format" });
-    return;
-  }
-
-  // Build the messages array expected by OpenAI
-  // You might transform your conversation into the format:
-  // [{ role: "system", content: "You are helpful support." }, { role: "user", content: "..." }]
-  const messages = [
-    { role: "system", content: "You are a helpful support chatbot." },
-    ...conversation.map((msg) => ({
-      role: msg.sender === "user" ? "user" : "assistant",
-      content: msg.text,
-    }))
-  ];
-
+export async function POST(request) {
   try {
-    const completion = await openai.createChatCompletion({
-      model: "gpt-4o-mini", // or whichever model you want to use
+    const { conversation } = await request.json();
+    
+    // Get the latest knowledge base
+    const knowledgeBase = await getKnowledgeBase();
+
+    const messages = conversation.map(msg => ({
+      role: msg.sender === 'user' ? 'user' : 'assistant',
+      content: msg.text
+    }));
+
+    // Add system message with knowledge base
+    messages.unshift({
+      role: 'system',
+      content: `You are a helpful support agent for Higherrrrrrr, a meme token trading platform on Solana. 
+      Be friendly, knowledgeable, and a bit playful - but always professional and accurate. 
+      If the user really cant get to an answer, direct them to our community telegram please! 
+      But try really really hard to get them to an answer first.
+      
+      Here is the current documentation and knowledge base to reference:
+      
+      ${knowledgeBase}`
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // Using 16k model for larger context
       messages: messages,
       temperature: 0.7,
+      max_tokens: 1000,
     });
-    const reply = completion.data.choices[0].message.content.trim();
-    res.status(200).json({ response: reply });
+
+    return Response.json({ 
+      response: completion.choices[0].message.content 
+    });
+
   } catch (error) {
-    console.error("OpenAI API error:", error);
-    res.status(500).json({ error: "Failed to get response from OpenAI" });
+    console.error('Chat API Error:', error);
+    return Response.json({ 
+      error: "Sorry, I'm having trouble connecting right now. Please try again later." 
+    }, { status: 500 });
   }
 }

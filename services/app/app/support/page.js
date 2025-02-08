@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { initKnowledgeBase } from '../../utils/knowledgeBase';
 
 const FAQ = () => {
   const faqs = [
@@ -46,11 +47,31 @@ const FAQ = () => {
 
 const Chatbot = () => {
   const [query, setQuery] = useState("");
-  const [conversation, setConversation] = useState([
-    { sender: "bot", text: "Hello! How can I help you today?" }
-  ]);
+  const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    async function init() {
+      try {
+        await initKnowledgeBase();
+        setConversation([{ 
+          sender: "bot", 
+          text: "Hi! I've loaded all the latest Higherrrrrrr documentation. How can I help you today?" 
+        }]);
+      } catch (error) {
+        console.error('Failed to initialize knowledge base:', error);
+        setConversation([{ 
+          sender: "bot", 
+          text: "Hello! I'm here to help, though I might have limited access to the latest documentation." 
+        }]);
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+    init();
+  }, []);
 
   const handleSend = async () => {
     if (!query.trim()) return;
@@ -86,7 +107,23 @@ const Chatbot = () => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-bold mb-4">Chat with Support</h2>
+      <h2 className="text-2xl font-bold mb-4">Ask Any Question</h2>
+      <div className="bg-black/40 border border-green-500/20 rounded-lg p-6 mb-6">
+        <p className="text-green-500/80 text-sm leading-relaxed">
+          Our AI support bot has been trained on all of Higherrrrrrr's documentation, 
+          technical specs, and team discussions. It can help with everything from basic 
+          questions to complex technical queries about our platform. The knowledge base 
+          is automatically updated from our GitHub repository, so you'll always get 
+          the most current information.
+        </p>
+        <p className="text-green-500/80 text-sm mt-2">
+          💡 <span className="opacity-80">
+            {isInitializing 
+              ? "Loading documentation..." 
+              : "Responses might take a few seconds as the bot processes our extensive documentation."}
+          </span>
+        </p>
+      </div>
       <div className="border border-gray-700 p-4 rounded mb-4 h-80 overflow-y-auto bg-black">
         {conversation.map((msg, i) => (
           <div key={i} className={`mb-2 ${msg.sender === "bot" ? "text-green-500" : "text-blue-500"}`}>
@@ -99,16 +136,17 @@ const Chatbot = () => {
       <div className="flex gap-2">
         <input
           type="text"
-          placeholder="Type your question..."
+          placeholder={isInitializing ? "Loading documentation..." : "Type your question..."}
           className="flex-grow p-2 border border-gray-700 rounded bg-black text-green-500"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => { if(e.key === "Enter") handleSend() }}
+          onKeyDown={(e) => { if(e.key === "Enter" && !isInitializing) handleSend() }}
+          disabled={isInitializing}
         />
         <button
           onClick={handleSend}
-          className="px-4 py-2 bg-green-500 text-black rounded hover:bg-green-600 transition"
-          disabled={loading}
+          className="px-4 py-2 bg-green-500 text-black rounded hover:bg-green-600 transition disabled:opacity-50"
+          disabled={isInitializing || loading}
         >
           Send
         </button>
