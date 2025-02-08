@@ -297,6 +297,12 @@ export default function RootLayout({ children }) {
                             >
                               Base Tokens
                             </Link>
+                            <Link
+                              href="/support"
+                              className="text-green-500/60 hover:text-green-500 font-mono text-xs"
+                            >
+                              Support
+                            </Link>
                           </div>
                           <div className="flex items-center">
                             <img 
