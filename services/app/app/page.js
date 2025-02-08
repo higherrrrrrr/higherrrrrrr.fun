@@ -246,7 +246,7 @@ export default function Home() {
             </h1>
             
             <p className="text-xl md:text-2xl mb-12 text-green-500/80">
-              The finest place on the internet to trade shitcoins
+              Believe in something
             </p>
 
             <button 
