@@ -49,7 +49,7 @@ This report contains a comprehensive audit of the **Higherrrrrrr** protocol, whi
 
 - The **Rust** smart contracts (using the Anchor framework).  
 - The tokenomics details, distribution instructions, and fee mechanisms.  
-- The usage of third-party crates (e.g., Orca Whirlpools).  
+- The usage of third-party crates (e.g., Meteora Whirlpools).  
 - The overall design’s alignment with typical Solana and Anchor security best practices.  
 
 Our review spans from logical correctness and code readability to potential vulnerabilities and misconfigurations.
@@ -64,7 +64,7 @@ Our review spans from logical correctness and code readability to potential vuln
   - "Conviction NFTs" system to reward large token holders.
   - Automatic and manual evolution mechanics for token metadata.
   - Fee vault and distribution logic, splitting fees between protocol and creators.
-  - Single-sided liquidity additions on Orca Whirlpools.  
+  - Single-sided liquidity additions on Meteora Whirlpools.  
 - **Findings**:  
   - We did not identify any critical vulnerabilities that would allow unauthorized minting or seizing of funds.  
   - A few **low-severity** findings relate to potential improvements in user validation, strict checks on distribution percentages, and immutability preferences.  
@@ -113,7 +113,7 @@ The code is an Anchor-based Solana program that covers functionality such as tok
 │       │   │   ├── create_meme_token.rs
 │       │   │   ├── evolutions.rs
 │       │   │   ├── fee_distribution.rs
-│       │   │   ├── trade_orca.rs
+│       │   │   ├── trade_Meteora.rs
 │       │   │   ├── conviction_nfts.rs
 │       │   │   └── mod.rs
 │       │   ├── state/
@@ -156,7 +156,7 @@ Our audit process involves:
    - Fees misdirection.  
    - Overflow or boundary errors.  
 
-We also checked the relevant references in the code for CPIs to third-party programs (Orca Whirlpools, MPL Token Metadata) to ensure correct usage.
+We also checked the relevant references in the code for CPIs to third-party programs (Meteora Whirlpools, MPL Token Metadata) to ensure correct usage.
 
 ---
 
@@ -196,7 +196,7 @@ No issues found.
 No major issues.  
 
 #### programs/protocol/Cargo.toml & Xargo.toml
-- **Cargo.toml** references `anchor-lang = "0.30.1"` and Orca-related crates.  
+- **Cargo.toml** references `anchor-lang = "0.30.1"` and Meteora-related crates.  
 - **Xargo.toml** is default, no custom standard library changes.  
 
 No issues.  
@@ -214,7 +214,7 @@ No issues.
    - Validates distribution percentages (non-LP ≤ 35%, remainder = 65% for LP).  
    - Mints the entire supply, then locks the mint authority.  
    - **Potential Attack Vector**: If distributions are mis-typed, it could hamper the intended supply. The code checks `is_pool` for exactly one or zero occurrences. If there’s more than one, it errors. This is good.  
-   - The logic sets up an Orca Whirlpools pool with `init_pool`.  
+   - The logic sets up an Meteora Whirlpools pool with `init_pool`.  
    - Overall, the function is consistent with the tokenomics doc.
 
 2. **evolutions.rs**  
@@ -229,8 +229,8 @@ No issues.
    - Splits LP fees from `lp_fee_account` equally.  
    - **Potential Attack Vector**: The `lp_fee_account` must match `fee_vault.lp_token_vault`. This is checked for correctness. Good.  
 
-4. **trade_orca.rs**  
-   - Wraps an Orca Whirlpools CPI for swaps.  
+4. **trade_Meteora.rs**  
+   - Wraps an Meteora Whirlpools CPI for swaps.  
    - Applies a post-swap step to “trigger_evolution” if a threshold is met.  
    - Uses `get_current_price` from `Whirlpool` data to set the new name/URI if needed.  
    - No re-entrancy concerns. The CPI is straightforward, and Anchor ensures no cross-call contamination.  
@@ -293,9 +293,9 @@ No issues.
 - This approach seems functionally correct; no double-mint risk because the `distribute_conviction_nfts` does a re-check.  
 
 ### 7.5 Fee Distribution & LP Mechanics
-- Fees from swaps are stored in the Orca pool fee account. A specialized instruction (`distribute_lp_fees`) splits them between protocol and creator.  
+- Fees from swaps are stored in the Meteora pool fee account. A specialized instruction (`distribute_lp_fees`) splits them between protocol and creator.  
 - This code seems correct and checks the identity of the fee vault.  
-- Single-sided liquidity addition logic is mostly simulated. Real production usage must confirm Orca’s actual instructions.  
+- Single-sided liquidity addition logic is mostly simulated. Real production usage must confirm Meteora’s actual instructions.  
 
 ### 7.6 Immutability & Upgrades
 - As typical with Anchor, the program can be upgraded by the upgrade authority unless it’s explicitly removed.  
@@ -321,8 +321,8 @@ No issues.
    - If additional vesting logic is needed for team tokens, implement a specific vesting schedule on-chain or confirm that the external multisig locks them.  
 4. **Review Metadata Authority**  
    - The `metadata_update_authority` is critical. If a compromised account can update metadata, it could mislead users. Keep it under a robust governance or burn it if not needed after final evolutions.  
-5. **Check Real-World Orca CPI**  
-   - Ensure the `orca_whirlpools_client` usage matches the actual mainnet instructions. The code references a “simulated” single-sided liquidity approach, so confirm it’s correct on mainnet.  
+5. **Check Real-World Meteora CPI**  
+   - Ensure the `Meteora_whirlpools_client` usage matches the actual mainnet instructions. The code references a “simulated” single-sided liquidity approach, so confirm it’s correct on mainnet.  
 
 ---
 

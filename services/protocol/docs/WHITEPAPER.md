@@ -11,7 +11,7 @@
 4. [Tokenomics & Supply Mechanics](#4-tokenomics--supply-mechanics)  
 5. [Evolving Metadata & Threshold Triggers](#5-evolving-metadata--threshold-triggers)  
 6. [Conviction NFTs for Large Holders](#6-conviction-nfts-for-large-holders)  
-7. [Trading Flows & Integration with Orca](#7-trading-flows--integration-with-orca)  
+7. [Trading Flows & Integration with Meteora](#7-trading-flows--integration-with-Meteora)  
 8. [Fee Collection & Liquidity Reinforcement](#8-fee-collection--liquidity-reinforcement)  
 9. [Governance & Security](#9-governance--security)  
 10. [Launchpad & Ecosystem Vision](#10-launchpad--ecosystem-vision)  
@@ -31,7 +31,7 @@
 - **Deflationary Design**: A portion of tokens are burned on every swap, ensuring a continuously decreasing supply.  
 - **Big-Holder “Conviction” NFTs**: Addresses holding at least 0.042069% of a token’s total supply automatically receive commemorative NFTs each time the token evolves.  
 - **Single-Sided Liquidity**: Projects can provide only their own tokens to a pool, letting the market bring in SOL, thus enabling fair price discovery.  
-- **Flexible Fee Splits & Innovative Fee Collection**: A default 1% swap fee is split between token burns and SOL‑based liquidity or revenue—but **all splits and destinations** (including protocol revenue vs. “floor” support) are fully configurable. Notably, fees are now collected directly from aggregated liquidity provider (LP) fees in our Orca pool deposit rather than solely via a pass‑through front‑end.
+- **Flexible Fee Splits & Innovative Fee Collection**: A default 1% swap fee is split between token burns and SOL‑based liquidity or revenue—but **all splits and destinations** (including protocol revenue vs. “floor” support) are fully configurable. Notably, fees are now collected directly from aggregated liquidity provider (LP) fees in our Meteora pool deposit rather than solely via a pass‑through front‑end.
 
 By aligning playful elements with cryptographic fundamentals—and keeping all parameters adjustable—**Higherrrrrrrr** aims to empower a new generation of meme tokens on Solana.
 
@@ -49,7 +49,7 @@ Many meme tokens rely on hype without transparency. **Higherrrrrrrr** proves tha
 
 ### 2.3. Why Solana?
 
-The Solana blockchain provides high throughput, low fees, and tooling like **Metaplex** for token/NFT metadata and **Orca** for efficient liquidity. This makes it easy to:
+The Solana blockchain provides high throughput, low fees, and tooling like **Metaplex** for token/NFT metadata and **Meteora** for efficient liquidity. This makes it easy to:
 
 - Update token names/art frequently without excessive gas costs.  
 - Execute trades rapidly.  
@@ -78,7 +78,7 @@ The Solana blockchain provides high throughput, low fees, and tooling like **Met
    - Addresses holding ≥ 0.042069% of the total supply receive a commemorative NFT upon each evolution, rewarding long‑term commitment.
 
 4. **Fee & Liquidity Mechanics with LP Fee Collection**  
-   - Instead of relying solely on a pass‑through fee mechanism, the protocol now collects aggregated fees directly from our Orca LP deposit. These LP fees are then split evenly between protocol revenue and creator support, with a default 1% fee structure.
+   - Instead of relying solely on a pass‑through fee mechanism, the protocol now collects aggregated fees directly from our Meteora LP deposit. These LP fees are then split evenly between protocol revenue and creator support, with a default 1% fee structure.
    - The fee distribution is fully configurable to adapt to various market conditions and project needs.
 
 5. **Pre‑Mine & Pool Distribution Lock‑In**  
@@ -139,11 +139,11 @@ A dedicated on‑chain registry tracks addresses that meet or exceed the convict
 
 ---
 
-## 7. Trading Flows & Integration with Orca
+## 7. Trading Flows & Integration with Meteora
 
-### 7.1. Orca as the Chosen AMM
+### 7.1. Meteora as the Chosen AMM
 
-**Orca** is leveraged for its efficient, user‑friendly concentrated liquidity (CL) model on Solana. Through Orca, token‑to‑SOL swaps are executed rapidly, with built‑in mechanisms for fee collection and liquidity management.
+**Meteora** is leveraged for its efficient, user‑friendly concentrated liquidity (CL) model on Solana. Through Meteora, token‑to‑SOL swaps are executed rapidly, with built‑in mechanisms for fee collection and liquidity management.
 
 ### 7.2. Single‑Sided Liquidity Provision
 
@@ -151,9 +151,9 @@ Projects deploy only their own tokens into a liquidity pool, allowing the market
 
 ### 7.3. Fee Collection from LP Pools
 
-Distinct from traditional pass‑through fee collection, our protocol now aggregates fees directly from the Orca LP fee account. During each swap:
+Distinct from traditional pass‑through fee collection, our protocol now aggregates fees directly from the Meteora LP fee account. During each swap:
 - **Token fees** are taken from the swapped amount, with a portion allocated to token burns.
-- **SOL fees** are accumulated in the Orca LP fee account and later distributed evenly between protocol and creator via a dedicated fee distribution instruction.
+- **SOL fees** are accumulated in the Meteora LP fee account and later distributed evenly between protocol and creator via a dedicated fee distribution instruction.
 This ensures that fee collection is both transparent and integrated into the liquidity dynamics.
 
 ### 7.4. Automated Threshold Checks
@@ -168,11 +168,11 @@ Following each swap, the protocol decodes the current price from the Whirlpool s
 
 A default fee of **1%** is applied to swaps, split as follows:
 - **Token Side**: Approximately 0.5% of the swapped tokens are burned, reducing the overall supply.
-- **SOL Side**: Aggregated SOL fees are collected in the Orca LP fee account.
+- **SOL Side**: Aggregated SOL fees are collected in the Meteora LP fee account.
 
 ### 8.2. Aggregated LP Fee Distribution
 
-Fees accumulated in the Orca LP fee account are distributed evenly between the protocol and the creator:
+Fees accumulated in the Meteora LP fee account are distributed evenly between the protocol and the creator:
 - A dedicated fee distribution instruction retrieves the total fees from the LP fee account.
 - The fees are split equally, with any remainder allocated to the protocol.
 This mechanism ensures that both the protocol and the creator benefit directly from liquidity provision and swap activity.
@@ -232,7 +232,7 @@ Once community confidence is established, the upgrade authority can be set to `N
 4. **Define Evolution Thresholds**: Set milestones for metadata updates based on price or market metrics.
 5. **Register Large Holders**: Enable holders to register for Conviction NFTs by meeting the threshold.
 6. **Fee Structure Implementation**: Integrate the LP fee collection mechanism and configure the fee split.
-7. **Liquidity Provision**: Deposit tokens into a single‑sided liquidity pool on Orca, facilitating fair price discovery.
+7. **Liquidity Provision**: Deposit tokens into a single‑sided liquidity pool on Meteora, facilitating fair price discovery.
 8. **Front‑End Integration**: Provide interfaces for monitoring evolutions, NFT distributions, and fee collection.
 
 ### 12.2. Team Vesting & Multi‑Sig Control
@@ -268,7 +268,7 @@ Future expansions include:
 1. **Fixed Supply with Mint Authority Lock**: Ensuring no inflation post‑deployment.
 2. **Threshold‑Based Evolution**: Dynamic updates to on‑chain metadata that reflect market milestones.
 3. **Conviction NFTs**: Rewarding committed large holders with unique, evolution‑linked NFTs.
-4. **Innovative Fee Collection**: Aggregating fees directly from Orca LP pools and splitting them evenly between protocol and creator.
+4. **Innovative Fee Collection**: Aggregating fees directly from Meteora LP pools and splitting them evenly between protocol and creator.
 5. **Strict Distribution Splits**: Locking pre‑mine distributions at **35%** and liquidity pool deposits at **65%** to ensure fair and balanced initial allocation.
 6. **Flexible and Transparent Governance**: Using multi‑sig and community‑driven models to manage protocol parameters securely.
 

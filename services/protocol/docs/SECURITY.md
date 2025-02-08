@@ -2,7 +2,7 @@
 
 **A Comprehensive Audit & Security Review of the Memecoin Protocol**
 
-This document consolidates an **extensive security analysis** of the entire Memecoin Protocol codebase, covering Steps 1–6. Below we examine each instruction and data structure for potential vulnerabilities, best practices, and recommended mitigations. We focus on **Anchor**-based Solana development, cross-program invocations (Orca, Metaplex), big-holder NFTs, and fee distribution logic. This is an **AI-driven** audit with additional manual reasoning, intended to guide final fixes and risk mitigation before mainnet deployment.
+This document consolidates an **extensive security analysis** of the entire Memecoin Protocol codebase, covering Steps 1–6. Below we examine each instruction and data structure for potential vulnerabilities, best practices, and recommended mitigations. We focus on **Anchor**-based Solana development, cross-program invocations (Meteora, Metaplex), big-holder NFTs, and fee distribution logic. This is an **AI-driven** audit with additional manual reasoning, intended to guide final fixes and risk mitigation before mainnet deployment.
 
 ---
 
@@ -14,12 +14,12 @@ This document consolidates an **extensive security analysis** of the entire Meme
 4. [Instruction-by-Instruction Analysis](#4-instruction-by-instruction-analysis)  
    1. [Step 2: `create_meme_token`](#41-create_meme_token)  
    2. [Step 3: Evolutions (`set_evolutions` & `update_meme_metadata`)](#42-evolutions-set_evolutions--update_meme_metadata)  
-   3. [Step 4: `trade_via_orca` & Single-Sided Liquidity](#43-trade_via_orca--single-sided-liquidity)  
+   3. [Step 4: `trade_via_Meteora` & Single-Sided Liquidity](#43-trade_via_Meteora--single-sided-liquidity)  
    4. [Step 5: Conviction NFTs (`register_holder`, `distribute_conviction_nfts`)](#44-conviction-nfts-register_holder-distribute_conviction_nfts)  
    5. [Step 6: Fee Distribution & Protocol Liquidity](#45-fee-distribution--protocol-liquidity)  
 5. [Upgrade Authority & Governance Concerns](#5-upgrade-authority--governance-concerns)  
 6. [Integer Overflow & Math Checks](#6-integer-overflow--math-checks)  
-7. [Metaplex/Orca CPIs & External Integrations](#7-metaplexorca-cpis--external-integrations)  
+7. [Metaplex/Meteora CPIs & External Integrations](#7-metaplexMeteora-cpis--external-integrations)  
 8. [Recommended Mitigations & Fixes](#8-recommended-mitigations--fixes)  
 9. [Conclusion & Next Steps](#9-conclusion--next-steps)
 
@@ -39,7 +39,7 @@ This **SECURITY.md** aims to highlight **potential vulnerabilities** or **logic 
 
 1. **Step 2**: `create_meme_token`  
 2. **Step 3**: `set_evolutions` & `update_meme_metadata`  
-3. **Step 4**: `trade_via_orca`, single-sided liquidity  
+3. **Step 4**: `trade_via_Meteora`, single-sided liquidity  
 4. **Step 5**: `register_holder`, `distribute_conviction_nfts`  
 5. **Step 6**: FeeVault instructions for fee distribution
 
@@ -193,17 +193,17 @@ pub fn update_meme_metadata(ctx: Context<UpdateMemeMetadata>, current_price: u64
 
 ---
 
-### 4.3. `trade_via_orca` & Single-Sided Liquidity (Step 4)
+### 4.3. `trade_via_Meteora` & Single-Sided Liquidity (Step 4)
 
 ```rust
-pub fn trade_via_orca(
-    ctx: Context<TradeViaOrca>,
+pub fn trade_via_Meteora(
+    ctx: Context<TradeViaMeteora>,
     amount_in: u64,
     min_out: u64,
     current_price: u64,
 ) -> Result<()> {
     // optionally takes a fee
-    // does a CPI to orca::swap
+    // does a CPI to Meteora::swap
     // calls update_meme_metadata with current_price
     Ok(())
 }
@@ -211,7 +211,7 @@ pub fn trade_via_orca(
 
 - **Risks**:
   1. **Fee** is not forcibly implemented in Step 4 code, only a demonstration. If the final code doesn’t do robust fee checks, the protocol might fail to collect revenue. That’s not a security vulnerability per se, just a design flaw.  
-  2. **Orca** Integration: If the user passes invalid pool accounts or tries to swap with an incorrect pool, we rely on Orca’s code to reject. We must ensure we pass the correct addresses.  
+  2. **Meteora** Integration: If the user passes invalid pool accounts or tries to swap with an incorrect pool, we rely on Meteora’s code to reject. We must ensure we pass the correct addresses.  
   3. **Compute Budget**: If the user triggers a large evolution update or NFT distribution in the same transaction, it might exceed compute. Not strictly a security hole, but can cause DoS if the transaction is too large.  
 
 #### Single-Sided Liquidity
@@ -221,14 +221,14 @@ pub fn create_single_sided_liquidity(
     ctx: Context<CreateSingleSidedLiquidity>,
     amount: u64,
 ) -> Result<()> {
-    // deposit memecoin only into orca pool
+    // deposit memecoin only into Meteora pool
     Ok(())
 }
 ```
 
 - **Risk**: If the AMM requires some base side (SOL/USDC) or an initial ratio, a purely single-sided deposit might fail. If your design is truly 0 base side, that’s unusual but not a direct security flaw.
 
-**Verdict**: The main risk is ensuring the user can’t supply invalid pool accounts to exploit something. Typically, orca’s program ID check should mitigate that. Also, ensure fees are consistent if you do partial token-based or SOL-based. No direct exploit if used properly.
+**Verdict**: The main risk is ensuring the user can’t supply invalid pool accounts to exploit something. Typically, Meteora’s program ID check should mitigate that. Also, ensure fees are consistent if you do partial token-based or SOL-based. No direct exploit if used properly.
 
 ---
 
@@ -279,7 +279,7 @@ pub struct FeeVault {
 }
 ```
 
-**`trade_via_orca`** or similar now skims fees. We see instructions:
+**`trade_via_Meteora`** or similar now skims fees. We see instructions:
 
 - `withdraw_protocol_sol`
 - `withdraw_creator_tokens`

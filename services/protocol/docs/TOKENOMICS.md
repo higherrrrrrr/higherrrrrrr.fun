@@ -23,7 +23,7 @@ That’s how **Higherrrrrrr** keeps the game going for degens.
 
 ## 1. Summary (tl;dr)
 
-- **LP Fees:** 1% total fee on trades (via Orca/Jupiter).  
+- **LP Fees:** 1% total fee on trades (via Meteora/Jupiter).  
   - **0.5%** of the **token side** is burned (removed from supply).  
   - **0.5%** of the **SOL side** is added as single-sided liquidity to help stabilize the token price.  
 - **Conviction NFTs:** Holding **≥ 0.042069%** of the supply (420,690 tokens) grants you special NFTs (or “relics”) every time the token “evolves.”  
@@ -73,7 +73,7 @@ We aim to combine a dash of degenerate humor with robust on-chain engineering to
 
 ### 3.4 Single-Sided Launch Pool (65%)
 
-- Placed on Orca as a single-sided liquidity deposit for open trading.  
+- Placed on Meteora as a single-sided liquidity deposit for open trading.  
 - Ensures broad distribution from day one, minimal slippage, and no insider advantage.
 
 ---
@@ -156,7 +156,7 @@ A total of **15%** is reserved for these loyal participants. We’ll provide ins
 
 ### 9.1 Single-Sided Liquidity
 
-We deposit **65%** of the supply into Orca on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
+We deposit **65%** of the supply into Meteora on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
 
 ### 9.2 Migration LP Support\* (5%)
 
@@ -170,7 +170,7 @@ A separate **migration-focused** liquidity pool will be seeded with 5% of the su
 
 ## 10. Next Steps
 
-1. **Check the Liquidity**: Once launched, you can buy/sell on Orca or via Jupiter.  
+1. **Check the Liquidity**: Once launched, you can buy/sell on Meteora or via Jupiter.  
 2. **Register if You’re a Zealot**: If you hit ≥ 420,690 tokens, call `register_holder`.  
 3. **Watch the Art**: Keep an eye out for **`evolution.svg`** updates whenever thresholds are hit.  
 4. **HODL or Trade**: Up to you—just remember, relic NFTs reward big holders.  

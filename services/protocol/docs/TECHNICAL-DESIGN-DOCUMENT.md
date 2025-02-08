@@ -246,7 +246,7 @@ pub struct FeeVault {
    1. **Calculate** a fee portion (e.g., 1% of `amount_in`).  
    2. If `user_in_token == SOL`, deposit that fee portion into `protocol_sol_vault`.  
    3. If `user_in_token == MemeToken`, deposit that fee portion into `creator_token_vault`.  
-   4. **CPI** into Orca’s `swap` for `(amount_in - fee)`.  
+   4. **CPI** into Meteora’s `swap` for `(amount_in - fee)`.  
    5. Check if new price crosses an evolution threshold; if so, call `update_metadata`.
 
 **Complexities**:  
@@ -271,10 +271,10 @@ Both instructions can impose optional additional checks, like time-locked withdr
 
 1. **Buying MemeToken with SOL**:  
    - 1% of `SOL` side → protocol.  
-   - The user receives `(amount_in - fee)` worth of tokens from Orca.  
+   - The user receives `(amount_in - fee)` worth of tokens from Meteora.  
 2. **Selling MemeToken for SOL**:  
    - 1% of `MemeToken` side → creator.  
-   - The user receives `(amount_in - fee)` worth of SOL from Orca.
+   - The user receives `(amount_in - fee)` worth of SOL from Meteora.
 
 ### 5.2. Configurable Rates
 
@@ -334,10 +334,10 @@ At any point, the respective authority can call a “withdraw” instruction to 
 
 Many projects prefer a “fair” approach where the project team only deposits their token. The broader market or community will deposit the counterpart (SOL), setting a fair market price.
 
-### 7.2. Orca Pool Creation
+### 7.2. Meteora Pool Creation
 
 **Instruction**: `create_pool_with_single_side` (optional, but typical for a “fair launch”).
-1. The memecoin deposits X tokens into Orca’s liquidity pool.  
+1. The memecoin deposits X tokens into Meteora’s liquidity pool.  
 2. The protocol or user might receive some **LP tokens** in `lp_token_vault`.  
 
 Below is the **continuation and conclusion** of the **Memecoin Launchpad & Evolutionary Token Platform – Technical Design (Extended Version)** document, picking up from **Section 7.3** onward. 
@@ -347,7 +347,7 @@ Below is the **continuation and conclusion** of the **Memecoin Launchpad & Evolu
 ## 7.3. Ongoing Liquidity Management
 
 1. **Add Liquidity**:  
-   - If the memecoin’s creator or the protocol wishes to deepen liquidity, they can deposit additional tokens (and possibly SOL) into the same Orca pool.  
+   - If the memecoin’s creator or the protocol wishes to deepen liquidity, they can deposit additional tokens (and possibly SOL) into the same Meteora pool.  
    - In return, they receive more LP tokens, which are held in the `lp_token_vault` or distributed as they see fit.
 
 2. **Remove Liquidity**:  
