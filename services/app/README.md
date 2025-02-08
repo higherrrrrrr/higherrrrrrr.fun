@@ -26,7 +26,6 @@ Real-time token trading dashboard for the degen in all of us. Track trending EVM
 ### Prerequisites
 - Node.js 18+
 - Your favorite EVM node URL (Infura/Alchemy)
-- OpenAI API key (for AI support)
 - Coffee ☕
 
 ### Setup
@@ -49,7 +48,6 @@ Create `.env.local` with:
 ```env
 NEXT_PUBLIC_RPC_URL=your-evm-node-url
 NEXT_PUBLIC_REFRESH_INTERVAL=60000  # Data refresh in ms
-OPENAI_API_KEY=your-openai-api-key  # For AI support chat
 ```
 
 4. Build the knowledge base:
@@ -64,6 +62,17 @@ npm run dev
 ```
 
 6. Visit [http://localhost:3000](http://localhost:3000) and watch number go up (hopefully)
+
+## Runtime Configuration
+
+The following environment variables are required at runtime:
+
+```env
+NEXT_PUBLIC_RPC_URL=your-evm-node-url
+NEXT_PUBLIC_REFRESH_INTERVAL=60000  # Data refresh in ms
+```
+
+These can be set in your deployment environment or locally via `.env.local` for development.
 
 ## Contributing
 
@@ -80,8 +89,9 @@ PRs welcome, especially for:
 - Price feeds update every minute by default
 - Trend data based on 6hr volume
 - Keep an eye on your RPC rate limits
-- AI support knowledge base is automatically rebuilt during `yarn build`
+- AI support knowledge base must be built with `yarn build-knowledge`
 - Knowledge base includes all `.md` files from the repo
+- AI support requires OPENAI_API_KEY at runtime
 
 ---
 

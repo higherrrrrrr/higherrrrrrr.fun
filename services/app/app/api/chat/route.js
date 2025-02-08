@@ -2,12 +2,21 @@
 import OpenAI from 'openai';
 import { getKnowledgeBase } from '../../../utils/knowledgeBase';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(request) {
   try {
+    // Check for API key
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY is not set');
+      return Response.json({ 
+        error: "Server configuration error. Please contact support." 
+      }, { status: 500 });
+    }
+
+    // Initialize OpenAI client inside the handler
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
     const { conversation } = await request.json();
     
     // Get the latest knowledge base
