@@ -32,7 +32,7 @@ export async function POST(request) {
     });
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Using 16k model for larger context
+      model: "gpt-4o-mini",
       messages: messages,
       temperature: 0.7,
       max_tokens: 1000,

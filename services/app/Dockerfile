@@ -17,9 +17,6 @@ RUN yarn install --frozen-lockfile
 # Copy source
 COPY . .
 
-# Build knowledge base
-RUN yarn build-knowledge
-
 # Set environment variables
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
