@@ -2,25 +2,29 @@
 FROM node:18-alpine AS builder
 
 # Install build dependencies
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    libc6-compat
+RUN apk add --no-cache python3 make g++ libc6-compat
 
 WORKDIR /app
 
-# Install dependencies first (better caching)
+# Copy only package files first for better layer caching
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
 
-# Copy source
-COPY . .
+# Install dependencies with specific optimizations
+RUN yarn install --frozen-lockfile --network-timeout 600000 \
+    --prefer-offline \
+    --production=false
 
-# Set environment variables
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
-ENV DISABLE_ESLINT_PLUGIN true
+# Copy only necessary source files
+COPY next.config.js .
+COPY public ./public
+COPY app ./app
+COPY utils ./utils
+COPY data ./data
+
+# Set build environment variables
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    NODE_ENV=production \
+    DISABLE_ESLINT_PLUGIN=true
 
 # Build the app
 RUN yarn build
@@ -30,19 +34,23 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Copy necessary files from builder
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
+# Install production dependencies only
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --production=true \
+    --prefer-offline \
+    --network-timeout 600000
 
-# Set environment variables
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
-ENV PORT 3000
+# Copy only the necessary built files from builder
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+# Set runtime environment variables
+ENV NODE_ENV=production \
+    PORT=3000 \
+    NEXT_TELEMETRY_DISABLED=1
 
 EXPOSE 3000
 
-# Start the application
-CMD ["yarn", "start"]
+# Use node directly instead of yarn for smaller footprint
+CMD ["node", "server.js"]
