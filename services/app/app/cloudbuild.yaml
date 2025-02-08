@@ -19,9 +19,9 @@ steps:
       - '--cache-from'
       - >-
         $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - services/alpha
+      - services/app
       - '-f'
-      - services/alpha/Dockerfile
+      - services/app/Dockerfile
     id: Build
   - name: gcr.io/cloud-builders/docker
     args:
