@@ -5,7 +5,7 @@ const featuredProjects = [
     name: 'Wen Lamboo',
     imageUrl: '/images/featured/wen-lamboo.jpg',
     description: 'Higher community member Magpie answers Crypto\'s favorite question: Wen $LAMBOO?',
-    launchDate: '2025-02-11T20:20:00Z',
+    launchDate: '2025-02-12T20:20:00Z',
     website: 'https://www.lamboo.fun/',
     twitter: 'https://x.com/Lamboo_Brainlet',
     telegram: 'https://t.me/+h9Q_lwzKty42ODRk',
