@@ -13,7 +13,7 @@ import { http } from 'viem';
 import ClientOnly from "../components/ClientOnly";
 import Script from 'next/script';
 import posthog from 'posthog-js';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 // PostHog initialization
 if (typeof window !== 'undefined') {
@@ -41,14 +41,13 @@ const queryClient = new QueryClient();
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   // Track page views
   useEffect(() => {
     if (pathname) {
       posthog.capture('$pageview');
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   // Determine mobile viewport
   const [isMobile, setIsMobile] = useState(false);
