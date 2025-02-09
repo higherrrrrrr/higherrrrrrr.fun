@@ -161,7 +161,7 @@ export default function MainLayout({ children }) {
                   Twitter
                 </a>
                 <a
-                  href="https://t.me/higherrrrrrrfun"
+                  href="https://t.me/higherrrrrrrhub"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-green-500/60 hover:text-green-500 font-mono text-xs"
