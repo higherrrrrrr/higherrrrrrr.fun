@@ -2,6 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install build dependencies first
+RUN apk add --no-cache python3 make g++ py3-pip
+
 # Install dependencies first (for better caching)
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --network-timeout 600000 --prefer-offline
@@ -15,9 +18,6 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     DISABLE_ESLINT_PLUGIN=true \
     NEXT_SHARP_PATH=/app/node_modules/sharp
-
-# Install additional dependencies needed for sharp
-RUN apk add --no-cache python3 make g++
 
 # Rebuild sharp for alpine
 RUN npm rebuild sharp
