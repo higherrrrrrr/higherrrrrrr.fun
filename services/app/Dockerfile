@@ -19,9 +19,6 @@ ENV NODE_ENV=production \
     DISABLE_ESLINT_PLUGIN=true \
     NEXT_SHARP_PATH=/app/node_modules/sharp
 
-# Rebuild sharp for alpine
-RUN npm rebuild sharp
-
 # Build the app
 RUN yarn build
 
