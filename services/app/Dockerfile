@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -7,15 +7,20 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile --network-timeout 600000 --prefer-offline
 
 # Copy all source files
-# Instead of copying individual directories, copy everything
-# since we have missing dependencies (components, api, onchain directories)
 COPY . .
 
 # Set build environment variables
 ENV NODE_ENV=production \
     PORT=3000 \
     NEXT_TELEMETRY_DISABLED=1 \
-    DISABLE_ESLINT_PLUGIN=true
+    DISABLE_ESLINT_PLUGIN=true \
+    NEXT_SHARP_PATH=/app/node_modules/sharp
+
+# Install additional dependencies needed for sharp
+RUN apk add --no-cache python3 make g++
+
+# Rebuild sharp for alpine
+RUN npm rebuild sharp
 
 # Build the app
 RUN yarn build
