@@ -1,7 +1,5 @@
 import { createPublicClient, http, formatEther } from 'viem';
 import { base } from 'wagmi/chains';
-import { getCurrentChain } from '../components/Web3Provider';
-import { higherrrrrrrAbi } from './generated';
 
 // Create public client
 const publicClient = createPublicClient({
@@ -63,110 +61,6 @@ const PoolABI = [
     "type": "function"
   }
 ] as const;
-
-export async function getTokenState(tokenAddress: string): Promise<TokenState> {
-
-  try {
-    // Get token data
-    const [name, symbol, totalSupply, currentPrice, maxSupply, marketType, bondingCurve, convictionNFT, 
-           convictionThreshold, minOrderSize, totalFeeBps, poolAddress, priceLevels] = await publicClient.multicall({
-      contracts: [
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'name'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'symbol'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'totalSupply'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'getCurrentPrice'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'MAX_TOTAL_SUPPLY'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'marketType'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'bondingCurve'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'convictionNFT'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'CONVICTION_THRESHOLD'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'MIN_ORDER_SIZE'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'TOTAL_FEE_BPS'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'poolAddress'
-        },
-        {
-          address: tokenAddress as `0x${string}`,
-          abi: higherrrrrrrAbi,
-          functionName: 'getPriceLevels'
-        }
-      ]
-    });
-
-    // Remove the old price levels loop and use the returned data
-    const formattedPriceLevels = priceLevels.result?.map((level, index) => ({
-      price: index === 0 ? '0' : formatEther(level.price),
-      name: level.name
-    }));
-
-    return {
-      name: name.result,
-      symbol: symbol.result,
-      totalSupply: formatEther(totalSupply.result || BigInt(0)),
-      currentPrice: formatEther(currentPrice.result || BigInt(0)),
-      maxSupply: formatEther(maxSupply.result || BigInt(0)),
-      marketType: Number(marketType.result || 0),
-      bondingCurve: bondingCurve.result?.toString() || '',
-      convictionNFT: convictionNFT.result?.toString() || '',
-      CONVICTION_THRESHOLD: formatEther(convictionThreshold.result || BigInt(0)),
-      MIN_ORDER_SIZE: formatEther(minOrderSize.result || BigInt(0)),
-      TOTAL_FEE_BPS: Number(totalFeeBps.result || 0),
-      poolAddress: poolAddress.result?.toString() || '',
-      priceLevels: formattedPriceLevels,
-      currentName: name.result?.toString() || '',
-      MAX_TOTAL_SUPPLY: formatEther(maxSupply.result || BigInt(0))
-    };
-  } catch (error) {
-    console.error('Error getting token state:', error);
-    throw error;
-  }
-}
 
 export async function getTokenStates(tokenAddresses: string[]): Promise<{ [key: string]: TokenState }> {
   console.log('Fetching states for tokens:', tokenAddresses);
@@ -322,20 +216,34 @@ export async function getUniswapQuote(
   }
 }
 
-export async function getTokenBalance(tokenAddress: string, walletAddress: string): Promise<string> {
+export async function getTokenState(address: string): Promise<TokenState> {
   try {
-    const balance = await publicClient.readContract({
-      address: tokenAddress as `0x${string}`,
-      abi: higherrrrrrrAbi,
-      functionName: 'balanceOf',
-      args: [walletAddress as `0x${string}`]
+    const data = await publicClient.readContract({
+      address: address as `0x${string}`,
+      abi: PoolABI,
+      functionName: 'slot0'
     });
-
-    return formatEther(balance || BigInt(0));
+    
+    // Transform the data into TokenState format
+    return {
+      name: '',
+      symbol: '',
+      totalSupply: '0',
+      currentPrice: formatEther(data[0]),
+      maxSupply: '0',
+      priceLevels: [],
+      currentName: '',
+      marketType: 0,
+      bondingCurve: '',
+      convictionNFT: '',
+      CONVICTION_THRESHOLD: '0',
+      MIN_ORDER_SIZE: '0',
+      TOTAL_FEE_BPS: 0,
+      MAX_TOTAL_SUPPLY: '0',
+      poolAddress: address
+    };
   } catch (error) {
-    console.error('Error getting token balance:', error);
-    return '0';
+    console.error('Error getting token state:', error);
+    throw error;
   }
 }
-
-// Rest of the file stays the same... 

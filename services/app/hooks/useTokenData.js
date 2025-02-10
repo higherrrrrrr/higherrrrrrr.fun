@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
-import { getTokenState, getTokenBalance } from '../onchain';
+import { 
+  getTopTradingTokens, 
+  getLatestTokens,
+  getTokenState,
+  // ... same functions
+} from '@/lib/client-api';
 import { getEthPrice } from '../api/price';
 import { getTokenCreator, getToken } from '../api/token';
+import { getTokenState as getTokenStateFromLib } from '../lib/api';
 
 export function useTokenData(address, userAddress) {
   const [tokenState, setTokenState] = useState(null);
@@ -11,33 +17,34 @@ export function useTokenData(address, userAddress) {
   const [tokenDetails, setTokenDetails] = useState(null);
   const [isCreator, setIsCreator] = useState(false);
 
-  async function refreshTokenState() {
-    if (typeof address === 'string') {
-      const state = await getTokenState(address);
+  const refreshTokenState = async () => {
+    if (!address) return;
+    try {
+      const state = await getTokenStateFromLib(address);
       setTokenState(state);
       
       if (userAddress) {
         const balance = await getTokenBalance(address, userAddress);
         setUserBalance(balance);
       }
+    } catch (error) {
+      console.error('Failed to fetch token state:', error);
     }
-  }
+  };
 
   useEffect(() => {
-    const updateBalance = async () => {
-      if (userAddress && address) {
+    const fetchBalance = async () => {
+      if (!address || !userAddress) return;
+      try {
         const balance = await getTokenBalance(address, userAddress);
         setUserBalance(balance);
-      } else {
+      } catch (error) {
+        console.error('Failed to fetch balance:', error);
         setUserBalance('0');
       }
     };
-
-    updateBalance();
-    
-    const balanceInterval = setInterval(updateBalance, 15000);
-    return () => clearInterval(balanceInterval);
-  }, [userAddress, address]);
+    fetchBalance();
+  }, [address, userAddress]);
 
   useEffect(() => {
     const checkCreator = async () => {

@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getTopTradingTokens, getLatestTokens } from '../../api/tokens';
-import { getTokenState } from '../../onchain/tokenState';
+import { getTopTradingTokens, getLatestTokens, getTokenState } from '../../lib/api';
 import TokenCard from '../../components/TokenCard';
 
 // Constants

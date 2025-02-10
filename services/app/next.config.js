@@ -1,5 +1,6 @@
 const path = require('path');
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: false,
@@ -12,11 +13,13 @@ const nextConfig = {
       net: false,
       tls: false
     };
+    config.experiments = { ...config.experiments, topLevelAwait: true };
     return config;
   },
   // Add this to ensure path aliases work
   experimental: {
-    esmExternals: 'loose'
+    esmExternals: 'loose',
+    serverActions: true,
   }
 }
 

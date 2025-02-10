@@ -1,86 +1,87 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { getEthPrice } from '../api/price';
+import { getEthPrice } from '@/lib/client-api';
+import type { Token } from '@/lib/types';
 import { useState, useEffect } from 'react';
 
-// Add a loading skeleton component
-const TokenCardSkeleton = () => (
-  <div className="block p-6 border border-green-500/20 rounded-lg animate-pulse">
-    <div className="flex items-start space-x-4">
-      <div className="w-12 h-12 bg-green-500/20 rounded-full flex-shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="h-7 bg-green-500/20 w-32 rounded mb-2" />
-        <div className="h-5 bg-green-500/20 w-48 rounded mb-4" />
-        <div className="mt-4">
-          <div className="h-4 bg-green-500/20 w-24 rounded mb-1" />
-          <div className="h-5 bg-green-500/20 w-32 rounded" />
-        </div>
-        <div className="mt-3">
-          <div className="h-4 bg-green-500/20 w-full rounded mb-1" />
-          <div className="h-1.5 bg-green-500/20 rounded-full" />
-        </div>
-        <div className="mt-3">
-          <div className="h-6 bg-green-500/20 w-40 rounded" />
+interface TokenCardProps {
+  token: Token;
+  loading?: boolean;
+}
+
+export function TokenCardSkeleton() {
+  return (
+    <div className="block p-6 border border-green-500/20 rounded-lg animate-pulse">
+      <div className="flex items-start space-x-4">
+        <div className="w-12 h-12 bg-green-500/20 rounded-full flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="h-7 bg-green-500/20 w-32 rounded mb-2" />
+          <div className="h-5 bg-green-500/20 w-48 rounded mb-4" />
+          <div className="mt-4">
+            <div className="h-4 bg-green-500/20 w-24 rounded mb-1" />
+            <div className="h-5 bg-green-500/20 w-32 rounded" />
+          </div>
+          <div className="mt-3">
+            <div className="h-4 bg-green-500/20 w-full rounded mb-1" />
+            <div className="h-1.5 bg-green-500/20 rounded-full" />
+          </div>
+          <div className="mt-3">
+            <div className="h-6 bg-green-500/20 w-40 rounded" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+}
 
-export default function TokenCard({ token, tokenState, isLoading }) {
+export default function TokenCard({ token, loading }: TokenCardProps) {
   const [marketCap, setMarketCap] = useState('...');
   const [stateInfo, setStateInfo] = useState({ current: null, next: null, currentPrice: null, nextPrice: null });
 
   useEffect(() => {
-    if (tokenState) {
-      getMarketCap(tokenState).then(cap => setMarketCap(cap));
-      
-      // Get current and next state info
-      if (tokenState.priceLevels) {
-        const currentIndex = tokenState.priceLevels.findIndex(level => level.name === tokenState.name);
-        const currentState = tokenState.priceLevels[currentIndex];
-        const nextState = tokenState.priceLevels[currentIndex + 1];
+    if (token.priceLevels) {
+      const currentIndex = token.priceLevels.findIndex(level => level.name === token.name);
+      const currentState = token.priceLevels[currentIndex];
+      const nextState = token.priceLevels[currentIndex + 1];
 
-        setStateInfo({
-          current: currentState?.name || tokenState.name,
-          next: nextState?.name || 'FINAL FORM',
-          currentPrice: parseFloat(tokenState.currentPrice),
-          nextPrice: nextState?.price || currentState?.price
-        });
-      }
+      setStateInfo({
+        current: currentState?.name || token.name,
+        next: nextState?.name || 'FINAL FORM',
+        currentPrice: parseFloat(token.currentPrice),
+        nextPrice: nextState?.price || currentState?.price
+      });
     }
-  }, [tokenState]);
+  }, [token.priceLevels, token.currentPrice, token.name]);
 
-  const getMarketCap = async (tokenState) => {
-    if (!tokenState) {
-      return '0';
-    }
+  useEffect(() => {
+    getMarketCap(token).then(cap => setMarketCap(cap));
+  }, [token]);
+
+  const getMarketCap = async (token: Token) => {
+    if (!token) return '0';
     
     try {
-      const priceInEth = parseFloat(tokenState.currentPrice);
-      const ethPriceData = await getEthPrice();
+      const priceInEth = parseFloat(token.currentPrice);
+      const ethPrice = await getEthPrice();
       
-      const usdPrice = priceInEth * ethPriceData.price_usd;
-      const totalSupply = parseFloat(tokenState.totalSupply);
+      const usdPrice = priceInEth * ethPrice;
+      const totalSupply = parseFloat(token.totalSupply);
       const marketCapUsd = usdPrice * totalSupply;
       
-      if (isNaN(marketCapUsd)) {
-        return '0';
-      }
-      
+      if (isNaN(marketCapUsd)) return '0';
       return Math.floor(marketCapUsd).toLocaleString();
     } catch (error) {
       return '0';
     }
   };
 
-  const getProgress = (tokenState) => {
-    if (!tokenState?.priceLevels || !tokenState?.currentPrice) return 0;
+  const getProgress = (token: Token) => {
+    if (!token.priceLevels || !token.currentPrice) return 0;
     
-    const currentIndex = tokenState.priceLevels.findIndex(level => level.name === tokenState.name);
-    const currentPrice = parseFloat(tokenState.currentPrice);
-    const currentThreshold = parseFloat(tokenState.priceLevels[currentIndex]?.price || 0);
-    const nextThreshold = parseFloat(tokenState.priceLevels[currentIndex + 1]?.price || currentThreshold);
+    const currentIndex = token.priceLevels.findIndex(level => level.name === token.name);
+    const currentPrice = parseFloat(token.currentPrice);
+    const currentThreshold = parseFloat(token.priceLevels[currentIndex]?.price || '0');
+    const nextThreshold = parseFloat(token.priceLevels[currentIndex + 1]?.price || currentThreshold.toString());
     
     if (currentThreshold === nextThreshold) return 100;
     
@@ -88,7 +89,7 @@ export default function TokenCard({ token, tokenState, isLoading }) {
     return Math.min(Math.max(progress, 0), 100);
   };
 
-  if (isLoading || !token) {
+  if (loading || !token) {
     return <TokenCardSkeleton />;
   }
 
@@ -110,23 +111,23 @@ export default function TokenCard({ token, tokenState, isLoading }) {
         )}
         <div className="flex-1 min-w-0">
           <p className="text-2xl font-mono text-green-500 mb-1 truncate">
-            ${tokenState?.symbol || token.symbol}
+            ${token.symbol}
           </p>
           <div className="text-sm text-green-500/60 mb-4">
-            {tokenState?.marketType === 'bonding_curve' && (
+            {token.marketType === 'bonding_curve' && (
               <div className="flex items-center space-x-2 overflow-hidden">
-                <span className="truncate">{tokenState?.priceLevels[tokenState?.currentLevel - 1]?.name}</span>
+                <span className="truncate">{token.priceLevels[token.currentLevel - 1]?.name}</span>
                 <span className="text-green-500/40 flex-shrink-0">→</span>
                 <span className="text-green-500/40 truncate">
-                  {tokenState?.priceLevels[tokenState?.currentLevel]?.name || 'FINAL FORM'}
+                  {token.priceLevels[token.currentLevel]?.name || 'FINAL FORM'}
                 </span>
                 <span className="text-green-500/40 ml-2 flex-shrink-0">
-                  ({tokenState?.currentLevel}/{tokenState?.priceLevels?.length})
+                  ({token.currentLevel}/{token.priceLevels?.length})
                 </span>
               </div>
             )}
           </div>
-          {tokenState && (
+          {token && (
             <>
               <div className="mt-4">
                 <p className="text-xs text-green-500/40 mb-1">Market Cap</p>
@@ -138,12 +139,12 @@ export default function TokenCard({ token, tokenState, isLoading }) {
                   <div className="mt-3">
                     <div className="flex justify-between text-xs text-green-500/40 mb-1">
                       <span className="truncate">Progress to {stateInfo.next}</span>
-                      <span className="flex-shrink-0">{Math.round(getProgress(tokenState))}%</span>
+                      <span className="flex-shrink-0">{Math.round(getProgress(token))}%</span>
                     </div>
                     <div className="h-1.5 bg-green-500/10 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-green-500 rounded-full transition-all duration-500"
-                        style={{ width: `${getProgress(tokenState)}%` }}
+                        style={{ width: `${getProgress(token)}%` }}
                       />
                     </div>
                   </div>

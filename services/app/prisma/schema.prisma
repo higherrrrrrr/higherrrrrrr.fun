@@ -1,0 +1,131 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Token {
+  id             String              @id @default(cuid())
+  address        String              @unique
+  symbol         String
+  name           String
+  price          Float?
+  priceChange24h Float?
+  volume24h      Float?
+  holders        Int?
+  totalSupply    String?
+  marketType     String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  tweets         Tweet[]
+  priceHistory   PriceHistoryPoint[]
+  liquidityPools LiquidityPool[]
+  tokenBalances  TokenBalance[]
+  transactions   Transaction[]
+  marketData     MarketData[]
+  distribution   TokenDistribution?
+}
+
+model TokenBalance {
+  id            String   @id @default(cuid())
+  walletAddress String
+  token         Token    @relation(fields: [tokenAddress], references: [address])
+  tokenAddress  String
+  amount        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([walletAddress, tokenAddress])
+}
+
+model Tweet {
+  id           String   @id @default(cuid())
+  tweetId      String   @unique
+  text         String
+  authorId     String
+  tokenAddress String
+  createdAt    DateTime @default(now())
+  inReplyTo    String?  @map("in_reply_to")
+  token        Token    @relation(fields: [tokenAddress], references: [address])
+}
+
+model TokenDistribution {
+  id           String   @id @default(cuid())
+  token        Token    @relation(fields: [tokenAddress], references: [address])
+  tokenAddress String   @unique
+  distribution Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PriceHistoryPoint {
+  id           String   @id @default(cuid())
+  token        Token    @relation(fields: [tokenAddress], references: [address])
+  tokenAddress String
+  price        Float
+  timestamp    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([tokenAddress, timestamp])
+}
+
+model LiquidityPool {
+  id           String   @id @default(cuid())
+  token        Token    @relation(fields: [tokenAddress], references: [address])
+  tokenAddress String
+  exchange     String
+  address      String
+  liquidity    Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([tokenAddress, exchange])
+}
+
+model MarketData {
+  id                String   @id @default(cuid())
+  tokenAddress      String
+  price             Float?
+  marketCap         Float?
+  volume24h         Float?
+  volumeChange24h   Float?
+  priceChange24h    Float?
+  priceChange7d     Float?
+  priceChange30d    Float?
+  volume7d          Float?
+  volume30d         Float?
+  totalLiquidity    Float?
+  holders           Int?
+  totalSupply       String?
+  circulatingSupply String?
+  lastUpdated       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  token             Token    @relation(fields: [tokenAddress], references: [address])
+
+  @@unique([tokenAddress])
+  @@index([lastUpdated])
+}
+
+model Transaction {
+  id           String   @id @default(cuid())
+  timestamp    DateTime
+  fromAddress  String
+  toAddress    String
+  amount       String
+  price        Float
+  value        Float
+  signature    String   @unique @map("tx_signature")
+  token        Token    @relation(fields: [tokenAddress], references: [address])
+  tokenAddress String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([fromAddress])
+  @@index([toAddress])
+  @@index([timestamp])
+}

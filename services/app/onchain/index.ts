@@ -1,4 +1,4 @@
-export { getTokenState, getTokenStates, getUniswapQuote, getTokenBalance } from './tokenState';
+export { getTokenState, getTokenStates, getUniswapQuote } from './tokenState';
 export { getProgressToNextLevel } from './tokenState';
 export { higherrrrrrrAbi, higherrrrrrrFactoryAbi } from './generated';
 export * from './config';

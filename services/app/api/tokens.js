@@ -54,38 +54,4 @@ export async function getLatestTokens() {
     console.error('Latest tokens fetch failed:', error);
     throw error;
   }
-}
-
-export async function getTopTradingTokens() {
-  try {
-    const response = await fetch(
-      `${getApiUrl()}/tokens/top-trading`,
-      {
-        headers: {
-          'Authorization': getAuthHeader()
-        }
-      }
-    );
-    
-    // Log the raw response for debugging
-    const text = await response.text();
-
-    try {
-      const data = JSON.parse(text);
-      console.log('Parsed top trading tokens:', data);
-      
-      if (!data.tokens) {
-        throw new Error('No tokens array in response');
-      }
-      
-      return {
-        tokens: data.tokens,
-        updatedAt: data.updated_at
-      };
-    } catch (parseError) {
-      throw parseError;
-    }
-  } catch (error) {
-    throw error;
-  }
 } 
