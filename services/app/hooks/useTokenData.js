@@ -23,7 +23,7 @@ export function useTokenData(address, userAddress) {
       
       // Update user balance if wallet is connected
       if (userAddress) {
-        const balanceResponse = await fetch(`/api/${address}/balance/${userAddress}`);
+        const balanceResponse = await fetch(`/api/${userAddress}/balance/${address}`);
         const balanceData = await balanceResponse.json();
         
         if (!balanceResponse.ok) {
@@ -53,7 +53,7 @@ export function useTokenData(address, userAddress) {
     const updateBalance = async () => {
       if (userAddress && address) {
         try {
-          const balanceResponse = await fetch(`/api/${address}/balance/${userAddress}`);
+          const balanceResponse = await fetch(`/api/${userAddress}/balance/${address}`);
           const balanceData = await balanceResponse.json();
           
           if (!balanceResponse.ok) {

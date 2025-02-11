@@ -4,10 +4,14 @@
  * @returns {string} - The formatted price
  */
 export function formatUsdPrice(price) {
-  if (price < 0.000001) return price.toExponential(2);
-  if (price < 0.01) return price.toFixed(6);
-  if (price < 1) return price.toFixed(4);
-  return price.toFixed(2);
+  // Convert to number and handle invalid inputs
+  const num = Number(price);
+  if (isNaN(num) || !isFinite(num)) return '0.00';
+  
+  if (num < 0.000001) return num.toExponential(2);
+  if (num < 0.01) return num.toFixed(6);
+  if (num < 1) return num.toFixed(4);
+  return num.toFixed(2);
 }
 
 /**

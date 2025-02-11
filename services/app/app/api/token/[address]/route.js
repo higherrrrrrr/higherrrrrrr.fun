@@ -24,7 +24,7 @@ const PoolABI = [
 ];
 
 export async function GET(request, { params }) {
-  const address = params.address;
+  const { address }  = await params;
   
   // Validate address format
   if (!address?.match(/^0x[a-fA-F0-9]{40}$/)) {
