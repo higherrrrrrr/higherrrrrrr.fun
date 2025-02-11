@@ -1,28 +1,31 @@
 import { useState, useEffect } from 'react';
-import { getTokenState, getTokenBalance } from '../onchain';
-import { getEthPrice } from '../api/price';
-import { getTokenCreator, getToken } from '../api/token';
+import { getTokenBalance } from '../onchain';
 
 export function useTokenData(address, userAddress) {
   const [tokenState, setTokenState] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [ethPrice, setEthPrice] = useState(0);
   const [userBalance, setUserBalance] = useState('0');
-  const [tokenDetails, setTokenDetails] = useState(null);
   const [isCreator, setIsCreator] = useState(false);
 
   const fetchTokenData = async () => {
+    if (!address) return;
+    
     try {
+      setLoading(true);
       const response = await fetch(`/api/token/${address}`);
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch token data');
+      }
       
       setTokenState(data);
       setIsCreator(userAddress?.toLowerCase() === data.creator?.toLowerCase());
       
-      // User balance would come from the wallet connection
-      // This is just a placeholder
+      // Update user balance if wallet is connected
       if (userAddress) {
-        setUserBalance('0');
+        const balance = await getTokenBalance(address, userAddress);
+        setUserBalance(balance);
       }
     } catch (error) {
       console.error('Error fetching token data:', error);
@@ -31,12 +34,16 @@ export function useTokenData(address, userAddress) {
     }
   };
 
+  // Initial data fetch
   useEffect(() => {
-    if (address) {
-      fetchTokenData();
-    }
+    fetchTokenData();
+    
+    // Set up refresh interval
+    const refreshInterval = setInterval(fetchTokenData, 15000);
+    return () => clearInterval(refreshInterval);
   }, [address, userAddress]);
 
+  // Update balance when wallet changes
   useEffect(() => {
     const updateBalance = async () => {
       if (userAddress && address) {
@@ -48,79 +55,13 @@ export function useTokenData(address, userAddress) {
     };
 
     updateBalance();
-    
-    const balanceInterval = setInterval(updateBalance, 15000);
-    return () => clearInterval(balanceInterval);
   }, [userAddress, address]);
-
-  useEffect(() => {
-    const checkCreator = async () => {
-      if (userAddress) {
-        try {
-          const creatorData = await getTokenCreator(address);
-          setIsCreator(
-            creatorData.creator.toLowerCase() === userAddress.toLowerCase()
-          );
-        } catch (error) {
-          setIsCreator(false);
-        } 
-      }
-    };
-    checkCreator();
-  }, [address, userAddress]);
-
-  useEffect(() => {
-    const fetchTokenDetails = async () => {
-      if (!address) return;
-      try {
-        const details = await getToken(address);
-        setTokenDetails(details);
-      } catch (error) {
-        // Silently fail
-      }
-    };
-    fetchTokenDetails();
-  }, [address]);
-
-  useEffect(() => {
-    if (address) {
-      setLoading(true);
-      Promise.all([
-        fetchTokenData(),
-        getEthPrice()
-      ])
-        .then(([_, priceData]) => {
-          setEthPrice(priceData.price_usd);
-        })
-        .catch(console.error)
-        .finally(() => setLoading(false));
-
-      const tokenRefreshTimer = setInterval(() => {
-        fetchTokenData().catch(console.error);
-      }, 15000);
-
-      return () => clearInterval(tokenRefreshTimer);
-    }
-  }, [address]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      getEthPrice()
-        .then(priceData => {
-          setEthPrice(priceData.price_usd);
-        })
-        .catch(console.error);
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return {
     tokenState,
     loading,
-    ethPrice,
     userBalance,
-    tokenDetails,
+    tokenDetails: tokenState?.details,
     isCreator,
     refreshTokenState: fetchTokenData
   };
