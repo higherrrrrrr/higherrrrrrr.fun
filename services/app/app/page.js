@@ -3,113 +3,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getTopTradingTokens, getLatestTokens } from '../api/tokens';
-import { getTokenState } from '../onchain/tokenState';
-import TokenCard from '../components/TokenCard';
-import featuredProjects from '../data/featuredProjects';
-import { highliteTokens, ascendingTokens } from '../data/tokens';
 import { GlitchText } from '../components/GlitchText';
 import { formatCountdown } from '../utils/formatters';
 import { getHighliteProjects } from '../utils/projects';
 
 // Constants
-const TOKENS_PER_PAGE = 24;
-const snakeStyles = `
-  .snake-border {
-    position: relative;
-    border: 2px solid rgba(0, 255, 0, 0.15);
-    transition: transform 0.3s;
-    background: rgba(0, 0, 0, 0.8);
-  }
-  
-  .snake-border:hover {
-    transform: scale(1.02);
-  }
-
-  .snake-border::after {
-    content: "";
-    position: absolute;
-    top: 16px; left: 16px; right: 16px; bottom: 16px;
-    border: 2px solid rgba(0, 255, 0, 0.15);
-    border-radius: 8px;
-    pointer-events: none;
-    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.05);
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  
-  .snake-border:hover::after {
-    border-color: rgba(0, 255, 0, 0.3);
-    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.1);
-  }
-  
-  .snake-border:hover::before {
-    content: "";
-    position: absolute;
-    top: -2px; left: -2px; right: -2px; bottom: -2px;
-    border-radius: 8px;
-    pointer-events: none;
-    background: linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 0,
-                linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 100%,
-                linear-gradient(0deg, #00ff00 50%, transparent 50%) 0 0,
-                linear-gradient(0deg, #00ff00 50%, transparent 50%) 100% 0;
-    background-repeat: no-repeat;
-    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-    animation: snake-travel 6s infinite linear;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
-  }
-
-  .timer-snake-border {
-    position: relative;
-    border: 2px solid rgba(0, 0, 0, 0.5);
-  }
-  
-  .timer-snake-border::before {
-    content: "";
-    position: absolute;
-    top: -2px; left: -2px; right: -2px; bottom: -2px;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    pointer-events: none;
-    background: linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 0,
-                linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 100%,
-                linear-gradient(0deg, #00ff00 50%, transparent 50%) 0 0,
-                linear-gradient(0deg, #00ff00 50%, transparent 50%) 100% 0;
-    background-repeat: no-repeat;
-    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-    animation: snake-travel 6s infinite linear;
-    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
-  }
-
-  @keyframes snake-travel {
-    0% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
-    }
-    12.5% {
-      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
-    }
-    25% {
-      background-position: 100% 0, -100% 100%, 0 100%, 100% 0;
-    }
-    37.5% {
-      background-position: 100% 0, -100% 100%, 0 100%, 100% -100%;
-    }
-    50% {
-      background-position: 0 0, 0 100%, 0 100%, 100% -100%;
-    }
-    62.5% {
-      background-position: 0 0, 0 100%, 0 0, 100% -100%;
-    }
-    75% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
-    }
-    87.5% {
-      background-position: 100% 0, -100% 100%, 0 0, 100% 0;
-    }
-    100% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
-    }
-  }
-`;
+const TOKENS_PER_PAGE = 24
 
 export default function Home() {
   const [topTokens, setTopTokens] = useState([]);
