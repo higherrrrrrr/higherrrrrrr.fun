@@ -67,7 +67,7 @@
       linear-gradient(0deg, transparent 50%, #22c55e 50%) 100% 0;
     background-repeat: no-repeat;
     background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-    animation: snake-border 2s infinite linear;
+    @apply animate-snake-border;
   }
 
   .snake-border:hover::before {
