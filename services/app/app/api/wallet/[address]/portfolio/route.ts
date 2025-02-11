@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
-import { PortfolioSchema } from '../../../../../lib/schemas';
+import { createApiResponse } from '@/lib/api-utils';
+import { priceService } from '@/lib/price-service';
+import { SOL_MINT, SOL_DECIMALS, DEFAULT_DECIMALS, API_ENDPOINTS, ERROR_MESSAGES, HTTP_STATUS } from '@/lib/constants';
 import type { Portfolio, TokenBalance } from '@/lib/types';
+import { env } from '@/lib/env.mjs';
 
 export async function GET(
   request: Request,
@@ -12,90 +14,90 @@ export async function GET(
   
   if (!address) {
     return createApiResponse({
-      error: 'Wallet address is required',
-      status: 400
+      error: ERROR_MESSAGES.NO_WALLET_ADDRESS,
+      status: HTTP_STATUS.BAD_REQUEST
     });
   }
 
   try {
-    const tokens = await prisma.tokenBalance.findMany({
-      where: {
-        walletAddress: address,
-        amount: { gt: '0' }  // Use string comparison
-      },
-      include: {
-        token: {
-          include: {
-            marketData: true  // Get all market data
-          }
-        }
-      }
-    });
-
-    if (tokens.length === 0) {
-      const emptyPortfolio = {
-        tokens: [],
-        totalValue: 0,
-        change24h: 0,
-        lastUpdated: Date.now()
-      };
-      return createApiResponse({ data: emptyPortfolio, status: 200 });
+    const response = await fetch(API_ENDPOINTS.HELIUS_BALANCES(address));
+    
+    if (!response.ok) {
+      throw new Error(ERROR_MESSAGES.HELIUS_API_FAILED);
     }
 
-    // Process the tokens to get latest market data
-    const processedTokens = tokens.map(t => {
-      const latestMarketData = t.token.marketData.reduce((latest, current) => {
-        return !latest || current.updatedAt > latest.updatedAt ? current : latest;
-      }, null);
+    const data = await response.json();
 
-      const price = latestMarketData?.price ?? 0;
-      const amount = parseFloat(t.amount) || 0;
-      const value = price * amount;
-      const priceChange24h = latestMarketData?.priceChange24h ?? 0;
+    // Get all token addresses including SOL
+    const tokenAddresses = [
+      ...(data.nativeBalance > 0 ? [SOL_MINT] : []),
+      ...(data.tokens?.map((t: any) => t.mint) || [])
+    ];
 
-      return {
-        address: t.token.address,
-        symbol: t.token.symbol || '',
-        name: t.token.name || '',
-        amount: amount.toString(),
-        price: price.toString(),
-        value: value.toString(),
-        priceChange24h: priceChange24h.toString(),
-        lastUpdated: latestMarketData?.updatedAt || new Date()
-      };
-    });
+    // Get prices for all tokens in one batch
+    const prices = await priceService.getTokenPrices(tokenAddresses);
 
-    const totalValue = calculateTotalValue(processedTokens);
-    const change24h = calculatePortfolioChange(processedTokens);
+    const tokens: TokenBalance[] = [];
 
-    const portfolioData = {
-      tokens: processedTokens,
-      totalValue: totalValue.toString(),
-      change24h: change24h.toString(),
+    // Add SOL if present
+    if (data.nativeBalance > 0) {
+      const solBalance = data.nativeBalance / Math.pow(10, DEFAULT_DECIMALS);
+      const solPrice = prices.get(SOL_MINT)?.price || 0;
+      
+      tokens.push({
+        address: SOL_MINT,
+        symbol: 'SOL',
+        name: 'Solana',
+        amount: solBalance.toString(),
+        price: solPrice.toString(),
+        value: (solBalance * solPrice).toString(),
+        priceChange24h: (prices.get(SOL_MINT)?.price_change_24h || 0).toString(),
+        lastUpdated: new Date(prices.get(SOL_MINT)?.last_updated || Date.now())
+      });
+    }
+
+    // Add SPL tokens
+    if (data.tokens) {
+      for (const token of data.tokens) {
+        const decimals = token.decimals || DEFAULT_DECIMALS;
+        const balance = token.amount / Math.pow(10, decimals);
+        const price = prices.get(token.mint)?.price || 0;
+        const value = balance * price;
+
+        tokens.push({
+          address: token.mint,
+          symbol: token.symbol || 'Unknown',
+          name: token.name || 'Unknown Token',
+          amount: balance.toString(),
+          price: price.toString(),
+          value: value.toString(),
+          priceChange24h: (prices.get(token.mint)?.price_change_24h || 0).toString(),
+          lastUpdated: new Date(prices.get(token.mint)?.last_updated || Date.now())
+        });
+      }
+    }
+
+    // Sort by value descending
+    const sortedTokens = tokens.sort((a, b) => 
+      parseFloat(b.value) - parseFloat(a.value)
+    );
+
+    const portfolio = {
+      tokens: sortedTokens,
+      totalValue: sortedTokens.reduce((sum, t) => sum + parseFloat(t.value), 0),
+      change24h: sortedTokens.reduce((sum, t) => sum + parseFloat(t.priceChange24h), 0),
       lastUpdated: Date.now()
     };
 
-    const validatedPortfolio = PortfolioSchema.parse(portfolioData);
-    return createApiResponse({ data: validatedPortfolio, status: 200 });
-
+    return createApiResponse({ 
+      data: portfolio, 
+      status: HTTP_STATUS.OK 
+    });
   } catch (error) {
-    return handleApiError(error);
+    console.error(ERROR_MESSAGES.FETCH_PORTFOLIO_FAILED, error);
+    return createApiResponse({ 
+      error: ERROR_MESSAGES.FETCH_PORTFOLIO_FAILED,
+      status: HTTP_STATUS.SERVER_ERROR 
+    });
   }
-}
-
-function calculateTotalValue(tokens: any[]): number {
-  return tokens.reduce((sum, t) => sum + (t.value || 0), 0);
-}
-
-function calculatePortfolioChange(tokens: any[]): number {
-  const totalValue = calculateTotalValue(tokens);
-  const previousValue = tokens.reduce((sum, t) => {
-    const priceChange = t.priceChange24h || 0;
-    const currentValue = t.value || 0;
-    return sum + (currentValue / (1 + (priceChange / 100)));
-  }, 0);
-  
-  return previousValue > 0 
-    ? ((totalValue - previousValue) / previousValue) * 100 
-    : 0;
 } 

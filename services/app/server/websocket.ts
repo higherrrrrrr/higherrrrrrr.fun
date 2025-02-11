@@ -1,98 +1,157 @@
 import WebSocket from 'ws';
-import { createServer } from 'http';
-import { helius } from '../lib/helius';
-import { connection } from '../lib/solana';
 import { PublicKey } from '@solana/web3.js';
+import { env } from './env';
+import { wsUrl } from './connections';
+import { getTokenBalance } from '@/lib/utils/solana';
 
-const port = process.env.WS_PORT || 8080;
-const wss = new WebSocket.Server({ port: Number(port) });
+const serverPort = 8080; // Use fixed port instead of parsing from URL
+const heliusWsUrl = env.HELIUS_WS_URL;
 
-console.log(`WebSocket server starting on port ${port}`);
+console.log('Starting WebSocket server with config:', {
+  serverPort,
+  heliusWsUrl: heliusWsUrl?.replace(/api-key=[\w-]+/, 'api-key=****')
+});
 
-// Add reconnection logic for Helius WebSocket
+const wss = new WebSocket.Server({ 
+  port: serverPort,
+  perMessageDeflate: false,
+  clientTracking: true,
+  handleProtocols: (protocols) => {
+    if (!protocols) return false;
+    const protocolArray = Array.isArray(protocols) ? protocols : [protocols];
+    return protocolArray.includes('ws') ? 'ws' : false;
+  }
+});
+
+console.log(`Local WebSocket server starting on port ${serverPort}`);
+console.log('Using Helius WebSocket URL:', wsUrl.replace(/api-key=[\w-]+/, 'api-key=****'));
+
+const subscriptions = new Map<string, { type: string; address: string }>();
+const TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+
 function connectHeliusWebSocket() {
-  const heliusWs = new WebSocket(`wss://ws.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`);
+  console.log('Attempting to connect to Helius WebSocket...');
+  
+  const heliusWs = new WebSocket(wsUrl, {
+    handshakeTimeout: 10000,
+    maxPayload: 100 * 1024 * 1024
+  });
 
   heliusWs.on('open', () => {
     console.log('Connected to Helius WebSocket');
-    heliusWs.send(JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'tokenAccountSubscribe',
-      params: []
-    }));
+  });
+
+  heliusWs.on('message', async (data) => {
+    try {
+      const message = JSON.parse(data.toString());
+      
+      // Handle subscription confirmations
+      if (message.result !== undefined) {
+        console.log('Subscription confirmed with ID:', message.result);
+      }
+      
+      // Handle account updates
+      if (message.params?.result) {
+        const update = message.params.result;
+        const subscriptionId = message.params.subscription;
+        const subscription = subscriptions.get(subscriptionId);
+        
+        if (!subscription) return;
+
+        // Different handling based on subscription type
+        if (subscription.type === 'wallet') {
+          // Get updated token balances for wallet
+          const walletTokens = await getTokenBalance(subscription.address, update.accountId);
+          
+          wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({
+                type: 'walletUpdate',
+                address: subscription.address,
+                tokens: walletTokens,
+                timestamp: Date.now()
+              }));
+            }
+          });
+        } else {
+          // Token updates (price, volume, holders)
+          wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({
+                type: 'tokenUpdate',
+                address: subscription.address,
+                data: {
+                  price: update.price,
+                  volume: update.volume,
+                  holders: update.holders,
+                  timestamp: Date.now()
+                }
+              }));
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
+    }
   });
 
   heliusWs.on('error', (error) => {
-    console.error('Helius WebSocket error:', error);
-    setTimeout(connectHeliusWebSocket, 5000);
+    console.error('WebSocket error:', error);
   });
 
-  heliusWs.on('close', () => {
-    console.log('Helius WebSocket closed, attempting to reconnect...');
+  heliusWs.on('close', (code, reason) => {
+    console.log(`WebSocket connection closed (${code}): ${reason}`);
+    console.log('Attempting to reconnect in 5 seconds...');
     setTimeout(connectHeliusWebSocket, 5000);
   });
 
   return heliusWs;
 }
 
+// Initialize WebSocket connection
 const heliusWs = connectHeliusWebSocket();
 
-// Forward Helius updates to our clients
-heliusWs.on('message', (data) => {
-  const update = JSON.parse(data.toString());
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(update));
-    }
+// Handle client connections
+wss.on('connection', (ws, req) => {
+  console.log('Client connected:', {
+    headers: req.headers,
+    time: new Date().toISOString()
   });
-});
-
-// Create a map to store token subscriptions
-const tokenSubscriptions = new Map();
-
-wss.on('connection', (ws) => {
-  console.log('Client connected');
 
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message.toString());
-      console.log('Received:', data);
+      console.log('Received message:', data);
       
-      // Handle subscriptions
-      if (data.type === 'subscribe' && data.address) {
-        // Subscribe to Solana account changes if not already subscribed
-        if (!tokenSubscriptions.has(data.address)) {
-          const subscription = connection.onAccountChange(
-            new PublicKey(data.address),
-            (accountInfo, context) => {
-              wss.clients.forEach(client => {
-                if (client.readyState === WebSocket.OPEN) {
-                  client.send(JSON.stringify({
-                    type: 'accountUpdate',
-                    address: data.address,
-                    data: accountInfo,
-                    slot: context.slot
-                  }));
-                }
-              });
-            }
-          );
-          tokenSubscriptions.set(data.address, subscription);
-        }
-      }
+      // Echo back for testing
+      ws.send(JSON.stringify({ type: 'echo', data }));
     } catch (error) {
-      console.error('Error handling message:', error);
+      console.error('Failed to parse message:', error);
     }
   });
 
-  // Cleanup subscriptions on disconnect
-  ws.on('close', () => {
-    tokenSubscriptions.forEach((subscription, address) => {
-      connection.removeAccountChangeListener(subscription);
-    });
-    tokenSubscriptions.clear();
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
   });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
+
+// Handle graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Shutting down WebSocket server...');
+  heliusWs.close();
+  wss.close(() => {
+    console.log('WebSocket server closed');
+    process.exit(0);
+  });
+});
+
+wss.on('listening', () => {
+  console.log(`Local WebSocket server listening on port ${serverPort}`);
 });
 
 wss.on('error', (error) => {

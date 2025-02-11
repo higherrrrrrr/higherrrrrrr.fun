@@ -1,43 +1,62 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { helius } from '@/lib/helius';
-import { toast } from 'react-hot-toast';
 import type { HeliusToken } from '@/lib/types';
 
-const POPULAR_TOKEN_ADDRESSES = [
-  'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-  'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT
-  'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', // BONK
-  // Add more token addresses as needed
-];
+const calculateWhaleScore = (whaleCount: number): number => {
+  if (whaleCount >= 100) return 5;
+  if (whaleCount >= 50) return 4;
+  if (whaleCount >= 20) return 3;
+  if (whaleCount >= 10) return 2;
+  if (whaleCount >= 1) return 1;
+  return 0;
+};
 
-export function useHeliusTokens() {
+export function useHeliusTokens(addresses: string[]) {
   const [tokens, setTokens] = useState<HeliusToken[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    let retryTimeout: NodeJS.Timeout;
+    setIsLoading(true);
 
     async function fetchTokens() {
       try {
-        // Fetch each token's data individually
-        const tokenPromises = POPULAR_TOKEN_ADDRESSES.map(async (address) => {
-          try {
-            const response = await helius.rpc.getAsset({
-              id: address,
-              displayOptions: {
-                showFungible: true,
-              }
-            });
+        if (!addresses.length) {
+          setTokens([]);
+          return;
+        }
 
-            if (!response) return null;
+        // Fetch tokens in batches of 100 to avoid rate limits
+        const batchSize = 100;
+        const batches = [];
+        
+        for (let i = 0; i < addresses.length; i += batchSize) {
+          const batch = addresses.slice(i, i + batchSize);
+          batches.push(batch);
+        }
 
-            // Transform the response to match our HeliusToken type
-            return {
+        const allTokens: HeliusToken[] = [];
+
+        for (const batch of batches) {
+          const responses = await Promise.all(
+            batch.map(address => 
+              helius.rpc.getAsset({
+                id: address,
+                displayOptions: { showFungible: true }
+              }).catch(err => {
+                console.error(`Failed to fetch token ${address}:`, err);
+                return null;
+              })
+            )
+          );
+
+          const validTokens = responses
+            .filter((res): res is NonNullable<typeof res> => res !== null)
+            .map(response => ({
               address: response.id,
-              symbol: response.content?.metadata?.symbol || '',
-              name: response.content?.metadata?.name || '',
+              symbol: response.content?.metadata?.symbol || 'Unknown',
+              name: response.content?.metadata?.name || 'Unknown Token',
               price: response.price || 0,
               priceChange1h: response.priceChange?.h1 || 0,
               priceChange24h: response.priceChange?.h24 || 0,
@@ -49,34 +68,25 @@ export function useHeliusTokens() {
               holders: response.ownership?.holderCount || 0,
               whaleScore: calculateWhaleScore(response.ownership?.whaleCount || 0),
               metadata: {
-                name: response.content?.metadata?.name || '',
-                symbol: response.content?.metadata?.symbol || '',
+                name: response.content?.metadata?.name || 'Unknown Token',
+                symbol: response.content?.metadata?.symbol || 'Unknown',
                 image: response.content?.files?.[0]?.uri || '',
                 description: response.content?.metadata?.description || '',
                 attributes: response.content?.metadata?.attributes || []
               }
-            };
-          } catch (err) {
-            console.error(`Failed to fetch token ${address}:`, err);
-            return null;
-          }
-        });
+            }));
 
-        const results = await Promise.all(tokenPromises);
-        const validTokens = results.filter((token): token is HeliusToken => token !== null);
+          allTokens.push(...validTokens);
+        }
 
         if (mounted) {
-          setTokens(validTokens);
+          setTokens(allTokens);
           setError(null);
         }
       } catch (err) {
-        console.error('Failed to fetch Helius tokens:', err);
+        console.error('Failed to fetch tokens:', err);
         if (mounted) {
           setError(err as Error);
-          setTokens([]);
-          toast.error('Failed to fetch token data');
-          // Retry after 5 seconds
-          retryTimeout = setTimeout(fetchTokens, 5000);
         }
       } finally {
         if (mounted) {
@@ -86,20 +96,11 @@ export function useHeliusTokens() {
     }
 
     fetchTokens();
-    const interval = setInterval(fetchTokens, 30000);
 
     return () => {
       mounted = false;
-      if (retryTimeout) {
-        clearTimeout(retryTimeout);
-      }
-      clearInterval(interval);
     };
-  }, []);
+  }, [addresses]);
 
   return { tokens, isLoading, error };
-}
-
-function calculateWhaleScore(whaleCount: number): number {
-  return Math.min(whaleCount * 10, 100); // 10 whales = 100% score
 } 

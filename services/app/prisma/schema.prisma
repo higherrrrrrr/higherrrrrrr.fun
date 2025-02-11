@@ -13,6 +13,7 @@ model Token {
   address        String              @unique
   symbol         String
   name           String
+  decimals       Int                 @default(9)
   price          Float?
   priceChange24h Float?
   volume24h      Float?
@@ -26,8 +27,13 @@ model Token {
   liquidityPools LiquidityPool[]
   tokenBalances  TokenBalance[]
   transactions   Transaction[]
-  marketData     MarketData[]
+  marketData     MarketData?
   distribution   TokenDistribution?
+
+  @@index([symbol])
+  @@index([name])
+  @@index([price])
+  @@index([volume24h])
 }
 
 model TokenBalance {
@@ -67,10 +73,15 @@ model PriceHistoryPoint {
   token        Token    @relation(fields: [tokenAddress], references: [address])
   tokenAddress String
   price        Float
+  volume       Float?
+  marketCap    Float?
   timestamp    DateTime
+  interval     String   @default("1d")
   createdAt    DateTime @default(now())
 
   @@index([tokenAddress, timestamp])
+  @@index([timestamp])
+  @@index([interval])
 }
 
 model LiquidityPool {
@@ -88,8 +99,10 @@ model LiquidityPool {
 
 model MarketData {
   id                String   @id @default(cuid())
-  tokenAddress      String
+  token             Token    @relation(fields: [tokenAddress], references: [address])
+  tokenAddress      String   @unique
   price             Float?
+  confidence        Float?   @default(1)
   marketCap         Float?
   volume24h         Float?
   volumeChange24h   Float?
@@ -102,13 +115,15 @@ model MarketData {
   holders           Int?
   totalSupply       String?
   circulatingSupply String?
+  quality           Float?   @default(1)
+  source            String?
   lastUpdated       DateTime @default(now())
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  token             Token    @relation(fields: [tokenAddress], references: [address])
 
-  @@unique([tokenAddress])
   @@index([lastUpdated])
+  @@index([price])
+  @@index([volume24h])
 }
 
 model Transaction {

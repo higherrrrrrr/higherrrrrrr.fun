@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/db';
 import { getRedisClient } from '@/lib/redis';
+import { API_ENDPOINTS, ERROR_MESSAGES } from '@/lib/constants';
+import { env } from '@/lib/env.mjs';
 
 const BATCH_SIZE = 50;
 
@@ -25,7 +27,7 @@ export async function GET(request: Request) {
       const batch = mintAccounts.slice(i, i + BATCH_SIZE);
       
       const response = await fetch(
-        `https://api.helius.xyz/v0/token-metadata?api-key=${process.env.HELIUS_API_KEY}`,
+        API_ENDPOINTS.HELIUS_METADATA,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
       );
 
       if (!response.ok) {
-        throw new Error(`Helius API failed: ${response.statusText}`);
+        throw new Error(ERROR_MESSAGES.HELIUS_API_FAILED);
       }
 
       const tokens = await response.json();
@@ -48,7 +50,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Token update failed:', error);
-    return NextResponse.json({ error: 'Failed to update tokens' }, { status: 500 });
+    return NextResponse.json({ error: ERROR_MESSAGES.FETCH_TOKEN_FAILED }, { status: 500 });
   }
 }
 

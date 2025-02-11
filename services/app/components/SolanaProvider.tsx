@@ -2,14 +2,15 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { env } from '@/lib/env';
+import { env } from '@/lib/env.mjs';
 import { toast } from 'react-hot-toast';
 
-interface SolanaContextType {
+type SolanaContextType = {
   connection: Connection;
-  network: string;
   isReady: boolean;
-}
+  currentRpcIndex: number;
+  switchRpc: () => void;
+};
 
 const SolanaContext = createContext<SolanaContextType>({} as SolanaContextType);
 
@@ -29,80 +30,47 @@ export function SolanaProvider({ children }: { children: React.ReactNode }) {
   
   const [connection, setConnection] = useState(() => {
     // Use default Helius RPC if env variable is not set
-    const rpcUrl = env.NEXT_PUBLIC_HELIUS_RPC_URL || DEFAULT_HELIUS_RPC;
+    const rpcUrl = env.NEXT_PUBLIC_HELIUS_RPC_URL;
     
     return new Connection(rpcUrl, {
       commitment: 'confirmed',
-      // Only set wsEndpoint if using Helius
       wsEndpoint: rpcUrl.includes('helius') ? rpcUrl.replace('https', 'wss') : undefined,
     });
   });
 
-  useEffect(() => {
-    let mounted = true;
-    let retryTimeout: NodeJS.Timeout;
+  const switchRpc = () => {
+    const nextIndex = (currentRpcIndex + 1) % (FALLBACK_RPCS.length + 1);
+    setCurrentRpcIndex(nextIndex);
+    
+    const rpcUrl = nextIndex === -1 
+      ? env.NEXT_PUBLIC_HELIUS_RPC_URL
+      : FALLBACK_RPCS[nextIndex];
+    
+    setConnection(new Connection(rpcUrl, {
+      commitment: 'confirmed',
+      wsEndpoint: rpcUrl.includes('helius') ? rpcUrl.replace('https', 'wss') : undefined,
+    }));
+  };
 
-    async function checkConnection() {
+  useEffect(() => {
+    const checkConnection = async () => {
       try {
         await connection.getLatestBlockhash();
-        if (mounted) {
-          setIsReady(true);
-        }
+        setIsReady(true);
       } catch (error) {
-        console.error('Failed to connect to Solana:', error);
-        
-        // Try next RPC in the list
-        const nextIndex = currentRpcIndex + 1;
-        if (nextIndex < FALLBACK_RPCS.length) {
-          console.log(`Switching to fallback RPC ${nextIndex + 1}...`);
-          const newConnection = new Connection(FALLBACK_RPCS[nextIndex], {
-            commitment: 'confirmed',
-          });
-          if (mounted) {
-            setConnection(newConnection);
-            setCurrentRpcIndex(nextIndex);
-          }
-        } else {
-          // If we've tried all RPCs, wait and retry from Helius
-          console.log('All fallbacks failed, retrying with Helius...');
-          if (mounted) {
-            setCurrentRpcIndex(-1);
-            retryTimeout = setTimeout(() => {
-              const heliusUrl = env.NEXT_PUBLIC_HELIUS_RPC_URL || DEFAULT_HELIUS_RPC;
-              const heliusConnection = new Connection(heliusUrl, {
-                commitment: 'confirmed',
-                wsEndpoint: heliusUrl.replace('https', 'wss'),
-              });
-              if (mounted) {
-                setConnection(heliusConnection);
-              }
-            }, 5000);
-          }
-        }
-      }
-    }
-
-    checkConnection();
-
-    return () => {
-      mounted = false;
-      if (retryTimeout) {
-        clearTimeout(retryTimeout);
+        console.error('RPC connection failed:', error);
+        switchRpc();
       }
     };
-  }, [connection, currentRpcIndex]);
+
+    checkConnection();
+  }, [connection]);
 
   return (
-    <SolanaContext.Provider value={{ 
-      connection, 
-      network: env.NEXT_PUBLIC_SOLANA_NETWORK || 'mainnet-beta',
-      isReady 
-    }}>
+    <SolanaContext.Provider value={{ connection, isReady, currentRpcIndex, switchRpc }}>
       {children}
     </SolanaContext.Provider>
   );
 }
 
-export function useSolana() {
-  return useContext(SolanaContext);
-} 
+export const useSolana = () => useContext(SolanaContext); 

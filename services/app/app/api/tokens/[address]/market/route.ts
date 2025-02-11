@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { getRedisClient } from '@/lib/redis';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse } from '@/lib/api-utils';
 import type { MarketData } from '@/lib/types';
+import { priceService } from '@/lib/price-service';
+import { CACHE_KEYS, CACHE_TIMES, DATA_SOURCES, ERROR_MESSAGES, HTTP_STATUS } from '@/lib/constants';
 
 const redis = await getRedisClient();
 
@@ -12,119 +13,59 @@ export async function GET(
 ) {
   const { address } = params;
   
+  if (!address) {
+    return createApiResponse({
+      error: ERROR_MESSAGES.MISSING_PARAMETERS,
+      status: HTTP_STATUS.BAD_REQUEST
+    });
+  }
+
   try {
-    const cacheKey = `token:${address}:market`;
+    const cacheKey = CACHE_KEYS.MARKET(address);
     let marketData: MarketData | null = null;
     
     if (redis) {
-      marketData = await redis.get(cacheKey);
-      if (marketData) {
-        return createApiResponse({ data: marketData, status: 200 });
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        return createApiResponse({ data: JSON.parse(cached), status: HTTP_STATUS.OK });
       }
     }
 
-    // First try to get fresh data from Helius
-    const heliusResponse = await fetch(
-      `https://api.helius.xyz/v0/token-metadata?api-key=${process.env.HELIUS_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mintAccounts: [address],
-          includeOffChain: false,
-          includeMarketData: true
-        })
-      }
-    );
-
-    if (heliusResponse.ok) {
-      const [heliusToken] = await heliusResponse.json();
-      
-      if (heliusToken?.marketData) {
-        // Get additional data from database
-        const dbToken = await prisma.token.findUnique({
-          where: { address },
-          include: {
-            marketData: {
-              orderBy: { updatedAt: 'desc' },
-              take: 1
-            }
-          }
-        });
-
-        marketData = {
-          price: heliusToken.marketData.price || 0,
-          marketCap: heliusToken.marketData.marketCap || 0,
-          volume24h: heliusToken.marketData.volume24h || 0,
-          volumeChange24h: heliusToken.marketData.volumeChange24h || 0,
-          priceChange24h: heliusToken.marketData.priceChange24h || 0,
-          // Use database values for fields not available in Helius
-          priceChange7d: dbToken?.marketData[0]?.priceChange7d || 0,
-          priceChange30d: dbToken?.marketData[0]?.priceChange30d || 0,
-          volume7d: dbToken?.marketData[0]?.volume7d || 0,
-          volume30d: dbToken?.marketData[0]?.volume30d || 0,
-          totalLiquidity: dbToken?.marketData[0]?.totalLiquidity || 0,
-          holders: heliusToken.ownership?.holderCount || dbToken?.marketData[0]?.holders || 0,
-          supply: {
-            total: heliusToken.supply?.total || dbToken?.marketData[0]?.totalSupply || '0',
-            circulating: heliusToken.supply?.circulating || dbToken?.marketData[0]?.circulatingSupply || '0'
-          },
-          lastUpdated: Date.now()
-        };
-
-        // Cache the combined data
-        if (redis) {
-          await redis.set(cacheKey, marketData, { ex: 60 });
-        }
-
-        return createApiResponse({ data: marketData, status: 200 });
-      }
-    }
-
-    // Fallback to database if Helius fails or returns no data
-    const token = await prisma.token.findUnique({
-      where: { address },
-      include: {
-        marketData: {
-          orderBy: { updatedAt: 'desc' },
-          take: 1
-        }
-      }
-    });
-
-    if (!token?.marketData?.[0]) {
-      return createApiResponse({
-        error: 'Market data not found',
-        status: 404
-      });
-    }
-
-    // Use database data as fallback
+    const prices = await priceService.getTokenPrices([address]);
+    const tokenInfo = prices.get(address);
+    
     marketData = {
-      price: token.marketData[0].price || 0,
-      marketCap: token.marketData[0].marketCap || 0,
-      volume24h: token.marketData[0].volume24h || 0,
-      volumeChange24h: token.marketData[0].volumeChange24h || 0,
-      priceChange24h: token.marketData[0].priceChange24h || 0,
-      priceChange7d: token.marketData[0].priceChange7d || 0,
-      priceChange30d: token.marketData[0].priceChange30d || 0,
-      volume7d: token.marketData[0].volume7d || 0,
-      volume30d: token.marketData[0].volume30d || 0,
-      totalLiquidity: token.marketData[0].totalLiquidity || 0,
-      holders: token.marketData[0].holders || 0,
+      price: tokenInfo?.price || 0,
+      confidence: tokenInfo ? 1 : 0,
+      marketCap: tokenInfo?.market_cap || 0,
+      volume24h: tokenInfo?.volume_24h || 0,
+      volumeChange24h: 0,
+      priceChange24h: tokenInfo?.price_change_24h || 0,
+      priceChange7d: 0,
+      priceChange30d: 0,
+      volume7d: 0,
+      volume30d: 0,
+      totalLiquidity: 0,
+      holders: 0,
       supply: {
-        total: token.marketData[0].totalSupply || '0',
-        circulating: token.marketData[0].circulatingSupply || '0'
+        total: '0',
+        circulating: '0'
       },
-      lastUpdated: token.marketData[0].updatedAt.getTime()
+      lastUpdated: tokenInfo?.last_updated || new Date().toISOString(),
+      source: tokenInfo ? DATA_SOURCES.GECKOTERMINAL : DATA_SOURCES.NONE,
+      quality: tokenInfo ? 1 : 0
     };
 
     if (redis) {
-      await redis.set(cacheKey, marketData, { ex: 60 });
+      await redis.set(cacheKey, JSON.stringify(marketData), { ex: CACHE_TIMES.WITH_PRICE });
     }
 
-    return createApiResponse({ data: marketData, status: 200 });
+    return createApiResponse({ data: marketData, status: HTTP_STATUS.OK });
   } catch (error) {
-    return handleApiError(error);
+    console.error('Failed to fetch market data:', error);
+    return createApiResponse({ 
+      error: ERROR_MESSAGES.FETCH_MARKET_FAILED,
+      status: HTTP_STATUS.SERVER_ERROR 
+    });
   }
 } 

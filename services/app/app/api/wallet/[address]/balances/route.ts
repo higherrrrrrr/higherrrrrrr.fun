@@ -1,112 +1,123 @@
 import { NextResponse } from 'next/server';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { getRedisClient } from '@/lib/redis';
+import { priceService } from '@/lib/price-service';
+import { createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
+import { SOL_MINT, SOL_DECIMALS, DEFAULT_DECIMALS, CACHE_KEYS, CACHE_TIMES, DATA_SOURCES, API_ENDPOINTS, ERROR_MESSAGES, HTTP_STATUS } from '@/lib/constants';
 
-const SOL_DECIMALS = 9;
-const SOL_MINT = 'So11111111111111111111111111111111111111112';
+const redis = await getRedisClient();
 
-// Create connection for native balance
-const connection = new Connection(process.env.RPC_ENDPOINT || 'https://api.mainnet-beta.solana.com');
+const WalletParamsSchema = z.object({
+  address: z.string().min(1)
+});
 
 export async function GET(
-  request: Request,
-  context: { params: Promise<{ address: string }> }
+  request: Request, 
+  context: { params: { address: string } }
 ) {
-  const { address } = await context.params;
-
   try {
-    // Get native SOL balance first
-    let nativeBalance = 0;
-    try {
-      nativeBalance = await connection.getBalance(new PublicKey(address));
-    } catch (solError) {
-      console.error('Failed to fetch SOL balance:', solError);
-    }
+    const params = WalletParamsSchema.parse(context.params);
+    const { address } = params;
 
-    // Get list of tradeable tokens from Jupiter first
-    const jupiterResponse = await fetch('https://token.jup.ag/all');
-    if (!jupiterResponse.ok) {
-      console.error('Jupiter token list error:', await jupiterResponse.text());
-      throw new Error('Failed to fetch token list');
-    }
-    const jupiterTokens = await jupiterResponse.json();
-    
-    // Create map of token metadata for quick lookup
-    const tokenMetadata = new Map(
-      jupiterTokens.map((token: any) => [
-        token.address,
-        {
-          symbol: token.symbol,
-          name: token.name,
-          decimals: token.decimals
-        }
-      ])
-    );
+    const cacheKey = CACHE_KEYS.BALANCES(address);
+    let balanceData = null;
 
-    // Use Helius DAS API
-    const response = await fetch(
-      `https://api.helius.xyz/v0/addresses/${address}/balances?api-key=${process.env.HELIUS_API_KEY}`,
-      {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        }
+    if (redis) {
+      balanceData = await redis.get(cacheKey);
+      if (balanceData) {
+        const parsed = JSON.parse(balanceData);
+        console.debug('Returning cached balances:', {
+          total: parsed.tokens.length,
+          withPrice: parsed.tokens.filter((t: any) => parseFloat(t.price) > 0).length,
+          withoutPrice: parsed.tokens.filter((t: any) => parseFloat(t.price) === 0).length,
+          totalValue: parsed.tokens.reduce((acc: number, t: any) => acc + parseFloat(t.valueUsd || '0'), 0)
+        });
+        return createApiResponse({ data: parsed, status: HTTP_STATUS.OK });
       }
-    );
-
-    if (!response.ok) {
-      console.error('Helius API error:', await response.text());
-      throw new Error('Failed to fetch balances');
     }
 
+    const response = await fetch(API_ENDPOINTS.HELIUS_BALANCES(address));
+    if (!response.ok) {
+      throw new Error(ERROR_MESSAGES.HELIUS_API_FAILED);
+    }
+    
     const data = await response.json();
+    const tokenAddresses = [
+      ...(data.nativeBalance > 0 ? [SOL_MINT] : []),
+      ...(data.tokens?.map((t: any) => t.mint) || [])
+    ];
 
-    // Transform the response to match expected format
-    const balanceResponse = {
-      nativeBalance,
-      tokens: [
-        // Add SOL as a token
-        {
-          mint: SOL_MINT,
-          amount: nativeBalance,
-          decimals: SOL_DECIMALS,
-          symbol: 'SOL',
-          name: 'Solana'
-        }
-      ]
+    const prices = await priceService.getTokenPrices(tokenAddresses);
+    const tokens: any[] = [];
+
+    // Process SOL balance if present
+    if (data.nativeBalance > 0) {
+      const solBalance = data.nativeBalance / Math.pow(10, SOL_DECIMALS);
+      const solPrice = prices.get(SOL_MINT)?.price || 0;
+      
+      tokens.push({
+        address: SOL_MINT,
+        symbol: 'SOL',
+        name: 'Solana',
+        amount: solBalance.toString(),
+        price: solPrice.toString(),
+        valueUsd: (solBalance * solPrice).toString(),
+        decimals: SOL_DECIMALS,
+        dataSource: DATA_SOURCES.HELIUS,
+        lastUpdated: new Date().toISOString()
+      });
+    }
+
+    // Process token balances
+    if (data.tokens) {
+      for (const token of data.tokens) {
+        const decimals = token.decimals || DEFAULT_DECIMALS;
+        const amount = token.amount / Math.pow(10, decimals);
+        const price = prices.get(token.mint)?.price || 0;
+        
+        tokens.push({
+          address: token.mint,
+          symbol: token.symbol || 'Unknown',
+          name: token.name || 'Unknown Token',
+          amount: amount.toString(),
+          price: price.toString(),
+          valueUsd: (amount * price).toString(),
+          decimals: decimals,
+          dataSource: DATA_SOURCES.HELIUS,
+          lastUpdated: new Date().toISOString()
+        });
+      }
+    }
+
+    const result = {
+      tokens,
+      stats: {
+        total: tokens.length,
+        withPrice: tokens.filter(t => parseFloat(t.price) > 0).length,
+        withoutPrice: tokens.filter(t => parseFloat(t.price) === 0).length,
+        totalValue: tokens.reduce((acc, t) => acc + parseFloat(t.valueUsd), 0)
+      }
     };
 
-    // Add other tokens, but only if they're tradeable on Jupiter
-    if (data.tokens) {
-      balanceResponse.tokens.push(
-        ...data.tokens
-          .filter((token: any) => 
-            token.amount > 0 && 
-            tokenMetadata.has(token.mint)
-          )
-          .map((token: any) => {
-            const metadata = tokenMetadata.get(token.mint) || {
-              symbol: '',
-              name: '',
-              decimals: token.decimals || 0
-            };
-            return {
-              mint: token.mint,
-              amount: token.amount,
-              decimals: metadata.decimals,
-              symbol: metadata.symbol,
-              name: metadata.name
-            };
-          })
-      );
+    if (redis) {
+      await redis.set(cacheKey, JSON.stringify(result), { ex: CACHE_TIMES.WITH_PRICE });
     }
 
-    console.log('Returning balances:', balanceResponse);
-    return NextResponse.json(balanceResponse);
+    console.debug('Fetched new balances:', result.stats);
+    return createApiResponse({ data: result, status: HTTP_STATUS.OK });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return createApiResponse({
+        error: ERROR_MESSAGES.INVALID_PARAMETERS,
+        status: HTTP_STATUS.BAD_REQUEST,
+        details: error.errors
+      });
+    }
+
     console.error('Failed to fetch balances:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch balances' },
-      { status: 500 }
-    );
+    return createApiResponse({
+      error: ERROR_MESSAGES.FETCH_BALANCES_FAILED,
+      status: HTTP_STATUS.SERVER_ERROR
+    });
   }
 } 

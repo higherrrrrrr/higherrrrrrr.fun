@@ -45,35 +45,56 @@ export async function fetchHelius(endpoint: string, body: any) {
   return response.json();
 }
 
-interface ApiResponse<T> {
+interface ApiResponse<T = any> {
   data?: T;
   error?: string;
   status: number;
 }
 
-export function createApiResponse<T>(response: ApiResponse<T>) {
-  return NextResponse.json(
-    {
-      data: response.data,
-      error: response.error,
-      timestamp: Date.now()
-    },
-    { status: response.status }
-  );
-}
+export function createApiResponse<T>({ 
+  data, 
+  error, 
+  status = 200 
+}: ApiResponse<T>) {
+  const response = {
+    status,
+    ...(data && { data }),
+    ...(error && { error })
+  };
 
-export function handleApiError(error: unknown) {
-  console.error('API Error:', error);
-  
-  if (error instanceof ZodError) {
-    return createApiResponse({
-      error: 'Validation error',
-      status: 400
-    });
+  // Log errors but not in test environment
+  if (error && process.env.NODE_ENV !== 'test') {
+    console.error('API Error:', { status, error });
   }
 
+  return NextResponse.json(response, { status });
+}
+
+export function handleApiError(error: unknown, defaultMessage = 'Internal server error') {
+  console.error('API Error:', error);
+
+  const message = error instanceof Error ? error.message : defaultMessage;
+  
   return createApiResponse({
-    error: 'Internal server error',
-    status: 500
+    error: message,
+    status: 500,
+    data: null
   });
+}
+
+export async function withErrorHandling<T>(
+  fn: () => Promise<T>,
+  errorMessage = 'Operation failed'
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : errorMessage
+    );
+  }
+}
+
+export function validateAddress(address: string): boolean {
+  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
 } 

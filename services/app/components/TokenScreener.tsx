@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { formatNumber, formatPriceChange, getPriceChangeColor } from '@/lib/format';
 import useSWR from 'swr';
@@ -37,45 +37,73 @@ export default function TokenScreener() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [minMarketCap, setMinMarketCap] = useState(0);
   const [minVolume, setMinVolume] = useState(0);
-
-  // Add level info from token state
   const [tokenStates, setTokenStates] = useState({});
+  const [liveData, setLiveData] = useState<Record<string, any>>({});
 
-  // Fetch token states
   useEffect(() => {
-    const fetchTokenStates = async () => {
-      if (!tokens?.length) return;
-
-      try {
-        const statePromises = tokens.map(async (token) => {
-          try {
-            const state = await getTokenState(token.address);
-            return {
-              address: token.address,
-              state
-            };
-          } catch (err) {
-            return { address: token.address, state: null };
-          }
-        });
-
-        const results = await Promise.all(statePromises);
-        const states = {};
-        results.forEach((r) => {
-          if (r.state) {
-            states[r.address] = r.state;
-          }
-        });
-        setTokenStates(states);
-      } catch (err) {
-        console.error('Failed to fetch token states:', err);
+    if (!tokens) return;
+    
+    // Initialize liveData with current token data
+    const initialLiveData = tokens.reduce((acc, token) => ({
+      ...acc,
+      [token.address]: {
+        price: token.price,
+        priceChange24h: token.priceChange24h,
+        priceChange1h: token.priceChange1h,
+        priceChange7d: token.priceChange7d,
+        holders: token.holders,
+        whaleScore: token.whaleScore
       }
-    };
-
-    fetchTokenStates();
+    }), {});
+    setLiveData(initialLiveData);
   }, [tokens]);
 
-  const filteredTokens = tokens?.filter(token => {
+  // WebSocket subscription for real-time updates
+  useWebSocket({
+    tokens: tokens?.map(t => t.address),
+    onPriceUpdate: (data) => {
+      if (!data?.address) return;
+      
+      setLiveData(prev => ({
+        ...prev,
+        [data.address]: {
+          ...prev[data.address],
+          price: data.price,
+          priceChange24h: data.priceChange24h,
+          priceChange1h: data.priceChange1h,
+          priceChange7d: data.priceChange7d,
+          lastUpdated: Date.now()
+        }
+      }));
+    },
+    onHolderUpdate: (data) => {
+      if (!data?.address) return;
+      
+      setLiveData(prev => ({
+        ...prev,
+        [data.address]: {
+          ...prev[data.address],
+          holders: data.holders,
+          whaleScore: data.whaleScore,
+          lastUpdated: Date.now()
+        }
+      }));
+    }
+  });
+
+  // Merge base token data with live updates
+  const mergedTokens = useMemo(() => {
+    if (!tokens) return [];
+    
+    return tokens.map(token => ({
+      ...token,
+      ...liveData[token.address],
+      isLive: !!liveData[token.address]?.lastUpdated
+    }));
+  }, [tokens, liveData]);
+
+  // Update filtered tokens to use merged data
+  const filteredTokens = mergedTokens.filter(token => {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -108,8 +136,9 @@ export default function TokenScreener() {
       default:
         return true;
     }
-  }) || [];
+  });
 
+  // Update sorted tokens to use merged data
   const sortedTokens = [...filteredTokens].sort((a, b) => {
     let aValue = a[sortField];
     let bValue = b[sortField];
@@ -323,7 +352,17 @@ export default function TokenScreener() {
                       )}
                     </div>
                   </td>
-                  <td className="text-right p-4">${formatNumber(token.price)}</td>
+                  <td className="text-right p-4">
+                    <div className="flex items-center justify-end gap-2">
+                      ${formatNumber(token.price)}
+                      {token.isLive && (
+                        <span 
+                          className="w-2 h-2 rounded-full bg-green-500 animate-pulse" 
+                          title="Live data"
+                        />
+                      )}
+                    </div>
+                  </td>
                   <td className={`text-right p-4 ${getPriceChangeColor(token[`priceChange${timeFrame}`])}`}>
                     {formatPriceChange(token[`priceChange${timeFrame}`])}
                   </td>

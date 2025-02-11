@@ -1,104 +1,72 @@
 import { NextResponse } from 'next/server';
+import { priceService } from '@/lib/price-service';
+import { createApiResponse } from '@/lib/api-utils';
+import { getRedisClient } from '@/lib/redis';
+import { CACHE_KEYS, CACHE_TIMES, DATA_SOURCES, ERROR_MESSAGES, HTTP_STATUS } from '@/lib/constants';
+import type { TokenPrice } from '@/lib/types';
 
-const BATCH_SIZE = 100; // Jupiter API limit
+const redis = await getRedisClient();
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  let tokens = searchParams.get('tokens');
+  const tokens = searchParams.get('tokens');
 
   if (!tokens) {
-    return NextResponse.json({ error: 'No tokens provided' }, { status: 400 });
+    return createApiResponse({ 
+      error: ERROR_MESSAGES.NO_TOKENS_PROVIDED,
+      status: HTTP_STATUS.BAD_REQUEST 
+    });
   }
 
-  // Remove duplicate tokens and filter out empty strings
-  const uniqueTokens = [...new Set(tokens.split(','))].filter(Boolean);
-  const priceData: { [key: string]: any } = {};
-
   try {
-    // First try to get all token prices in one batch using Jupiter's official endpoint
-    const response = await fetch(
-      `https://jupiter.api.solana.fm/v4/price?ids=${uniqueTokens.join(',')}`,
-      {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0',
-        },
-        next: { revalidate: 60 }, // Cache for 1 minute
-      }
-    );
+    const uniqueTokens = [...new Set(tokens.split(','))].filter(Boolean);
+    const cacheKey = CACHE_KEYS.PRICES(uniqueTokens);
+    let priceData = null;
 
-    if (!response.ok) {
-      console.error('Jupiter API error:', await response.text());
-      
-      // If first attempt fails, try batching
-      for (let i = 0; i < uniqueTokens.length; i += BATCH_SIZE) {
-        const batch = uniqueTokens.slice(i, i + BATCH_SIZE);
-        const batchResponse = await fetch(
-          `https://jupiter.api.solana.fm/v4/price?ids=${batch.join(',')}`,
-          {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'User-Agent': 'Mozilla/5.0',
-            }
-          }
-        );
-
-        if (!batchResponse.ok) {
-          console.error('Jupiter API batch error:', await batchResponse.text());
-          continue;
-        }
-
-        const batchData = await batchResponse.json();
-        Object.entries(batchData.data || {}).forEach(([mint, price]: [string, any]) => {
-          priceData[mint] = {
-            price: parseFloat(price.price) || 0,
-            volume_24h: parseFloat(price.volume24h) || 0,
-            market_cap: parseFloat(price.marketCap) || 0,
-            price_change_24h: parseFloat(price.priceChange24h) || 0
-          };
+    if (redis) {
+      priceData = await redis.get(cacheKey);
+      if (priceData) {
+        const parsed = JSON.parse(priceData);
+        console.debug('Returning cached prices:', {
+          total: uniqueTokens.length,
+          withPrice: Object.keys(parsed.data).length,
+          withoutPrice: uniqueTokens.length - Object.keys(parsed.data).length
         });
+        return createApiResponse({ data: parsed, status: HTTP_STATUS.OK });
       }
-    } else {
-      const jupiterData = await response.json();
-      Object.entries(jupiterData.data || {}).forEach(([mint, price]: [string, any]) => {
-        priceData[mint] = {
-          price: parseFloat(price.price) || 0,
-          volume_24h: parseFloat(price.volume24h) || 0,
-          market_cap: parseFloat(price.marketCap) || 0,
-          price_change_24h: parseFloat(price.priceChange24h) || 0
-        };
-      });
     }
 
-    // Ensure all requested tokens have a price entry, even if zero
-    uniqueTokens.forEach((mint) => {
-      if (!priceData[mint]) {
-        priceData[mint] = {
-          price: 0,
-          volume_24h: 0,
-          market_cap: 0,
-          price_change_24h: 0
-        };
-      }
-    });
+    const prices = await priceService.getTokenPrices(uniqueTokens);
+    const tokenPrices: Record<string, TokenPrice & { source: string; quality: number }> = {};
 
-    console.log('Returning price data:', { data: priceData });
-    return NextResponse.json({ data: priceData });
+    for (const [address, tokenInfo] of prices.entries()) {
+      tokenPrices[address] = {
+        ...tokenInfo,
+        source: DATA_SOURCES.GECKOTERMINAL,
+        quality: 1,
+        confidence: 1
+      };
+    }
+
+    const stats = {
+      total: uniqueTokens.length,
+      withPrice: Object.keys(tokenPrices).length,
+      withoutPrice: uniqueTokens.length - Object.keys(tokenPrices).length
+    };
+
+    const result = { data: tokenPrices, stats };
+
+    if (redis) {
+      await redis.set(cacheKey, JSON.stringify(result), { ex: CACHE_TIMES.WITH_PRICE });
+    }
+
+    console.debug('Fetched new prices:', stats);
+    return createApiResponse({ data: result, status: HTTP_STATUS.OK });
   } catch (error) {
     console.error('Failed to fetch prices:', error);
-    // Return empty data with expected structure
-    return NextResponse.json({
-      data: uniqueTokens.reduce((acc: any, mint: string) => {
-        acc[mint] = {
-          price: 0,
-          volume_24h: 0,
-          market_cap: 0,
-          price_change_24h: 0
-        };
-        return acc;
-      }, {})
+    return createApiResponse({
+      error: ERROR_MESSAGES.FETCH_PRICES_FAILED,
+      status: HTTP_STATUS.SERVER_ERROR
     });
   }
 } 

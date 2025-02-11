@@ -1,5 +1,5 @@
 import { Connection, PublicKey } from '@solana/web3.js';
-import { env } from './env';
+import { env } from '@/lib/env.mjs';
 
 const FALLBACK_RPC = 'https://api.mainnet-beta.solana.com';
 const RPC_URL = env.NEXT_PUBLIC_HELIUS_RPC_URL || FALLBACK_RPC;

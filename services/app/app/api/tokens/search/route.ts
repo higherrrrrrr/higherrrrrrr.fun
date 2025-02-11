@@ -1,61 +1,68 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { getRedisClient } from '@/lib/redis';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
-import { TokenSearchSchema } from '../../../../lib/schemas';
-import type { Token } from '@/lib/types';
+import { createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
+import { CACHE_KEYS, CACHE_TIMES, DATA_SOURCES, ERROR_MESSAGES, HTTP_STATUS } from '@/lib/constants';
 
 const redis = await getRedisClient();
+
+const SearchParamsSchema = z.object({
+  query: z.string().min(1),
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().positive().max(100).default(20)
+});
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q') || '';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
-    const offset = (page - 1) * limit;
+    const params = SearchParamsSchema.parse({
+      query: searchParams.get('query'),
+      page: parseInt(searchParams.get('page') || '1'),
+      limit: parseInt(searchParams.get('limit') || '20')
+    });
 
-    if (query.length < 2) {
-      return createApiResponse({
-        error: 'Search query must be at least 2 characters',
-        status: 400
-      });
-    }
-
-    const cacheKey = `search:${query}:${page}:${limit}`;
+    const cacheKey = CACHE_KEYS.SEARCH(params.query, params.page, params.limit);
     let result = null;
 
     if (redis) {
       result = await redis.get(cacheKey);
       if (result) {
-        return createApiResponse({ data: JSON.parse(result), status: 200 });
+        return createApiResponse({ data: JSON.parse(result), status: HTTP_STATUS.OK });
       }
     }
 
+    const offset = (params.page - 1) * params.limit;
+
+    // Search tokens in database
     const [tokens, total] = await Promise.all([
       prisma.token.findMany({
         where: {
           OR: [
-            { name: { contains: query, mode: 'insensitive' } },
-            { symbol: { contains: query, mode: 'insensitive' } },
-            { address: { equals: query } }
+            { symbol: { contains: params.query, mode: 'insensitive' } },
+            { name: { contains: params.query, mode: 'insensitive' } },
+            { address: params.query }
           ]
         },
         include: {
           marketData: {
-            orderBy: { updatedAt: 'desc' },
-            take: 1
+            take: 1,
+            orderBy: { timestamp: 'desc' }
           }
         },
-        take: limit,
-        skip: offset
+        skip: offset,
+        take: params.limit,
+        orderBy: [
+          { marketData: { _count: 'desc' } },
+          { symbol: 'asc' }
+        ]
       }),
       prisma.token.count({
         where: {
           OR: [
-            { name: { contains: query, mode: 'insensitive' } },
-            { symbol: { contains: query, mode: 'insensitive' } },
-            { address: { equals: query } }
+            { symbol: { contains: params.query, mode: 'insensitive' } },
+            { name: { contains: params.query, mode: 'insensitive' } },
+            { address: params.query }
           ]
         }
       })
@@ -70,27 +77,38 @@ export async function GET(request: Request) {
       priceChange24h: token.marketData[0]?.priceChange24h || 0,
       volume24h: token.marketData[0]?.volume24h || 0,
       marketCap: token.marketData[0]?.marketCap || 0,
-      lastUpdated: token.marketData[0]?.updatedAt || new Date()
+      lastUpdated: token.marketData[0]?.updatedAt || new Date(),
+      source: DATA_SOURCES.DATABASE
     }));
 
     result = {
       tokens: formattedTokens,
       total,
-      page,
-      limit,
+      page: params.page,
+      limit: params.limit,
       hasMore: offset + tokens.length < total,
-      query
+      query: params.query
     };
 
-    const validatedResult = TokenSearchSchema.parse(result);
-
     if (redis) {
-      await redis.set(cacheKey, JSON.stringify(validatedResult), { ex: 60 });
+      await redis.set(cacheKey, JSON.stringify(result), { ex: CACHE_TIMES.DEFAULT });
     }
 
-    return createApiResponse({ data: validatedResult, status: 200 });
+    return createApiResponse({ data: result, status: HTTP_STATUS.OK });
   } catch (error) {
-    return handleApiError(error);
+    if (error instanceof z.ZodError) {
+      return createApiResponse({
+        error: ERROR_MESSAGES.INVALID_PARAMETERS,
+        status: HTTP_STATUS.BAD_REQUEST,
+        details: error.errors
+      });
+    }
+
+    console.error('Failed to search tokens:', error);
+    return createApiResponse({
+      error: ERROR_MESSAGES.SEARCH_FAILED,
+      status: HTTP_STATUS.SERVER_ERROR
+    });
   }
 }
 

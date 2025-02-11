@@ -12,6 +12,7 @@ import type { Portfolio, PnLData } from '@/lib/types';
 import { getWalletTokens, getWalletTransactions } from '@/lib/helius';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import { formatNumber } from '@/lib/format';
+import { SOL_MINT, DEFAULT_DECIMALS } from '@/lib/constants';
 
 interface SectionProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ interface SectionProps {
 
 export default function UserProfile() {
   const { primaryWallet } = useDynamicContext();
-  const { portfolio, isLoading, error } = usePortfolioData();
+  const { portfolio, isLoading, error } = usePortfolioData(primaryWallet?.address || null);
   const [activeTab, setActiveTab] = useState('holdings');
 
   useWebSocket({
@@ -48,6 +49,28 @@ export default function UserProfile() {
       portfolio.tokens = updatedTokens;
       portfolio.totalValue = totalValue;
       portfolio.change24h = change24h;
+    },
+    onWalletUpdate: (data) => {
+      if (!portfolio) return;
+      
+      // Update token balances from wallet data
+      const updatedTokens = portfolio.tokens.map(token => {
+        const newBalance = data.tokens.find(t => t.mint === token.address);
+        if (newBalance) {
+          const newValue = Number(newBalance.amount) * token.price;
+          return {
+            ...token,
+            amount: newBalance.amount,
+            value: newValue
+          };
+        }
+        return token;
+      });
+
+      const totalValue = updatedTokens.reduce((sum, token) => sum + token.value, 0);
+      portfolio.tokens = updatedTokens;
+      portfolio.totalValue = totalValue;
+      portfolio.lastUpdated = data.timestamp;
     }
   });
 

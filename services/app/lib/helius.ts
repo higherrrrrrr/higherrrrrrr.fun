@@ -1,91 +1,128 @@
+import { Connection, PublicKey } from '@solana/web3.js';
 import { Helius } from 'helius-sdk';
-import { Metaplex } from '@metaplex-foundation/js';
-import { connection } from './solana';
-import { PublicKey } from '@solana/web3.js';
+import { metaplex } from './metaplex';
 import { toast } from 'react-hot-toast';
-import { env } from './env';
+import { clientEnv } from './env.client';
 
-if (!env.NEXT_PUBLIC_HELIUS_API_KEY) {
-  throw new Error('HELIUS_API_KEY is required');
+const rpcUrl = clientEnv.NEXT_PUBLIC_HELIUS_RPC_URL;
+if (!rpcUrl) {
+  throw new Error('NEXT_PUBLIC_HELIUS_RPC_URL is not configured');
 }
+
+// Parse RPC URL for both HTTP and WebSocket endpoints
+const parseRpcUrl = (url: string) => {
+  const isHelius = url.includes('helius');
+  
+  if (isHelius) {
+    const apiKey = url.split('api-key=')[1];
+    return {
+      http: `https://rpc.helius.xyz/?api-key=${apiKey}`,
+      ws: `wss://rpc.helius.xyz/?api-key=${apiKey}`
+    };
+  }
+  
+  const baseUrl = url.split('?')[0];
+  return {
+    http: baseUrl,
+    ws: baseUrl.replace('https://', 'wss://')
+  };
+};
+
+const endpoints = parseRpcUrl(rpcUrl);
+
+export const heliusRpcUrl = endpoints.http;
+export const heliusWsUrl = endpoints.ws;
 
 // Create the Helius client with mainnet cluster
-export const helius = new Helius({
-  apiKey: env.NEXT_PUBLIC_HELIUS_API_KEY || '',
+export const helius = new Helius(env.HELIUS_API_KEY, {
+  rpcUrl: clientEnv.NEXT_PUBLIC_HELIUS_RPC_URL,
+  timeout: 30000,
+  retry: {
+    retries: 3,
+    factor: 2,
+    minTimeout: 1000,
+    maxTimeout: 5000
+  }
 });
 
-const metaplex = new Metaplex(connection);
-
-// Add retry logic for Helius calls
-async function retryHelius<T>(
-  operation: () => Promise<T>,
-  retries = 3
-): Promise<T | null> {
-  for (let i = 0; i < retries; i++) {
-    try {
-      return await operation();
-    } catch (error) {
-      if (i === retries - 1) {
-        console.error('Helius operation failed after retries:', error);
-        toast.error('Failed to fetch token data');
-        return null;
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+// Retry logic for Helius API calls
+async function retryHelius<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries > 0) {
+      console.warn('Retrying Helius API call...', { retriesLeft: retries });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return retryHelius(fn, retries - 1);
     }
+    toast.error('Failed to fetch token data. Please try again.');
+    throw error;
   }
-  return null;
 }
 
-export async function getHeliusTokenData() {
+const calculateWhaleScore = (whaleCount: number): number => {
+  if (whaleCount >= 100) return 5;
+  if (whaleCount >= 50) return 4;
+  if (whaleCount >= 20) return 3;
+  if (whaleCount >= 10) return 2;
+  if (whaleCount >= 1) return 1;
+  return 0;
+};
+
+export async function getHeliusTokenData(addresses?: string[]) {
   return retryHelius(async () => {
-    const response = await helius.rpc.getAssetsByGroup({
-      groupKey: 'collection',
-      groupValue: 'All Tokens',
-      page: 1,
-      limit: 100,
-    });
+    try {
+      let tokens;
+      
+      if (addresses && addresses.length > 0) {
+        const responses = await Promise.all(
+          addresses.map(address =>
+            helius.rpc.getAsset({
+              id: address,
+              displayOptions: { showFungible: true }
+            }).catch(err => {
+              console.error(`Failed to fetch token ${address}:`, err);
+              return null;
+            })
+          )
+        );
+        tokens = responses.filter(r => r !== null);
+      } else {
+        const response = await helius.rpc.getAssetsByGroup({
+          groupKey: 'collection',
+          groupValue: 'All Tokens',
+          page: 1,
+          limit: 100,
+        });
+        tokens = response.items;
+      }
 
-    // Get Metaplex data for each token
-    const tokensWithMetadata = await Promise.all(
-      response.items.map(async token => {
-        try {
-          const metadata = await metaplex.nfts().findByMint({ 
-            mintAddress: new PublicKey(token.id) 
-          });
-
-          return {
-            ...token,
-            metaplexData: {
-              name: metadata.name,
-              symbol: metadata.symbol,
-              image: metadata.json?.image,
-              description: metadata.json?.description,
-              attributes: metadata.json?.attributes
-            }
-          };
-        } catch (err) {
-          console.error(`Failed to get Metaplex data for token ${token.id}:`, err);
-          return token;
+      return tokens.map(token => ({
+        address: token.id,
+        symbol: token.content?.metadata?.symbol || 'Unknown',
+        name: token.content?.metadata?.name || 'Unknown Token',
+        price: token.price || 0,
+        priceChange1h: token.priceChange?.h1 || 0,
+        priceChange24h: token.priceChange?.h24 || 0,
+        priceChange7d: token.priceChange?.d7 || 0,
+        volume1h: token.volume?.h1 || 0,
+        volume24h: token.volume?.h24 || 0,
+        volume7d: token.volume?.d7 || 0,
+        marketCap: token.marketCap || 0,
+        holders: token.ownership?.holderCount || 0,
+        whaleScore: calculateWhaleScore(token.ownership?.whaleCount || 0),
+        metadata: {
+          name: token.content?.metadata?.name || 'Unknown Token',
+          symbol: token.content?.metadata?.symbol || 'Unknown',
+          image: token.content?.files?.[0]?.uri || '',
+          description: token.content?.metadata?.description || '',
+          attributes: token.content?.metadata?.attributes || []
         }
-      })
-    );
-
-    return tokensWithMetadata.map(token => ({
-      address: token.id,
-      symbol: token.symbol,
-      name: token.name,
-      price: token.price,
-      priceChange1h: token.priceChange.h1,
-      priceChange24h: token.priceChange.h24,
-      priceChange7d: token.priceChange.d7,
-      volume1h: token.volume.h1,
-      volume24h: token.volume.h24,
-      volume7d: token.volume.d7,
-      marketCap: token.marketCap,
-      holders: token.holders,
-      whaleScore: calculateWhaleScore(token.holderDistribution),
-      metadata: token.metaplexData
-    }));
+      }));
+    } catch (error) {
+      console.error('Failed to fetch token data:', error);
+      throw error;
+    }
   });
 }
 
@@ -104,7 +141,7 @@ export async function getWalletTransactions(address: string | undefined) {
   
   try {
     // Use the parsed transaction history endpoint
-    const response = await fetch(`https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${env.NEXT_PUBLIC_HELIUS_API_KEY}`);
+    const response = await fetch(`https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${env.HELIUS_API_KEY}`);
     
     if (!response.ok) {
       throw new Error('Failed to fetch transactions');
@@ -133,13 +170,4 @@ export async function getWalletTokens(address: string | undefined) {
     console.error('Failed to fetch wallet tokens:', error);
     return [];
   }
-}
-
-function calculateWhaleScore(distribution: any) {
-  // Calculate what % of supply is held by top 10 wallets
-  // Higher score means more whale concentration
-  return Math.min(
-    (distribution?.top10Holders?.percentage || 0) * 100,
-    100
-  );
 } 

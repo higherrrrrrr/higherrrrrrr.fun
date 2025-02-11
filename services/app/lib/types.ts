@@ -87,10 +87,10 @@ export interface TokenBalance {
   address: string;
   symbol: string;
   name: string;
-  amount: number;
-  price: number;
-  value: number;
-  priceChange24h: number;
+  amount: string;
+  price: string;
+  value: string;
+  priceChange24h: string;
   lastUpdated: Date;
 }
 
@@ -105,6 +105,7 @@ export interface Portfolio {
     monthly: PnLData[];
   };
   transactions?: Transaction[];
+  lastUpdated: number;
 }
 
 export interface Holdings {
@@ -138,6 +139,14 @@ export interface WebSocketHolderUpdate {
 
 export type WebSocketEvent = WebSocketPriceUpdate | WebSocketHolderUpdate;
 
+export interface TokenMetadata {
+  name: string;
+  symbol: string;
+  image?: string;
+  description?: string;
+  attributes?: Array<{ trait_type: string; value: string }>;
+}
+
 export interface HeliusToken {
   address: string;
   symbol: string;
@@ -152,16 +161,7 @@ export interface HeliusToken {
   marketCap: number;
   holders: number;
   whaleScore: number;
-  metadata?: {
-    name: string;
-    symbol: string;
-    image?: string;
-    description?: string;
-    attributes?: Array<{
-      trait_type: string;
-      value: string | number;
-    }>;
-  };
+  metadata: TokenMetadata;
 }
 
 export interface HeliusAsset {
@@ -206,4 +206,32 @@ export interface HeliusTransaction {
   slot: number;
   signer: string[];
   // Add other fields as needed
+}
+
+export interface TokenPrice {
+  price: number;
+  price_change_24h: number;
+  last_updated: number;
+}
+
+export interface TokenStats {
+  total: number;
+  withPrice: number;
+  withoutPrice: number;
+  totalValue: number;
+}
+
+export interface BalanceResponse {
+  tokens: {
+    mint: string;
+    amount: number;
+    decimals: number;
+    symbol: string;
+    name: string;
+    price: number;
+    valueUsd: number;
+    source: 'geckoterminal' | 'none' | 'error';
+    lastUpdated: number;
+  }[];
+  stats: TokenStats;
 } 

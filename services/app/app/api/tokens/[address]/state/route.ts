@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTokenMetadata } from '@/lib/helius';
+import { env } from '@/lib/env.mjs';
 
 export async function GET(
   request: Request,

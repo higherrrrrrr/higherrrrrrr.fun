@@ -1,14 +1,17 @@
 import { useEffect, useCallback, useRef } from 'react';
-import { env } from '@/lib/env';
+import { clientEnv } from '@/lib/env.client';
 import { toast } from 'react-hot-toast';
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 
 interface WebSocketOptions {
   tokens?: any[];
   onPriceUpdate?: (data: any) => void;
   onHolderUpdate?: (data: any) => void;
+  onWalletUpdate?: (data: any) => void;
 }
 
-export function useWebSocket({ tokens, onPriceUpdate, onHolderUpdate }: WebSocketOptions) {
+export function useWebSocket({ tokens, onPriceUpdate, onHolderUpdate, onWalletUpdate }: WebSocketOptions) {
+  const { primaryWallet } = useDynamicContext();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
@@ -16,53 +19,77 @@ export function useWebSocket({ tokens, onPriceUpdate, onHolderUpdate }: WebSocke
 
   const connect = useCallback(() => {
     try {
-      // Don't try to connect if we don't have tokens
-      if (!tokens?.length) {
-        return;
-      }
-
-      // Don't reconnect if we've hit the limit
-      if (reconnectAttempts.current >= maxReconnectAttempts) {
-        console.warn('Max WebSocket reconnection attempts reached');
-        return;
-      }
-
-      // Close existing connection if any
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-
-      const wsUrl = env.NEXT_PUBLIC_WS_URL;
-      if (!wsUrl) {
-        console.warn('WebSocket URL not configured');
-        return;
-      }
-
+      const wsUrl = 'ws://localhost:8080';
+      console.log('Creating new WebSocket connection to:', wsUrl);
+      
+      // Create WebSocket without protocol for testing
       const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+      
+      const connectionTimeout = setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          console.error('WebSocket connection timeout');
+          ws.close();
+          if (reconnectAttempts.current < maxReconnectAttempts) {
+            reconnectAttempts.current++;
+            connect();
+          }
+        }
+      }, 5000);
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        clearTimeout(connectionTimeout);
+        console.log('WebSocket connected successfully');
         reconnectAttempts.current = 0;
 
-        // Subscribe to token updates
-        const tokenAddresses = tokens.map(t => t.address).filter(Boolean);
-        if (tokenAddresses.length) {
-          ws.send(JSON.stringify({
-            type: 'subscribe',
-            tokens: tokenAddresses
-          }));
+        // Send test message
+        ws.send(JSON.stringify({ type: 'test', message: 'Hello server!' }));
+      };
+
+      ws.onerror = (event) => {
+        const errorDetails = {
+          url: wsUrl,
+          readyState: ws.readyState,
+          timestamp: new Date().toISOString(),
+          error: event instanceof ErrorEvent ? event.message : 'Unknown error'
+        };
+        
+        console.error('WebSocket connection error:', errorDetails);
+        
+        // Close the connection explicitly
+        ws.close();
+        
+        if (reconnectAttempts.current < maxReconnectAttempts) {
+          console.log(`Attempting reconnect ${reconnectAttempts.current + 1}/${maxReconnectAttempts}`);
+          reconnectTimeout.current = setTimeout(() => {
+            reconnectAttempts.current++;
+            connect();
+          }, 3000 * (reconnectAttempts.current + 1));
+        } else {
+          console.error('Max reconnection attempts reached');
+          toast.error('Failed to connect to WebSocket server');
         }
+      };
+
+      ws.onclose = (event) => {
+        console.log('WebSocket connection closed:', {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean
+        });
       };
 
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.log('Received WebSocket message:', data);
+          
           switch (data.type) {
-            case 'price':
-              onPriceUpdate?.(data);
+            case 'tokenUpdate':
+              onPriceUpdate?.(data.data);
               break;
-            case 'holders':
-              onHolderUpdate?.(data);
+            case 'walletUpdate':
+              onWalletUpdate?.(data);
               break;
             default:
               console.warn('Unknown WebSocket message type:', data.type);
@@ -71,37 +98,13 @@ export function useWebSocket({ tokens, onPriceUpdate, onHolderUpdate }: WebSocke
           console.error('Failed to parse WebSocket message:', err);
         }
       };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        toast.error('WebSocket connection error');
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket disconnected');
-        wsRef.current = null;
-
-        // Attempt to reconnect with exponential backoff
-        if (reconnectAttempts.current < maxReconnectAttempts) {
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 10000);
-          reconnectTimeout.current = setTimeout(() => {
-            reconnectAttempts.current++;
-            connect();
-          }, delay);
-        }
-      };
-
-      wsRef.current = ws;
     } catch (error) {
       console.error('Failed to establish WebSocket connection:', error);
-      toast.error('Failed to connect to WebSocket');
     }
-  }, [tokens, onPriceUpdate, onHolderUpdate]);
+  }, [tokens, onPriceUpdate, onWalletUpdate, maxReconnectAttempts]);
 
-  // Connect when component mounts or tokens change
   useEffect(() => {
     connect();
-
     return () => {
       if (wsRef.current) {
         wsRef.current.close();
@@ -112,18 +115,4 @@ export function useWebSocket({ tokens, onPriceUpdate, onHolderUpdate }: WebSocke
       }
     };
   }, [connect]);
-
-  // Resubscribe when tokens change
-  useEffect(() => {
-    const ws = wsRef.current;
-    if (ws?.readyState === WebSocket.OPEN && tokens?.length) {
-      const tokenAddresses = tokens.map(t => t.address).filter(Boolean);
-      if (tokenAddresses.length) {
-        ws.send(JSON.stringify({
-          type: 'subscribe',
-          tokens: tokenAddresses
-        }));
-      }
-    }
-  }, [tokens]);
 } 

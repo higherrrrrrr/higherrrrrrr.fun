@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { getRedisClient } from '@/lib/redis';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
-import { TokenListSchema } from '../../../lib/schemas';
-import type { Token } from '@/lib/types';
+import { createApiResponse } from '@/lib/api-utils';
+import { priceService } from '@/lib/price-service';
+import { CACHE_KEYS, CACHE_TIMES, DATA_SOURCES, ERROR_MESSAGES, HTTP_STATUS } from '@/lib/constants';
 
 const redis = await getRedisClient();
 
@@ -14,51 +13,43 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '100');
     const offset = (page - 1) * limit;
 
-    const cacheKey = `tokens:${page}:${limit}`;
+    const cacheKey = CACHE_KEYS.TOKENS_PAGE(page, limit);
     let result = null;
     
     if (redis) {
       result = await redis.get(cacheKey);
       if (result) {
-        return createApiResponse({ data: JSON.parse(result), status: 200 });
+        return createApiResponse({ 
+          data: JSON.parse(result), 
+          status: HTTP_STATUS.OK 
+        });
       }
     }
 
-    const total = await prisma.token.count();
+    // Get all tokens from GeckoTerminal
+    const allTokens = await priceService.getAllTokens();
+    const total = allTokens.length;
 
     if (total === 0) {
       return createApiResponse({ 
         data: { tokens: [], total: 0, page, limit, hasMore: false },
-        status: 200 
+        status: HTTP_STATUS.OK 
       });
     }
 
-    const tokens = await prisma.token.findMany({
-      include: {
-        marketData: {
-          orderBy: { updatedAt: 'desc' },
-          take: 1
-        }
-      },
-      orderBy: {
-        marketData: {
-          _count: 'desc'
-        }
-      },
-      take: limit,
-      skip: offset
-    });
+    // Paginate tokens
+    const tokens = allTokens.slice(offset, offset + limit);
 
     const formattedTokens = tokens.map(token => ({
       address: token.address,
       symbol: token.symbol,
       name: token.name,
-      decimals: token.decimals,
-      price: token.marketData[0]?.price || 0,
-      priceChange24h: token.marketData[0]?.priceChange24h || 0,
-      volume24h: token.marketData[0]?.volume24h || 0,
-      marketCap: token.marketData[0]?.marketCap || 0,
-      lastUpdated: token.marketData[0]?.updatedAt || new Date()
+      price: token.price,
+      priceChange24h: token.price_change_24h,
+      volume24h: token.volume_24h,
+      marketCap: token.market_cap,
+      lastUpdated: token.last_updated,
+      source: DATA_SOURCES.GECKOTERMINAL
     }));
 
     result = { 
@@ -69,14 +60,16 @@ export async function GET(request: Request) {
       hasMore: offset + tokens.length < total
     };
 
-    const validatedResult = TokenListSchema.parse(result);
-
     if (redis) {
-      await redis.set(cacheKey, JSON.stringify(validatedResult), { ex: 60 });
+      await redis.set(cacheKey, JSON.stringify(result), { ex: CACHE_TIMES.WITH_PRICE });
     }
 
-    return createApiResponse({ data: validatedResult, status: 200 });
+    return createApiResponse({ data: result, status: HTTP_STATUS.OK });
   } catch (error) {
-    return handleApiError(error);
+    console.error(ERROR_MESSAGES.FETCH_TOKEN_FAILED, error);
+    return createApiResponse({ 
+      error: ERROR_MESSAGES.FETCH_TOKEN_FAILED,
+      status: HTTP_STATUS.SERVER_ERROR 
+    });
   }
 } 
