@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getTokenState } from '../../onchain/tokenState';
+import { useTokenData } from '../../hooks/useTokenData';
 import TokenCard from '../../components/TokenCard';
 import { FEATURED_TOKEN_ADDRESSES } from '../../constants/tokens';
 
@@ -11,7 +11,6 @@ const TOKENS_PER_PAGE = 24;
 export default function BaseTokens() {
   const [displayedTokens, setDisplayedTokens] = useState([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
-  const [tokenStates, setTokenStates] = useState({});
 
   // Load tokens
   useEffect(() => {
@@ -37,46 +36,6 @@ export default function BaseTokens() {
     loadTokens();
   }, []);
 
-  // Fetch token states
-  useEffect(() => {
-    const fetchTokenStates = async () => {
-      if (!displayedTokens.length) return;
-
-      try {
-        const statePromises = displayedTokens.map(async (token) => {
-          try {
-            const state = await getTokenState(token.address);
-            return {
-              address: token.address,
-              state: state ? {
-                ...state,
-                progress: state.marketType === 'bonding_curve'
-                  ? (state.currentPrice / state.priceLevels[state.priceLevels.length - 1]) * 100
-                  : null
-              } : null
-            };
-          } catch (err) {
-            console.error(`Error fetching state for ${token.address}:`, err);
-            return { address: token.address, state: null };
-          }
-        });
-
-        const results = await Promise.all(statePromises);
-        const states = {};
-        results.forEach((r) => {
-          if (r.state) {
-            states[r.address] = r.state;
-          }
-        });
-        setTokenStates(states);
-      } catch (err) {
-        console.error('Error fetching token states:', err);
-      }
-    };
-    
-    fetchTokenStates();
-  }, [displayedTokens]);
-
   return (
     <div className="min-h-screen bg-black text-green-500 font-mono">
       <div className="w-full pt-8">
@@ -96,22 +55,39 @@ export default function BaseTokens() {
                     </div>
                   ))
                 : displayedTokens.map((token) => (
-                    <div
-                      key={token.address}
-                      className="snake-border p-4 bg-black/20 rounded"
-                    >
-                      <div className="snake-line"></div>
-                      <TokenCard
-                        token={token}
-                        tokenState={tokenStates[token.address]}
-                        isLoading={!tokenStates[token.address]}
-                      />
-                    </div>
+                    <TokenDataWrapper 
+                      key={token.address} 
+                      token={token}
+                    />
                   ))}
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Wrapper component to handle individual token data
+function TokenDataWrapper({ token }) {
+  const { tokenState, loading } = useTokenData(token.address);
+
+  // Calculate progress if it's a bonding curve
+  const tokenStateWithProgress = tokenState ? {
+    ...tokenState,
+    progress: tokenState.marketType === 'bonding_curve'
+      ? (tokenState.currentPrice / tokenState.priceLevels[tokenState.priceLevels.length - 1]) * 100
+      : null
+  } : null;
+
+  return (
+    <div className="snake-border p-4 bg-black/20 rounded">
+      <div className="snake-line"></div>
+      <TokenCard
+        token={token}
+        tokenState={tokenStateWithProgress}
+        isLoading={loading}
+      />
     </div>
   );
 } 

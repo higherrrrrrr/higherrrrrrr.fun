@@ -726,7 +726,7 @@ export const higherrrrrrrAbi = [
     },
     { type: 'error', inputs: [], name: 'SlippageBoundsExceeded' },
     { type: 'error', inputs: [], name: 'TooManyPriceLevels' },
-  ] as const
+  ]
   
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // HigherrrrrrrFactory
@@ -847,7 +847,7 @@ export const higherrrrrrrAbi = [
     },
     { type: 'error', inputs: [], name: 'Unauthorized' },
     { type: 'error', inputs: [], name: 'ZeroAddress' },
-  ] as const
+  ]
   
   /**
    * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
@@ -856,7 +856,7 @@ export const higherrrrrrrAbi = [
   export const higherrrrrrrFactoryAddress = {
     8453: '0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1',
     31337: '0x158d291D8b47F056751cfF47d1eEcd19FDF9B6f8',
-  } as const
+  }
   
   /**
    * - [__View Contract on Base Basescan__](https://basescan.org/address/0x6F599293d4bB71750bbe7dD4D7D26780ad4c22E1)
@@ -865,4 +865,4 @@ export const higherrrrrrrAbi = [
   export const higherrrrrrrFactoryConfig = {
     address: higherrrrrrrFactoryAddress,
     abi: higherrrrrrrFactoryAbi,
-  } as const
+  }

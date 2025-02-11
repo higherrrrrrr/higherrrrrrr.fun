@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { getTokenBalance } from '../onchain';
 
 export function useTokenData(address, userAddress) {
   const [tokenState, setTokenState] = useState(null);
@@ -24,8 +23,14 @@ export function useTokenData(address, userAddress) {
       
       // Update user balance if wallet is connected
       if (userAddress) {
-        const balance = await getTokenBalance(address, userAddress);
-        setUserBalance(balance);
+        const balanceResponse = await fetch(`/api/${address}/balance/${userAddress}`);
+        const balanceData = await balanceResponse.json();
+        
+        if (!balanceResponse.ok) {
+          throw new Error(balanceData.error || 'Failed to fetch balance');
+        }
+        
+        setUserBalance(balanceData.balance);
       }
     } catch (error) {
       console.error('Error fetching token data:', error);
@@ -47,8 +52,19 @@ export function useTokenData(address, userAddress) {
   useEffect(() => {
     const updateBalance = async () => {
       if (userAddress && address) {
-        const balance = await getTokenBalance(address, userAddress);
-        setUserBalance(balance);
+        try {
+          const balanceResponse = await fetch(`/api/${address}/balance/${userAddress}`);
+          const balanceData = await balanceResponse.json();
+          
+          if (!balanceResponse.ok) {
+            throw new Error(balanceData.error || 'Failed to fetch balance');
+          }
+          
+          setUserBalance(balanceData.balance);
+        } catch (error) {
+          console.error('Error updating balance:', error);
+          setUserBalance('0');
+        }
       } else {
         setUserBalance('0');
       }

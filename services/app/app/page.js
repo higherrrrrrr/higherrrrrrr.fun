@@ -7,120 +7,13 @@ import { GlitchText } from '../components/GlitchText';
 import { formatCountdown } from '../utils/formatters';
 import { getHighliteProjects } from '../utils/projects';
 
-// Constants
-const TOKENS_PER_PAGE = 24
-
 export default function Home() {
-  const [topTokens, setTopTokens] = useState([]);
-  const [displayedTokens, setDisplayedTokens] = useState([]);
-  const [isLoadingFeed, setIsLoadingFeed] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
-  const [tokenStates, setTokenStates] = useState({});
-  const [viewMode, setViewMode] = useState('trending');
   const [highliteProjects, setHighliteProjects] = useState([]);
-
-  // Replace useRef-based infinite scroll with scroll event listener
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!hasMore || isLoadingFeed) return;
-
-      const scrolledToBottom =
-        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
-
-      if (scrolledToBottom) {
-        setPage((prev) => prev + 1);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasMore, isLoadingFeed]);
-
-  // Fetch tokens (trending or latest)
-  useEffect(() => {
-    const fetchTokens = async () => {
-      try {
-        setIsLoadingFeed(true);
-        setPage(1);
-
-        if (viewMode === 'latest') {
-          const { tokens: latestTokens } = await getLatestTokens();
-          setTopTokens(latestTokens || []);
-          setDisplayedTokens((latestTokens || []).slice(0, TOKENS_PER_PAGE));
-          setHasMore((latestTokens || []).length > TOKENS_PER_PAGE);
-        } else {
-          const { tokens: trendingTokens } = await getTopTradingTokens();
-          setTopTokens(trendingTokens || []);
-          setDisplayedTokens((trendingTokens || []).slice(0, TOKENS_PER_PAGE));
-          setHasMore((trendingTokens || []).length > TOKENS_PER_PAGE);
-        }
-      } catch (error) {
-        setTopTokens([]);
-        setDisplayedTokens([]);
-        setHasMore(false);
-      } finally {
-        setIsLoadingFeed(false);
-      }
-    };
-    fetchTokens();
-  }, [viewMode]);
-
-  // Handle pagination
-  useEffect(() => {
-    if (page > 1) {
-      const start = (page - 1) * TOKENS_PER_PAGE;
-      const end = start + TOKENS_PER_PAGE;
-      const newTokens = topTokens.slice(start, end);
-
-      setDisplayedTokens((prev) => [...prev, ...newTokens]);
-      setHasMore(end < topTokens.length);
-    }
-  }, [page, topTokens]);
-
-  // Fetch token states
-  useEffect(() => {
-    const fetchTokenStates = async () => {
-      if (!displayedTokens.length) return;
-
-      try {
-        const statePromises = displayedTokens.map(async (token) => {
-          try {
-            const state = await getTokenState(token.address);
-            const progress =
-              state?.marketType === 'bonding_curve'
-                ? (state.currentPrice / state.priceLevels[state.priceLevels.length - 1]) * 100
-                : null;
-
-            return {
-              address: token.address,
-              state: { ...state, progress },
-            };
-          } catch (err) {
-            return { address: token.address, state: null };
-          }
-        });
-
-        const results = await Promise.all(statePromises);
-        const states = {};
-        results.forEach((r) => {
-          if (r.state) {
-            states[r.address] = r.state;
-          }
-        });
-        setTokenStates(states);
-      } catch (err) {
-        // Silently fail
-      }
-    };
-    fetchTokenStates();
-  }, [displayedTokens]);
 
   useEffect(() => {
     setHighliteProjects(getHighliteProjects());
   }, []);
 
-  // Add this useEffect for auto-updating countdown
   useEffect(() => {
     const timer = setInterval(() => {
       setHighliteProjects(prev => 

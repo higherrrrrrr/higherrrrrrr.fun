@@ -1,7 +1,7 @@
 import { createPublicClient, http, formatEther } from 'viem';
 import { base } from 'wagmi/chains';
 import { higherrrrrrrAbi } from './abi';
-import config from '../../../config/config';
+import config from '../../config/config';
 
 // Create public client
 const publicClient = createPublicClient({

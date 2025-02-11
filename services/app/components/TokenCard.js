@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { getEthPrice } from '../api/price';
 import { useState, useEffect } from 'react';
+import { usePrice } from '../hooks/usePrice';
 
 // Add a loading skeleton component
 const TokenCardSkeleton = () => (
@@ -30,10 +30,11 @@ const TokenCardSkeleton = () => (
 export default function TokenCard({ token, tokenState, isLoading }) {
   const [marketCap, setMarketCap] = useState('...');
   const [stateInfo, setStateInfo] = useState({ current: null, next: null, currentPrice: null, nextPrice: null });
+  const { price: ethPrice, loading: priceLoading } = usePrice();
 
   useEffect(() => {
-    if (tokenState) {
-      getMarketCap(tokenState).then(cap => setMarketCap(cap));
+    if (tokenState && ethPrice) {
+      calculateMarketCap(tokenState, ethPrice).then(cap => setMarketCap(cap));
       
       // Get current and next state info
       if (tokenState.priceLevels) {
@@ -49,18 +50,16 @@ export default function TokenCard({ token, tokenState, isLoading }) {
         });
       }
     }
-  }, [tokenState]);
+  }, [tokenState, ethPrice]);
 
-  const getMarketCap = async (tokenState) => {
-    if (!tokenState) {
+  const calculateMarketCap = async (tokenState, ethPrice) => {
+    if (!tokenState || !ethPrice) {
       return '0';
     }
     
     try {
       const priceInEth = parseFloat(tokenState.currentPrice);
-      const ethPriceData = await getEthPrice();
-      
-      const usdPrice = priceInEth * ethPriceData.price_usd;
+      const usdPrice = priceInEth * ethPrice;
       const totalSupply = parseFloat(tokenState.totalSupply);
       const marketCapUsd = usdPrice * totalSupply;
       
@@ -70,6 +69,7 @@ export default function TokenCard({ token, tokenState, isLoading }) {
       
       return Math.floor(marketCapUsd).toLocaleString();
     } catch (error) {
+      console.error('Error calculating market cap:', error);
       return '0';
     }
   };
@@ -88,7 +88,7 @@ export default function TokenCard({ token, tokenState, isLoading }) {
     return Math.min(Math.max(progress, 0), 100);
   };
 
-  if (isLoading || !token) {
+  if (isLoading || !token || priceLoading) {
     return <TokenCardSkeleton />;
   }
 
