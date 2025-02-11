@@ -43,86 +43,47 @@
     background-size: 32px 32px;
     background-position: -16px -16px;
   }
+
+  .snake-border {
+    @apply relative border-2 border-green-500/10 rounded-lg transition-all duration-300 
+           bg-black/80;
+  }
+
+  .snake-border:hover {
+    @apply -translate-y-0.5 border-green-500/30;
+  }
+
+  .snake-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: 
+      linear-gradient(90deg, transparent 50%, #22c55e 50%) 0 0,
+      linear-gradient(90deg, transparent 50%, #22c55e 50%) 0 100%,
+      linear-gradient(0deg, transparent 50%, #22c55e 50%) 0 0,
+      linear-gradient(0deg, transparent 50%, #22c55e 50%) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
+    animation: snake-border 2s infinite linear;
+  }
+
+  .snake-border:hover::before {
+    opacity: 1;
+  }
 }
 
+/* Dynamic wallet styles */
 .dynamic-shadow-dom button.dynamic-connect-button {
   background-color: #00FF00;
   color: #000;
   font-weight: bold;
   border-radius: 4px;
 }
+
 .dynamic-shadow-dom button.dynamic-connect-button span {
   background-color: #fff;
   padding: 2px 5px;
-}
-
-
-/* SNAKE BORDER */
-.snake-border {
-  position: relative;
-  border: 2px solid rgba(0, 255, 0, 0.1);
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  background: rgba(0, 0, 0, 0.8);
-  overflow: hidden;
-}
-
-.snake-border:hover {
-  transform: translateY(-2px);
-  border-color: rgba(0, 255, 0, 0.2);
-  box-shadow: 0 4px 12px rgba(0, 255, 0, 0.1);
-}
-
-.snake-line {
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  pointer-events: none;
-  background: 
-    linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 0,
-    linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 100%,
-    linear-gradient(0deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 0,
-    linear-gradient(0deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 100% 0;
-  background-repeat: no-repeat;
-  background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-  animation: snake-travel 2s infinite linear;
-}
-
-@keyframes snake-travel {
-  0% {
-    background-position: -20px 0, -20px 100%, 0 -20px, 100% -20px;
-  }
-  100% {
-    background-position: 100% 0, 100% 100%, 0 100%, 100% 100%;
-  }
-}
-
-/* Remove the old hover effects */
-.snake-border::after,
-.snake-border::before {
-  display: none;
-}
-
-.timer-snake-border {
-  position: relative;
-  border: 2px solid rgba(0, 0, 0, 0.5);
-}
-
-.timer-snake-border::before {
-  content: "";
-  position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  pointer-events: none;
-  background: linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 0,
-              linear-gradient(90deg, #00ff00 50%, transparent 50%) 0 100%,
-              linear-gradient(0deg, #00ff00 50%, transparent 50%) 0 0,
-              linear-gradient(0deg, #00ff00 50%, transparent 50%) 100% 0;
-  background-repeat: no-repeat;
-  background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-  animation: snake-travel 6s infinite linear;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
 }

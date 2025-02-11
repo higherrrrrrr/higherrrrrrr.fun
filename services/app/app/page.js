@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { GlitchText } from '../components/GlitchText';
 import { formatCountdown } from '../utils/formatters';
 import { getHighliteProjects } from '../utils/projects';
+import { SnakeBorder } from '../components/SnakeBorder';
 
 export default function Home() {
   const [highliteProjects, setHighliteProjects] = useState([]);
@@ -41,13 +42,14 @@ export default function Home() {
               Believe in something
             </p>
 
-            <button 
-              className="px-6 py-3 border-2 border-green-500/30 rounded-lg 
-                         hover:border-green-500 transition-colors text-lg"
-              disabled
-            >
-              Launch Token (Coming Soon)
-            </button>
+            <SnakeBorder disabled>
+              <button 
+                className="px-6 py-3 text-lg w-full"
+                disabled
+              >
+                Launch Token (Coming Soon)
+              </button>
+            </SnakeBorder>
           </div>
         </div>
       </div>
@@ -57,19 +59,20 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between mb-12">
             <h2 className="text-3xl font-bold">HighLites</h2>
-            <Link 
-              href="/featured/feed"
-              className="px-4 py-2 border border-green-500/30 rounded hover:border-green-500 transition-colors"
-            >
-              View All
-            </Link>
+            <SnakeBorder>
+              <Link 
+                href="/featured/feed"
+                className="px-4 py-2 w-full block hover:text-green-400 transition-colors"
+              >
+                View All
+              </Link>
+            </SnakeBorder>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {highliteProjects.map((project) => (
               <Link key={project.slug} href={`/featured/${project.slug}`} className="block w-full">
-                <div className="snake-border p-6 bg-black/20 rounded h-full flex flex-col">
-                  <div className="snake-line"></div>
+                <SnakeBorder className="p-6 bg-black/20 h-full flex flex-col">
                   {project.imageUrl && (
                     <div className="aspect-square mb-6 overflow-hidden rounded">
                       <img
@@ -87,7 +90,7 @@ export default function Home() {
                     <span className="opacity-70 mr-2">Launch:</span>
                     {formatCountdown(project.timeLeftMs)}
                   </div>
-                </div>
+                </SnakeBorder>
               </Link>
             ))}
           </div>
