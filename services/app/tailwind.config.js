@@ -67,21 +67,30 @@ module.exports = {
           '50%': { opacity: '1' }
         },
         'snake-travel': {
-          '0%': { backgroundPosition: '50% 0, 50% 100%, 0 50%, 100% 50%' },
-          '25%': { backgroundPosition: '100% 0, 0% 100%, 0 0%, 100% 100%' },
-          '50%': { backgroundPosition: '50% 0, 50% 100%, 0 50%, 100% 50%' },
-          '75%': { backgroundPosition: '0% 0, 100% 100%, 0 100%, 100% 0%' },
-          '100%': { backgroundPosition: '50% 0, 50% 100%, 0 50%, 100% 50%' }
+          '0%': { 
+            backgroundPosition: '-20px 0, -20px 100%, 0 -20px, 100% -20px'
+          },
+          '100%': { 
+            backgroundPosition: '100% 0, 100% 100%, 0 100%, 100% 100%'
+          }
+        },
+        'snake-border': {
+          '0%': { 
+            backgroundPosition: '-20px 0, -20px 100%, 0 -20px, 100% -20px'
+          },
+          '100%': { 
+            backgroundPosition: '100% 0, 100% 100%, 0 100%, 100% 100%'
+          }
         }
       },
       animation: {
         'progress-pulse': 'progress-pulse 2s ease-in-out infinite',
         'scan': 'scan 2s linear infinite',
-        'snake': 'snake 2.8s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+        'snake': 'snake-border 2s infinite linear',
         'glitch-top': 'glitch-top 2s infinite linear alternate-reverse',
         'glitch-bottom': 'glitch-bottom 2s infinite linear alternate-reverse',
         'terminal-blink': 'terminal-blink 1s step-end infinite',
-        'snake-travel': 'snake-travel 3s linear infinite'
+        'snake-travel': 'snake-travel 2s infinite linear'
       },
       textShadow: {
         'terminal': '0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2)',
@@ -96,44 +105,33 @@ module.exports = {
         '.snake-border': {
           'position': 'relative',
           'border': '2px solid rgba(0, 255, 0, 0.15)',
-          'transition': 'all 0.15s',
+          'transition': 'all 0.3s',
           'borderRadius': '8px',
+          'background': 'rgba(0, 0, 0, 0.8)',
           '&:hover': {
-            'transform': 'scale(1.015)',
-            '& .snake-line': {
-              '@apply animate-snake-travel': {}
-            },
-            '&::after': {
-              'borderColor': 'rgba(0, 255, 0, 0.4)',
-              'boxShadow': '0 0 15px rgba(0, 255, 0, 0.15)'
+            'borderColor': 'rgba(0, 255, 0, 0.3)',
+            'transform': 'translateY(-2px)',
+            'boxShadow': '0 4px 12px rgba(0, 255, 0, 0.1)',
+            '&::before': {
+              'opacity': '1'
             }
           },
-          '& .snake-line': {
+          '&::before': {
             'content': '""',
             'position': 'absolute',
-            'top': '-2px',
-            'left': '-2px',
-            'right': '-2px',
-            'bottom': '-2px',
-            'borderRadius': '8px',
-            'pointerEvents': 'none',
+            'inset': '-2px',
+            'opacity': '0',
+            'transition': 'opacity 0.3s',
             'background': `
-              linear-gradient(90deg, #00ff00 50%, transparent 50%) 50% 0,
-              linear-gradient(90deg, #00ff00 50%, transparent 50%) 50% 100%,
-              linear-gradient(0deg, #00ff00 50%, transparent 50%) 0 50%,
-              linear-gradient(0deg, #00ff00 50%, transparent 50%) 100% 50%
+              linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 0,
+              linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 100%,
+              linear-gradient(0deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 0,
+              linear-gradient(0deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 100% 0
             `,
             'backgroundRepeat': 'no-repeat',
-            'backgroundSize': '20px 2px, 20px 2px, 2px 20px, 2px 20px'
-          },
-          '&::after': {
-            'content': '""',
-            'position': 'absolute',
-            'inset': '16px',
-            'border': '2px solid rgba(0, 255, 0, 0.1)',
-            'borderRadius': '8px',
-            'pointerEvents': 'none',
-            'transition': 'all 0.3s'
+            'backgroundSize': '20px 2px, 20px 2px, 2px 20px, 2px 20px',
+            'animation': 'snake-travel 2s infinite linear',
+            'pointerEvents': 'none'
           }
         },
         '.terminal-text': {
