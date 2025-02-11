@@ -4,7 +4,7 @@ module.exports = {
     './pages/**/*.{js,jsx}',
     './components/**/*.{js,jsx}',
     './layouts/**/*.{js,jsx}',
-    './app/**/*.{js,jsx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
@@ -76,10 +76,10 @@ module.exports = {
         },
         'snake-border': {
           '0%': { 
-            backgroundPosition: '-20px 0, -20px 100%, 0 -20px, 100% -20px'
+            backgroundPosition: '0 0, 0 100%, 0 0, 100% 0' 
           },
           '100%': { 
-            backgroundPosition: '100% 0, 100% 100%, 0 100%, 100% 100%'
+            backgroundPosition: '100% 0, 100% 100%, 0 100%, 100% 100%' 
           }
         }
       },
@@ -90,7 +90,8 @@ module.exports = {
         'glitch-top': 'glitch-top 2s infinite linear alternate-reverse',
         'glitch-bottom': 'glitch-bottom 2s infinite linear alternate-reverse',
         'terminal-blink': 'terminal-blink 1s step-end infinite',
-        'snake-travel': 'snake-travel 2s infinite linear'
+        'snake-travel': 'snake-travel 2s infinite linear',
+        'snake-border': 'snake-border 2s infinite linear'
       },
       textShadow: {
         'terminal': '0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2)',
@@ -130,7 +131,7 @@ module.exports = {
             `,
             'backgroundRepeat': 'no-repeat',
             'backgroundSize': '20px 2px, 20px 2px, 2px 20px, 2px 20px',
-            'animation': 'snake-travel 2s infinite linear',
+            'animation': 'snake-border 2s infinite linear',
             'pointerEvents': 'none'
           }
         },
