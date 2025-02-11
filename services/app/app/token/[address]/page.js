@@ -1,6 +1,6 @@
 'use client';
-import { TokenPageWrapper } from '../../../components/token/evm/TokenPageWrapper';
-import { TokenPage as EvmTokenPage } from '../../../components/token/evm/TokenPage';
+import { TokenPageWrapper } from '../../../components/token/TokenPageWrapper';
+import { TokenPage as EvmTokenPage } from '../../../components/token/TokenPage';
 import { isValidEvmAddress } from '../../../utils/address';
 import { useParams } from 'next/navigation';
 

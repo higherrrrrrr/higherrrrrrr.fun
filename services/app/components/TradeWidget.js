@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
-import { parseEther, formatEther } from 'viem';
-import { higherrrrrrrAbi } from '../onchain/generated';
-import { getBuyQuote, getSellQuote } from '../onchain/quotes';
+import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useSignTypedData } from 'wagmi';
+import { parseEther, formatEther, concat, numberToHex, size } from 'viem';
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 import DynamicConnectButton from './DynamicConnectButton';
 import { base as wagmiBase } from 'wagmi/chains';
 import { formatUsdPrice } from '../utils/format';
+import qs from 'qs';
 
 const MIN_ETH_AMOUNT = "0.0000001";
+const AFFILIATE_FEE = 100; // 1% fee in basis points
+const FEE_RECIPIENT = "YOUR_FEE_RECIPIENT_ADDRESS"; // Replace with your fee recipient address
 
 function formatTokenAmount(amount) {
   const num = parseFloat(amount);
@@ -26,7 +27,7 @@ function formatTokenAmount(amount) {
 
 export default function TradeWidget({ 
   tokenState, 
-  address, 
+  address: tokenAddress, 
   userBalance, 
   ethPrice,
   onTradeComplete 
@@ -74,19 +75,11 @@ export default function TradeWidget({
   }, [chain]);
 
   const { 
-    writeContract: buyToken,
+    writeContract,
     data: buyHash,
     isPending: isBuyPending,
     error: buyError,
     isError: isBuyError
-  } = useWriteContract();
-
-  const { 
-    writeContract: sellToken,
-    data: sellHash,
-    isPending: isSellPending,
-    error: sellError,
-    isError: isSellError
   } = useWriteContract();
 
   const { isLoading: isBuyLoading, isSuccess: isBuySuccess } = useWaitForTransactionReceipt({
@@ -100,18 +93,7 @@ export default function TradeWidget({
     }
   });
 
-  const { isLoading: isSellLoading, isSuccess: isSellSuccess } = useWaitForTransactionReceipt({
-    hash: sellHash,
-    chainId: wagmiBase?.id,
-    onSuccess: () => {
-      onTradeComplete?.();
-      setAmount('');
-      setQuote(null);
-      setError('');
-    }
-  });
-
-  const isLoading = isBuyLoading || isSellLoading || isBuyPending || isSellPending;
+  const isLoading = isBuyLoading || isBuyPending;
 
   useEffect(() => {
     if (chain && wagmiBase && chain.id !== wagmiBase.id) {
@@ -122,6 +104,124 @@ export default function TradeWidget({
   }, [chain]);
 
   const { switchChain } = useSwitchChain();
+
+  const { signTypedDataAsync } = useSignTypedData();
+
+  // New state for 0x API quotes
+  const [quoteData, setQuoteData] = useState(null);
+  const [permitSignature, setPermitSignature] = useState(null);
+
+  // Function to get quote from 0x API
+  const fetchQuote = async (isBuyOrder = true) => {
+    if (!amount || !userAddress) return;
+
+    const params = {
+      sellToken: isBuyOrder ? 'ETH' : tokenAddress,
+      buyToken: isBuyOrder ? tokenAddress : 'ETH',
+      sellAmount: parseEther(amount).toString(),
+      takerAddress: userAddress,
+      swapFeeRecipient: FEE_RECIPIENT,
+      swapFeeBps: AFFILIATE_FEE,
+      swapFeeToken: isBuyOrder ? tokenAddress : 'ETH',
+    };
+
+    try {
+      const response = await fetch(`/api/quote?${qs.stringify(params)}`);
+      const data = await response.json();
+      setQuoteData(data);
+      setError('');
+      return data;
+    } catch (err) {
+      console.error('Quote error:', err);
+      setError('Failed to get quote');
+      return null;
+    }
+  };
+
+  // Effect to fetch quote when amount changes
+  useEffect(() => {
+    if (amount) {
+      fetchQuote(isBuying);
+    }
+  }, [amount, isBuying, userAddress, tokenAddress]);
+
+  // Modified transaction handling
+  const handleTransaction = async () => {
+    if (!userAddress) {
+      setShowAuthFlow(true);
+      return;
+    }
+
+    if (chain && wagmiBase && chain.id !== wagmiBase.id) {
+      try {
+        await switchChain({ chainId: wagmiBase.id });
+        return;
+      } catch (err) {
+        setError('Failed to switch to Base network');
+        return;
+      }
+    }
+
+    try {
+      setError('');
+      
+      // Get fresh quote
+      const quote = await fetchQuote(isBuying);
+      if (!quote) return;
+
+      // Sign permit if needed
+      if (quote.permit2?.eip712) {
+        try {
+          const signature = await signTypedDataAsync(quote.permit2.eip712);
+          setPermitSignature(signature);
+          
+          // Append signature to transaction data
+          const signatureLengthInHex = numberToHex(size(signature), {
+            size: 32,
+            signed: false,
+          });
+          
+          quote.transaction.data = concat([
+            quote.transaction.data,
+            signatureLengthInHex,
+            signature
+          ]);
+          
+        } catch (err) {
+          console.error('Permit signing error:', err);
+          setError('Failed to sign permit');
+          return;
+        }
+      }
+
+      // Send transaction
+      const tx = {
+        address: quote.to,
+        abi: [], // 0x API provides complete transaction data
+        functionName: undefined,
+        chainId: wagmiBase.id,
+        value: quote.value ? BigInt(quote.value) : 0n,
+        data: quote.data,
+        gas: quote.gas ? BigInt(quote.gas) : undefined
+      };
+
+      const hash = await writeContract(tx);
+      
+      // Wait for transaction receipt
+      const receipt = await waitForTransactionReceipt({ hash });
+      
+      if (receipt.status === 'success') {
+        onTradeComplete?.();
+        setAmount('');
+        setQuoteData(null);
+        setError('');
+      }
+
+    } catch (err) {
+      console.error('Transaction error:', err);
+      setError(err.message || 'Transaction failed');
+    }
+  };
 
   const handlePercentageClick = (percentage) => {
     if (!userAddress) return;
@@ -188,163 +288,10 @@ export default function TradeWidget({
     }
   };
 
-  const handleTransaction = async () => {
-    if (!userAddress) {
-      setShowAuthFlow(true);
-      return;
-    }
-
-    // Check and switch chain if needed
-    if (chain && wagmiBase && chain.id !== wagmiBase.id) {
-      try {
-        await switchChain({ chainId: wagmiBase.id });
-        return; // Return here as the chain switch will trigger a re-render
-      } catch (err) {
-        console.error('Failed to switch chain:', err);
-        setError('Failed to switch to Base network. Please switch manually.');
-        return;
-      }
-    }
-
-    try {
-      setError('');
-      const marketType = tokenState?.marketType || 0;
-
-      if (isBuying) {
-        if (!amount) return;
-
-        try {
-          const config = {
-            address,
-            abi: higherrrrrrrAbi,
-            functionName: 'buy',
-            chainId: wagmiBase.id,
-            value: parseEther(amount),
-            args: [
-              userAddress,
-              userAddress,
-              '',
-              marketType,
-              parseEther(MIN_ETH_AMOUNT),
-              0
-            ]
-          };
-
-          console.log('Transaction Config:', {
-            ...config,
-            value: config.value.toString(),
-            userBalance: ethBalance?.value.toString(),
-            chain: chain?.id,
-            targetChain: wagmiBase.id
-          });
-
-          buyToken(config);
-
-        } catch (err) {
-          console.error('Buy transaction error:', err);
-          if (err.code === 'ACTION_REJECTED') {
-            setError('Transaction rejected by user');
-          } else if (err.message?.includes('insufficient funds')) {
-            setError(`Insufficient balance for transaction. Required: ${err.message.match(/want (\d+)/)?.[1] || 'unknown'}, Have: ${ethBalance?.value.toString() || '0'}`);
-          } else {
-            setError(err.message || 'Buy transaction failed');
-          }
-        }
-      } else {
-        if (!amount) return;
-
-        try {
-          const config = {
-            address,
-            abi: higherrrrrrrAbi,
-            functionName: 'sell',
-            args: [
-              parseEther(amount),
-              userAddress,
-              '',
-              marketType,
-              parseEther(MIN_ETH_AMOUNT),
-              0
-            ]
-          };
-
-          sellToken(config);
-
-        } catch (err) {
-          console.error('Sell transaction error:', err);
-          if (err.code === 'ACTION_REJECTED') {
-            setError('Transaction rejected by user');
-          } else {
-            setError(err.message || 'Sell transaction failed');
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Transaction error:', err);
-      setError(err.message || 'Transaction failed');
-    }
-  };
-
   const isQuoteAvailable = useMemo(() => {
     if (!amount || !quote) return false;
     return true;
   }, [amount, quote]);
-
-  // Effect to update quote when amount changes
-  useEffect(() => {
-    if (!amount || !address) {
-      setQuote(null);
-      return;
-    }
-
-    const updateQuote = async () => {
-      const MAX_RETRIES = 5;
-      
-      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          const amountWei = parseEther(amount);
-
-          if (isBuying) {
-            const quoteWei = await getBuyQuote(address, amountWei);
-            if (quoteWei === BigInt(0)) {
-              if (attempt === MAX_RETRIES) {
-                console.error('Got zero buy quote after all retries');
-                setQuote(null);
-                setError('Failed to get quote');
-                return;
-              }
-              continue;
-            }
-            setQuote(quoteWei);
-            setError('');
-            return;
-          } else {
-            const quoteWei = await getSellQuote(address, amountWei);
-            if (quoteWei === BigInt(0)) {
-              if (attempt === MAX_RETRIES) {
-                setQuote(null);
-                setError('Failed to get quote');
-                return;
-              }
-              continue;
-            }
-            setQuote(quoteWei);
-            setError('');
-            return;
-          }
-        } catch (error) {
-          if (attempt === MAX_RETRIES) {
-            setQuote(null);
-            setError('Failed to get quote');
-            return;
-          }
-          continue;
-        }
-      }
-    };
-
-    updateQuote();
-  }, [amount, address, isBuying]);
 
   // Add effect to handle errors
   useEffect(() => {
@@ -352,11 +299,7 @@ export default function TradeWidget({
       console.error('Buy error:', buyError);
       setError(buyError.message || 'Buy transaction failed');
     }
-    if (isSellError && sellError) {
-      console.error('Sell error:', sellError);
-      setError(sellError.message || 'Sell transaction failed');
-    }
-  }, [isBuyError, buyError, isSellError, sellError]);
+  }, [isBuyError, buyError]);
 
   return (
     <div className="border border-green-500/30 rounded-lg p-4 md:p-6 space-y-6">
@@ -465,7 +408,7 @@ export default function TradeWidget({
           
           <button
             onClick={async () => {
-              const ethAmount = await calculateEthForTokenAmount(address, 1_001_001);
+              const ethAmount = await calculateEthForTokenAmount(tokenAddress, 1_001_001);
               if (ethAmount) {
                 setIsBuying(true);
                 handleAmountChange(ethAmount);
@@ -508,46 +451,30 @@ export default function TradeWidget({
           </div>
         )}
 
-        {amount && (
+        {amount && quoteData && (
           <div className="space-y-2 p-4 bg-green-500/5 rounded-lg">
             <div className="flex justify-between text-sm">
               <span>{isBuying ? "You'll Get" : "You'll Receive"}</span>
               <span>
-                {!isQuoteAvailable ? 'Quote unavailable' : 
-                 quote ? (isBuying 
-                   ? `${formatTokenAmount(formatEther(quote))} ${tokenState.symbol}`
-                   : `${parseFloat(formatEther(quote)).toFixed(6)} ETH`
-                 ) : '...'}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm text-green-500/70">
-              <span>USD Value</span>
-              <span>
-                {!isQuoteAvailable ? '-' :
-                 quote ? `$${(parseFloat(formatEther(quote)) * (isBuying ? parseFloat(tokenState.currentPrice) * ethPrice : ethPrice)).toFixed(2)}` : '...'}
+                {isBuying 
+                  ? `${formatTokenAmount(formatEther(quoteData.buyAmount))} ${tokenState.symbol}`
+                  : `${parseFloat(formatEther(quoteData.buyAmount)).toFixed(6)} ETH`
+                }
               </span>
             </div>
             
-            {isBuying && parseFloat(amount) > parseFloat(ethBalance?.formatted || '0') && (
-              <div className="text-red-500 text-sm mt-2 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>Insufficient ETH balance</span>
+            {/* Display fees */}
+            {quoteData.fees?.integratorFee && (
+              <div className="flex justify-between text-sm text-green-500/70">
+                <span>Fee</span>
+                <span>
+                  {formatEther(quoteData.fees.integratorFee.amount)} 
+                  {quoteData.fees.integratorFee.token === 'ETH' ? 'ETH' : tokenState.symbol}
+                </span>
               </div>
             )}
-            {!isBuying && parseFloat(amount) > parseFloat(userBalance) && (
-              <div className="text-red-500 text-sm mt-2 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>Insufficient token balance</span>
-              </div>
-            )}
-
-            <div className="text-xs text-green-500/50 mt-2">
-              Minimum trade amount: {MIN_ETH_AMOUNT} ETH
-            </div>
+            
+            {/* ... rest of the quote display ... */}
           </div>
         )}
 
@@ -581,8 +508,8 @@ export default function TradeWidget({
             ) : (
               <span>
                 {isBuying 
-                  ? quote 
-                    ? `Buy ~${formatTokenAmount(formatEther(quote))} ${tokenState.symbol}` 
+                  ? quoteData 
+                    ? `Buy ~${formatTokenAmount(formatEther(quoteData.buyAmount))} ${tokenState.symbol}` 
                     : `Buy ${tokenState.symbol}`
                   : `Sell ${formatTokenAmount(amount)} ${tokenState.symbol}`
                 }
