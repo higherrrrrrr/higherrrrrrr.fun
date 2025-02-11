@@ -1,8 +1,11 @@
-import { formatUsdPrice, formatMarketCap } from '../../../utils/format';
+import { formatUsdPrice, formatMarketCap } from '../../utils/format';
 
-const MAX_SUPPLY = 1_000_000_000; // 1B tokens
+export function TokenLevelsTable({ tokenState }) {
+  // Only show levels table for tokens that support leveling
+  if (!tokenState.priceLevels?.length) {
+    return null;
+  }
 
-export function TokenLevelsTable({ tokenState, ethPrice }) {
   return (
     <div className="border border-green-500/30 rounded-lg overflow-x-auto">
       <table className="w-full">
@@ -19,15 +22,11 @@ export function TokenLevelsTable({ tokenState, ethPrice }) {
         </thead>
         <tbody>
           {tokenState.priceLevels.map((level, index) => {
-            const levelUsdPrice = parseFloat(level.price) * ethPrice;
-            const levelMarketCap = levelUsdPrice * MAX_SUPPLY;
-            const currentPriceEth = parseFloat(tokenState.currentPrice);
-            
+            const currentPrice = parseFloat(tokenState.currentPrice);
             const nextLevel = tokenState.priceLevels[index + 1];
             const nextLevelPrice = nextLevel ? parseFloat(nextLevel.price) : Infinity;
-            const isCurrentLevel = currentPriceEth >= parseFloat(level.price) && currentPriceEth < nextLevelPrice;
-            
-            const isAchieved = currentPriceEth >= parseFloat(level.price) && !isCurrentLevel;
+            const isCurrentLevel = currentPrice >= parseFloat(level.price) && currentPrice < nextLevelPrice;
+            const isAchieved = currentPrice >= parseFloat(level.price) && !isCurrentLevel;
 
             return (
               <tr key={index} className={`border-b border-green-500/10 ${isCurrentLevel ? 'bg-green-500/10' : ''}`}>
@@ -38,18 +37,10 @@ export function TokenLevelsTable({ tokenState, ethPrice }) {
                   </div>
                 </td>
                 <td className="p-4 text-right whitespace-nowrap">
-                  {index === 0 ? (
-                    'Free'
-                  ) : (
-                    `$${formatUsdPrice(levelUsdPrice)}`
-                  )}
+                  {index === 0 ? 'Free' : `$${formatUsdPrice(level.priceUsd)}`}
                 </td>
                 <td className="p-4 text-right whitespace-nowrap">
-                  {index === 0 ? (
-                    '-'
-                  ) : (
-                    formatMarketCap(levelMarketCap)
-                  )}
+                  {index === 0 ? '-' : formatMarketCap(level.marketCapUsd)}
                 </td>
                 <td className="p-4 text-center whitespace-nowrap">
                   {isCurrentLevel ? (

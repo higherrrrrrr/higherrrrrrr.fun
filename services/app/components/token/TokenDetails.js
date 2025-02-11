@@ -1,4 +1,26 @@
 export function TokenDetails({ tokenDetails, address, tokenState }) {
+  const getExplorerUrl = () => {
+    switch (tokenState.chain) {
+      case 'base':
+        return `https://basescan.org/token/${address}`;
+      case 'solana':
+        return `https://solscan.io/token/${address}`;
+      default:
+        return '';
+    }
+  };
+
+  const getDexScreenerUrl = () => {
+    switch (tokenState.chain) {
+      case 'base':
+        return `https://dexscreener.com/base/${address}`;
+      case 'solana':
+        return `https://dexscreener.com/solana/${address}`;
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 pb-4">
       <div className="flex flex-col gap-4">
@@ -89,9 +111,9 @@ export function TokenDetails({ tokenDetails, address, tokenState }) {
             </svg>
           </button>
 
-          {tokenState?.marketType === 1 && (
+          {tokenState?.marketType === 'DEX' && (
             <a
-              href={`https://dexscreener.com/base/${address}`}
+              href={getDexScreenerUrl()}
               target="_blank"
               rel="noopener noreferrer"
               className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
@@ -104,12 +126,12 @@ export function TokenDetails({ tokenDetails, address, tokenState }) {
           )}
 
           <a
-            href={`https://basescan.org/token/${address}`}
+            href={getExplorerUrl()}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2 py-1 text-xs border border-green-500/30 hover:border-green-500 rounded flex items-center gap-1"
           >
-            <span>Basescan</span>
+            <span>{tokenState.chain === 'base' ? 'Basescan' : 'Solscan'}</span>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>

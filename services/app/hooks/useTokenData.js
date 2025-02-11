@@ -11,17 +11,31 @@ export function useTokenData(address, userAddress) {
   const [tokenDetails, setTokenDetails] = useState(null);
   const [isCreator, setIsCreator] = useState(false);
 
-  async function refreshTokenState() {
-    if (typeof address === 'string') {
-      const state = await getTokenState(address);
-      setTokenState(state);
+  const fetchTokenData = async () => {
+    try {
+      const response = await fetch(`/api/token/${address}`);
+      const data = await response.json();
       
+      setTokenState(data);
+      setIsCreator(userAddress?.toLowerCase() === data.creator?.toLowerCase());
+      
+      // User balance would come from the wallet connection
+      // This is just a placeholder
       if (userAddress) {
-        const balance = await getTokenBalance(address, userAddress);
-        setUserBalance(balance);
+        setUserBalance('0');
       }
+    } catch (error) {
+      console.error('Error fetching token data:', error);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    if (address) {
+      fetchTokenData();
+    }
+  }, [address, userAddress]);
 
   useEffect(() => {
     const updateBalance = async () => {
@@ -72,7 +86,7 @@ export function useTokenData(address, userAddress) {
     if (address) {
       setLoading(true);
       Promise.all([
-        refreshTokenState(),
+        fetchTokenData(),
         getEthPrice()
       ])
         .then(([_, priceData]) => {
@@ -82,7 +96,7 @@ export function useTokenData(address, userAddress) {
         .finally(() => setLoading(false));
 
       const tokenRefreshTimer = setInterval(() => {
-        refreshTokenState().catch(console.error);
+        fetchTokenData().catch(console.error);
       }, 15000);
 
       return () => clearInterval(tokenRefreshTimer);
@@ -108,6 +122,6 @@ export function useTokenData(address, userAddress) {
     userBalance,
     tokenDetails,
     isCreator,
-    refreshTokenState
+    refreshTokenState: fetchTokenData
   };
 } 

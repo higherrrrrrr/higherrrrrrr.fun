@@ -7,7 +7,9 @@
     "build": "next build",
     "build-knowledge": "node scripts/build-knowledge.js",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down"
   },
   "dependencies": {
     "@dynamic-labs/ethereum": "^4.3.0",
@@ -23,9 +25,11 @@
     "encoding": "^0.1.13",
     "ethers": "^6.13.5",
     "framer-motion": "^10.16.16",
+    "glob": "^8.0.3",
     "isomorphic-unfetch": "^4.0.2",
     "js-cookie": "^3.0.5",
     "next": "^15.1.6",
+    "node-pg-migrate": "^7.9.1",
     "openai": "^4.83.0",
     "pino-pretty": "^13.0.0",
     "posthog-js": "^1.195.0",
@@ -35,8 +39,7 @@
     "react-twitter-widgets": "^1.11.0",
     "utf-8-validate": "^5.0.10",
     "viem": "^2.22.21",
-    "wagmi": "^2.14.9",
-    "glob": "^8.0.3"
+    "wagmi": "^2.14.9"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

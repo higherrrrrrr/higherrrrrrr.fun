@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { TokenHeader } from './TokenHeader';
 import { TokenDetails } from './TokenDetails';
 import { TokenProgress } from './TokenProgress';
-import { TokenChart } from './evm/TokenChart';
+import { TokenChart } from './TokenChart';
 import { TokenLevelsTable } from './TokenLevelsTable';
 import TradeWidget from '../TradeWidget';
 import { useTokenData } from '../../hooks/useTokenData';
@@ -18,7 +18,6 @@ export function TokenPage({ addressProp }) {
   const {
     tokenState,
     loading,
-    ethPrice,
     userBalance,
     tokenDetails,
     isCreator,
@@ -41,7 +40,6 @@ export function TokenPage({ addressProp }) {
     <div className="min-h-screen bg-black text-green-500 font-mono">
       <TokenHeader 
         tokenState={tokenState}
-        ethPrice={ethPrice}
         totalSupply={tokenState.totalSupply}
         isCreator={isCreator}
         address={address}
@@ -56,27 +54,23 @@ export function TokenPage({ addressProp }) {
       <div className="border-b border-green-500/30" />
 
       <div className="max-w-4xl mx-auto p-4 md:p-8 space-y-12">
-        <TokenProgress 
-          tokenState={tokenState}
-          ethPrice={ethPrice}
-        />
+        <TokenProgress tokenState={tokenState} />
 
-        {tokenState?.marketType === 1 && tokenState?.poolAddress && (
-          <TokenChart poolAddress={tokenState.poolAddress} />
+        {tokenState?.marketType === 'DEX' && tokenState?.poolAddress && (
+          <TokenChart 
+            poolAddress={tokenState.poolAddress}
+            chain={tokenState.chain}
+          />
         )}
 
         <TradeWidget 
           tokenState={tokenState}
           address={address}
           userBalance={userBalance}
-          ethPrice={ethPrice}
           onTradeComplete={refreshTokenState}
         />
 
-        <TokenLevelsTable 
-          tokenState={tokenState}
-          ethPrice={ethPrice}
-        />
+        <TokenLevelsTable tokenState={tokenState} />
       </div>
     </div>
   );

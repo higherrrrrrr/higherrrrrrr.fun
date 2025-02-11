@@ -1,11 +1,7 @@
 import Link from 'next/link';
-import { formatUsdPrice, formatMarketCap } from '../../../utils/format';
+import { formatUsdPrice, formatMarketCap } from '../../utils/format';
 
-export function TokenHeader({ tokenState, ethPrice, totalSupply, isCreator, address }) {
-  const priceInEth = parseFloat(tokenState.currentPrice);
-  const usdPrice = priceInEth * ethPrice;
-  const marketCapUsd = usdPrice * parseFloat(totalSupply);
-
+export function TokenHeader({ tokenState, totalSupply, isCreator, address }) {
   return (
     <div className="p-4">
       <div className="max-w-4xl mx-auto">
@@ -33,13 +29,13 @@ export function TokenHeader({ tokenState, ethPrice, totalSupply, isCreator, addr
             <div>
               <div className="text-sm text-green-500/50">Price</div>
               <div className="text-lg">
-                ${formatUsdPrice(usdPrice)}
+                ${formatUsdPrice(tokenState.currentPriceUsd)}
               </div>
             </div>
             <div>
               <div className="text-sm text-green-500/50">Market Cap</div>
               <div className="text-lg">
-                {formatMarketCap(marketCapUsd)}
+                {formatMarketCap(tokenState.marketCapUsd)}
               </div>
             </div>
             <div>
@@ -47,7 +43,7 @@ export function TokenHeader({ tokenState, ethPrice, totalSupply, isCreator, addr
               <div className="text-lg">
                 {totalSupply.toLocaleString(undefined, {maximumFractionDigits: 0})}
                 <div className="text-sm text-green-500/70">
-                  {((parseFloat(totalSupply) / 1_000_000_000) * 100).toFixed(2)}%
+                  {((parseFloat(totalSupply) / tokenState.maxSupply) * 100).toFixed(2)}%
                 </div>
               </div>
             </div>

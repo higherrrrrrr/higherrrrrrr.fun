@@ -1,13 +1,13 @@
-import { getProgressToNextLevel } from '../../../utils/token';
+import { getProgressToNextLevel } from '../../utils/token';
 
-export function TokenProgress({ tokenState, ethPrice }) {
+export function TokenProgress({ tokenState }) {
   const getCurrentLevelIndex = (tokenState) => {
     if (!tokenState?.priceLevels || !tokenState?.currentPrice) return -1;
-    const currentPriceEth = parseFloat(tokenState.currentPrice);
+    const currentPrice = parseFloat(tokenState.currentPrice);
     
     return tokenState.priceLevels.reduce((highestIndex, level, index) => {
       const levelPrice = parseFloat(level.price);
-      return currentPriceEth >= levelPrice ? index : highestIndex;
+      return currentPrice >= levelPrice ? index : highestIndex;
     }, -1);
   };
 
@@ -23,19 +23,19 @@ export function TokenProgress({ tokenState, ethPrice }) {
         </div>
       </div>
 
-      {tokenState.marketType === 0 && parseFloat(tokenState.totalSupply) < 800_000_000 && (
+      {tokenState.marketType === 'BONDING_CURVE' && parseFloat(tokenState.totalSupply) < tokenState.maxSupply && (
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Bonding Curve Progress</span>
             <span>
-              {((parseFloat(tokenState.totalSupply) / 800_000_000) * 100).toFixed(2)}%
+              {((parseFloat(tokenState.totalSupply) / tokenState.maxSupply) * 100).toFixed(2)}%
             </span>
           </div>
           <div className="w-full bg-green-500/20 rounded-full h-4">
             <div 
               className="bg-green-500 h-4 rounded-full transition-all"
               style={{ 
-                width: `${(parseFloat(tokenState.totalSupply) / 800_000_000 * 100)}%`
+                width: `${(parseFloat(tokenState.totalSupply) / tokenState.maxSupply * 100)}%`
               }}
             />
           </div>
