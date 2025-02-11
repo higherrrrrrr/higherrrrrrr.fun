@@ -5,9 +5,6 @@ import { useTokenData } from '../../hooks/useTokenData';
 import TokenCard from '../../components/TokenCard';
 import { FEATURED_TOKEN_ADDRESSES } from '../../constants/tokens';
 
-// Constants
-const TOKENS_PER_PAGE = 24;
-
 export default function BaseTokens() {
   const [displayedTokens, setDisplayedTokens] = useState([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
