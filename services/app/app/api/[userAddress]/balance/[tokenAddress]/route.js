@@ -1,7 +1,7 @@
 /// get the balance of a token for a given address
 import { NextResponse } from 'next/server';
 import { ethers } from 'ethers';
-import config from '../../config/config';
+import config from '../../../config/config';
 
 // Minimal ERC20 ABI - just what we need for balanceOf
 const ERC20_ABI = [
@@ -9,17 +9,18 @@ const ERC20_ABI = [
 ];
 
 export async function GET(request, { params }) {
-  // Extract token address and user address from params
-  const [tokenAddress, userAddress] = params.address;
-
-  if (!tokenAddress || !userAddress) {
-    return NextResponse.json(
-      { error: 'Missing token address or user address' },
-      { status: 400 }
-    );
-  }
-
   try {
+    // Ensure params are properly awaited
+    const userAddress = await params.userAddress;
+    const tokenAddress = await params.tokenAddress;
+
+    if (!tokenAddress || !userAddress) {
+      return NextResponse.json(
+        { error: 'Missing token address or user address' },
+        { status: 400 }
+      );
+    }
+
     // Set up provider using RPC URL from config
     const provider = new ethers.JsonRpcProvider(config.RPC_URL);
     
