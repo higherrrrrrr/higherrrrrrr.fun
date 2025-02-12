@@ -91,14 +91,12 @@ export default function Home() {
             </p>
 
             <div className="flex justify-center">
-              <SnakeBorder disabled className="opacity-50">
-                <button 
-                  className="px-8 py-3 text-lg text-green-400 font-bold whitespace-nowrap"
-                  disabled
-                >
-                  Launch Token (Coming Sewn)
-                </button>
-              </SnakeBorder>
+              <button 
+                className="px-8 py-3 text-lg font-bold whitespace-nowrap rounded border-2 border-green-500 text-green-500/50"
+                disabled
+              >
+                Launch Token (Coming Sewn)
+              </button>
             </div>
           </div>
         </div>
