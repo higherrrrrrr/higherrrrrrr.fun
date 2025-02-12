@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTokenData } from '../../hooks/useTokenData';
 import TokenCard from '../../components/TokenCard';
 import { FEATURED_TOKEN_ADDRESSES } from '../../constants/tokens';
+import { SnakeBorder } from '../../components/SnakeBorder.js';
 
 export default function BaseTokens() {
   const [displayedTokens, setDisplayedTokens] = useState([]);
