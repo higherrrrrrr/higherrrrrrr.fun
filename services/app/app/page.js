@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { GlitchText } from '../components/GlitchText';
 import { formatCountdown } from '../utils/formatters';
 import { getHighliteProjects } from '../utils/projects';
-import { SnakeBorder } from '../components/SnakeBorder';
+import { SnakeBorder } from '../components/SnakeBorder.js';
 
 export default function Home() {
   const [highliteProjects, setHighliteProjects] = useState([]);
@@ -42,14 +42,16 @@ export default function Home() {
               Believe in something
             </p>
 
-            <SnakeBorder disabled>
-              <button 
-                className="px-6 py-3 text-lg w-full"
-                disabled
-              >
-                Launch Token (Coming Soon)
-              </button>
-            </SnakeBorder>
+            <div className="flex justify-center">
+              <SnakeBorder disabled>
+                <button 
+                  className="px-8 py-3 text-lg text-green-400 font-bold whitespace-nowrap"
+                  disabled
+                >
+                  Launch Token (Coming Sewn)
+                </button>
+              </SnakeBorder>
+            </div>
           </div>
         </div>
       </div>
