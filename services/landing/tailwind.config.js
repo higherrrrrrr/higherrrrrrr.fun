@@ -59,28 +59,6 @@ module.exports = {
         }
       }),
       addComponents({
-        '.snake-border': {
-          'position': 'relative',
-          'border': '2px solid rgba(0, 255, 0, 0.15)',
-          'transition': 'all 0.15s',
-          'borderRadius': '8px',
-          '&:hover': {
-            'transform': 'scale(1.015)',
-            '&::after': {
-              'borderColor': 'rgba(0, 255, 0, 0.4)',
-              'boxShadow': '0 0 15px rgba(0, 255, 0, 0.15)'
-            }
-          },
-          '&::after': {
-            'content': '""',
-            'position': 'absolute',
-            'inset': '16px',
-            'border': '2px solid rgba(0, 255, 0, 0.1)',
-            'borderRadius': '8px',
-            'pointerEvents': 'none',
-            'transition': 'all 0.3s'
-          }
-        },
         '.timer-snake-border': {
           '@apply relative border-2 border-green-500/20 rounded-lg bg-black/50': {},
           '&::after': {

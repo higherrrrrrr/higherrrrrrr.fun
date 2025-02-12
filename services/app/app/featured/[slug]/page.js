@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import featuredProjects from '../../../data/featuredProjects';
 import { FaGlobe, FaTelegramPlane } from 'react-icons/fa';
 import { GlitchText } from '../../../components/GlitchText';
+import { GlowBorder } from '../../../components/GlowBorder';
 
 /* Simple X (Twitter) icon */
 const XIcon = ({ className }) => (
@@ -145,19 +146,17 @@ export default function FeaturedProjectPage() {
             <div className="flex flex-col md:flex-row items-center justify-center gap-12 mb-16">
               {/* Image with constant snake border */}
               {project.imageUrl && (
-                <div className="snake-border p-4 bg-black/20 rounded">
-                  <div className="snake-line"></div>
+                <GlowBorder className="p-4 bg-black/20">
                   <img
                     src={project.imageUrl}
                     alt={project.name}
                     className="w-full max-w-md object-cover rounded"
                   />
-                </div>
+                </GlowBorder>
               )}
 
               {/* Countdown box with constant snake border */}
-              <div className="snake-border bg-black/20 rounded">
-                <div className="snake-line"></div>
+              <GlowBorder className="bg-black/20">
                 <div className="flex flex-col items-center md:items-start p-8">
                   <h2 className="text-2xl font-bold text-green-400 mb-4">
                     Launch Countdown
@@ -167,18 +166,27 @@ export default function FeaturedProjectPage() {
                       {countdownStr}
                     </p>
                     {/* Info icon with tooltip */}
-                    <div className="group">
+                    <div className="group/tooltip relative inline-block" onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}>
                       <div className="cursor-help text-green-500/70 hover:text-green-500 transition-colors text-base">
                         ℹ
                       </div>
-                      <div className="invisible group-hover:visible absolute bottom-full right-0 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-10">
+                      <div 
+                        className="invisible group-hover/tooltip:visible absolute bottom-full right-0 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-50"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
                         Launch times may be adjusted by project creators based on market conditions. Changes by the Higherrrrrrr team will be clearly communicated.
                         <div className="absolute -bottom-1 right-3 w-2 h-2 bg-black border-r border-b border-green-500/30 transform rotate-45"></div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </GlowBorder>
             </div>
 
             {/* Custom content */}

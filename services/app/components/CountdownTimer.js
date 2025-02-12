@@ -1,3 +1,5 @@
+import { GlowBorder } from './GlowBorder';
+
 export function CountdownDigit({ value, label, size = "default" }) {
     const sizeClasses = {
       default: "text-2xl md:text-4xl p-3 min-w-[80px]",
@@ -6,9 +8,9 @@ export function CountdownDigit({ value, label, size = "default" }) {
   
     return (
       <div className="flex flex-col items-center">
-        <div className={`timer-snake-border font-bold mb-2 rounded-lg bg-black/50 ${sizeClasses[size]}`}>
+        <GlowBorder className={`font-bold mb-2 ${sizeClasses[size]}`}>
           {value.toString().padStart(2, '0')}
-        </div>
+        </GlowBorder>
         <div className={`text-xs ${size === 'large' ? 'md:text-base' : 'md:text-sm'} text-green-500/60`}>
           {label}
         </div>

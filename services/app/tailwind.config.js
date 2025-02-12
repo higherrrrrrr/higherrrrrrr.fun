@@ -103,38 +103,6 @@ module.exports = {
     require('@tailwindcss/typography'),
     function({ addComponents, addUtilities }) {
       addComponents({
-        '.snake-border': {
-          'position': 'relative',
-          'border': '2px solid rgba(0, 255, 0, 0.15)',
-          'transition': 'all 0.3s',
-          'borderRadius': '8px',
-          'background': 'rgba(0, 0, 0, 0.8)',
-          '&:hover': {
-            'borderColor': 'rgba(0, 255, 0, 0.3)',
-            'transform': 'translateY(-2px)',
-            'boxShadow': '0 4px 12px rgba(0, 255, 0, 0.1)',
-            '&::before': {
-              'opacity': '1'
-            }
-          },
-          '&::before': {
-            'content': '""',
-            'position': 'absolute',
-            'inset': '-2px',
-            'opacity': '0',
-            'transition': 'opacity 0.3s',
-            'background': `
-              linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 0,
-              linear-gradient(90deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 100%,
-              linear-gradient(0deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 0 0,
-              linear-gradient(0deg, transparent 50%, rgba(0, 255, 0, 0.4) 50%) 100% 0
-            `,
-            'backgroundRepeat': 'no-repeat',
-            'backgroundSize': '20px 2px, 20px 2px, 2px 20px, 2px 20px',
-            'animation': 'snake-border 2s infinite linear',
-            'pointerEvents': 'none'
-          }
-        },
         '.terminal-text': {
           '@apply text-green-500': {},
           'text-shadow': '0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2)',
