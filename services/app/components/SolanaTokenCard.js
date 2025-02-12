@@ -86,7 +86,6 @@ export function SolanaTokenCard({ token, category }) {
     return `${Math.floor(diffHours/(24 * 365))}y ago`;
   };
 
-  // Get volume-based emoji with higher thresholds
   const getVolumeEmoji = (volume) => {
     const vol = parseFloat(volume);
     if (!vol) return '';
@@ -97,7 +96,6 @@ export function SolanaTokenCard({ token, category }) {
     return '';
   };
 
-  // Get category-based emoji
   const getCategoryEmoji = (category) => {
     switch (category?.toLowerCase()) {
       case 'meme': return '🎭';
@@ -107,7 +105,13 @@ export function SolanaTokenCard({ token, category }) {
     }
   };
 
-  // Now use the functions in useMemo
+  const getLegitimacyScoreColor = (score) => {
+    score = parseInt(score) || 0;  // Ensure we have a number
+    if (score >= 75) return 'text-green-400';
+    if (score >= 50) return 'text-yellow-500';
+    return 'text-red-500';
+  };
+
   const formattedValues = React.useMemo(() => ({
     volume: formatVolume(token.volume_24h),
     trades: formatNumber(token.trades_24h, 0),
@@ -126,37 +130,49 @@ export function SolanaTokenCard({ token, category }) {
           rel="noopener noreferrer"
           className="block p-4 h-full"
         >
-          {token.hasDuplicates && !token.isOriginal && (
-            <div className="absolute -top-2 -right-2 z-10 group">
-              <span className="text-yellow-500 cursor-help">⚠️</span>
-              <div className="invisible group-hover:visible absolute top-0 right-0 translate-x-2
-                            p-2 bg-black/95 border border-green-500/30 rounded text-xs whitespace-nowrap z-10 min-w-[200px]">
-                <div className="mb-1">
-                  {token.duplicateCount} similar {token.duplicateCount === 1 ? 'token' : 'tokens'} found
-                </div>
-                <div className="text-green-500/70">
-                  {token.legitimacyDetails}
-                  <br />
-                  Not financial advice. DYOR.
-                </div>
-              </div>
-            </div>
-          )}
-
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1">
               <h3 className="font-bold text-green-500 flex items-center truncate">
                 <span className="truncate">{token.name || 'Unknown Token'}</span>
                 <span className="ml-2 flex-shrink-0">{formattedValues.categoryEmoji}</span>
               </h3>
-              <p className="text-sm text-green-500/70 flex items-center">
+              <div className="text-sm text-green-500/70 flex items-center gap-2">
                 <span className="truncate">{token.symbol}</span>
                 {category && (
-                  <span className="ml-2 px-2 py-0.5 text-xs rounded bg-green-500/10 flex-shrink-0">
+                  <span className="px-2 py-0.5 text-xs rounded bg-green-500/10 flex-shrink-0">
                     {category}
                   </span>
                 )}
-              </p>
+              </div>
+              {token.legitimacyScore && (
+                <div className="mt-1 group relative inline-block">
+                  <span className="text-green-500/50 text-sm font-mono">
+                    Trust Score: <span className={`${getLegitimacyScoreColor(token.legitimacyScore)} cursor-help`}>
+                      {token.legitimacyScore}%
+                    </span>
+                  </span>
+                  <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 w-72 bg-black/95 border border-green-500/30 rounded-lg text-sm text-green-500/90 z-10 shadow-xl backdrop-blur-sm">
+                    {token.hasDuplicates && token.duplicateCount > 0 && (
+                      <div className="text-yellow-500 text-xs mb-2">
+                        ⚠️ {token.duplicateCount} similar {token.duplicateCount === 1 ? 'token was' : 'tokens were'} found
+                      </div>
+                    )}
+                    {token.legitimacyDetails && (
+                      <div className="text-xs text-green-500/70">
+                        {token.legitimacyDetails}
+                      </div>
+                    )}
+                    <div className="mt-2 pt-2 border-t border-green-500/20 text-xs text-yellow-500/70">
+                      ⚠️ This score is an estimate and may be inaccurate.
+                      <br />
+                      Always do your own research (DYOR).
+                      <br />
+                      Not financial advice (NFA).
+                    </div>
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black border-r border-b border-green-500/30"></div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="text-right flex-shrink-0">

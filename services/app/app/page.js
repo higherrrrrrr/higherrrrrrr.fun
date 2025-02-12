@@ -13,19 +13,98 @@ import debounce from 'lodash/debounce'; // You may need to install lodash
 import { useTokenSearch } from '../hooks/useTokenSearch';
 import useSWR from 'swr';
 import { SolanaTokenList } from '../components/SolanaTokenCard';
+import { useTokenFilter } from '../hooks/useTokenFilter';
+import { TokenFilters } from '../components/TokenFilters';
+import { TokenDisplay } from '../components/TokenDisplay';
+import { processTokens } from '../utils/tokenProcessing';
 
 export default function Home() {
   const { majorTokens, memeTokens, vcTokens, loading: tokensLoading } = useHomepage();
-  const [selectedCategory, setSelectedCategory] = useState('meme');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const {
     query: searchQuery,
-    results: searchResults,
+    handleSearch,
+    searchTokens,
     isLoading: isSearching,
     error: searchError,
-    handleSearch,
     clearSearch
   } = useTokenSearch();
   const [highliteProjects, setHighliteProjects] = useState([]);
+  const {
+    tokens,
+    error: filterError,
+    isLoading: filterLoading,
+    filters,
+    updateFilters
+  } = useTokenFilter();
+
+  // Add this near your other state declarations
+  const filterKey = JSON.stringify({
+    filters,
+    selectedCategory,
+    searchQuery
+  });
+
+  // Handle search changes without hiding UI elements
+  const handleSearchChange = (value) => {
+    handleSearch(value);
+    // Reset filters and update category when searching
+    updateFilters({
+      ...filters,
+      page: 1,
+      category: selectedCategory
+    });
+  };
+
+  // Determine which tokens to display
+  const getDisplayTokens = () => {
+    let displayTokens;
+
+    // Get base tokens based on category and filters
+    if (tokens && Object.values(filters).some(v => v)) {
+      displayTokens = tokens; // These are already processed by useTokenFilter
+    } else {
+      // Combine and process tokens based on category
+      switch (selectedCategory) {
+        case 'major':
+          displayTokens = processTokens(majorTokens, { sortBy: filters.sortBy });
+          break;
+        case 'meme':
+          displayTokens = processTokens(memeTokens, { sortBy: filters.sortBy });
+          break;
+        case 'vc':
+          displayTokens = processTokens(vcTokens, { sortBy: filters.sortBy });
+          break;
+        default:
+          displayTokens = processTokens([...majorTokens, ...memeTokens, ...vcTokens], { 
+            sortBy: filters.sortBy 
+          });
+      }
+    }
+
+    // Apply search if query exists, maintaining sort preferences
+    return searchQuery ? searchTokens(displayTokens, searchQuery) : displayTokens;
+  };
+
+  // Update filters while maintaining search state
+  const handleFilterUpdate = (newFilters) => {
+    updateFilters({
+      ...newFilters,
+      page: 1,
+      category: selectedCategory
+    });
+  };
+
+  // Update category while maintaining search state
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    updateFilters({
+      ...filters,
+      category,
+      page: 1
+    });
+    // Don't clear search when changing category
+  };
 
   useEffect(() => {
     setHighliteProjects(getHighliteProjects());
@@ -50,19 +129,6 @@ export default function Home() {
     { id: 'vc', name: 'VC Backed' }
   ];
 
-  const getTokensForCategory = () => {
-    switch (selectedCategory) {
-      case 'major':
-        return majorTokens;
-      case 'meme':
-        return memeTokens;
-      case 'vc':
-        return vcTokens;
-      default:
-        return memeTokens; // Default to showing memes
-    }
-  };
-
   // Add debouncing to your data fetching
   const debouncedFetch = useCallback(
     debounce(async () => {
@@ -79,6 +145,38 @@ export default function Home() {
     revalidateOnFocus: false, // Prevent revalidation on window focus
     revalidateOnReconnect: false // Prevent revalidation on reconnect
   });
+
+  const handleClearAll = () => {
+    // Reset category
+    setSelectedCategory('all');
+    // Reset filters to default
+    updateFilters({
+      minVolume: 0,
+      maxVolume: Infinity,
+      minHolders: 0,
+      maxHolders: Infinity,
+      minTransactionSize: 0,
+      minTrades: 0,
+      minAge: null,
+      maxAge: null,
+      sortBy: 'volume',
+      sortDir: 'desc',
+      category: null,
+      preset: null,
+      page: 1,
+      perPage: 12
+    });
+  };
+
+  // Add a separate function for clearing search
+  const handleClearSearch = () => {
+    clearSearch();
+    // Don't reset filters, only update the page
+    updateFilters({
+      ...filters,
+      page: 1
+    });
+  };
 
   if (searchError) {
     return (
@@ -184,58 +282,90 @@ export default function Home() {
           </div>
 
           {/* Search Bar */}
-          <div className="mb-8">
-            <input
-              type="text"
-              placeholder="Search by name, symbol, or address..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="w-full px-4 py-2 bg-black border border-green-500/20 rounded-lg 
-                       text-green-500 placeholder-green-500/50 focus:outline-none 
-                       focus:border-green-500/50 transition-colors"
-            />
+          <div className="mb-8 relative">
+            <div className="flex gap-4">
+              <input
+                type="text"
+                placeholder="Search by name, symbol, or address..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="flex-1 px-4 py-2 bg-black border border-green-500/20 rounded-lg 
+                         text-green-500 placeholder-green-500/50 focus:outline-none 
+                         focus:border-green-500/50 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={handleClearSearch}
+                  className="px-4 py-2 text-green-500/70 hover:text-green-500 
+                           transition-colors rounded-lg border border-green-500/20"
+                >
+                  Clear Search
+                </button>
+              )}
+            </div>
             {searchError && (
               <p className="mt-2 text-red-500 text-sm">{searchError}</p>
             )}
           </div>
 
-          {/* Category Tabs - Only show if not searching */}
-          {!searchQuery && (
-            <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
-              {categories.map(category => (
-                <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-6 py-2 rounded-lg transition-colors whitespace-nowrap
-                    ${selectedCategory === category.id 
-                      ? 'bg-green-500 text-black' 
-                      : 'bg-green-500/10 hover:bg-green-500/20'
-                    }`}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Category Tabs - Always visible */}
+          <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
+            <button
+              onClick={() => handleCategoryChange('all')}
+              className={`px-6 py-2 rounded-lg ${
+                selectedCategory === 'all'
+                  ? 'bg-green-500 text-black'
+                  : 'bg-green-500/10 hover:bg-green-500/20'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => handleCategoryChange('meme')}
+              className={`px-6 py-2 rounded-lg ${
+                selectedCategory === 'meme'
+                  ? 'bg-green-500 text-black'
+                  : 'bg-green-500/10 hover:bg-green-500/20'
+              }`}
+            >
+              Meme
+            </button>
+            <button
+              onClick={() => handleCategoryChange('major')}
+              className={`px-6 py-2 rounded-lg ${
+                selectedCategory === 'major'
+                  ? 'bg-green-500 text-black'
+                  : 'bg-green-500/10 hover:bg-green-500/20'
+              }`}
+            >
+              Major
+            </button>
+            <button
+              onClick={() => handleCategoryChange('vc')}
+              className={`px-6 py-2 rounded-lg ${
+                selectedCategory === 'vc'
+                  ? 'bg-green-500 text-black'
+                  : 'bg-green-500/10 hover:bg-green-500/20'
+              }`}
+            >
+              VC
+            </button>
+          </div>
 
-          {/* Token Grid */}
-          {isSearching || tokensLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <div key={`loading-${i}`} className="h-48 rounded-lg bg-green-500/5 animate-pulse" />
-              ))}
-            </div>
-          ) : searchResults ? (
-            <SolanaTokenList 
-              tokens={searchResults} 
-              category={null}
-            />
-          ) : (
-            <SolanaTokenList 
-              tokens={getTokensForCategory()} 
-              category={selectedCategory} 
-            />
-          )}
+          {/* Filters - Always visible */}
+          <TokenFilters 
+            filters={filters}
+            onUpdateFilters={handleFilterUpdate}
+            onClearAll={handleClearAll}
+          />
+
+          {/* Token Display */}
+          <TokenDisplay
+            tokens={getDisplayTokens()}
+            category={selectedCategory}
+            isLoading={searchQuery ? isSearching : tokensLoading}
+            filterKey={filterKey}
+          />
         </div>
       </div>
     </div>
