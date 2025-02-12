@@ -12,6 +12,7 @@
     "migrate:down": "node-pg-migrate down"
   },
   "dependencies": {
+    "@duneanalytics/client-sdk": "^0.2.5",
     "@dynamic-labs/ethereum": "^4.3.0",
     "@dynamic-labs/sdk-react-core": "^4.3.0",
     "@dynamic-labs/solana": "^4.3.0",
