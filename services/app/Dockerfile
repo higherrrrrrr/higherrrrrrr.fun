@@ -1,26 +1,57 @@
-FROM node:20-alpine
-
+# Stage 1: Dependencies
+FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Install build dependencies first
+# Install build dependencies
 RUN apk add --no-cache python3 make g++ py3-pip
 
-# Install dependencies first (for better caching)
+# Copy only package files first
 COPY package.json yarn.lock ./
+
+# Install dependencies with specific flags for optimization
 RUN yarn install --frozen-lockfile --network-timeout 600000 --prefer-offline
 
-# Copy all source files
-COPY . .
+# Stage 2: Builder
+FROM node:20-alpine AS builder
+WORKDIR /app
 
 # Set build environment variables
 ENV NODE_ENV=production \
-    PORT=3000 \
     NEXT_TELEMETRY_DISABLED=1 \
-    DISABLE_ESLINT_PLUGIN=true \
-    NEXT_SHARP_PATH=/app/node_modules/sharp
+    DISABLE_ESLINT_PLUGIN=true
 
-# Build the app
+# Copy deps from previous stage and source files
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build the application
 RUN yarn build
 
+# Stage 3: Runner
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Set production environment variables
+ENV NODE_ENV=production \
+    PORT=3000 \
+    NEXT_TELEMETRY_DISABLED=1 \
+    NEXT_SHARP_PATH=/app/node_modules/sharp
+
+# Install only production dependencies
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Copy only necessary files from builder
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Set correct permissions
+RUN chown -R nextjs:nodejs /app
+
+USER nextjs
+
+EXPOSE 3000
+
 # Start the server
-CMD ["yarn", "start"]
+CMD ["node", "server.js"]
