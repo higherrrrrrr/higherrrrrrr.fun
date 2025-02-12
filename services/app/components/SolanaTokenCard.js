@@ -1,6 +1,59 @@
 import { GlowBorder } from './GlowBorder';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
+
+export function SolanaTokenList({ tokens, category }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  
+  // Calculate pagination
+  const indexOfLastToken = currentPage * itemsPerPage;
+  const indexOfFirstToken = indexOfLastToken - itemsPerPage;
+  const currentTokens = tokens.slice(indexOfFirstToken, indexOfLastToken);
+  const totalPages = Math.ceil(tokens.length / itemsPerPage);
+
+  return (
+    <div>
+      {/* Token grid */}
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {currentTokens.map((token) => (
+          <SolanaTokenCard 
+            key={token.token_address} 
+            token={token} 
+            category={category}
+          />
+        ))}
+      </div>
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex justify-center items-center gap-4">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border border-green-500/30 disabled:opacity-50 
+                     disabled:cursor-not-allowed hover:bg-green-500/10 transition-colors"
+          >
+            Previous
+          </button>
+          
+          <span className="text-green-500">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border border-green-500/30 disabled:opacity-50 
+                     disabled:cursor-not-allowed hover:bg-green-500/10 transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SolanaTokenCard({ token, category }) {
   // Define formatting functions first
@@ -65,13 +118,13 @@ export function SolanaTokenCard({ token, category }) {
   }), [token.volume_24h, token.trades_24h, token.total_accounts, token.created_at, category, formatNumber]);
 
   return (
-    <div className="relative">
-      <GlowBorder>
+    <div className="relative h-full">
+      <GlowBorder className="h-full">
         <Link 
           href={`https://ape.pro/solana/${token.token_address}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="block p-4"
+          className="block p-4 h-full"
         >
           {token.hasDuplicates && !token.isOriginal && (
             <div className="absolute -top-2 -right-2 z-10 group">
@@ -91,22 +144,22 @@ export function SolanaTokenCard({ token, category }) {
           )}
 
           <div className="flex items-start justify-between">
-            <div>
-              <h3 className="font-bold text-green-500 flex items-center">
-                <span>{token.name || 'Unknown Token'}</span>
-                <span className="ml-2">{formattedValues.categoryEmoji}</span>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-green-500 flex items-center truncate">
+                <span className="truncate">{token.name || 'Unknown Token'}</span>
+                <span className="ml-2 flex-shrink-0">{formattedValues.categoryEmoji}</span>
               </h3>
-              <p className="text-sm text-green-500/70">
-                {token.symbol}
+              <p className="text-sm text-green-500/70 flex items-center">
+                <span className="truncate">{token.symbol}</span>
                 {category && (
-                  <span className="ml-2 px-2 py-0.5 text-xs rounded bg-green-500/10">
+                  <span className="ml-2 px-2 py-0.5 text-xs rounded bg-green-500/10 flex-shrink-0">
                     {category}
                   </span>
                 )}
               </p>
             </div>
 
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <div className="font-mono font-bold text-green-400">
                 {formattedValues.volume}
                 <span className="ml-2">{formattedValues.volumeEmoji}</span>

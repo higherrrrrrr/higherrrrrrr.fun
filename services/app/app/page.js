@@ -12,6 +12,7 @@ import { GlowBorder } from '../components/GlowBorder.js';
 import debounce from 'lodash/debounce'; // You may need to install lodash
 import { useTokenSearch } from '../hooks/useTokenSearch';
 import useSWR from 'swr';
+import { SolanaTokenList } from '../components/SolanaTokenCard';
 
 export default function Home() {
   const { majorTokens, memeTokens, vcTokens, loading: tokensLoading } = useHomepage();
@@ -225,39 +226,15 @@ export default function Home() {
               ))}
             </div>
           ) : searchResults ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {searchResults.length > 0 ? (
-                searchResults.map(token => (
-                  <div 
-                    key={`${token.token_address}-search`}
-                    className="transition-all duration-200"
-                  >
-                    <SolanaTokenCard
-                      token={token}
-                      category={null}
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-3 text-center py-12 text-green-500/70">
-                  No tokens found matching "{searchQuery}"
-                </div>
-              )}
-            </div>
+            <SolanaTokenList 
+              tokens={searchResults} 
+              category={null}
+            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getTokensForCategory().map(token => (
-                <div 
-                  key={`${token.token_address}-${selectedCategory}`}
-                  className="transition-all duration-200"
-                >
-                  <SolanaTokenCard
-                    token={token}
-                    category={selectedCategory}
-                  />
-                </div>
-              ))}
-            </div>
+            <SolanaTokenList 
+              tokens={getTokensForCategory()} 
+              category={selectedCategory} 
+            />
           )}
         </div>
       </div>
