@@ -7,7 +7,7 @@ import Link from 'next/link';
 import featuredProjects from '../../../data/featuredProjects';
 import { GlitchText } from '../../../components/GlitchText';
 import { formatCountdown } from '../../../utils/formatters';
-import { SnakeBorder } from '../../../components/SnakeBorder.js';
+import { GlowBorder } from '../../../components/GlowBorder.js';
 
 /*
   1) Helper function to format the countdown string 
@@ -85,43 +85,46 @@ export default function FeaturedFeed() {
             const countdownStr = formatCountdown(project.timeLeftMs);
 
             return (
-              <Link key={project.slug} href={`/featured/${project.slug}`}>
-                <div className="snake-border p-6 bg-black/20">
-                  <div className="snake-line"></div>
-                  {/* Image + text */}
-                  <div className="flex items-start gap-4">
-                    {project.imageUrl && (
-                      <img
-                        src={project.imageUrl}
-                        alt={project.name}
-                        className="w-16 h-16 object-cover rounded"
-                      />
-                    )}
-                    <div>
-                      <h2 className="text-xl font-bold">{project.name}</h2>
-                      <p className="text-sm text-green-500/70">
-                        {project.description}
-                      </p>
-                    </div>
-                  </div>
+              <div key={project.slug} className="group">
+                <GlowBorder className="transition-all duration-200 group-hover:opacity-100 opacity-70">
+                  <div className="p-6 bg-black rounded-lg">
+                    <Link href={`/featured/${project.slug}`}>
+                      {/* Image + text */}
+                      <div className="flex items-start gap-4">
+                        {project.imageUrl && (
+                          <img
+                            src={project.imageUrl}
+                            alt={project.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        )}
+                        <div>
+                          <h2 className="text-xl font-bold">{project.name}</h2>
+                          <p className="text-sm text-green-500/70">
+                            {project.description}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
 
-                  {/* Countdown text */}
-                  <div className="mt-1 text-green-300 font-bold text-sm flex items-center gap-2">
-                    <span className="mr-2">Launch:</span>
-                    {countdownStr}
-                    {/* Info icon with tooltip */}
-                    <div className="group relative">
-                      <div className="cursor-help text-green-500/70 hover:text-green-500 transition-colors text-base">
-                        ℹ
-                      </div>
-                      <div className="invisible group-hover:visible absolute bottom-full right-0 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-10">
-                        Launch times may be adjusted by project creators based on market conditions. Changes by the Higherrrrrrr team will be clearly communicated.
-                        <div className="absolute -bottom-1 right-3 w-2 h-2 bg-black border-r border-b border-green-500/30 transform rotate-45"></div>
+                    {/* Countdown text - Outside of Link */}
+                    <div className="mt-1 text-green-300 font-bold text-sm flex items-center gap-2">
+                      <span className="mr-2">Launch:</span>
+                      {countdownStr}
+                      {/* Info icon with tooltip */}
+                      <div className="group/tooltip relative inline-block">
+                        <div className="cursor-help text-green-500/70 hover:text-green-500 transition-colors text-base">
+                          ℹ
+                        </div>
+                        <div className="invisible group-hover/tooltip:visible absolute bottom-full right-0 mb-2 w-64 p-3 bg-black border border-green-500/30 rounded-lg shadow-lg text-xs text-green-500/80 z-50">
+                          Launch times may be adjusted by project creators based on market conditions. Changes by the Higherrrrrrr team will be clearly communicated.
+                          <div className="absolute -bottom-1 right-3 w-2 h-2 bg-black border-r border-b border-green-500/30 transform rotate-45"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Link>
+                </GlowBorder>
+              </div>
             );
           })}
         </div>

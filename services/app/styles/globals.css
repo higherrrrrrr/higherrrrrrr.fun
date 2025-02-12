@@ -43,36 +43,6 @@
     background-size: 32px 32px;
     background-position: -16px -16px;
   }
-
-  .snake-border {
-    @apply relative border-2 border-green-500/10 rounded-lg transition-all duration-300 
-           bg-black/80;
-  }
-
-  .snake-border:hover {
-    @apply -translate-y-0.5 border-green-500/30;
-  }
-
-  .snake-border::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-    background: 
-      linear-gradient(90deg, transparent 50%, #22c55e 50%) 0 0,
-      linear-gradient(90deg, transparent 50%, #22c55e 50%) 0 100%,
-      linear-gradient(0deg, transparent 50%, #22c55e 50%) 0 0,
-      linear-gradient(0deg, transparent 50%, #22c55e 50%) 100% 0;
-    background-repeat: no-repeat;
-    background-size: 20px 2px, 20px 2px, 2px 20px, 2px 20px;
-    @apply animate-snake-border;
-  }
-
-  .snake-border:hover::before {
-    opacity: 1;
-  }
 }
 
 /* Dynamic wallet styles */

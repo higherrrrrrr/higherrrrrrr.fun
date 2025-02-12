@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTokenData } from '../../hooks/useTokenData';
 import TokenCard from '../../components/TokenCard';
 import { FEATURED_TOKEN_ADDRESSES } from '../../constants/tokens';
-import { SnakeBorder } from '../../components/SnakeBorder.js';
+import { GlowBorder } from '../../components/GlowBorder.js';
 
 export default function BaseTokens() {
   const [displayedTokens, setDisplayedTokens] = useState([]);
@@ -44,21 +44,21 @@ export default function BaseTokens() {
           </div>
 
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {isLoadingFeed
-                ? [...Array(6)].map((_, i) => (
-                    <div key={i} className="snake-border p-4 bg-black/20 rounded">
-                      <div className="snake-line"></div>
-                      <TokenCard isLoading />
-                    </div>
-                  ))
-                : displayedTokens.map((token) => (
-                    <TokenDataWrapper 
-                      key={token.address} 
-                      token={token}
-                    />
-                  ))}
-            </div>
+            {isLoadingFeed && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <GlowBorder key={i} className="p-4 bg-black/20">
+                    <TokenCard isLoading />
+                  </GlowBorder>
+                ))}
+              </div>
+            )}
+            {!isLoadingFeed && displayedTokens.map((token) => (
+              <TokenDataWrapper 
+                key={token.address} 
+                token={token}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -79,13 +79,12 @@ function TokenDataWrapper({ token }) {
   } : null;
 
   return (
-    <div className="snake-border p-4 bg-black/20 rounded">
-      <div className="snake-line"></div>
+    <GlowBorder className="p-4 bg-black/20">
       <TokenCard
         token={token}
         tokenState={tokenStateWithProgress}
         isLoading={loading}
       />
-    </div>
+    </GlowBorder>
   );
 } 
