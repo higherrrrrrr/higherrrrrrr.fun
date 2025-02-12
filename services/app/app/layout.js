@@ -118,7 +118,7 @@ export default function RootLayout({ children }) {
                   {/* HEADER: Modified mobile header for TV mode */}
                   {isMobile && tvEnabled ? (
                     <>
-                      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-green-500/30 flex justify-between items-center px-4 py-3">
+                      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-green-500/30 flex justify-between items-center px-4 py-2">
                         <Link
                           href="/"
                           className="flex items-center gap-2 text-2xl font-mono font-bold text-green-500"
@@ -162,14 +162,14 @@ export default function RootLayout({ children }) {
                   ) : (
                     // Original header for non-TV mode or desktop
                     (!tvEnabled || !isMobile) && (
-                      <header className="sticky top-0 z-50 bg-black border-b border-green-500/30 flex flex-col md:flex-row justify-between items-center p-3 md:p-6 max-w-[1920px] mx-auto w-full gap-4 md:gap-0">
+                      <header className="sticky top-0 z-50 bg-black border-b border-green-500/30 flex justify-between items-center p-3 md:p-6 max-w-[1920px] mx-auto w-full">
                         {/* Left side - Logo and Navigation */}
                         <div className="flex items-center gap-6">
                           <Link
                             href="/"
-                            className="flex items-center gap-2 text-3xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer"
+                            className="flex items-center gap-2 text-2xl md:text-3xl font-mono font-bold text-green-500 hover:text-green-400 transition-colors cursor-pointer"
                           >
-                            <img src="/icon.png" alt="Higher Logo" className="w-8 h-8" />
+                            <img src="/icon.png" alt="Higher Logo" className="w-6 h-6 md:w-8 md:h-8" />
                             HIGHER⁷
                           </Link>
                           {/* Desktop Navigation */}
@@ -190,46 +190,11 @@ export default function RootLayout({ children }) {
                         </div>
 
                         {/* Right side - Actions */}
-                        <div className="flex gap-3 md:gap-4 items-center">
-                          {/* Desktop TV Toggle */}
-                          <div className="hidden md:flex items-center gap-2">
+                        <div className="flex gap-3 items-center">
+                          <div className="flex items-center gap-2">
                             <span className="text-green-500 font-mono">TV</span>
                             <button
                               onClick={toggleTV}
-                              className={`
-                                px-2 py-1 rounded-full border border-green-500 font-mono text-xs
-                                ${tvEnabled ? "bg-green-500 text-black" : "bg-black text-green-500"}
-                              `}
-                            >
-                              {tvEnabled ? "ON" : "OFF"}
-                            </button>
-                          </div>
-                          <div className="h-10">
-                            <DynamicConnectButton />
-                          </div>
-                        </div>
-
-                        {/* Mobile Navigation */}
-                        <nav className="flex md:hidden flex-col items-center gap-4 w-full mt-4">
-                          <div className="flex items-center gap-4 justify-center w-full">
-                            <Link
-                              href="/how-it-works"
-                              className="text-green-500 hover:text-green-400 transition-colors font-mono"
-                            >
-                              How It Works
-                            </Link>
-                            <Link
-                              href="/featured/feed"
-                              className="text-green-500 hover:text-green-400 transition-colors font-mono"
-                            >
-                              HighLites
-                            </Link>
-                          </div>
-                          <div className="flex items-center gap-2 justify-center w-full">
-                            <span className="text-sm text-green-500/70 font-mono">TV</span>
-                            <button
-                              onClick={toggleTV}
-                              aria-pressed={tvEnabled}
                               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                                 tvEnabled ? "bg-green-500" : "bg-gray-600"
                               }`}
@@ -241,7 +206,10 @@ export default function RootLayout({ children }) {
                               />
                             </button>
                           </div>
-                        </nav>
+                          <div className="h-10">
+                            <DynamicConnectButton />
+                          </div>
+                        </div>
                       </header>
                     )
                   )}
