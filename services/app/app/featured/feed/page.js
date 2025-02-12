@@ -7,6 +7,7 @@ import Link from 'next/link';
 import featuredProjects from '../../../data/featuredProjects';
 import { GlitchText } from '../../../components/GlitchText';
 import { formatCountdown } from '../../../utils/formatters';
+import { SnakeBorder } from '../../../components/SnakeBorder.js';
 
 /*
   1) Helper function to format the countdown string 
