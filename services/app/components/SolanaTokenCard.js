@@ -1,10 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
 
 export function SolanaTokenCard({ token, category }) {
-  const [imageError, setImageError] = useState(false);
-
   // Format numbers with commas and fixed decimal places
   const formatNumber = (num, decimals = 2) => {
     if (!num) return '0';
@@ -24,15 +20,6 @@ export function SolanaTokenCard({ token, category }) {
     return `$${num.toFixed(2)}`;
   };
 
-  // Handle IPFS URLs
-  const getImageUrl = (uri) => {
-    if (!uri) return '/default-token.png';
-    if (uri.startsWith('ipfs://')) {
-      return uri.replace('ipfs://', 'https://ipfs.io/ipfs/');
-    }
-    return uri;
-  };
-
   // Format date to relative time
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -47,38 +34,24 @@ export function SolanaTokenCard({ token, category }) {
 
   return (
     <Link 
-      href={`https://ape.pro/solana/${token.token_address}`}
+      href={`https://ape.pro/solana/${token.token_address?.toLowerCase()}`}
       target="_blank"
       rel="noopener noreferrer"
       className="block p-4 border border-green-500/20 bg-black hover:border-green-500/40 transition-colors"
     >
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          {!imageError && token.token_uri && (
-            <div className="w-10 h-10 relative rounded-full overflow-hidden bg-green-500/5">
-              <Image
-                src={getImageUrl(token.token_uri)}
-                alt={token.name || 'Token'}
-                fill
-                className="object-cover"
-                onError={() => setImageError(true)}
-              />
-            </div>
-          )}
-          
-          <div>
-            <h3 className="font-bold text-green-500">
-              {token.name || 'Unknown Token'}
-            </h3>
-            <p className="text-sm text-green-500/70">
-              {token.symbol}
-              {category && (
-                <span className="ml-2 px-2 py-0.5 text-xs rounded bg-green-500/10">
-                  {category}
-                </span>
-              )}
-            </p>
-          </div>
+        <div>
+          <h3 className="font-bold text-green-500">
+            {token.name || 'Unknown Token'}
+          </h3>
+          <p className="text-sm text-green-500/70">
+            {token.symbol}
+            {category && (
+              <span className="ml-2 px-2 py-0.5 text-xs rounded bg-green-500/10">
+                {category}
+              </span>
+            )}
+          </p>
         </div>
 
         <div className="text-right">

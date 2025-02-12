@@ -5,7 +5,12 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: false,
   images: {
+    domains: ['*'],
     remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
       {
         protocol: 'https',
         hostname: '**',
