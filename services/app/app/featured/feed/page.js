@@ -7,7 +7,6 @@ import Link from 'next/link';
 import featuredProjects from '../../../data/featuredProjects';
 import { GlitchText } from '../../../components/GlitchText';
 import { formatCountdown } from '../../../utils/formatters';
-import { SnakeBorder } from '../../../components/SnakeBorder.js';
 
 /*
   1) Helper function to format the countdown string 
@@ -86,7 +85,7 @@ export default function FeaturedFeed() {
 
             return (
               <Link key={project.slug} href={`/featured/${project.slug}`}>
-                <SnakeBorder className="p-6 bg-black/20">
+                <div className="snake-border p-6 bg-black/20">
                   <div className="snake-line"></div>
                   {/* Image + text */}
                   <div className="flex items-start gap-4">
@@ -120,7 +119,7 @@ export default function FeaturedFeed() {
                       </div>
                     </div>
                   </div>
-                </SnakeBorder>
+                </div>
               </Link>
             );
           })}
