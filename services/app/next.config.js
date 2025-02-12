@@ -1,10 +1,21 @@
 const path = require('path');
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: false,
   images: {
-    domains: ['storage.googleapis.com']
+    domains: ['*'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
+      }
+    ]
   },
   webpack: (config) => {
     config.resolve.fallback = { 
