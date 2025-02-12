@@ -34,7 +34,7 @@ export function SolanaTokenCard({ token, category }) {
 
   return (
     <Link 
-      href={`https://ape.pro/solana/${token.token_address?.toLowerCase()}`}
+      href={`https://ape.pro/solana/${token.token_address}`}
       target="_blank"
       rel="noopener noreferrer"
       className="block p-4 border border-green-500/20 bg-black hover:border-green-500/40 transition-colors"

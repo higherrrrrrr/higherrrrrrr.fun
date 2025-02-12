@@ -9,14 +9,34 @@ const MAJOR_TOKENS = [
   '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // Wrapped BTC (Wormhole)
   'cbbtcf3aa214zXHbiAZQwf4122FBYbraNdFqgw4iMij',  // Coinbase Wrapped BTC
   'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn', // Jito Staked SOL
-].map(addr => addr.toLowerCase());
+];
 
 const VC_BACKED_TOKENS = [
+  // DEX & Trading
   '27G8MtK7VtTcCHkpASjSDdkWWYfoqT6ggEuKidVJidD4', // Jupiter Perps LP
   '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', // Raydium
   'LAYER4xPpTCb3QL8S9u41EAhAX7mhBn8Q6xMTwY2Yzc',  // Solayer
   'sSo14endRuUbvQaJS3dq36Q829a3A6BEfoeeRGJywEh',  // Solayer SOL
-].map(addr => addr.toLowerCase());
+  'KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS',  // Kamino
+  'jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL',  // JITO
+  'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So',  // Marinade staked SOL
+  'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn', // Jito Staked SOL
+  
+  // Stablecoins with institutional backing
+  '9znqrsgljnkwcuu5gq5lr8beucpzqmvmqkai3sszh54u', // First Digital USD
+  
+  // NFT/Gaming Projects
+  'AMvHHqak2JevcnsBBbKb28hYcwytKMAs2DefjmRkekgv', // Jupiter Community Test
+  '9PSRPhTMfY31LxZGEdmAmUS9rAFo68CBohMkAtsZY9BW', // Flip.gg
+  
+  // Layer Solutions
+  'Cd55P9pMnVLssU3L63UgQTFmBUnCm9E9BGmSYn3H5y8x', // Solayer variant
+  '4uwg72sLLhJnUdRjKGKDJHhz6NJrgxiFesGfxF1FUyGN', // Solayer variant
+  'FwKcZs3Fd6bKHktrzEBSRFUnufN7xzm45zqc34Q3tMJN', // Solayer variant
+  'HN9g8jb3ra2wHLTJfPaUzgfafU2uoCQSi5hjHmrfYHNB', // Solayer variant
+  '8U4HrXm1NKvSyig6AFV3nmqv9PettLTsiNfyG3QWWjVk', // Solayer variant
+  'CxJE9jd3ARkvewRXSuAJeaKhsUpvecgyPPBPpt722LrF'  // Solayer variant
+].map(addr => addr); // Note: Not using toLowerCase() to preserve case sensitivity
 
 class TokenCache {
   constructor() {
@@ -58,7 +78,7 @@ class TokenCache {
 
   async getToken(address) {
     await this.waitForData();
-    return this.cache.get(address?.toLowerCase());
+    return this.cache.get(address);
   }
 
   async getAllTokens() {
@@ -69,7 +89,7 @@ class TokenCache {
   async getMajorTokens() {
     await this.waitForData();
     return (await this.getAllTokens())
-      .filter(token => MAJOR_TOKENS.includes(token.token_address?.toLowerCase()))
+      .filter(token => MAJOR_TOKENS.includes(token.token_address))
       .sort((a, b) => {
         const volumeA = parseFloat(a.volume_24h || 0);
         const volumeB = parseFloat(b.volume_24h || 0);
@@ -101,9 +121,8 @@ class TokenCache {
     await this.waitForData();
     const allTokens = await this.getAllTokens();
     
-    // Get all non-major, non-VC tokens
     const tokens = allTokens.filter(token => {
-      const address = token.token_address?.toLowerCase();
+      const address = token.token_address;
       const isMajor = MAJOR_TOKENS.includes(address);
       const isVC = VC_BACKED_TOKENS.includes(address);
       return !isMajor && !isVC;
@@ -120,7 +139,7 @@ class TokenCache {
   async getVCBackedTokens() {
     await this.waitForData();
     return (await this.getAllTokens())
-      .filter(token => VC_BACKED_TOKENS.includes(token.token_address?.toLowerCase()))
+      .filter(token => VC_BACKED_TOKENS.includes(token.token_address))
       .sort((a, b) => {
         const volumeA = parseFloat(a.volume_24h || 0);
         const volumeB = parseFloat(b.volume_24h || 0);
@@ -156,7 +175,7 @@ class TokenCache {
         this.cache.clear();
         
         data.result.rows.forEach(row => {
-          const address = row.token_mint_address?.toLowerCase();
+          const address = row.token_mint_address;
           if (address) {
             // Normalize the data structure
             this.cache.set(address, {
