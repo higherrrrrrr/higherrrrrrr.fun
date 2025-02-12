@@ -79,7 +79,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center py-16">
             <h1 className="text-4xl md:text-6xl font-bold mb-8">
-              <GlitchText>HIGHER⁷</GlitchText>
+              <div className="flex justify-center">
+                <div className="relative left-3">
+                  <GlitchText>HIGHER⁷</GlitchText>
+                </div>
+              </div>
             </h1>
             
             <p className="text-xl md:text-2xl mb-12 text-green-500/80">
@@ -87,7 +91,7 @@ export default function Home() {
             </p>
 
             <div className="flex justify-center">
-              <SnakeBorder disabled>
+              <SnakeBorder disabled className="opacity-50">
                 <button 
                   className="px-8 py-3 text-lg text-green-400 font-bold whitespace-nowrap"
                   disabled
