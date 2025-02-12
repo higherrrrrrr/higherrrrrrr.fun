@@ -281,12 +281,6 @@ export default function RootLayout({ children }) {
                       <div className="max-w-[1920px] mx-auto px-3 md:px-6 py-3 md:py-4">
                         <div className="flex flex-col md:flex-row md:justify-between items-center gap-3 md:gap-0">
                           <div className="flex flex-wrap justify-center md:justify-start gap-4 md:gap-6">
-                            <Link
-                              href="/plex"
-                              className="text-green-500/60 hover:text-green-500 font-mono text-xs"
-                            >
-                              Plex
-                            </Link>
                             <a
                               href="https://x.com/higherrrrrrrfun"
                               target="_blank"
