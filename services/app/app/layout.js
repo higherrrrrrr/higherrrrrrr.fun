@@ -13,7 +13,8 @@ import { http } from 'viem';
 import ClientOnly from "../components/ClientOnly";
 import Script from 'next/script';
 import posthog from 'posthog-js';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Toaster } from 'react-hot-toast';
 
 // PostHog initialization
 if (typeof window !== 'undefined') {
@@ -41,13 +42,14 @@ const queryClient = new QueryClient();
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   // Track page views
   useEffect(() => {
     if (pathname) {
       posthog.capture('$pageview');
     }
-  }, [pathname]);
+  }, [pathname, searchParams]);
 
   // Determine mobile viewport
   const [isMobile, setIsMobile] = useState(false);
@@ -296,7 +298,7 @@ export default function RootLayout({ children }) {
                               Twitter
                             </a>
                             <a
-                              href="https://t.me/higherrrrrrrhub"
+                              href="https://t.me/higherrrrrrrfun"
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-green-500/60 hover:text-green-500 font-mono text-xs"
@@ -342,6 +344,26 @@ export default function RootLayout({ children }) {
                     </footer>
                   )}
                 </div>
+                <Toaster 
+                  position="bottom-right"
+                  toastOptions={{
+                    style: {
+                      background: '#000',
+                      color: '#22c55e',
+                      border: '1px solid rgba(34, 197, 94, 0.3)',
+                    },
+                    success: {
+                      duration: 3000,
+                    },
+                    error: {
+                      duration: 5000,
+                      style: {
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        color: '#ef4444',
+                      },
+                    },
+                  }}
+                />
               </DynamicProvider>
             </QueryClientProvider>
           </WagmiProvider>
