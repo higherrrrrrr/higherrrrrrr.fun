@@ -139,7 +139,7 @@ export function TokenFilters({ filters, onUpdateFilters, onClearAll }) {
       {/* Custom Filters Toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 bg-green-500/10 hover:bg-green-500/20 
+        className="mt-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 
                  text-green-500 rounded-lg transition-colors"
       >
         {isOpen ? 'Hide Custom Filters' : 'Show Custom Filters'} 
