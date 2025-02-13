@@ -38,7 +38,7 @@ const VC_BACKED_TOKENS = [
   'CxJE9jd3ARkvewRXSuAJeaKhsUpvecgyPPBPpt722LrF'  // Solayer variant
 ].map(addr => addr); // Note: Not using toLowerCase() to preserve case sensitivity
 
-class TokenCache {
+class TokensCache {
   constructor() {
     this.cache = new Map();
     this.lastUpdated = null;
@@ -204,6 +204,6 @@ class TokenCache {
   }
 }
 
-const tokenCache = new TokenCache();
+const tokenCache = new TokensCache();
 
 export default tokenCache; 
