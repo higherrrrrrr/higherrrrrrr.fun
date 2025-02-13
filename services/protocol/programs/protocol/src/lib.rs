@@ -1,40 +1,31 @@
 use anchor_lang::prelude::*;
 
-// 1. Import your other modules
 pub mod errors;
 pub mod instructions;
 pub mod state;
+pub mod amm; // New AMM module
 
-// 2. Bring instructions into scope (optional)
-use instructions::*;
+// Re-export instruction modules for easier access if desired.
+pub use instructions::create_meme_token::*;
+pub use instructions::evolutions::*;
+pub use instructions::conviction_nfts::*;
+pub use instructions::fee_distribution::*;
 
-// 3. Declare the program ID
 declare_id!("Prot111111111111111111111111111111111111111");
 
-// 4. The main Anchor program definition
 #[program]
 pub mod protocol {
     use super::*;
 
-    // Example minimal instruction from Step 1
+    // Minimal initialize instruction.
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         msg!("Hello, Memecoin Protocol!");
         Ok(())
     }
 
-    // -------------------- Step 2: Create Token --------------------
-    /// Creates a new memecoin by initializing the mint, setting evolution thresholds and distributions,
-    /// and locking the mint authority.
-    ///
-    /// Parameters:
-    /// - `name`: The name of the token.
-    /// - `symbol`: The token symbol.
-    /// - `decimals`: The decimal places.
-    /// - `total_supply`: The total token supply.
-    /// - `image`: A default image URI.
-    /// - `token_type`: The type of token evolution: Regular, TextEvolution, or ImageEvolution.
-    /// - `evolutions`: A vector of evolution items (price thresholds with new name/URI).
-    /// - `distributions`: A vector of distribution instructions.
+    // -------------------- Meme Token Instructions --------------------
+
+    /// Creates a new memecoin (see instructions/create_meme_token.rs)
     pub fn create_meme_token(
         ctx: Context<CreateMemeToken>,
         name: String,
@@ -59,7 +50,7 @@ pub mod protocol {
         )
     }
 
-    // -------------------- Step 3: Evolutions --------------------
+    /// Sets evolution thresholds (see instructions/evolutions.rs)
     pub fn set_evolutions(
         ctx: Context<SetEvolutions>,
         items: Vec<state::evolution_data::EvolutionItem>,
@@ -67,6 +58,7 @@ pub mod protocol {
         instructions::evolutions::handle_set_evolutions(ctx, items)
     }
 
+    /// Updates the token metadata if an evolution threshold is crossed.
     pub fn update_meme_metadata(
         ctx: Context<UpdateMemeMetadata>,
         current_price: u64,
@@ -74,61 +66,104 @@ pub mod protocol {
         instructions::evolutions::handle_update_meme_metadata(ctx, current_price)
     }
 
-    // -------------------- Step 4: Trading & Single-Sided Liquidity --------------------
-    pub fn trade_via_orca(
-        ctx: Context<TradeViaOrca>,
-        amount_in: u64,
-        min_out: u64,
-        current_price: u64,
-    ) -> Result<()> {
-        instructions::trade_orca::handle_trade_via_orca(
-            ctx,
-            amount_in,
-            min_out,
-            current_price,
-        )
-    }
+    // -------------------- Conviction NFT Instructions --------------------
 
-    pub fn create_single_sided_liquidity(
-        ctx: Context<CreateSingleSidedLiquidity>,
-        amount: u64,
-    ) -> Result<()> {
-        instructions::trade_orca::handle_create_single_sided_liquidity(ctx, amount)
-    }
-
-    // -------------------- Step 5: Conviction NFTs --------------------
+    /// Registers a holder as a "big holder" eligible for conviction NFTs.
     pub fn register_holder(ctx: Context<RegisterHolder>) -> Result<()> {
         instructions::conviction_nfts::handle_register_holder(ctx)
     }
 
+    /// Distributes conviction NFTs to qualified holders.
     pub fn distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>) -> Result<()> {
         instructions::conviction_nfts::handle_distribute_conviction_nfts(ctx)
     }
 
-    // -------------------- Step 6: Fee Distribution --------------------
+    // -------------------- Fee Distribution Instructions --------------------
+
+    /// Initializes the fee vault.
     pub fn init_fee_vault(ctx: Context<InitFeeVault>) -> Result<()> {
         instructions::fee_distribution::handle_init_fee_vault(ctx)
     }
 
+    /// Withdraws SOL fees for the protocol.
     pub fn withdraw_protocol_sol(
         ctx: Context<WithdrawProtocolSol>,
-        amount: u64
+        amount: u64,
     ) -> Result<()> {
         instructions::fee_distribution::handle_withdraw_protocol_sol(ctx, amount)
     }
 
+    /// Withdraws token fees for the creator.
     pub fn withdraw_creator_tokens(
         ctx: Context<WithdrawCreatorTokens>,
-        amount: u64
+        amount: u64,
     ) -> Result<()> {
         instructions::fee_distribution::handle_withdraw_creator_tokens(ctx, amount)
     }
-    /// Distributes aggregated LP fees from the Orca pool fee account evenly.
+
+    /// Distributes aggregated LP fees evenly between the protocol and the creator.
     pub fn distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
         instructions::fee_distribution::handle_distribute_lp_fees(ctx)
     }
+
+    // -------------------- AMM Module Instructions --------------------
+
+    /// Initializes a new AMM pool.
+    pub fn initialize_pool(
+        ctx: Context<InitializePool>,
+        bump: u8,
+    ) -> Result<()> {
+        let pool = &mut ctx.accounts.pool;
+        pool.initialize(
+            ctx.accounts.token_a_account.key(),
+            ctx.accounts.token_b_account.key(),
+            ctx.accounts.authority.key(),
+            bump,
+        )
+    }
+
+    /// Adds liquidity to the AMM pool.
+    pub fn add_liquidity(
+        ctx: Context<amm::AddLiquidity>,
+        amount_a: u64,
+        amount_b: u64,
+    ) -> Result<()> {
+        amm::add_liquidity(ctx, amount_a, amount_b)
+    }
+
+    /// Removes liquidity from the AMM pool.
+    pub fn remove_liquidity(ctx: Context<amm::RemoveLiquidity>, lp_amount: u64) -> Result<()> {
+        amm::remove_liquidity(ctx, lp_amount)
+    }
+
+    /// Executes a token swap in the AMM pool.
+    pub fn swap(
+        ctx: Context<Swap>,
+        amount_in: u64,
+        minimum_amount_out: u64,
+    ) -> Result<()> {
+        let pool = &ctx.accounts.pool;
+        
+        // Calculate swap amount
+        let amount_out = pool.calculate_swap_amount(
+            amount_in,
+            ctx.accounts.pool_token_a_account.amount,
+            ctx.accounts.pool_token_b_account.amount,
+        )?;
+
+        // Verify slippage
+        require!(
+            amount_out >= minimum_amount_out,
+            AmmError::SlippageExceeded
+        );
+
+        // Transfer tokens (implementation needed)
+        // This would involve CPI calls to the token program
+        
+        Ok(())
+    }
 }
 
-// An optional trivial struct for a minimal “initialize” instruction
+// A minimal initialize context for the protocol.
 #[derive(Accounts)]
 pub struct Initialize {}
