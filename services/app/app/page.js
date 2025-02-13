@@ -295,7 +295,7 @@ export default function Home() {
               />
               {searchQuery && (
                 <button
-                  onClick={handleClearSearch}
+                  onClick={() => handleClearSearch()}
                   className="px-4 py-2 text-green-500/70 hover:text-green-500 
                            transition-colors rounded-lg border border-green-500/20"
                 >
