@@ -122,7 +122,7 @@ const featuredProjects = [
       </p>
       <p class="mb-4">
         <strong>What is with the $HARDER floor and burn mechanics?</strong><br/>
-        For the uninitiated, this may seem hard to understand, but it's actually quite simple! When trades happen, half of the LP fee in $HARDER is automatically burned from supply - making it more scarce. The other half of the LP fee in $CULT is added back to the liquidity pool to help absorb sell pressure! What this means is that over time, $HARDER supply goes down and there is a fat stack of $CULT waiting to weather the jeet sells. Simple, based, bullish.
+        For the uninitiated, this may seem hard to understand, but it's actually quite simple! When trades happen, half of the LP fee in $HARDER is automatically burned from supply - making it more scarce. The other half of the LP fee in $CULT is added back to the liquidity pool to help absorb sell pressure! What this means is that over time, $HARDER supply goes down and there is a fat stack of $CULT waiting to weather the sells of non-believers. Simple, based, bullish.
       </p>
     `,
   },
@@ -152,7 +152,7 @@ const featuredProjects = [
       </p>
       <p class="mb-4">
         <strong>What is with the $CULT floor and burn mechanics?</strong><br/>
-        For the uninitiated, this may seem hard to understand, but it's actually quite simple! When trades happen, half of the LP fee in $CULT is automatically burned from supply - making it more scarce. The other half of the LP fee in $SOL is added back to the liquidity pool to help absorb sell pressure! What this means is that over time, $CULT supply goes down and there is a fat stack of $SOL waiting to weather the jeet sells. Simple, based, bullish.
+        For the uninitiated, this may seem hard to understand, but it's actually quite simple! When trades happen, half of the LP fee in $CULT is automatically burned from supply - making it more scarce. The other half of the LP fee in $SOL is added back to the liquidity pool to help absorb sell pressure! What this means is that over time, $CULT supply goes down and there is a fat stack of $SOL waiting to weather the sells of non-believers. Simple, based, bullish.
       </p>
       <p class="mb-4">
         <strong>Wen airdrop?</strong><br/>
