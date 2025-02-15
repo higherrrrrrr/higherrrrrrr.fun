@@ -129,6 +129,19 @@ export default function FeaturedFeed() {
           })}
         </div>
       </div>
+
+      {/* PITCH SECTION */}
+      <div className="max-w-4xl mx-auto px-4 md:px-8 pb-12">
+        <h2 className="text-xl font-bold text-center text-green-500">
+          Think Your Project is HighLite Worthy?{' '}
+          <a 
+            href="mailto:phil@higherrrrrrr.fun" 
+            className="text-green-500 hover:text-green-400 transition-colors underline"
+          >
+            Pitch it here
+          </a>
+        </h2>
+      </div>
     </div>
   );
 }
