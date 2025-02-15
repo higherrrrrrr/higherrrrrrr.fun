@@ -1,27 +1,74 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTokenData } from '../../hooks/useTokenData';
 import TokenCard from '../../components/TokenCard';
 import { FEATURED_TOKEN_ADDRESSES } from '../../constants/tokens';
 import { GlowBorder } from '../../components/GlowBorder.js';
+
+function TokenDataWrapper({ token }) {
+  const [tokenSymbol, setTokenSymbol] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTokenSymbol = async () => {
+      try {
+        const response = await fetch('https://mainnet.base.org', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_call',
+            params: [{
+              to: token.address,
+              data: '0x95d89b41' // symbol() function signature
+            }, 'latest'],
+            id: 1
+          })
+        });
+        const data = await response.json();
+        if (data.result) {
+          const symbol = Buffer.from(data.result.slice(2), 'hex')
+            .toString('utf8')
+            .replace(/\0/g, '');
+          setTokenSymbol(symbol);
+        }
+      } catch (error) {
+        console.error('Error fetching token symbol:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTokenSymbol();
+  }, [token.address]);
+
+  return (
+    <GlowBorder className="p-4 bg-black/20">
+      <TokenCard
+        token={{
+          ...token,
+          symbol: tokenSymbol
+        }}
+        isLoading={loading}
+      />
+    </GlowBorder>
+  );
+}
 
 export default function BaseTokens() {
   const [displayedTokens, setDisplayedTokens] = useState([]);
   const [isLoadingFeed, setIsLoadingFeed] = useState(true);
 
-  // Load tokens
   useEffect(() => {
     const loadTokens = async () => {
       try {
         setIsLoadingFeed(true);
-        
-        // Create token objects from addresses
         const tokens = FEATURED_TOKEN_ADDRESSES.map(address => ({
           address,
-          creation_time: "2024-01-01", // Default date if needed
+          creation_time: "2024-01-01",
         }));
-        
         setDisplayedTokens(tokens);
       } catch (error) {
         console.error('Error loading tokens:', error);
@@ -43,15 +90,13 @@ export default function BaseTokens() {
             <p className="text-green-500/60">Featured tokens on Base</p>
           </div>
 
-          <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {isLoadingFeed && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <GlowBorder key={i} className="p-4 bg-black/20">
-                    <TokenCard isLoading />
-                  </GlowBorder>
-                ))}
-              </div>
+              [...Array(6)].map((_, i) => (
+                <GlowBorder key={i} className="p-4 bg-black/20">
+                  <TokenCard isLoading />
+                </GlowBorder>
+              ))
             )}
             {!isLoadingFeed && displayedTokens.map((token) => (
               <TokenDataWrapper 
@@ -63,28 +108,5 @@ export default function BaseTokens() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Wrapper component to handle individual token data
-function TokenDataWrapper({ token }) {
-  const { tokenState, loading } = useTokenData(token.address);
-
-  // Calculate progress if it's a bonding curve
-  const tokenStateWithProgress = tokenState ? {
-    ...tokenState,
-    progress: tokenState.marketType === 'bonding_curve'
-      ? (tokenState.currentPrice / tokenState.priceLevels[tokenState.priceLevels.length - 1]) * 100
-      : null
-  } : null;
-
-  return (
-    <GlowBorder className="p-4 bg-black/20">
-      <TokenCard
-        token={token}
-        tokenState={tokenStateWithProgress}
-        isLoading={loading}
-      />
-    </GlowBorder>
   );
 } 
