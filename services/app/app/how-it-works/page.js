@@ -92,7 +92,7 @@ export default function HowItWorks() {
               <ul className="list-disc pl-6 text-green-500">
                 <li>Real-time price charts and market data</li>
                 <li>Efficient order execution through Jupiter</li>
-                <li>Transparent fee structure (1% swap fee)</li>
+                <li>Transparent fee structure (1% swap fee on Higherrrrrrr tokens)</li>
                 <li>Token information and social links</li>
                 <li>Trading history and portfolio tracking</li>
               </ul>
@@ -160,6 +160,8 @@ export default function HowItWorks() {
                 <li>Custom project pages and lore</li>
                 <li>Integrated social features</li>
                 <li>Community analytics and insights</li>
+                <li>Community Vendor Directory</li>
+                <li>Higherrrrrrr Hub on Telegram</li>
               </ul>
             </section>
 
