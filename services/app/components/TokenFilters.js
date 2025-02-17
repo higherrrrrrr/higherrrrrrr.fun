@@ -9,6 +9,7 @@ const PRESET_FILTERS = {
       minHolders: 100,
       maxHolders: Infinity,
       minTransactionSize: 1000,
+      minPriceChange24h: 5,
       sortBy: 'volume',
       sortDir: 'desc'
     }
@@ -21,7 +22,8 @@ const PRESET_FILTERS = {
       minHolders: 50,
       maxHolders: 1000,
       maxAge: 7,
-      sortBy: 'volume',
+      minPriceChange24h: 10,
+      sortBy: 'priceChange24h',
       sortDir: 'desc'
     }
   },
@@ -81,35 +83,61 @@ export function TokenFilters({ filters, onUpdateFilters, onClearAll }) {
   const formRef = useRef(null);
 
   const handlePresetClick = (presetKey) => {
-    console.log('Applying preset:', presetKey, PRESET_FILTERS[presetKey].filters); // Debug log
     setActivePreset(presetKey);
     onUpdateFilters(PRESET_FILTERS[presetKey].filters);
-    setIsOpen(false); // Close custom filters when applying preset
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    // Convert form data to proper types
+    const newFilters = {
+      minVolume: formData.get('minVolume') ? Number(formData.get('minVolume')) : 0,
+      maxVolume: formData.get('maxVolume') ? Number(formData.get('maxVolume')) : Infinity,
+      minHolders: formData.get('minHolders') ? Number(formData.get('minHolders')) : 0,
+      maxHolders: formData.get('maxHolders') ? Number(formData.get('maxHolders')) : Infinity,
+      minMarketCap: formData.get('minMarketCap') ? Number(formData.get('minMarketCap')) : 0,
+      maxMarketCap: formData.get('maxMarketCap') ? Number(formData.get('maxMarketCap')) : Infinity,
+      minPriceChange24h: formData.get('minPriceChange24h') ? Number(formData.get('minPriceChange24h')) : null,
+      maxPriceChange24h: formData.get('maxPriceChange24h') ? Number(formData.get('maxPriceChange24h')) : null,
+      sortBy: formData.get('sortBy') || 'volume',
+      sortDir: formData.get('sortDir') || 'desc'
+    };
+
+    console.log('Applying filters:', newFilters); // Debug log
+    setActivePreset(null);
+    onUpdateFilters(newFilters);
   };
 
   const handleClearAll = () => {
-    setActivePreset(null);
-    // Reset all form inputs to their default state
     if (formRef.current) {
       formRef.current.reset();
-      // Clear any custom number inputs
-      const numberInputs = formRef.current.querySelectorAll('input[type="number"]');
-      numberInputs.forEach(input => {
-        input.value = '';
-      });
     }
-    onClearAll();
-    setIsOpen(false);
+    setActivePreset(null);
+    onUpdateFilters({
+      minVolume: 0,
+      maxVolume: Infinity,
+      minHolders: 0,
+      maxHolders: Infinity,
+      minMarketCap: 0,
+      maxMarketCap: Infinity,
+      minPriceChange24h: null,
+      maxPriceChange24h: null,
+      sortBy: 'volume',
+      sortDir: 'desc'
+    });
   };
 
   return (
     <div className="mb-8">
+      {/* Filter Header */}
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 text-green-500 hover:text-green-400"
         >
-          <span>Filters</span>
+          <span>Custom Filters</span>
           {isOpen ? '↑' : '↓'}
         </button>
         <button
@@ -119,8 +147,9 @@ export function TokenFilters({ filters, onUpdateFilters, onClearAll }) {
           Clear All Filters
         </button>
       </div>
+
       {/* Preset Filters */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mb-4">
         {Object.entries(PRESET_FILTERS).map(([key, preset]) => (
           <button
             key={key}
@@ -136,35 +165,12 @@ export function TokenFilters({ filters, onUpdateFilters, onClearAll }) {
         ))}
       </div>
 
-      {/* Custom Filters Toggle */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="mt-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 
-                 text-green-500 rounded-lg transition-colors"
-      >
-        {isOpen ? 'Hide Custom Filters' : 'Show Custom Filters'} 
-      </button>
-
       {/* Custom Filter Form */}
       {isOpen && (
         <form 
           ref={formRef}
-          onSubmit={(e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const newFilters = {
-              minVolume: formData.get('minVolume') ? Number(formData.get('minVolume')) : 0,
-              maxVolume: formData.get('maxVolume') ? Number(formData.get('maxVolume')) : Infinity,
-              minHolders: formData.get('minHolders') ? Number(formData.get('minHolders')) : 0,
-              maxHolders: formData.get('maxHolders') ? Number(formData.get('maxHolders')) : Infinity,
-              minTransactionSize: formData.get('minTransactionSize') ? Number(formData.get('minTransactionSize')) : 0,
-              minTrades: formData.get('minTrades') ? Number(formData.get('minTrades')) : 0,
-              sortBy: formData.get('sortBy') || 'volume',
-              sortDir: formData.get('sortDir') || 'desc'
-            };
-            onUpdateFilters(newFilters);
-          }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-black/20 rounded-lg"
+          onSubmit={handleSubmit}
+          className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-black/20 rounded-lg"
         >
           {/* Volume Range */}
           <div className="space-y-2">
@@ -208,16 +214,70 @@ export function TokenFilters({ filters, onUpdateFilters, onClearAll }) {
             </div>
           </div>
 
-          {/* Other filter inputs remain the same */}
-          
+          {/* Market Cap Range */}
+          <div className="space-y-2">
+            <label className="block text-sm text-green-500/70">Market Cap Range</label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                name="minMarketCap"
+                placeholder="Min"
+                defaultValue={filters.minMarketCap > 0 ? filters.minMarketCap : ''}
+                className="w-full px-3 py-2 bg-black border border-green-500/30 rounded text-green-500"
+              />
+              <input
+                type="number"
+                name="maxMarketCap"
+                placeholder="Max"
+                defaultValue={filters.maxMarketCap < Infinity ? filters.maxMarketCap : ''}
+                className="w-full px-3 py-2 bg-black border border-green-500/30 rounded text-green-500"
+              />
+            </div>
+          </div>
+
+          {/* Price Change Range */}
+          <div className="space-y-2">
+            <label className="block text-sm text-green-500/70">24h Price Change (%)</label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                name="minPriceChange24h"
+                placeholder="Min"
+                defaultValue={filters.minPriceChange24h || ''}
+                className="w-full px-3 py-2 bg-black border border-green-500/30 rounded text-green-500"
+              />
+              <input
+                type="number"
+                name="maxPriceChange24h"
+                placeholder="Max"
+                defaultValue={filters.maxPriceChange24h || ''}
+                className="w-full px-3 py-2 bg-black border border-green-500/30 rounded text-green-500"
+              />
+            </div>
+          </div>
+
+          {/* Sort Options */}
           <div className="md:col-span-2 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={handleClearAll}
-              className="px-4 py-2 text-green-500/70 hover:text-green-500 transition-colors"
-            >
-              Reset All
-            </button>
+            <div className="flex gap-2">
+              <select 
+                name="sortBy"
+                defaultValue={filters.sortBy}
+                className="px-3 py-2 bg-black border border-green-500/30 rounded text-green-500"
+              >
+                <option value="volume">Volume</option>
+                <option value="marketCap">Market Cap</option>
+                <option value="priceChange24h">24h Price Change</option>
+                <option value="holders">Holders</option>
+              </select>
+              <select 
+                name="sortDir"
+                defaultValue={filters.sortDir}
+                className="px-3 py-2 bg-black border border-green-500/30 rounded text-green-500"
+              >
+                <option value="desc">High to Low</option>
+                <option value="asc">Low to High</option>
+              </select>
+            </div>
             <button
               type="submit"
               className="px-4 py-2 bg-green-500 text-black rounded-lg hover:bg-green-400 transition-colors"

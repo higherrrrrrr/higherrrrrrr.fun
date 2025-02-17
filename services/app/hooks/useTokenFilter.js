@@ -60,26 +60,34 @@ export function useTokenFilter() {
     category: null,
     preset: null,
     page: 1,
-    perPage: 12
+    perPage: 12,
+    minMarketCap: 0,
+    maxMarketCap: Infinity,
+    minPriceChange24h: null,
+    maxPriceChange24h: null
   });
 
   // Create query string from filters
   const queryString = useCallback(() => {
     const params = new URLSearchParams();
     
-    if (filters.minVolume > 0) params.set('minVolume', filters.minVolume);
-    if (filters.maxVolume < Infinity) params.set('maxVolume', filters.maxVolume);
-    if (filters.minHolders > 0) params.set('minHolders', filters.minHolders);
-    if (filters.maxHolders < Infinity) params.set('maxHolders', filters.maxHolders);
-    if (filters.minTransactionSize > 0) params.set('minTransactionSize', filters.minTransactionSize);
-    if (filters.minTrades > 0) params.set('minTrades', filters.minTrades);
-    if (filters.minAge) params.set('minAge', filters.minAge);
-    if (filters.maxAge) params.set('maxAge', filters.maxAge);
+    if (filters.minVolume > 0) params.set('minVolume', filters.minVolume.toString());
+    if (filters.maxVolume < Infinity) params.set('maxVolume', filters.maxVolume.toString());
+    if (filters.minHolders > 0) params.set('minHolders', filters.minHolders.toString());
+    if (filters.maxHolders < Infinity) params.set('maxHolders', filters.maxHolders.toString());
+    if (filters.minTransactionSize > 0) params.set('minTransactionSize', filters.minTransactionSize.toString());
+    if (filters.minTrades > 0) params.set('minTrades', filters.minTrades.toString());
+    if (filters.minAge) params.set('minAge', filters.minAge.toString());
+    if (filters.maxAge) params.set('maxAge', filters.maxAge.toString());
     if (filters.sortBy) params.set('sortBy', filters.sortBy);
     if (filters.sortDir) params.set('sortDir', filters.sortDir);
     if (filters.category) params.set('category', filters.category);
-    params.set('page', filters.page);
-    params.set('perPage', filters.perPage);
+    if (filters.minMarketCap > 0) params.set('minMarketCap', filters.minMarketCap.toString());
+    if (filters.maxMarketCap < Infinity) params.set('maxMarketCap', filters.maxMarketCap.toString());
+    if (filters.minPriceChange24h !== null) params.set('minPriceChange24h', filters.minPriceChange24h.toString());
+    if (filters.maxPriceChange24h !== null) params.set('maxPriceChange24h', filters.maxPriceChange24h.toString());
+    params.set('page', filters.page.toString());
+    params.set('perPage', filters.perPage.toString());
     
     return params.toString();
   }, [filters]);
@@ -135,7 +143,11 @@ export function useTokenFilter() {
         category: null,
         preset: null,
         page: 1,
-        perPage: 12
+        perPage: 12,
+        minMarketCap: 0,
+        maxMarketCap: Infinity,
+        minPriceChange24h: null,
+        maxPriceChange24h: null
       });
       return;
     }
