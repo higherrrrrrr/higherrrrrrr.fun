@@ -1,61 +1,27 @@
 import { GlowBorder } from './GlowBorder';
 import Link from 'next/link';
-import React, { useState } from 'react';
-
-export function SolanaTokenList({ tokens, category }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 12;
-  
-  // Calculate pagination
-  const indexOfLastToken = currentPage * itemsPerPage;
-  const indexOfFirstToken = indexOfLastToken - itemsPerPage;
-  const currentTokens = tokens.slice(indexOfFirstToken, indexOfLastToken);
-  const totalPages = Math.ceil(tokens.length / itemsPerPage);
-
-  return (
-    <div>
-      {/* Token grid */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {currentTokens.map((token) => (
-          <SolanaTokenCard 
-            key={token.token_address} 
-            token={token} 
-            category={category}
-          />
-        ))}
-      </div>
-
-      {/* Pagination controls */}
-      {totalPages > 1 && (
-        <div className="mt-8 flex justify-center items-center gap-4">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border border-green-500/30 disabled:opacity-50 
-                     disabled:cursor-not-allowed hover:bg-green-500/10 transition-colors"
-          >
-            Previous
-          </button>
-          
-          <span className="text-green-500">
-            Page {currentPage} of {totalPages}
-          </span>
-          
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border border-green-500/30 disabled:opacity-50 
-                     disabled:cursor-not-allowed hover:bg-green-500/10 transition-colors"
-          >
-            Next
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
+import React, { useState, useEffect } from 'react';
+import { TradeModal } from './TradeModal';
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 
 export function SolanaTokenCard({ token, category }) {
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  const { primaryWallet } = useDynamicContext();
+  const [userBalance, setUserBalance] = useState(0);
+
+  // Fetch user balance when wallet changes
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (primaryWallet?.address) {
+        // Replace this with actual balance fetching logic
+        const balance = 0; // Temporary placeholder
+        setUserBalance(balance);
+      }
+    };
+
+    fetchBalance();
+  }, [primaryWallet?.address, token.token_address]);
+
   // Define formatting functions first
   const formatVolume = (vol) => {
     if (!vol) return '$0';
@@ -124,90 +90,168 @@ export function SolanaTokenCard({ token, category }) {
   return (
     <div className="relative h-full">
       <GlowBorder className="h-full">
-        <Link 
-          href={`https://ape.pro/solana/${token.token_address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block p-4 h-full"
-        >
-          <div className="flex items-start justify-between">
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-green-500 flex items-center truncate">
-                <span className="truncate">{token.name || 'Unknown Token'}</span>
-                <span className="ml-2 flex-shrink-0">{formattedValues.categoryEmoji}</span>
-              </h3>
-              <div className="text-sm text-green-500/70 flex items-center gap-2">
-                <span className="truncate">{token.symbol}</span>
-                {category && (
-                  <span className="px-2 py-0.5 text-xs rounded bg-green-500/10 flex-shrink-0">
-                    {category}
-                  </span>
+        <div className="flex flex-col h-full">
+          <Link 
+            href={`https://ape.pro/solana/${token.token_address}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block p-4 flex-grow"
+          >
+            <div className="flex items-start justify-between">
+              <div className="min-w-0 flex-1">
+                <h3 className="font-bold text-green-500 flex items-center truncate">
+                  <span className="truncate">{token.name || 'Unknown Token'}</span>
+                  <span className="ml-2 flex-shrink-0">{formattedValues.categoryEmoji}</span>
+                </h3>
+                <div className="text-sm text-green-500/70 flex items-center gap-2">
+                  <span className="truncate">{token.symbol}</span>
+                  {category && (
+                    <span className="px-2 py-0.5 text-xs rounded bg-green-500/10 flex-shrink-0">
+                      {category}
+                    </span>
+                  )}
+                </div>
+                {token.legitimacyScore && (
+                  <div className="mt-1 group relative inline-block">
+                    <span className="text-green-500/50 text-sm font-mono">
+                      Trust Score: <span className={`${getLegitimacyScoreColor(token.legitimacyScore)} cursor-help`}>
+                        {token.legitimacyScore}%
+                      </span>
+                    </span>
+                    <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 w-72 bg-black/95 border border-green-500/30 rounded-lg text-sm text-green-500/90 z-10 shadow-xl backdrop-blur-sm">
+                      {token.hasDuplicates && token.duplicateCount > 0 && (
+                        <div className="text-yellow-500 text-xs mb-2">
+                          ⚠️ {token.duplicateCount} similar {token.duplicateCount === 1 ? 'token was' : 'tokens were'} found
+                        </div>
+                      )}
+                      {token.legitimacyDetails && (
+                        <div className="text-xs text-green-500/70">
+                          {token.legitimacyDetails}
+                        </div>
+                      )}
+                      <div className="mt-2 pt-2 border-t border-green-500/20 text-xs text-yellow-500/70">
+                        ⚠️ This score is an estimate and may be inaccurate.
+                        <br />
+                        Always do your own research (DYOR).
+                        <br />
+                        Not financial advice (NFA).
+                      </div>
+                      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black border-r border-b border-green-500/30"></div>
+                    </div>
+                  </div>
                 )}
               </div>
-              {token.legitimacyScore && (
-                <div className="mt-1 group relative inline-block">
-                  <span className="text-green-500/50 text-sm font-mono">
-                    Trust Score: <span className={`${getLegitimacyScoreColor(token.legitimacyScore)} cursor-help`}>
-                      {token.legitimacyScore}%
-                    </span>
-                  </span>
-                  <div className="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 w-72 bg-black/95 border border-green-500/30 rounded-lg text-sm text-green-500/90 z-10 shadow-xl backdrop-blur-sm">
-                    {token.hasDuplicates && token.duplicateCount > 0 && (
-                      <div className="text-yellow-500 text-xs mb-2">
-                        ⚠️ {token.duplicateCount} similar {token.duplicateCount === 1 ? 'token was' : 'tokens were'} found
-                      </div>
-                    )}
-                    {token.legitimacyDetails && (
-                      <div className="text-xs text-green-500/70">
-                        {token.legitimacyDetails}
-                      </div>
-                    )}
-                    <div className="mt-2 pt-2 border-t border-green-500/20 text-xs text-yellow-500/70">
-                      ⚠️ This score is an estimate and may be inaccurate.
-                      <br />
-                      Always do your own research (DYOR).
-                      <br />
-                      Not financial advice (NFA).
-                    </div>
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black border-r border-b border-green-500/30"></div>
-                  </div>
+
+              <div className="text-right flex-shrink-0">
+                <div className="font-mono font-bold text-green-400">
+                  {formattedValues.volume}
+                  <span className="ml-2">{formattedValues.volumeEmoji}</span>
                 </div>
-              )}
+                <div className="text-xs text-green-500/50">
+                  24h Volume
+                </div>
+              </div>
             </div>
 
-            <div className="text-right flex-shrink-0">
-              <div className="font-mono font-bold text-green-400">
-                {formattedValues.volume}
-                <span className="ml-2">{formattedValues.volumeEmoji}</span>
+            <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
+              <div>
+                <div className="text-green-500/50">Trades (24h)</div>
+                <div className="font-mono text-green-400">
+                  {formattedValues.trades}
+                </div>
               </div>
-              <div className="text-xs text-green-500/50">
-                24h Volume
+              <div>
+                <div className="text-green-500/50">Holders</div>
+                <div className="font-mono text-green-400">
+                  {formattedValues.holders}
+                </div>
+              </div>
+              <div>
+                <div className="text-green-500/50">Created</div>
+                <div className="font-mono text-green-400">
+                  {formattedValues.created}
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <div className="text-green-500/50">Trades (24h)</div>
-              <div className="font-mono text-green-400">
-                {formattedValues.trades}
-              </div>
-            </div>
-            <div>
-              <div className="text-green-500/50">Holders</div>
-              <div className="font-mono text-green-400">
-                {formattedValues.holders}
-              </div>
-            </div>
-            <div>
-              <div className="text-green-500/50">Created</div>
-              <div className="font-mono text-green-400">
-                {formattedValues.created}
-              </div>
-            </div>
+          <div className="px-4 pb-4 pt-2">
+            <GlowBorder>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsTradeModalOpen(true);
+                }}
+                className="w-full px-4 py-2 bg-transparent hover:bg-green-500/10 
+                         text-green-500 transition-colors"
+              >
+                Trade
+              </button>
+            </GlowBorder>
           </div>
-        </Link>
+        </div>
       </GlowBorder>
+
+      <TradeModal 
+        isOpen={isTradeModalOpen}
+        onClose={() => setIsTradeModalOpen(false)}
+        token={token}
+        userBalance={userBalance}
+        onBalanceUpdate={() => fetchBalance()}
+      />
+    </div>
+  );
+}
+
+export function SolanaTokenList({ tokens, category }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  
+  // Calculate pagination
+  const indexOfLastToken = currentPage * itemsPerPage;
+  const indexOfFirstToken = indexOfLastToken - itemsPerPage;
+  const currentTokens = tokens.slice(indexOfFirstToken, indexOfLastToken);
+  const totalPages = Math.ceil(tokens.length / itemsPerPage);
+
+  return (
+    <div>
+      {/* Token grid */}
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {currentTokens.map((token) => (
+          <SolanaTokenCard 
+            key={token.token_address} 
+            token={token} 
+            category={category}
+          />
+        ))}
+      </div>
+
+      {/* Pagination controls */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex justify-center items-center gap-4">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border border-green-500/30 disabled:opacity-50 
+                     disabled:cursor-not-allowed hover:bg-green-500/10 transition-colors"
+          >
+            Previous
+          </button>
+          
+          <span className="text-green-500">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border border-green-500/30 disabled:opacity-50 
+                     disabled:cursor-not-allowed hover:bg-green-500/10 transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 } 
