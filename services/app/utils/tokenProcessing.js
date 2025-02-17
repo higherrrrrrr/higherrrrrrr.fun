@@ -109,18 +109,45 @@ export function processTokens(tokens, options = { sortBy: 'volume' }) {
 
 export function filterTokens(tokens, filters) {
   return tokens.filter(token => {
-    const volume = parseFloat(token.volume_24h) || 0;
-    const holders = parseInt(token.total_accounts || token.holder_count || token.holders || 0);
-    const ageInDays = token.created_at ? 
-      (Date.now() - new Date(token.created_at).getTime()) / (1000 * 60 * 60 * 24) : 
-      null;
-
-    if (filters.minVolume > 0 && volume < filters.minVolume) return false;
-    if (filters.maxVolume < Infinity && volume > filters.maxVolume) return false;
-    if (filters.minHolders > 0 && holders < filters.minHolders) return false;
-    if (filters.maxHolders < Infinity && holders > filters.maxHolders) return false;
-    if (filters.maxAge && ageInDays !== null && ageInDays > filters.maxAge) return false;
+    // Volume filters
+    if (filters.minVolume && (!token.volume_24h || parseFloat(token.volume_24h) < filters.minVolume)) return false;
+    if (filters.maxVolume && (!token.volume_24h || parseFloat(token.volume_24h) > filters.maxVolume)) return false;
+    
+    // Holders filters
+    if (filters.minHolders && (!token.total_accounts || parseInt(token.total_accounts) < filters.minHolders)) return false;
+    if (filters.maxHolders && (!token.total_accounts || parseInt(token.total_accounts) > filters.maxHolders)) return false;
+    
+    // Market Cap filters
+    if (filters.minMarketCap && (!token.marketCap || parseFloat(token.marketCap) < filters.minMarketCap)) return false;
+    if (filters.maxMarketCap && (!token.marketCap || parseFloat(token.marketCap) > filters.maxMarketCap)) return false;
+    
+    // Price change filters
+    if (filters.minPriceChange24h !== null) {
+      const change = parseFloat(token.priceChanges?.['24h'] || 0);
+      if (isNaN(change) || change < filters.minPriceChange24h) return false;
+    }
+    if (filters.maxPriceChange24h !== null) {
+      const change = parseFloat(token.priceChanges?.['24h'] || 0);
+      if (isNaN(change) || change > filters.maxPriceChange24h) return false;
+    }
 
     return true;
+  }).sort((a, b) => {
+    const sortBy = filters.sortBy || 'volume';
+    const sortDir = filters.sortDir || 'desc';
+    const multiplier = sortDir === 'desc' ? -1 : 1;
+
+    const getValue = (obj, key) => {
+      switch(key) {
+        case 'volume': return parseFloat(obj.volume_24h || 0);
+        case 'holders': return parseInt(obj.total_accounts || 0);
+        case 'trades': return parseInt(obj.trades_24h || 0);
+        case 'marketCap': return parseFloat(obj.marketCap || 0);
+        case 'priceChange24h': return parseFloat(obj.priceChanges?.['24h'] || 0);
+        default: return 0;
+      }
+    };
+
+    return multiplier * (getValue(a, sortBy) - getValue(b, sortBy));
   });
 } 

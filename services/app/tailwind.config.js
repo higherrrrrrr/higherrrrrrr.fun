@@ -81,6 +81,10 @@ module.exports = {
           '100%': { 
             backgroundPosition: '100% 0, 100% 100%, 0 100%, 100% 100%' 
           }
+        },
+        glow: {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.7 },
         }
       },
       animation: {
@@ -91,7 +95,8 @@ module.exports = {
         'glitch-bottom': 'glitch-bottom 2s infinite linear alternate-reverse',
         'terminal-blink': 'terminal-blink 1s step-end infinite',
         'snake-travel': 'snake-travel 2s infinite linear',
-        'snake-border': 'snake-border 2s infinite linear'
+        'snake-border': 'snake-border 2s infinite linear',
+        'glow': 'glow 2s ease-in-out infinite'
       },
       textShadow: {
         'terminal': '0 0 2px rgba(74, 222, 128, 0.4), 0 0 4px rgba(74, 222, 128, 0.2)',
