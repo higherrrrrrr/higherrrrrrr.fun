@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { useTokenInfo } from '../hooks/useTokenInfo';
 import { formatNumber } from '../utils/format';
+import { TradingModal } from './TradingModal';
 
 export function SolanaTokenList({ tokens, category }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,6 +61,7 @@ export function SolanaTokenList({ tokens, category }) {
 
 export function SolanaTokenCard({ token, category }) {
   const { data, loading, error } = useTokenInfo(token.token_address);
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
 
   // Define formatting functions first
   const formatVolume = (vol) => {
@@ -178,12 +180,7 @@ export function SolanaTokenCard({ token, category }) {
   return (
     <div className="relative h-full">
       <GlowBorder className="h-full">
-        <Link 
-          href={`https://ape.pro/solana/${token.token_address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block p-4 h-full"
-        >
+        <div className="p-4 h-full">
           {/* Header: Token Name + Category + 24h Change */}
           <div className="flex items-start justify-between mb-3">
             <div className="min-w-0 flex-1">
@@ -293,8 +290,40 @@ export function SolanaTokenCard({ token, category }) {
               </div>
             </div>
           )}
-        </Link>
+
+          {/* Add Trade Button */}
+          <div className="mt-4 flex justify-between items-center">
+            <Link 
+              href={`https://ape.pro/solana/${token.token_address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-500/70 hover:text-green-500 text-sm"
+            >
+              View Details →
+            </Link>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setIsTradeModalOpen(true);
+              }}
+              className="px-4 py-2 bg-green-500 text-black rounded-lg hover:bg-green-400 transition-colors font-bold"
+            >
+              Trade
+            </button>
+          </div>
+        </div>
       </GlowBorder>
+
+      {/* Trading Modal */}
+      <TradingModal
+        token={{
+          ...token,
+          ...data,
+          address: token.token_address,
+        }}
+        isOpen={isTradeModalOpen}
+        onClose={() => setIsTradeModalOpen(false)}
+      />
     </div>
   );
 } 

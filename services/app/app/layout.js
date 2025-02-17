@@ -109,10 +109,10 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <ClientOnly>
-          <WagmiProvider config={config}>
-            <QueryClientProvider client={queryClient}>
-              <DynamicProvider>
+        <DynamicProvider>
+          <ClientOnly>
+            <WagmiProvider config={config}>
+              <QueryClientProvider client={queryClient}>
                 <div className="min-h-screen bg-black flex flex-col relative">
 
                   {/* HEADER: Modified mobile header for TV mode */}
@@ -304,10 +304,10 @@ export default function RootLayout({ children }) {
                     </footer>
                   )}
                 </div>
-              </DynamicProvider>
-            </QueryClientProvider>
-          </WagmiProvider>
-        </ClientOnly>
+              </QueryClientProvider>
+            </WagmiProvider>
+          </ClientOnly>
+        </DynamicProvider>
       </body>
     </html>
   );
