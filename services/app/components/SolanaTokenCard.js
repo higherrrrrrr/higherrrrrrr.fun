@@ -130,7 +130,7 @@ export function SolanaTokenCard({ token, category }) {
 
         // Initialize Jupiter Terminal with the token as output (buying)
         window.Jupiter.init({
-          endpoint: process.env.NEXT_PUBLIC_HELIUS_SECURE_RPC_URL,
+          endpoint: "https://netti-iof1ud-fast-mainnet.helius-rpc.com",
           displayMode: "modal",
           defaultExplorer: "Solana Explorer",
           strictTokenList: false,

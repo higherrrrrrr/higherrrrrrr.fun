@@ -132,7 +132,7 @@ export default function Home() {
       try {
         // Initialize Jupiter Terminal with default SOL -> token but allow full customization
         window.Jupiter.init({
-          endpoint: process.env.NEXT_PUBLIC_HELIUS_SECURE_RPC_URL,
+          endpoint: "https://netti-iof1ud-fast-mainnet.helius-rpc.com",
           displayMode: "modal",
           defaultExplorer: "Solana Explorer",
           strictTokenList: false,
