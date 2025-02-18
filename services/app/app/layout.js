@@ -14,6 +14,7 @@ import ClientOnly from "../components/ClientOnly";
 import Script from 'next/script';
 import posthog from 'posthog-js';
 import { usePathname } from 'next/navigation';
+import { Connection } from '@solana/web3.js';
 
 // PostHog initialization
 if (typeof window !== 'undefined') {
@@ -106,6 +107,17 @@ export default function RootLayout({ children }) {
         <Script 
           src="https://embed.twitch.tv/embed/v1.js"
           strategy="beforeInteractive"
+        />
+        <Script
+          src="https://terminal.jup.ag/main-v3.js"
+          strategy="beforeInteractive"
+          data-preload
+          onLoad={() => {
+            console.log('Jupiter Terminal script loaded');
+          }}
+          onError={(e) => {
+            console.error('Error loading Jupiter Terminal:', e);
+          }}
         />
       </head>
       <body>
@@ -207,7 +219,7 @@ export default function RootLayout({ children }) {
                             </button>
                           </div>
                           <div className="h-10">
-                            <DynamicConnectButton />
+                            {/* <DynamicConnectButton /> */}
                           </div>
                         </div>
                       </header>

@@ -1,6 +1,7 @@
 import { GlowBorder } from './GlowBorder';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { Connection } from '@solana/web3.js';
 
 export function SolanaTokenList({ tokens, category }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -121,14 +122,43 @@ export function SolanaTokenCard({ token, category }) {
     categoryEmoji: getCategoryEmoji(category)
   }), [token.volume_24h, token.trades_24h, token.total_accounts, token.created_at, category, formatNumber]);
 
+  const handleClick = useCallback(async (e) => {
+    e.preventDefault();
+    if (typeof window !== 'undefined' && window.Jupiter) {
+      try {
+        console.log('Opening Jupiter Terminal for token:', token.token_address);
+
+        // Initialize Jupiter Terminal with the token as output (buying)
+        window.Jupiter.init({
+          endpoint: process.env.NEXT_PUBLIC_HELIUS_SECURE_RPC_URL,
+          displayMode: "modal",
+          defaultExplorer: "Solana Explorer",
+          strictTokenList: false,
+          formProps: {
+            // Input token (what user pays with)
+            initialInputMint: token.token_address, // The token they want to sell
+            fixedInputMint: true, // Lock the input token
+
+            // Output token (what user receives)
+            initialOutputMint: "So11111111111111111111111111111111111111112", // SOL
+            fixedOutputMint: false, // Allow changing output token
+
+            swapMode: "ExactIn", // Set to exact input mode for selling
+          }
+        });
+
+      } catch (error) {
+        console.error('Failed to open Jupiter Terminal:', error);
+      }
+    }
+  }, [token.token_address]);
+
   return (
     <div className="relative h-full">
       <GlowBorder className="h-full">
-        <Link 
-          href={`https://ape.pro/solana/${token.token_address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block p-4 h-full"
+        <div 
+          onClick={handleClick}
+          className="block p-4 h-full cursor-pointer"
         >
           <div className="flex items-start justify-between">
             <div className="min-w-0 flex-1">
@@ -206,7 +236,7 @@ export function SolanaTokenCard({ token, category }) {
               </div>
             </div>
           </div>
-        </Link>
+        </div>
       </GlowBorder>
     </div>
   );

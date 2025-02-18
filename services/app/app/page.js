@@ -76,9 +76,12 @@ export default function Home() {
           displayTokens = processTokens(vcTokens, { sortBy: filters.sortBy });
           break;
         default:
-          displayTokens = processTokens([...majorTokens, ...memeTokens, ...vcTokens], { 
-            sortBy: filters.sortBy 
-          });
+          // Deduplicate tokens when combining all categories
+          const allTokens = [...majorTokens, ...memeTokens, ...vcTokens];
+          const uniqueTokens = Array.from(new Map(allTokens.map(token => 
+            [token.token_address, token]
+          )).values());
+          displayTokens = processTokens(uniqueTokens, { sortBy: filters.sortBy });
       }
     }
 
@@ -121,6 +124,35 @@ export default function Home() {
     }, 1000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  // Add handler for token clicks
+  const handleTokenClick = useCallback((token) => {
+    if (typeof window !== 'undefined' && window.Jupiter) {
+      try {
+        // Initialize Jupiter Terminal with default SOL -> token but allow full customization
+        window.Jupiter.init({
+          endpoint: process.env.NEXT_PUBLIC_HELIUS_SECURE_RPC_URL,
+          displayMode: "modal",
+          defaultExplorer: "Solana Explorer",
+          strictTokenList: false,
+          formProps: {
+            // Set default input as SOL but allow changing
+            initialInputMint: "So11111111111111111111111111111111111111112", // SOL
+            fixedInputMint: false, // Allow changing input token
+
+            // Set clicked token as default output but allow changing
+            initialOutputMint: token.address || token.token_address,
+            fixedOutputMint: false, // Allow changing output token
+
+            // Default to ExactIn mode - users specify how much they want to spend
+            swapMode: "ExactIn"
+          }
+        });
+      } catch (error) {
+        console.error('Failed to open Jupiter Terminal:', error);
+      }
+    }
   }, []);
 
   const categories = [
@@ -359,12 +391,13 @@ export default function Home() {
             onClearAll={handleClearAll}
           />
 
-          {/* Token Display */}
+          {/* Token Display - Update to use handleTokenClick */}
           <TokenDisplay
             tokens={getDisplayTokens()}
             category={selectedCategory}
             isLoading={searchQuery ? isSearching : tokensLoading}
             filterKey={filterKey}
+            onTokenClick={handleTokenClick}
           />
         </div>
       </div>

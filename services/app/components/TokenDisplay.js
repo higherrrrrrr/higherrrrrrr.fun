@@ -1,14 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { SolanaTokenCard } from './SolanaTokenCard';
 
-export function TokenDisplay({ tokens, category, isLoading, filterKey }) {
+export const TokenDisplay = ({ 
+  tokens, 
+  category, 
+  isLoading, 
+  filterKey,
+  onTokenClick
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const tokensPerPage = 12;
+
+  // Deduplicate tokens
+  const uniqueTokens = useMemo(() => {
+    return Array.from(new Map(tokens.map(token => 
+      [token.token_address || token.address, token]
+    )).values());
+  }, [tokens]);
 
   // Reset page only when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filterKey]); // filterKey changes only when filters change, not during pagination
+  }, [filterKey]);
 
   if (isLoading) {
     return (
@@ -20,7 +33,7 @@ export function TokenDisplay({ tokens, category, isLoading, filterKey }) {
     );
   }
 
-  if (!tokens?.length) {
+  if (!uniqueTokens?.length) {
     return (
       <div className="text-center py-8 text-green-500/50">
         No tokens found
@@ -31,19 +44,31 @@ export function TokenDisplay({ tokens, category, isLoading, filterKey }) {
   // Calculate pagination
   const indexOfLastToken = currentPage * tokensPerPage;
   const indexOfFirstToken = indexOfLastToken - tokensPerPage;
-  const currentTokens = tokens.slice(indexOfFirstToken, indexOfLastToken);
-  const totalPages = Math.ceil(tokens.length / tokensPerPage);
+  const currentTokens = uniqueTokens.slice(indexOfFirstToken, indexOfLastToken);
+  const totalPages = Math.ceil(uniqueTokens.length / tokensPerPage);
 
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {currentTokens.map((token) => (
-          <SolanaTokenCard
-            key={token.token_address}
-            token={token}
-            category={token.category || category}
-          />
-        ))}
+        {currentTokens.map((token) => {
+          const tokenKey = token.token_address || token.address;
+          return (
+            <div 
+              key={tokenKey}
+              onClick={() => onTokenClick({
+                address: tokenKey,
+                symbol: token.symbol,
+                name: token.name
+              })}
+              className="cursor-pointer transition-transform hover:scale-[1.02]"
+            >
+              <SolanaTokenCard
+                token={token}
+                category={token.category || category}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Pagination Controls */}
@@ -80,4 +105,4 @@ export function TokenDisplay({ tokens, category, isLoading, filterKey }) {
       )}
     </div>
   );
-} 
+}; 
