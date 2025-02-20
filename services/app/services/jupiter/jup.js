@@ -1,7 +1,10 @@
-import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js';
 import { Program, BN } from '@coral-xyz/anchor';
+import fetch from 'cross-fetch';
+import bs58 from 'bs58';
 import { JUPITER_V6_PROGRAM_ID } from './constants';
 import { IDL, Jupiter } from './idl/jupiter';
+
 
 class JupiterInterface {
   constructor(connection, wallet) {
@@ -27,31 +30,18 @@ class JupiterInterface {
     amount,
     slippageBps = 50
   }) {
-    // Create route plan for direct swap
-    const routePlan = [{
-      inputMint,
-      outputMint,
-      inputAmount: new BN(amount),
-      slippageBps: new BN(slippageBps),
-      // You'll need to implement AMM selection logic here
-      // This would involve checking liquidity across different AMMs
-      ammProgram: null, // Selected AMM program ID
-      ammKey: null // Selected AMM account key
-    }];
+    try {
+      const response = await fetch(
+        `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint.toBase58()}&outputMint=${outputMint.toBase58()}&amount=${amount.toString()}&slippageBps=${slippageBps}&platformFeeBps=100`
+      );
 
-    // Get token accounts
-    const inputTokenAccount = await this.findAssociatedTokenAccount(inputMint);
-    const outputTokenAccount = await this.findAssociatedTokenAccount(outputMint);
+      const quoteResponse = await response.json();
+      console.log("🔹 Quote Response:", JSON.stringify(quoteResponse, null, 2));
 
-    // Calculate minimum output amount based on slippage
-    const minimumOutAmount = this.calculateMinimumOutAmount(amount, slippageBps);
-
-    return {
-      routePlan,
-      inputTokenAccount,
-      outputTokenAccount,
-      minimumOutAmount
-    };
+      return quoteResponse;
+    } catch (error) {
+      throw new Error(`❌ Failed to fetch quote: ${error.message}`);
+    }
   }
 
   /**
@@ -69,31 +59,47 @@ class JupiterInterface {
     minimumOutAmount
   }) {
     try {
-      // Create route instruction
-      const routeIx = await this.program.methods
-        .route(
-          routePlan,
-          new BN(minimumOutAmount)
-        )
-        .accounts({
-          tokenProgram: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-          userTransferAuthority: this.wallet.publicKey,
-          userSourceTokenAccount: inputTokenAccount,
-          userDestinationTokenAccount: outputTokenAccount,
-          // Add other required accounts based on route
-        })
-        .instruction();
-
-      // Create and send transaction
-      const transaction = new Transaction().add(routeIx);
+      const quoteResponse = await this.getQuote({
+        inputMint: new PublicKey(inputTokenAccount),  // ✅ Ensure it's the mint, not account
+        outputMint: new PublicKey(outputTokenAccount),
+        amount: minimumOutAmount,
+        slippageBps: 50
+      });
       
-      // Sign and send transaction
-      const signature = await this.program.provider.sendAndConfirm(transaction);
+      
 
+      const swapResponse = await fetch('https://api.jup.ag/swap/v1/swap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quoteResponse,
+          userPublicKey: this.wallet.publicKey.toBase58(),
+          feeAccount: '9xJYno3be7R3aLoU6jDTLyPVwSvFDQPBUEU2G8c178nv', // ✅ Ensure this token account exists
+
+        })
+      }).then(res => res.json());
+
+      console.log("✅ Swap Response:", JSON.stringify(swapResponse, null, 2));
+
+      if (!swapResponse.swapTransaction) {
+        console.error("❌ Swap failed: No transaction received from Jupiter API.");
+        return null; // Prevents app from crashing
+      }
+      
+
+      const transaction = Transaction.from(Buffer.from(swapResponse.swapTransaction, 'base64'));
+
+     // Transaction must be signed by the customer, not backend
+console.log("🚀 Ready to sign transaction on frontend");
+      const signature = await this.connection.sendRawTransaction(transaction.serialize(), {
+        skipPreflight: false,
+        preflightCommitment: "confirmed"
+      });
+
+      console.log("💰 Transaction Signature:", signature);
       return signature;
-
     } catch (error) {
-      throw new Error(`Swap failed: ${error.message}`);
+      throw new Error(`❌ Swap failed: ${error.message}`);
     }
   }
 
