@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { Helius } from 'helius-sdk';
 
-// Add error checking for API key
-if (!process.env.HELIUS_API_KEY) {
-  throw new Error('HELIUS_API_KEY is not defined in environment variables');
-}
-
-const helius = new Helius(process.env.HELIUS_API_KEY);
 
 export async function GET(request) {
+  if (!process.env.HELIUS_API_KEY) {
+    throw new Error('HELIUS_API_KEY is not defined in environment variables');
+  }
+  
+  const helius = new Helius(process.env.HELIUS_API_KEY);
+
   const { searchParams } = new URL(request.url);
   const ownerAddress = searchParams.get('owner');
   
