@@ -1,5 +1,6 @@
+"use client";
+
 import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
-import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 import { SolanaWalletConnectors } from "@dynamic-labs/solana";
 import { DYNAMIC_CONFIG } from '../config/dynamic';
 
@@ -8,11 +9,15 @@ const DynamicProvider = ({ children }) => {
     <DynamicContextProvider
       settings={{
         ...DYNAMIC_CONFIG,
-        theme: 'dark', 
+        theme: 'dark',
         walletConnectors: [
-          EthereumWalletConnectors,
           SolanaWalletConnectors,
         ],
+        network: 'mainnet',
+        solanaConfig: {
+          rpcUrl: "https://netti-iof1ud-fast-mainnet.helius-rpc.com",
+          network: 'mainnet'
+        }
       }}
     >
       {children}

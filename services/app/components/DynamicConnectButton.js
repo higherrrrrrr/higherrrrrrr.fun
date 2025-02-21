@@ -2,10 +2,8 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDynamicContext, DynamicUserProfile } from '@dynamic-labs/sdk-react-core';
-import { DYNAMIC_CONFIG } from '../config/dynamic';
-import { base as wagmiBase } from 'wagmi/chains';
 
 const DynamicConnectButton = ({ className, children }) => {
   const { 
@@ -14,25 +12,6 @@ const DynamicConnectButton = ({ className, children }) => {
     setShowDynamicUserProfile 
   } = useDynamicContext();
   const [error, setError] = useState(null);
-
-  // Add effect to switch network when wallet connects
-  useEffect(() => {
-    const switchToBase = async () => {
-      if (primaryWallet?.connector.supportsNetworkSwitching()) {
-        try {
-          await primaryWallet.switchNetwork(wagmiBase.id);
-          console.log("Successfully switched to Base network");
-        } catch (err) {
-          console.error("Failed to switch to Base network:", err);
-          setError('Failed to switch to Base network. Please switch manually.');
-        }
-      }
-    };
-
-    if (primaryWallet) {
-      switchToBase();
-    }
-  }, [primaryWallet]);
 
   // Compact button with thicker border and aligned text
   const defaultClassName =
