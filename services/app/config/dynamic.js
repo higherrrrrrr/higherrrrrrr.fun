@@ -74,4 +74,10 @@ export const DYNAMIC_CONFIG = {
   newToWeb3WalletChainMap: {
     [base.id]: ["metamask", "walletconnect", "rabby"],
   },
+  walletConnectorExtensions: [],
+  rpcEndpoints: {
+    solana: {
+      mainnet: "https://netti-iof1ud-fast-mainnet.helius-rpc.com"
+    }
+  }
 };
