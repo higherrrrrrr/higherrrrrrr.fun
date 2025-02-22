@@ -12,7 +12,7 @@ Below is a **highly detailed** Technical Design Document (TDD) for a **Solana-Ba
 4. [Instruction-Level Workflows](#4-instruction-level-workflows)  
 5. [Fee Collection & Distribution](#5-fee-collection--distribution)  
 6. [Metadata Evolutions & NFT Rewards](#6-metadata-evolutions--nft-rewards)  
-7. [Single-Sided Liquidity & AMM Integration](#7-single-sided-liquidity--amm-integration)  
+7. [Trading & Price Evolution](#7-trading--price-evolution)  
 8. [Security Considerations](#8-security-considerations)  
 9. [Possible Extensions & Future Work](#9-possible-extensions--future-work)  
 10. [Conclusion](#10-conclusion)
@@ -21,10 +21,10 @@ Below is a **highly detailed** Technical Design Document (TDD) for a **Solana-Ba
 
 ## 1. Introduction & Motivation
 
-The **Memecoin Launchpad & Evolutionary Token Platform** (hereafter, the “Platform”) on Solana is designed to streamline the **creation** and **management** of community-driven tokens that incorporate:
+The **Memecoin Launchpad & Evolutionary Token Platform** (hereafter, the "Platform") on Solana is designed to streamline the **creation** and **management** of community-driven tokens that incorporate:
 
 - **Fixed Supply Mechanics**: A fully minted supply (e.g., 1 billion tokens with 9 decimals) that is locked at creation.  
-- **Dynamic, Threshold-Based Metadata**: On-chain logic that updates each token’s displayed name or artwork as it meets certain price or market thresholds (e.g., "level up" events).  
+- **Dynamic, Threshold-Based Metadata**: On-chain logic that updates each token's displayed name or artwork as it meets certain price or market thresholds (e.g., "level up" events).  
 - **Big Holder (Conviction) NFTs**: Reward addresses holding above a certain fraction of the total supply whenever a threshold crossing occurs.  
 - **Fee Splits**: Systemically distribute token-based fees to the **creator** side while directing the SOL-based fees to the **protocol** side.  
 - **Optional Single-Sided Liquidity**: Provide a fair launch experience by enabling tokens to deposit only their side of the liquidity pool, letting the market supply the counterpart asset (usually SOL).
@@ -35,10 +35,10 @@ This TDD aims to detail every relevant piece of the on-chain architecture, highl
 
 ## 2. High-Level Goals
 
-1. **Usable Memecoin Framework**: Allow new projects to spin up “fun, hype-based” tokens with reliable **trust-minimized** code on Solana.  
+1. **Usable Memecoin Framework**: Allow new projects to spin up "fun, hype-based" tokens with reliable **trust-minimized** code on Solana.  
 2. **No Additional Minting**: Once the total supply is minted, the mint authority is burned, ensuring no unexpected inflation.  
 3. **Evolving Token Identity**: Each token can embed comedic or brand-centric evolution triggers, changing its name or URIs as the price or volume crosses new thresholds.  
-4. **Conviction-Based Rewards**: Large stakeholders (≥ a threshold % of supply) can claim or automatically receive special NFTs signifying their “conviction” or loyalty.  
+4. **Conviction-Based Rewards**: Large stakeholders (≥ a threshold % of supply) can claim or automatically receive special NFTs signifying their "conviction" or loyalty.  
 5. **Secure Fee Infrastructure**: Protocol-based instructions seamlessly route fees to PDAs, with minimal risk of misappropriation.  
 6. **Flexible Deployment**: The program can be configured to remain upgradable under a multisig or locked permanently for immutability.  
 
@@ -81,7 +81,7 @@ pub struct MemeTokenState {
 
 ### 3.2. `EvolutionData`
 
-**Stores** threshold-based instructions for how the token’s name/URI changes when crossing certain triggers (price, volume, etc.).
+**Stores** threshold-based instructions for how the token's name/URI changes when crossing certain triggers (price, volume, etc.).
 
 ```rust
 #[account]
@@ -108,7 +108,7 @@ pub struct EvolutionItem {
 
 ### 3.3. `ConvictionRegistry`
 
-**Purpose**: A ledger of addresses that have “registered” themselves as big holders (≥ some fraction like 0.42069% of total supply).
+**Purpose**: A ledger of addresses that have "registered" themselves as big holders (≥ some fraction like 0.42069% of total supply).
 
 ```rust
 #[account]
@@ -122,7 +122,7 @@ pub struct ConvictionRegistry {
 **Likely Seeds**: `[b"conviction_registry", mint_pubkey]`.
 
 - Each user calls `register_holder` upon crossing the threshold.  
-- The protocol references this account whenever a threshold-based “evolution” occurs to distribute “Conviction NFTs.”
+- The protocol references this account whenever a threshold-based "evolution" occurs to distribute "Conviction NFTs."
 
 ---
 
@@ -147,7 +147,7 @@ pub struct FeeVault {
 - **protocol_sol_vault**: A system account (or associated token account for wSOL) that accumulates the SOL side of fees.  
 - **creator_token_vault**: An SPL token account that receives the token side of fees.  
 - **lp_token_vault**: If the protocol invests fees into an AMM and gets LP tokens back, store them here.  
-- **protocol_pubkey** / **creator_pubkey**: Distinct addresses that can call withdrawal instructions. Typically the protocol side is a global treasury, and the creator side is the memecoin project’s address.
+- **protocol_pubkey** / **creator_pubkey**: Distinct addresses that can call withdrawal instructions. Typically the protocol side is a global treasury, and the creator side is the memecoin project's address.
 
 ---
 
@@ -159,7 +159,7 @@ pub struct FeeVault {
 
 1. **Args**:  
    - `(name, symbol, supply, decimals, distribution_list, etc.)`  
-   - Possibly a bool for “pre_mint” logic if you want to distribute some tokens upfront.  
+   - Possibly a bool for "pre_mint" logic if you want to distribute some tokens upfront.  
 
 2. **Flow**:  
    1. Create and initialize the SPL **mint**.  
@@ -169,8 +169,8 @@ pub struct FeeVault {
    5. Possibly store initial config in `FeeVault` (like fee rates, distribution addresses).
 
 3. **Validation**:  
-   - The signer must be the “creator,” ensuring random users can’t create a MemeTokenState claiming the same seeds.  
-   - If a “pre_mint” is used, ensure it doesn’t exceed the supply.
+   - The signer must be the "creator," ensuring random users can't create a MemeTokenState claiming the same seeds.  
+   - If a "pre_mint" is used, ensure it doesn't exceed the supply.
 
 ---
 
@@ -192,16 +192,16 @@ pub struct FeeVault {
 
 **Adds** a user to the `ConvictionRegistry` if they hold ≥ X% (like 0.42069%).
 
-1. **Args**: Potentially just `( )`, since the user’s identity and token account can be derived from context.  
+1. **Args**: Potentially just `( )`, since the user's identity and token account can be derived from context.  
 2. **Flow**:  
    1. The user passes in their token account.  
    2. Program checks `token_account.amount >= threshold_amt`.  
-   3. If valid, add user’s `Pubkey` to the `holders` vector in `ConvictionRegistry`.  
+   3. If valid, add user's `Pubkey` to the `holders` vector in `ConvictionRegistry`.  
 3. **Validation**:  
-   - Must confirm the user’s token account is indeed owned by them.  
-   - If user is already in the list, do nothing (or increment a “registration version” if needed).
+   - Must confirm the user's token account is indeed owned by them.  
+   - If user is already in the list, do nothing (or increment a "registration version" if needed).
 
-**Performance**: Storing an unbounded number of holders can be challenging; typically, you limit the maximum or store them in multiple pages. But if you expect ~200 or fewer big holders, it’s manageable in a single vector.
+**Performance**: Storing an unbounded number of holders can be challenging; typically, you limit the maximum or store them in multiple pages. But if you expect ~200 or fewer big holders, it's manageable in a single vector.
 
 ---
 
@@ -209,16 +209,16 @@ pub struct FeeVault {
 
 **Rewards** big holders with an NFT each time the token crosses from level `k` to `k+1`.
 
-1. **Trigger**: Called after an evolution threshold is crossed, or after a “metadata update” event.  
+1. **Trigger**: Called after an evolution threshold is crossed, or after a "metadata update" event.  
 2. **Flow**:  
    1. Load `ConvictionRegistry`.  
    2. For each holder in `holders`, confirm they still hold ≥ X%.  
-   3. If yes, **mint** them an NFT referencing “the old level.” If no, remove them from the registry.  
+   3. If yes, **mint** them an NFT referencing "the old level." If no, remove them from the registry.  
    4. Possibly do this in batches if you expect more than can fit in a single transaction.  
 
 3. **NFT Minting**:  
-   - Typically uses a CPI call to **Metaplex** `create_metadata_accounts_v3` or a minimal “NFT standard” instruction.  
-   - The minted NFT might store fields like “Conviction NFT – Level 3,” or embed a dynamic SVG referencing the date/time.
+   - Typically uses a CPI call to **Metaplex** `create_metadata_accounts_v3` or a minimal "NFT standard" instruction.  
+   - The minted NFT might store fields like "Conviction NFT – Level 3," or embed a dynamic SVG referencing the date/time.
 
 ---
 
@@ -233,7 +233,7 @@ pub struct FeeVault {
    3. Construct a Metaplex `update_metadata_accounts_v2` instruction with the new name/URI.  
    4. Optionally call `distribute_conviction_nfts` if a level changed.  
 3. **Validation**:  
-   - The Metaplex “update authority” must be the **Platform** program’s PDA or a known address.  
+   - The Metaplex "update authority" must be the **Platform** program's PDA or a known address.  
 
 ---
 
@@ -246,11 +246,11 @@ pub struct FeeVault {
    1. **Calculate** a fee portion (e.g., 1% of `amount_in`).  
    2. If `user_in_token == SOL`, deposit that fee portion into `protocol_sol_vault`.  
    3. If `user_in_token == MemeToken`, deposit that fee portion into `creator_token_vault`.  
-   4. **CPI** into Meteora’s `swap` for `(amount_in - fee)`.  
+   4. **CPI** into Meteora's `swap` for `(amount_in - fee)`.  
    5. Check if new price crosses an evolution threshold; if so, call `update_metadata`.
 
 **Complexities**:  
-- The program must handle “wrapped SOL” if user_in_token is SOL.  
+- The program must handle "wrapped SOL" if user_in_token is SOL.  
 - If the user is swapping MemeToken → Another SPL token, some logic might direct a portion of that other SPL token as protocol fees; adjustments are possible but typically you focus on the MemeToken & SOL case.
 
 ---
@@ -289,7 +289,7 @@ All fees land in:
 - **`protocol_sol_vault`** for SOL.  
 - **`creator_token_vault`** for MemeToken.  
 
-At any point, the respective authority can call a “withdraw” instruction to claim them. This ensures a **clean separation** of roles:
+At any point, the respective authority can call a "withdraw" instruction to claim them. This ensures a **clean separation** of roles:
 
 - The **creator** never touches the SOL side.  
 - The **protocol** never touches the token side.
@@ -302,9 +302,9 @@ At any point, the respective authority can call a “withdraw” instruction to 
 
 **Key**: The on-chain name/symbol embedded in the SPL mint are typically static, so the platform relies on the **Metaplex** program for dynamic display updates. Once a threshold is hit:
 
-1. The program sets the **Metaplex “update authority”** to itself or a delegated address at creation time.  
+1. The program sets the **Metaplex "update authority"** to itself or a delegated address at creation time.  
 2. `update_metadata` modifies the `name` or `uri` in the Metaplex `MetadataAccount`.  
-3. Wallets or explorers referencing the token’s Metaplex metadata see the new name/URI.
+3. Wallets or explorers referencing the token's Metaplex metadata see the new name/URI.
 
 ### 6.2. Conviction NFTs
 
@@ -328,37 +328,23 @@ At any point, the respective authority can call a “withdraw” instruction to 
 
 ---
 
-## 7. Single-Sided Liquidity & AMM Integration
+## 7. Trading & Price Evolution
 
-### 7.1. Why Single-Sided?
+### 7.1. Direct Pass-Through Trading
 
-Many projects prefer a “fair” approach where the project team only deposits their token. The broader market or community will deposit the counterpart (SOL), setting a fair market price.
+The protocol implements a simple pass-through trading mechanism:
+- Direct token transfers from input to output accounts
+- No intermediary pools or complex AMM interactions
+- Focus on core evolution mechanics
 
-### 7.2. Meteora Pool Creation
+### 7.2. Price Feed Integration
 
-**Instruction**: `create_pool_with_single_side` (optional, but typical for a “fair launch”).
-1. The memecoin deposits X tokens into Meteora’s liquidity pool.  
-2. The protocol or user might receive some **LP tokens** in `lp_token_vault`.  
+For production deployment, the protocol would integrate with:
+- Trusted price oracles
+- Or direct DEX price calculations
+- Or other reliable price sources
 
-Below is the **continuation and conclusion** of the **Memecoin Launchpad & Evolutionary Token Platform – Technical Design (Extended Version)** document, picking up from **Section 7.3** onward. 
-
----
-
-## 7.3. Ongoing Liquidity Management
-
-1. **Add Liquidity**:  
-   - If the memecoin’s creator or the protocol wishes to deepen liquidity, they can deposit additional tokens (and possibly SOL) into the same Meteora pool.  
-   - In return, they receive more LP tokens, which are held in the `lp_token_vault` or distributed as they see fit.
-
-2. **Remove Liquidity**:  
-   - Burn LP tokens from the `lp_token_vault` to reclaim the underlying token and SOL.  
-   - This process can be used to redistribute partial liquidity or execute buybacks.
-
-3. **Fee Integration**:  
-   - A portion of the fees collected (in either SOL or tokens) can be automatically reinvested into the liquidity pool.  
-   - This advanced strategy helps maintain a more stable price floor, though it increases the complexity of fee logic.
-
-By allowing the protocol or creator to manage these LP positions, the Platform supports a variety of liquidity provisioning strategies, from purely “fair launch” to actively managed pools.
+The current mock price (1000) would be replaced with actual market data.
 
 ---
 
@@ -371,9 +357,9 @@ By allowing the protocol or creator to manage these LP positions, the Platform s
 
 ### 8.2. Permissioned Calls & PDA Ownership
 
-- **create_meme_token**: Only the designated “creator” can call this to avoid collisions or unauthorized token creation under the same seeds.  
+- **create_meme_token**: Only the designated "creator" can call this to avoid collisions or unauthorized token creation under the same seeds.  
 - **FeeVault**: Withdraw instructions check if the caller matches the relevant pubkey (creator vs. protocol).  
-- **EvolutionData**: Only the authorized owner (or the program’s PDA) can modify thresholds or name/URI mappings.  
+- **EvolutionData**: Only the authorized owner (or the program's PDA) can modify thresholds or name/URI mappings.  
 - **ConvictionRegistry**: `register_holder` ensures the user actually holds ≥ X%. The program verifies they own the relevant token account.  
 
 ### 8.3. Data Validation & Overflow Handling
@@ -383,11 +369,11 @@ By allowing the protocol or creator to manage these LP positions, the Platform s
 
 ### 8.4. Metaplex Update Authority
 
-- The token’s Metaplex metadata must be set so that only the Platform’s **PDA** (or another controlled address) can call `update_metadata`. If set incorrectly, a malicious party could override name/URI.
+- The token's Metaplex metadata must be set so that only the Platform's **PDA** (or another controlled address) can call `update_metadata`. If set incorrectly, a malicious party could override name/URI.
 
 ### 8.5. Registry Size Constraints
 
-- Storing large lists of big holders on-chain can be expensive. The protocol can impose a max registry size, or store multiple “pages” if more than N addresses sign up.  
+- Storing large lists of big holders on-chain can be expensive. The protocol can impose a max registry size, or store multiple "pages" if more than N addresses sign up.  
 - If the threshold is high enough, the maximum number of potential holders remains small (~200 or fewer).
 
 ### 8.6. Off-Chain Price Feeds
@@ -399,7 +385,7 @@ By allowing the protocol or creator to manage these LP positions, the Platform s
 ## 9. Possible Extensions & Future Work
 
 1. **Tiered Conviction NFTs**  
-   - Instead of a single threshold, define multiple tiers (e.g., ≥0.1%, ≥0.42%, ≥1%), awarding different NFT “rarities” based on the user’s stake.
+   - Instead of a single threshold, define multiple tiers (e.g., ≥0.1%, ≥0.42%, ≥1%), awarding different NFT "rarities" based on the user's stake.
 
 2. **DAO Governance**  
    - Integrate a governance token or use the memecoin itself as a voting mechanism. Allow changes to fee rates or thresholds via on-chain proposals.
@@ -420,7 +406,7 @@ By allowing the protocol or creator to manage these LP positions, the Platform s
    - Over time, the multi-sig authority could be transferred to a decentralized DAO structure on Realms (SPL Governance).
 
 8. **Open IDLs for Aggregators**  
-   - Provide a standard interface for Jupiter or other aggregators to integrate “evolution triggers” or “conviction logic” even if users trade outside the official front end.
+   - Provide a standard interface for Jupiter or other aggregators to integrate "evolution triggers" or "conviction logic" even if users trade outside the official front end.
 
 ---
 
@@ -430,7 +416,7 @@ The **Memecoin Launchpad & Evolutionary Token Platform** detailed here brings to
 
 - **Locked Supply** with a comedic or brand-centric approach.  
 - **Threshold-Based Metaplex Evolutions**, enabling dynamic name/URI changes as price or volume milestones are met.  
-- **Conviction NFTs**, rewarding large holders with unique collectibles each time a “level up” occurs.  
+- **Conviction NFTs**, rewarding large holders with unique collectibles each time a "level up" occurs.  
 - **Fee Splits** where the **protocol** receives SOL side fees and the **creator** receives token side fees, all tracked via on-chain PDAs.  
 - **Single-Sided Liquidity** for fair launch price discovery, plus optional advanced liquidity management.
 

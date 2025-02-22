@@ -1,7 +1,7 @@
 # Higherrrrrrrr (CULT) Protocol White Paper
 
 > **A Solana-Based Memecoin Launchpad and Evolutionary Token Framework**  
-> *Where threshold-based metadata, big-holder NFTs, deflationary principles, and innovative fee collection converge—with flexible fee splits and extensive configurability.*
+> *Where threshold-based metadata, big-holder NFTs, deflationary principles, and direct trading converge—with extensive configurability.*
 
 ## Table of Contents
 
@@ -11,7 +11,7 @@
 4. [Tokenomics & Supply Mechanics](#4-tokenomics--supply-mechanics)  
 5. [Evolving Metadata & Threshold Triggers](#5-evolving-metadata--threshold-triggers)  
 6. [Conviction NFTs for Large Holders](#6-conviction-nfts-for-large-holders)  
-7. [Trading Flows & Integration with Meteora](#7-trading-flows--integration-with-Meteora)  
+7. [Trading Flows & Direct Pass-Through](#7-trading-flows--direct-pass-through)  
 8. [Fee Collection & Liquidity Reinforcement](#8-fee-collection--liquidity-reinforcement)  
 9. [Governance & Security](#9-governance--security)  
 10. [Launchpad & Ecosystem Vision](#10-launchpad--ecosystem-vision)  
@@ -25,13 +25,13 @@
 
 ## 1. Introduction
 
-**Higherrrrrrrr**—pronounced with **seven** trailing “r”s—represents a fusion of **memecoin culture** and **robust token engineering** on Solana. While it has an intentionally playful aesthetic, the protocol enforces a **serious, modular, and configurable** approach to on‑chain identity updates, holder engagement, fee management, and single‑sided liquidity provision. Here is a quick overview of its five key mechanics:
+**Higherrrrrrrr**—pronounced with **seven** trailing "r"s—represents a fusion of **memecoin culture** and **robust token engineering** on Solana. While it has an intentionally playful aesthetic, the protocol enforces a **serious, modular, and configurable** approach to on‑chain identity updates, holder engagement, fee management, and single‑sided liquidity provision. Here is a quick overview of its five key mechanics:
 
-- **Threshold-Based Evolving Metadata**: Token names and artwork can “level up” as certain price or market milestones are crossed.  
+- **Threshold-Based Evolving Metadata**: Token names and artwork can "level up" as certain price or market milestones are crossed.  
 - **Deflationary Design**: A portion of tokens are burned on every swap, ensuring a continuously decreasing supply.  
-- **Big-Holder “Conviction” NFTs**: Addresses holding at least 0.042069% of a token’s total supply automatically receive commemorative NFTs each time the token evolves.  
+- **Big-Holder "Conviction" NFTs**: Addresses holding at least 0.042069% of a token's total supply automatically receive commemorative NFTs each time the token evolves.  
 - **Single-Sided Liquidity**: Projects can provide only their own tokens to a pool, letting the market bring in SOL, thus enabling fair price discovery.  
-- **Flexible Fee Splits & Innovative Fee Collection**: A default 1% swap fee is split between token burns and SOL‑based liquidity or revenue—but **all splits and destinations** (including protocol revenue vs. “floor” support) are fully configurable. Notably, fees are now collected directly from aggregated liquidity provider (LP) fees in our Meteora pool deposit rather than solely via a pass‑through front‑end.
+- **Flexible Fee Splits & Innovative Fee Collection**: A default 1% swap fee is split between token burns and SOL‑based liquidity or revenue—but **all splits and destinations** (including protocol revenue vs. "floor" support) are fully configurable. Notably, fees are now collected directly from aggregated liquidity provider (LP) fees in our Meteora pool deposit rather than solely via a pass‑through front‑end.
 
 By aligning playful elements with cryptographic fundamentals—and keeping all parameters adjustable—**Higherrrrrrrr** aims to empower a new generation of meme tokens on Solana.
 
@@ -41,7 +41,7 @@ By aligning playful elements with cryptographic fundamentals—and keeping all p
 
 ### 2.1. Memecoin Evolution as a Core Feature
 
-**Higherrrrrrrr** uses threshold‑based “evolutions” that change the on‑chain name or artwork of a token in response to market conditions. This concept parallels how internet memes gain additional references or inside jokes over time, but here it is **anchored** to trust‑minimized, on‑chain logic. Creators can define the thresholds that best fit their narrative—such as price marks, volume targets, or community events.
+**Higherrrrrrrr** uses threshold‑based "evolutions" that change the on‑chain name or artwork of a token in response to market conditions. This concept parallels how internet memes gain additional references or inside jokes over time, but here it is **anchored** to trust‑minimized, on‑chain logic. Creators can define the thresholds that best fit their narrative—such as price marks, volume targets, or community events.
 
 ### 2.2. Balancing Engagement and Transparency
 
@@ -72,7 +72,7 @@ The Solana blockchain provides high throughput, low fees, and tooling like **Met
    - Mint a predetermined supply (often 1B with 9 decimals), then lock (burn) the mint authority to guarantee no further minting.
 
 2. **Metadata Evolutions**  
-   - On‑chain name/URI updates are triggered when predefined thresholds are crossed, reflecting the token’s evolving narrative.
+   - On‑chain name/URI updates are triggered when predefined thresholds are crossed, reflecting the token's evolving narrative.
 
 3. **Conviction NFTs**  
    - Addresses holding ≥ 0.042069% of the total supply receive a commemorative NFT upon each evolution, rewarding long‑term commitment.
@@ -110,11 +110,11 @@ This lock‑in mechanism ensures that early participants cannot pre‑mine the e
 
 ### 5.1. Price‑Based Name or Artwork Updates
 
-Tokens under **Higherrrrrrrr** define custom evolution thresholds that trigger changes in the token’s on‑chain metadata—such as name or artwork—once specific market milestones are achieved. For CULT, surpassing a price or market cap milestone initiates a metadata update, signifying a new “level” in the token’s lifecycle.
+Tokens under **Higherrrrrrrr** define custom evolution thresholds that trigger changes in the token's on‑chain metadata—such as name or artwork—once specific market milestones are achieved. For CULT, surpassing a price or market cap milestone initiates a metadata update, signifying a new "level" in the token's lifecycle.
 
 ### 5.2. Metaplex On‑Chain Updates
 
-Using **mpl-token-metadata**, the designated update authority can seamlessly update the token’s metadata (e.g., name, symbol, URI) on‑chain when a threshold is exceeded. This ensures that the token’s evolving identity is accurately reflected in wallets and explorers.
+Using **mpl-token-metadata**, the designated update authority can seamlessly update the token's metadata (e.g., name, symbol, URI) on‑chain when a threshold is exceeded. This ensures that the token's evolving identity is accurately reflected in wallets and explorers.
 
 ### 5.3. On‑Chain vs. Off‑Chain Storage
 
@@ -126,7 +126,7 @@ While token metadata is updated on‑chain, associated assets (such as artwork) 
 
 ### 6.1. The 0.042069% Threshold (420,690 Tokens)
 
-Holders maintaining at least **0.042069%** of the total supply (420,690 tokens for a 1B supply) qualify as “Conviction” holders. This threshold is both a playful and meaningful metric that ensures only committed participants receive rewards.
+Holders maintaining at least **0.042069%** of the total supply (420,690 tokens for a 1B supply) qualify as "Conviction" holders. This threshold is both a playful and meaningful metric that ensures only committed participants receive rewards.
 
 ### 6.2. On‑Chain Registry
 
@@ -139,26 +139,22 @@ A dedicated on‑chain registry tracks addresses that meet or exceed the convict
 
 ---
 
-## 7. Trading Flows & Integration with Meteora
+## 7. Trading Flows & Direct Pass-Through
 
-### 7.1. Meteora as the Chosen AMM
+### 7.1. Simple Pass-Through Trading
 
-**Meteora** is leveraged for its efficient, user‑friendly concentrated liquidity (CL) model on Solana. Through Meteora, token‑to‑SOL swaps are executed rapidly, with built‑in mechanisms for fee collection and liquidity management.
+The protocol implements a straightforward pass-through trading mechanism where tokens are transferred directly from input to output accounts. This simplifies the trading flow while maintaining the core evolution mechanics.
 
-### 7.2. Single‑Sided Liquidity Provision
+### 7.2. Evolution Triggers
 
-Projects deploy only their own tokens into a liquidity pool, allowing the market to contribute SOL. This mechanism promotes fair price discovery by ensuring that liquidity is provided in a balanced manner.
+Following each trade, the protocol checks the current price against predefined evolution thresholds. If a threshold is crossed, the token's metadata is updated accordingly via a Metaplex CPI call.
 
-### 7.3. Fee Collection from LP Pools
+### 7.3. Price Tracking
 
-Distinct from traditional pass‑through fee collection, our protocol now aggregates fees directly from the Meteora LP fee account. During each swap:
-- **Token fees** are taken from the swapped amount, with a portion allocated to token burns.
-- **SOL fees** are accumulated in the Meteora LP fee account and later distributed evenly between protocol and creator via a dedicated fee distribution instruction.
-This ensures that fee collection is both transparent and integrated into the liquidity dynamics.
-
-### 7.4. Automated Threshold Checks
-
-Following each swap, the protocol decodes the current price from the Whirlpool state, checking against predefined evolution thresholds. If a threshold is crossed, the token’s metadata is updated accordingly via a Metaplex CPI call.
+The protocol uses a mock price for development, but in production this would be replaced with:
+- Price feed from a trusted oracle
+- Or direct price calculation from relevant DEX pools
+- Or other reliable price source
 
 ---
 
@@ -194,7 +190,7 @@ Initially, a multi‑sig (e.g., **Squads**) manages the primary program, allowin
 
 ### 9.2. Transition to Full Immutability
 
-Once community confidence is established, the upgrade authority can be set to `None`, rendering the program immutable. Similarly, the Metaplex metadata update authority can be relinquished to permanently fix the token’s final evolution state.
+Once community confidence is established, the upgrade authority can be set to `None`, rendering the program immutable. Similarly, the Metaplex metadata update authority can be relinquished to permanently fix the token's final evolution state.
 
 ---
 
@@ -203,7 +199,7 @@ Once community confidence is established, the upgrade authority can be set to `N
 **Higherrrrrrrr** is more than a single token—it is a framework for launching an ecosystem of evolutionary, community‑driven tokens. Key objectives include:
 
 1. **Multiple Token Deployments**: Each token adheres to a fixed supply model (e.g., 1B tokens with 9 decimals) and evolves through predefined thresholds.
-2. **Configurable Parameters**: Projects can set unique evolution thresholds, fee splits, and distribution mechanisms to tailor the token’s behavior.
+2. **Configurable Parameters**: Projects can set unique evolution thresholds, fee splits, and distribution mechanisms to tailor the token's behavior.
 3. **Financial Flexibility**: Creators have the ability to dynamically adjust fee allocations, ensuring sustainability and growth.
 4. **Cross‑Promotion and Synergy**: Tokens deployed via **Higherrrrrrrr** benefit from a shared framework that emphasizes transparency, innovation, and community engagement.
 
@@ -212,13 +208,13 @@ Once community confidence is established, the upgrade authority can be set to `N
 ## 11. Use Cases & Scenarios
 
 1. **Playful, Thematic Tokens**  
-   - For example, a token named “FrogLeaps” may evolve at milestones like \$0.001, \$0.01, and \$0.069, with large holders receiving “Frog Royalty” NFTs and fees supporting amphibian conservation initiatives.
+   - For example, a token named "FrogLeaps" may evolve at milestones like \$0.001, \$0.01, and \$0.069, with large holders receiving "Frog Royalty" NFTs and fees supporting amphibian conservation initiatives.
    
 2. **Brand and Marketing Experiments**  
    - Brands can align token evolutions with marketing campaigns, awarding loyalty NFTs and adjusting fee splits to support brand events or charitable causes.
 
 3. **DAO and Governance Initiatives**  
-   - DAOs can use evolutionary tokens to gamify treasury growth, distributing “era NFTs” when certain thresholds are met and dynamically allocating fees to support the governance structure.
+   - DAOs can use evolutionary tokens to gamify treasury growth, distributing "era NFTs" when certain thresholds are met and dynamically allocating fees to support the governance structure.
 
 ---
 
@@ -284,5 +280,5 @@ Allocations designated for early adopters and loyal community members, distribut
 
 ### 15.2. Migration LP Support (5%)
 
-Specifically designates supply for the **Migrated Tokens/CULT** liquidity pools. The Migrated Tokens side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures robust cross-token liquidity pools for migrated tokens from Base.
+Specifically designates supply for the **Migrated Tokens/CULT** liquidity pools. The Migrated Tokens side is burned on each trade, while the CULT side directs 0.5% to the "floor" for price stability. This ensures robust cross-token liquidity pools for migrated tokens from Base.
 

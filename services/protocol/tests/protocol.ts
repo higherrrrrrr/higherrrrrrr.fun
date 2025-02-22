@@ -46,7 +46,7 @@ describe("protocol", () => {
     // A distribution recipient (for non–LP distribution).
     const distributionRecipient = Keypair.generate();
 
-    // Create “dummy” accounts for pool-related fields.
+    // Create "dummy" accounts for pool-related fields.
     const poolVault = Keypair.generate();
     const poolAccount = Keypair.generate();
     const poolAuthority = Keypair.generate();
@@ -180,10 +180,10 @@ describe("protocol", () => {
           user: provider.wallet.publicKey,
           userTokenAccount: userTokenAccount.publicKey, // this account should be owned by the token program
           convictionRegistry: convictionRegistryPDA,
-          // For memeTokenState, we “fake” it by providing an account whose mint matches dummyMint.
+          // For memeTokenState, we "fake" it by providing an account whose mint matches dummyMint.
           // (In a real test you would have created and initialized this account.)
           memeTokenState: {
-            // NOTE: When using Anchor’s testing client, you can pass a dummy object with a key.
+            // NOTE: When using Anchor's testing client, you can pass a dummy object with a key.
             key: dummyMint.publicKey,
           } as any,
           tokenProgram: splToken.TOKEN_PROGRAM_ID,
@@ -196,9 +196,9 @@ describe("protocol", () => {
 
     // Next, test distribute_conviction_nfts.
     // The instruction expects (for each holder in the registry) three extra accounts:
-    //   (1) the holder’s memecoin token account (for balance re-check),
+    //   (1) the holder's memecoin token account (for balance re-check),
     //   (2) the NFT mint account,
-    //   (3) the holder’s NFT token account.
+    //   (3) the holder's NFT token account.
     // Here we simulate a single holder.
     const nftMint = Keypair.generate();
     const holderNftTokenAccount = Keypair.generate();
@@ -213,7 +213,7 @@ describe("protocol", () => {
         .accounts({
           authority: provider.wallet.publicKey,
           convictionRegistry: convictionRegistryPDA,
-          // As before, we “fake” memeTokenState by providing the dummy mint.
+          // As before, we "fake" memeTokenState by providing the dummy mint.
           memeTokenState: { key: dummyMint.publicKey } as any,
           tokenProgram: splToken.TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
@@ -261,8 +261,44 @@ describe("protocol", () => {
     // and token transfers (withdraw_creator_tokens) by checking lamport balances before/after.
   });
 
-  // Optionally, add tests for trade_via_orca and create_single_sided_liquidity.
-  // These tests would follow a similar pattern: set up dummy pool accounts, supply a dummy current price,
-  // and then call the instruction. Because these instructions invoke CPIs (e.g. to Orca or Metaplex),
-  // you may need to either mock those programs or use dummy program IDs in your test environment.
+  it("executes a pass-through trade", async () => {
+    // Setup accounts for pass-through trading
+    const userInTokenAccount = Keypair.generate();
+    const userOutTokenAccount = Keypair.generate();
+    const dummyMint = Keypair.generate();
+
+    // Get PDAs for required accounts
+    const [evolutionDataPDA] = await PublicKey.findProgramAddress(
+      [Buffer.from("evolution_data"), dummyMint.publicKey.toBuffer()],
+      program.programId
+    );
+
+    const [memeTokenStatePDA] = await PublicKey.findProgramAddress(
+      [Buffer.from("meme_token_state"), dummyMint.publicKey.toBuffer()],
+      program.programId
+    );
+
+    try {
+      const tx = await program.methods.handlePassThroughTrade(
+        new BN(1000), // amount_in
+        new BN(990),  // min_out
+        new BN(1000)  // mock current_price
+      )
+        .accounts({
+          user: provider.wallet.publicKey,
+          userInTokenAccount: userInTokenAccount.publicKey,
+          userOutTokenAccount: userOutTokenAccount.publicKey,
+          memeTokenState: memeTokenStatePDA,
+          evolutionData: evolutionDataPDA,
+          metadata: Keypair.generate().publicKey, // dummy metadata account
+          metadataUpdateAuthority: provider.wallet.publicKey,
+          tokenProgram: splToken.TOKEN_PROGRAM_ID,
+          tokenMetadataProgram: new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"),
+        })
+        .rpc();
+      console.log("pass_through_trade tx:", tx);
+    } catch (err) {
+      console.error("Error in pass_through_trade:", err);
+    }
+  });
 });
