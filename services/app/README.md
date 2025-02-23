@@ -43,7 +43,7 @@ npm install
 pnpm install
 ```
 
-3. Set up your environment:
+3. Set up environment variables:
 Create `.env.local` with:
 ```env
 NEXT_PUBLIC_RPC_URL=your-evm-node-url
@@ -56,43 +56,64 @@ NEXT_PUBLIC_REFRESH_INTERVAL=60000  # Data refresh in ms
 yarn build-knowledge
 ```
 
-5. Start it up:
+5. Start PostgreSQL:
 ```bash
-npm run dev
+docker-compose up -d postgres
 ```
 
-6. Visit [http://localhost:3000](http://localhost:3000) and watch number go up (hopefully)
-
-## Runtime Configuration
-
-The following environment variables are required at runtime:
-
-```env
-NEXT_PUBLIC_RPC_URL=your-evm-node-url
-NEXT_PUBLIC_REFRESH_INTERVAL=60000  # Data refresh in ms
+6. Run migrations:
+```bash
+pnpm migrate
 ```
 
-These can be set in your deployment environment or locally via `.env.local` for development.
+7. Start it up:
+```bash
+pnpm dev
+```
+
+## Development
+
+Start the development server:
+```bash
+pnpm dev
+```
+
+Run tests:
+```bash
+pnpm test
+```
+
+## API Routes
+
+### Achievements
+- `GET /api/achievements` - List user achievements
+- `POST /api/achievements/check` - Check for new achievements
+- `GET /api/achievements/progress` - Get achievement progress
+- `GET /api/achievements/stats` - Get achievement statistics
+
+### Tokens
+- `GET /api/tokens/all` - List all tokens
+- `GET /api/price/solana` - Get Solana price
+
+### Balance
+- `POST /api/snapshot-balance` - Record wallet balance
+- `GET /api/balance-history` - Get balance history
+
+## Schema Validation
+
+Uses Yup for request validation. See schemas in:
+
+## Rate Limiting
+
+API routes are rate-limited. See configuration in:
 
 ## Contributing
 
-PRs welcome, especially for:
-- More token integrations
-- Better price feed sources
-- Degen-friendly UI improvements
-- Gas optimizations
-- Documentation improvements (automatically included in AI support)
+1. Create feature branch
+2. Make changes
+3. Run tests
+4. Submit PR
 
-## Notes
+## License
 
-- Designed for EVM-compatible chains
-- Price feeds update every minute by default
-- Trend data based on 6hr volume
-- Keep an eye on your RPC rate limits
-- AI support knowledge base must be built with `yarn build-knowledge`
-- Knowledge base includes all `.md` files from the repo
-- AI support requires OPENAI_API_KEY at runtime
-
----
-
-Built with 💎🤲 and Next.js
+MIT

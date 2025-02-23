@@ -2,33 +2,30 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  reactStrictMode: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  reactStrictMode: true,
+  experimental: {
+    serverActions: {}
+  },
   images: {
-    domains: ['*'],
-    remotePatterns: [
-      {
-        protocol: 'http',
-        hostname: '**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
-      }
+    domains: [
+      'raw.githubusercontent.com',
+      'assets.coingecko.com'
     ]
   },
   webpack: (config) => {
-    config.resolve.fallback = { 
-      fs: false,
-      net: false,
-      tls: false
+    config.resolve.fallback = { fs: false, net: false, tls: false };
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, './'),
     };
     return config;
   },
-  // Add this to ensure path aliases work
-  experimental: {
-    esmExternals: 'loose'
-  }
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

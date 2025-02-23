@@ -137,6 +137,74 @@ class JupiterInterface {
       amount: account.account.data.parsed.info.tokenAmount.amount
     }));
   }
+
+  async performSwap({ inputMint, outputMint, amount }) {
+    try {
+      // Use Jupiter's quote API
+      const quoteResponse = await fetch(`https://quote-api.jup.ag/v6/quote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          inputMint,
+          outputMint,
+          amount: new BN(amount).toString(),
+          slippageBps: 50, // 0.5% slippage
+          onlyDirectRoutes: false,
+          asLegacyTransaction: true
+        })
+      });
+
+      const quoteData = await quoteResponse.json();
+      
+      if (!quoteData.data || quoteData.data.length === 0) {
+        throw new Error('No routes found');
+      }
+
+      // Get the best route
+      const bestRoute = quoteData.data[0];
+
+      // Get the swap transaction
+      const swapResponse = await fetch(`https://quote-api.jup.ag/v6/swap`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          route: bestRoute,
+          userPublicKey: this.wallet.publicKey.toString(),
+          wrapUnwrapSOL: true
+        })
+      });
+
+      const swapData = await swapResponse.json();
+      
+      if (!swapData.swapTransaction) {
+        throw new Error('No swap transaction returned');
+      }
+
+      // Deserialize and sign the transaction
+      const swapTransaction = Transaction.from(
+        Buffer.from(swapData.swapTransaction, 'base64')
+      );
+
+      // Sign and send the transaction
+      const signature = await this.wallet.sendTransaction(
+        swapTransaction,
+        this.connection
+      );
+
+      // Wait for confirmation
+      await this.connection.confirmTransaction(signature);
+
+      return signature;
+
+    } catch (error) {
+      console.error('Error performing swap:', error);
+      throw error;
+    }
+  }
 }
 
 export default JupiterInterface; 
