@@ -1,47 +1,38 @@
 import { NextResponse } from 'next/server';
-import tokenCache from '../../../../services/tokens';
+import { withApiHandler } from '../../../../lib/apiHandler';
+import { logger } from '../../../../lib/logger';
+import { TokensService } from '../../../../services/tokens';
+import { cache } from '../../../../lib/cache';
 
-export async function GET(request) {
+export const GET = withApiHandler(async (request) => {
   try {
-    const { searchParams } = new URL(request.url);
-    const address = searchParams.get('address');
+    const cacheKey = 'solana_price';
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
-    if (!address) {
+    const solanaToken = await TokensService.getToken('SOL');
+    if (!solanaToken) {
       return NextResponse.json(
-        { error: 'Missing token address' },
-        { status: 400 }
+        { error: 'Failed to fetch Solana price' },
+        { status: 500 }
       );
     }
 
-    // Get cached token instance
-    const token = await tokenCache.getCachedToken(address);
-    
-    // Make sure price is up to date
-    if (token.isStale()) {
-      await token.update();
-    }
+    const response = {
+      price: solanaToken.price,
+      change_24h: solanaToken.price_change_24h,
+      updated_at: new Date().toISOString()
+    };
 
-    const price = token.getSpotPrice();
-    
-    if (price === null) {
-      return NextResponse.json(
-        { error: 'Price not available' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      address,
-      price,
-      metadata: token.getMetadata(),
-      timestamp: token.lastUpdate
-    });
-
+    await cache.set(cacheKey, response, 60); // Cache for 1 minute
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching token price:', error);
+    logger.error('Failed to fetch Solana price:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: error.message?.includes('not found') ? 404 : 500 }
+      { error: 'Failed to fetch Solana price' },
+      { status: 500 }
     );
   }
-}
+});

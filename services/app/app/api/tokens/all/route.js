@@ -1,25 +1,47 @@
 import { NextResponse } from 'next/server';
-import tokenCache from '../../../../services/tokens';
+import { withApiHandler } from '../../../../lib/apiHandler';
+import { logger } from '../../../../lib/logger';
+import { TokensService } from '../../../../services/tokens';
+import { cache } from '../../../../lib/cache';
 
-export async function GET() {
+export const GET = withApiHandler(async (request) => {
+  const { searchParams } = new URL(request.url);
+  const type = searchParams.get('type')?.toLowerCase() || 'all';
+
   try {
-    // Get all categories at once
-    const [major, meme, vc] = await Promise.all([
-      tokenCache.getMajorTokens(),
-      tokenCache.getMemeTokens(),
-      tokenCache.getVCBackedTokens()
-    ]);
+    const cacheKey = `tokens_${type}`;
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
-    return NextResponse.json({
-      major,
-      meme,
-      vc
-    });
+    let tokens;
+    switch (type) {
+      case 'major':
+        tokens = await TokensService.getMajorTokens();
+        break;
+      case 'meme':
+        tokens = await TokensService.getMemeTokens();
+        break;
+      case 'vc':
+        tokens = await TokensService.getVCBackedTokens();
+        break;
+      default:
+        tokens = await TokensService.getAllTokens();
+    }
+
+    const response = {
+      tokens,
+      updated_at: new Date().toISOString()
+    };
+
+    await cache.set(cacheKey, response, 300); // Cache for 5 minutes
+    return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching tokens:', error);
+    logger.error('Failed to fetch tokens:', error);
     return NextResponse.json(
       { error: 'Failed to fetch tokens' },
       { status: 500 }
     );
   }
-} 
+}); 

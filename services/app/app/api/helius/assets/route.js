@@ -1,79 +1,83 @@
 import { NextResponse } from 'next/server';
 import { Helius } from 'helius-sdk';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { logger } from '../../../../lib/logger';
+import { withApiHandler } from '../../../../lib/apiHandler';
+import { heliusAssetsSchema } from '../../schemas';
 
-
-export async function GET(request) {
-  if (!process.env.HELIUS_API_KEY) {
-    throw new Error('HELIUS_API_KEY is not defined in environment variables');
-  }
-  
-  const helius = new Helius(process.env.HELIUS_API_KEY);
-
+export const GET = withApiHandler(async (request) => {
   const { searchParams } = new URL(request.url);
-  const ownerAddress = searchParams.get('owner');
-  
-  if (!ownerAddress) {
+  const owner = searchParams.get('owner')?.toLowerCase();
+
+  logger.info('Fetching assets for wallet:', owner);
+
+  if (!owner || owner === 'null' || owner === 'undefined') {
+    logger.warn('Invalid owner parameter:', owner);
     return NextResponse.json(
-      { error: 'Owner address is required' },
+      { error: 'Valid owner address is required' },
       { status: 400 }
     );
   }
 
   try {
-    console.log('Fetching assets for address:', ownerAddress);
-    const response = await helius.rpc.getAssetsByOwner({
-      ownerAddress: ownerAddress,
-      page: 1,
-      limit: 1000,
-      displayOptions: {
-        showFungible: true,
-        showNativeBalance: true,
-        showCollectionMetadata: true,
-      },
-      sortBy: {
-        sortBy: "created",
-        sortDirection: "desc"
-      }
-    });
+    await heliusAssetsSchema.validate({ owner });
+  } catch (error) {
+    logger.warn('Helius assets validation failed:', { owner, error: error.message });
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
 
-    console.log('Response:', response);
-
-    if (!response) {
-      throw new Error('No response from Helius API');
+  try {
+    if (!process.env.HELIUS_API_KEY) {
+      throw new Error('HELIUS_API_KEY not configured');
     }
 
-    // Let's also try a direct RPC call to verify
-    const directResponse = await fetch("https://mainnet.helius-rpc.com/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: "my-id",
-        method: "getAssetsByOwner",
-        params: {
-          ownerAddress: ownerAddress,
-          page: 1,
-          limit: 1000,
-        },
-      }),
-    }).then(res => res.json());
-
-    console.log('Direct RPC Response:', directResponse);
-
-    console.log('Successfully fetched assets');
-    return NextResponse.json(response);
-  } catch (error) {
-    console.error('Detailed error:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
+    const helius = new Helius(process.env.HELIUS_API_KEY);
     
-    return NextResponse.json(
-      { error: 'Failed to fetch assets', details: error.message },
-      { status: error.response?.status || 500 }
-    );
+    logger.info('Fetching SOL balance and assets...');
+    const [balanceResponse, solPrice, assets] = await Promise.all([
+      helius.rpc.getBalance({ account: owner })
+        .catch(e => {
+          logger.error('Failed to fetch SOL balance:', e);
+          return 0;
+        }),
+      helius.rpc.getPrice({ id: "SOL" })
+        .catch(e => {
+          logger.error('Failed to fetch SOL price:', e);
+          return { value: 0 };
+        }),
+      helius.rpc.getAssetsByOwner({
+        ownerAddress: owner,
+        page: 1, 
+        limit: 1000,
+        displayOptions: {
+          showFungible: true,
+          showNativeBalance: false  // We get this separately
+        }
+      }).catch(e => {
+        logger.error('Failed to fetch assets:', e);
+        return { items: [] };
+      })
+    ]);
+
+    const nativeBalanceUsd = (balanceResponse / LAMPORTS_PER_SOL) * (solPrice?.value || 0);
+    
+    logger.info('Successfully fetched assets:', {
+      solBalance: balanceResponse / LAMPORTS_PER_SOL,
+      solPrice: solPrice?.value,
+      tokenCount: assets.items?.length
+    });
+
+    return NextResponse.json({
+      items: assets.items || [],
+      nativeBalance: balanceResponse,
+      nativeBalanceUsd
+    });
+  } catch (error) {
+    logger.error('Helius API error:', { owner, error });
+    return NextResponse.json({
+      items: [],
+      nativeBalance: 0,
+      nativeBalanceUsd: 0
+    });
   }
-} 
+}); 
