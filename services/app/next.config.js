@@ -1,4 +1,4 @@
-const path = require('path');
+import path from 'path';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -29,6 +29,6 @@ const nextConfig = {
   experimental: {
     esmExternals: 'loose'
   }
-}
+};
 
-module.exports = nextConfig
+export default nextConfig;
