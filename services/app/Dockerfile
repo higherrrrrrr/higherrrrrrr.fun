@@ -6,10 +6,10 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ py3-pip
 
 # Copy only package files first
-COPY package.json yarn.lock ./
+COPY package.json ./
 
-# Install dependencies with specific flags for optimization
-RUN yarn install --frozen-lockfile --network-timeout 600000 --prefer-offline
+# Install dependencies without frozen-lockfile
+RUN yarn install --network-timeout 600000
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
