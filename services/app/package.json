@@ -2,13 +2,14 @@
   "name": "alpha",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "build-knowledge": "node scripts/build-knowledge.js",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "node-pg-migrate up",
+    "migrate": "node scripts/migrate.js",
     "migrate:down": "node-pg-migrate down"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "bufferutil": "^4.0.7",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.4.7",
     "encoding": "^0.1.13",
     "ethers": "^6.13.5",
     "framer-motion": "^10.16.16",
