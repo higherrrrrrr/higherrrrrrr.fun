@@ -1,24 +1,5 @@
 {
-  "name": "higherrrrrrr.fun",
-  "private": true,
-  "workspaces": [
-    "services/*"
-  ],
-  "scripts": {
-    "app:migrate": "yarn workspace alpha migrate",
-    "app:dev": "yarn workspace alpha dev",
-    "landing:dev": "yarn workspace landing dev"
-  },
-  "devDependencies": {
-    "eslint": "^8.0.0",
-    "eslint-config-next": "^14.0.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5"
-  },
-  "packageManager": "yarn@4.0.2",
-  "resolutions": {
-    "@rrweb/types": "2.0.0-alpha.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+  "dependencies": {
+    "qs": "^6.14.0"
   }
 }
