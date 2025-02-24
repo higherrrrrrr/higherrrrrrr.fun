@@ -1,4 +1,8 @@
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -24,11 +28,7 @@ const nextConfig = {
       tls: false
     };
     return config;
-  },
-  // Add this to ensure path aliases work
-  experimental: {
-    esmExternals: 'loose'
   }
-}
+};
 
-module.exports = nextConfig
+export default nextConfig;
