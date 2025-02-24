@@ -11,6 +11,7 @@ import Script from 'next/script';
 import posthog from 'posthog-js';
 import { usePathname } from 'next/navigation';
 import { Connection } from '@solana/web3.js';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // PostHog initialization
 if (typeof window !== 'undefined') {
@@ -303,6 +304,7 @@ export default function RootLayout({ children }) {
             </div>
           </DynamicProvider>
         </ClientOnly>
+        <SpeedInsights />
       </body>
     </html>
   );
