@@ -94,6 +94,20 @@ pub fn handle_distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
     Ok(())
 }
 
+pub fn distribute_fees(
+    ctx: Context<DistributeFees>,
+    deadline: i64, // New deadline parameter
+) -> Result<()> {
+    // Check if transaction is still valid
+    let current_time = ctx.accounts.clock.unix_timestamp;
+    require!(
+        current_time <= deadline,
+        ErrorCode::TransactionExpired
+    );
+    
+    // Rest of function...
+}
+
 // -------------------- Context Structs --------------------
 
 #[derive(Accounts)]

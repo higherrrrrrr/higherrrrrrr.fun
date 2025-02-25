@@ -502,4 +502,35 @@ describe("protocol", () => {
     // This would be a more complex test that ties together all protocol features
     console.log("Full integration test would go here");
   });
+
+  // Add test for circuit breaker
+  it("Activates circuit breaker during extreme volatility", async () => {
+    // Setup extreme price change
+    const largeAmount = 1_000_000_000; // Very large amount
+    
+    // Execute swap to trigger volatility
+    await program.methods
+      .swap(new BN(largeAmount), new BN(0))
+      .accounts({
+        // ... account setup
+      })
+      .rpc();
+      
+    // Verify circuit breaker activation
+    const poolState = await program.account.pool.fetch(poolPda);
+    assert.isTrue(poolState.circuitBreakerActive);
+    
+    // Try another swap, should fail with CircuitBreakerActive
+    try {
+      await program.methods
+        .swap(new BN(largeAmount), new BN(0))
+        .accounts({
+          // ... account setup
+        })
+        .rpc();
+      assert.fail("Expected error due to circuit breaker");
+    } catch (err) {
+      assert.include(err.toString(), "CircuitBreakerActive");
+    }
+  });
 });

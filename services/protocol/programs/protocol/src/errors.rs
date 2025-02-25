@@ -46,4 +46,25 @@ pub enum ErrorCode {
 
     #[msg("Invalid fee configuration")]
     InvalidFeeConfig,
+
+    #[msg("Invalid creator address")]
+    InvalidCreatorAddress,
+    
+    #[msg("Invalid distribution address")]
+    InvalidDistributionAddress,
+    
+    #[msg("Circuit breaker active, trading restricted")]
+    CircuitBreakerActive,
+    
+    #[msg("Evolution threshold too high")]
+    ThresholdTooHigh,
+    
+    #[msg("Invalid volume update")]
+    InvalidVolumeUpdate,
+    
+    #[msg("Transaction expired")]
+    TransactionExpired,
+    
+    #[msg("Invalid URI format")]
+    InvalidUri,
 }

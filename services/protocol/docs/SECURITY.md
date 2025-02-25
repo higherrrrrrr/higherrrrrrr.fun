@@ -362,3 +362,36 @@ Next steps include:
 - **Final QA**: Conduct final QA to ensure all features work as expected.
 - **Security Monitoring**: Set up a security monitoring system to detect and respond to any suspicious activity.
 - **Community Engagement**: Engage with the community to ensure they are aware of the protocol's security measures.
+
+# Security Considerations
+
+## Circuit Breakers
+
+The protocol includes circuit breakers that activate during extreme market volatility. When triggered:
+
+1. A cooldown period of 1 hour is enforced
+2. Fee rates are capped at 5%
+3. An event is emitted for off-chain monitoring
+
+Circuit breakers protect liquidity providers from extreme market conditions and potential attacks.
+
+## Dynamic Fee Protection
+
+The dynamic fee system provides:
+- Base fees for normal operation
+- Variable fees that increase with volatility
+- Decay mechanisms to normalize fees after volatility subsides
+
+## Time-based Protections
+
+- All timestamp-sensitive operations use the system Clock sysvar
+- Fee distribution includes deadline parameters to prevent stale transactions
+- Volatility tracking includes time-based reference and decay mechanisms
+
+## Input Validation
+
+All user inputs undergo extensive validation, including:
+- Address validation
+- URI format validation
+- Threshold bounds checking
+- Overflow/underflow protection

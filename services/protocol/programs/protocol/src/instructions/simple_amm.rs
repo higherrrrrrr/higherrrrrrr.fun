@@ -27,7 +27,14 @@ pub struct Pool {
     pub filter_period: u64,        // Filter period (tf) in seconds
     pub decay_period: u64,         // Decay period (td) in seconds
     pub decay_factor: u64,         // Decay factor (R) in basis points (5000 = 0.5)
+    pub circuit_breaker_active: bool,
+    pub circuit_breaker_timestamp: i64,
 }
+
+// Add constants for circuit breaker thresholds
+pub const EXTREME_VOLATILITY_THRESHOLD: u64 = 1000; // 10% price change
+pub const MAX_VARIABLE_FEE: u64 = 500; // 5% maximum variable fee
+pub const CIRCUIT_BREAKER_COOLDOWN: i64 = 3600; // 1 hour cooldown
 
 pub fn initialize_pool(
     ctx: Context<InitializePool>,
@@ -273,12 +280,15 @@ pub fn remove_liquidity(
     Ok(())
 }
 
-// Jupiter-compatible swap function
-pub fn swap(
-    ctx: Context<Swap>,
-    amount_in: u64,
-    min_amount_out: u64,
-) -> Result<()> {
+/// Swap tokens in the AMM pool
+/// 
+/// # Arguments
+/// * `amount_in` - Amount of input token to swap
+/// * `min_amount_out` - Minimum amount of output token to receive (slippage protection)
+/// 
+/// # Returns
+/// * `Result<()>` - Success or error
+pub fn swap(ctx: Context<Swap>, amount_in: u64, min_amount_out: u64) -> Result<()> {
     let pool = &mut ctx.accounts.pool;
     
     // Reentrancy protection
@@ -462,7 +472,7 @@ pub fn swap(
     )?;
     
     // Emit swap event with additional fee info
-    emit!(SwapEvent {
+    emit!(EnhancedSwapEvent {
         pool: ctx.accounts.pool.key(),
         token_a_mint: pool.token_a_mint,
         token_b_mint: pool.token_b_mint,
@@ -475,6 +485,9 @@ pub fn swap(
         base_fee_rate: base_fee,
         variable_fee_rate: variable_fee,
         volatility: volatility_accumulator,
+        price_impact_percentage: price_volatility,
+        reserves_before: [reserve_in, reserve_out],
+        reserves_after: [new_reserve_in, new_reserve_out],
         timestamp: current_timestamp,
     });
     
@@ -485,7 +498,7 @@ pub fn swap(
 
 // Define the swap event for Jupiter integration
 #[event]
-pub struct SwapEvent {
+pub struct EnhancedSwapEvent {
     pub pool: Pubkey,
     pub token_a_mint: Pubkey,
     pub token_b_mint: Pubkey,
@@ -498,7 +511,10 @@ pub struct SwapEvent {
     pub base_fee_rate: u64,
     pub variable_fee_rate: u64,
     pub volatility: u64,
-    pub timestamp: i64,  // Add timestamp for Jupiter analytics
+    pub price_impact_percentage: u64,
+    pub reserves_before: [u64; 2],
+    pub reserves_after: [u64; 2],
+    pub timestamp: i64,
 }
 
 // Function to add single-sided liquidity (just token A)
@@ -900,7 +916,8 @@ pub struct Swap<'info> {
     
     pub token_program: Program<'info, Token>,
     
-    /// Clock for timestamp in event emission
+    /// CHECK: Clock for timestamp validation
+    #[account(address = sysvar::clock::ID)]
     pub clock: Sysvar<'info, Clock>,
 }
 
@@ -1080,6 +1097,7 @@ pub struct PoolCreatedEvent {
 pub fn add_single_sided_liquidity(
     ctx: Context<AddSingleSidedLiquidity>,
     amount_in: u64,
+    min_lp_tokens_out: u64,  // New parameter for slippage protection
 ) -> Result<()> {
     require!(amount_in > 0, ErrorCode::InvalidInput);
     
@@ -1136,6 +1154,12 @@ pub fn add_single_sided_liquidity(
             .ok_or(ErrorCode::MathError)?
     };
     
+    // Add slippage protection
+    require!(
+        value_ratio >= min_lp_tokens_out,
+        ErrorCode::SlippageExceeded
+    );
+    
     // Mint LP tokens to user
     token::mint_to(
         CpiContext::new_with_signer(
@@ -1174,5 +1198,12 @@ pub struct LiquidityAddedEvent {
     pub amount_a: u64,
     pub amount_b: u64,
     pub lp_tokens_minted: u64,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct CircuitBreakerEvent {
+    pub pool: Pubkey,
+    pub volatility: u64,
     pub timestamp: i64,
 } 

@@ -41,6 +41,21 @@ pub fn handle(
     evolutions: Vec<EvolutionItem>,            // evolution thresholds (immutable)
     distributions: Vec<DistributionInstruction>, // custom distribution instructions
 ) -> Result<()> {
+    // Add validation for creator addresses
+    require!(
+        !ctx.accounts.creator.key().eq(&Pubkey::default()),
+        ErrorCode::InvalidCreatorAddress
+    );
+    
+    // Validate all distribution recipient addresses
+    for dist in &distributions {
+        require!(
+            !dist.recipient.eq(&Pubkey::default()) && 
+            !dist.recipient.eq(&ctx.accounts.mint.key()),
+            ErrorCode::InvalidDistributionAddress
+        );
+    }
+    
     // --- 1. Populate MemeTokenState ---
     let token_state = &mut ctx.accounts.meme_token_state;
     token_state.creator = *ctx.accounts.creator.key;
