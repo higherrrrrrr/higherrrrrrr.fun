@@ -8,6 +8,7 @@ use crate::{
         meme_token_state::{MemeTokenState, TokenType},
         evolution_data::{EvolutionData, EvolutionItem},
     },
+    instructions::simple_amm::Pool,
 };
 
 /// A distribution instruction defines one recipient and the percentage of tokens they receive.
@@ -26,7 +27,7 @@ pub struct DistributionInstruction {
 /// 3. Distributes the minted supply according to a custom distribution:
 ///    - For each distribution _not_ flagged as pool, tokens are transferred to the provided recipient account.
 ///    - The non–LP distributions must total at most 35% of the supply.
-///    - The remaining tokens (i.e. LP allocation = 100 – non–LP) are assigned to the liquidity pool.
+///    - The remaining tokens (i.e. LP allocation = 100 – non–LP) are assigned to the liquidity pool.
 ///    - If a pool distribution is provided, its percentage must equal the computed LP allocation.
 /// 4. Locks the mint authority.
 pub fn handle(
@@ -114,150 +115,142 @@ pub fn handle(
     let pool_instructions: Vec<&DistributionInstruction> =
         distributions.iter().filter(|d| d.is_pool).collect();
 
-    // Allow at most one pool distribution.
-    if pool_instructions.len() > 1 {
-        return Err(ErrorCode::InvalidDistributionPercentage.into());
-    }
-
-    // If a pool instruction exists, its percentage must equal the computed LP percentage.
-    if pool_instructions.len() == 1 {
-        require!(
-            pool_instructions[0].percentage == computed_pool_percent,
-            ErrorCode::InvalidDistributionPercentage
-        );
-    }
-    
-    // --- 7. Distribute Tokens ---
-    // Process non–LP distributions.
-    let non_pool_count = distributions.iter().filter(|d| !d.is_pool).count();
+    // Verify we have exactly one pool distribution with the correct percentage.
     require!(
-        ctx.remaining_accounts.len() == non_pool_count,
-        ErrorCode::InsufficientBalance
+        pool_instructions.len() == 1 && pool_instructions[0].percentage == computed_pool_percent,
+        ErrorCode::InvalidDistributionPercentage
     );
-    let mut remaining_iter = ctx.remaining_accounts.iter();
 
-    for dist in distributions.iter().filter(|d| !d.is_pool) {
-        // Calculate allocation for this non–LP distribution.
-        let allocation = raw_amount
-            .checked_mul(dist.percentage as u64)
-            .and_then(|v| v.checked_div(100))
-            .ok_or(ErrorCode::Overflow)?;
-        // Get the recipient account from remaining accounts.
-        let recipient_account = remaining_iter.next().unwrap();
-        require!(
-            recipient_account.key == dist.recipient,
-            ErrorCode::Unauthorized
-        );
-        let cpi_ctx_transfer = CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.recipient_ata.to_account_info(),
-                to: recipient_account.clone(),
-                authority: ctx.accounts.creator.to_account_info(),
-            },
-        );
-        token::transfer(cpi_ctx_transfer, allocation)?;
-        msg!(
-            "Transferred {} tokens ({}%) to {}",
-            allocation,
-            dist.percentage,
-            recipient_account.key
-        );
-    }
+    // --- 7. Calculate token amounts and handle distributions ---
+    for dist in &distributions {
+        let amount = (raw_amount as u128)
+            .checked_mul(dist.percentage as u128)
+            .ok_or(ErrorCode::Overflow)?
+            .checked_div(100)
+            .ok_or(ErrorCode::Overflow)? as u64;
 
-    // Process the LP distribution.
-    let pool_allocation = raw_amount
-        .checked_mul(computed_pool_percent as u64)
-        .and_then(|v| v.checked_div(100))
-        .ok_or(ErrorCode::Overflow)?;
+        if !dist.is_pool {
+            // This is a non-pool distribution to a recipient.
+            msg!(
+                "Transferring {}% (amount: {}) to recipient {}",
+                dist.percentage,
+                amount,
+                dist.recipient
+            );
 
-    // Whether or not a pool instruction was provided, we need to initialize the pool and transfer tokens.
-    if let Some(pool_dist) = distributions.iter().find(|d| d.is_pool) {
-        // Use the provided pool instruction.
-        let pool_key = initialize_pool(ctx, pool_allocation)?;
-        let cpi_ctx_pool = CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.recipient_ata.to_account_info(),
-                to: ctx.accounts.pool_vault.to_account_info(),
-                authority: ctx.accounts.creator.to_account_info(),
-            },
-        );
-        token::transfer(cpi_ctx_pool, pool_allocation)?;
-        msg!(
-            "Transferred {} tokens ({}%) to Pool vault as specified",
-            pool_allocation,
-            pool_dist.percentage
-        );
-        token_state.pool = pool_key;
-    } else {
-        // No pool instruction provided; automatically use the computed LP allocation.
-        let pool_key = initialize_pool(ctx, pool_allocation)?;
-        let cpi_ctx_pool = CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.recipient_ata.to_account_info(),
-                to: ctx.accounts.pool_vault.to_account_info(),
-                authority: ctx.accounts.creator.to_account_info(),
-            },
-        );
-        token::transfer(cpi_ctx_pool, pool_allocation)?;
-        msg!(
-            "Automatically transferred {} tokens ({}%) to Pool vault",
-            pool_allocation,
-            computed_pool_percent
-        );
-        token_state.pool = pool_key;
+            let cpi_ctx_transfer = CpiContext::new(
+                ctx.accounts.token_program.to_account_info(),
+                Transfer {
+                    from: ctx.accounts.recipient_ata.to_account_info(),
+                    to: ctx.accounts.remaining_atas.iter().find(|&a| a.key() == dist.recipient).ok_or(ErrorCode::InvalidTokenAccount)?.to_account_info(),
+                    authority: ctx.accounts.creator.to_account_info(),
+                },
+            );
+            token::transfer(cpi_ctx_transfer, amount)?;
+        } else {
+            // This is the pool distribution.
+            // Initialize SimpleAMM pool with the token and SOL/WSOL
+            msg!(
+                "Creating SimpleAMM pool and allocating {} tokens ({}%)",
+                amount,
+                dist.percentage
+            );
+            
+            let pool_key = initialize_simple_amm_pool(ctx, amount)?;
+            token_state.pool = pool_key;
+            msg!("SimpleAMM pool created at: {}", pool_key);
+        }
     }
     
-    msg!(
-        "Created memecoin {} with symbol {}, total supply locked at {}. Non–LP distributions: {}%, LP distribution: {}%",
-        name,
-        symbol,
-        total_supply,
-        non_pool_percent,
-        computed_pool_percent
-    );
+    msg!("Token distribution complete.");
     Ok(())
 }
 
-/// **initialize_pool**
-///
-/// Calls Orca’s CPI to create a new concentrated liquidity pool for the token and wSOL pair.
-/// This function uses the additional accounts provided in the CreateMemeToken context.
-/// For demonstration purposes, it calls the CPI function from orca_whirlpools_client.
-fn initialize_pool<'info>(
+/// Creates a SimpleAMM pool and adds single-sided liquidity.
+fn initialize_simple_amm_pool<'info>(
     ctx: &Context<CreateMemeToken>,
-    _allocation: u64,
+    token_amount: u64,
 ) -> Result<Pubkey> {
-    // Example initial price: set sqrt_price_x96 to represent price 1 (i.e. 1 << 96).
-    let initial_sqrt_price_x96: u128 = 1 << 96;
-    let tick_spacing: u16 = 64; // Example tick spacing; adjust as needed.
+    // Define constants
+    let fee_rate = 100; // 1% fee rate in basis points
     
-    // Build the CPI context for pool initialization.
-    let cpi_ctx = CpiContext::new(
-        ctx.accounts.orca_whirlpools_program.to_account_info(),
-        orca_whirlpools_client::accounts::InitPool {
-            pool: ctx.accounts.pool_account.to_account_info(),
-            pool_authority: ctx.accounts.pool_authority.to_account_info(),
-            token_vault_a: ctx.accounts.pool_vault.to_account_info(), // our token vault (A side)
-            token_vault_b: ctx.accounts.token_vault_b.to_account_info(), // SOL side vault
-            fee_account: ctx.accounts.fee_account.to_account_info(),
-            token_mint_a: ctx.accounts.mint.to_account_info(),       // memecoin mint
-            token_mint_b: ctx.accounts.wsol_mint.to_account_info(),     // wSOL mint
-            payer: ctx.accounts.creator.to_account_info(),
-            system_program: ctx.accounts.system_program.to_account_info(),
-            rent: ctx.accounts.rent.to_account_info(),
-            token_program: ctx.accounts.token_program.to_account_info(),
-        },
+    // 1. Initialize the pool (uses seeds to derive PDAs)
+    // First calculate the bump for pool authority PDA
+    let (pool_authority, pool_bump) = Pubkey::find_program_address(
+        &[
+            b"pool_authority",
+            ctx.accounts.mint.key().as_ref(),
+            ctx.accounts.wsol_mint.key().as_ref(),
+        ],
+        ctx.program_id,
     );
     
-    // Call the CPI function to initialize the pool.
-    orca_whirlpools_client::cpi::init_pool(cpi_ctx, initial_sqrt_price_x96, tick_spacing)?;
-    msg!("Orca pool successfully created via CPI.");
+    // 2. Create SimpleAMM pool account
+    let (pool_pda, _) = Pubkey::find_program_address(
+        &[
+            b"pool",
+            ctx.accounts.mint.key().as_ref(),
+            ctx.accounts.wsol_mint.key().as_ref(),
+        ],
+        ctx.program_id,
+    );
     
-    // Return the new pool account's key.
-    Ok(ctx.accounts.pool_account.key())
+    // Initialize LP mint
+    let (lp_mint_pda, _) = Pubkey::find_program_address(
+        &[
+            b"lp_mint",
+            ctx.accounts.mint.key().as_ref(),
+            ctx.accounts.wsol_mint.key().as_ref(),
+        ],
+        ctx.program_id,
+    );
+    
+    // 3. Initialize the pool with SimpleAMM CPI call
+    let cpi_accounts = crate::instructions::simple_amm::InitializePool {
+        authority: ctx.accounts.creator.to_account_info(),
+        pool: ctx.accounts.pool_account.to_account_info(),
+        token_a_mint: ctx.accounts.mint.to_account_info(),
+        token_b_mint: ctx.accounts.wsol_mint.to_account_info(),
+        token_a_vault: ctx.accounts.pool_vault.to_account_info(),
+        token_b_vault: ctx.accounts.token_vault_b.to_account_info(),
+        lp_mint: ctx.accounts.lp_mint.to_account_info(),
+        fee_account: ctx.accounts.fee_account.to_account_info(),
+        pool_authority: ctx.accounts.pool_authority.to_account_info(),
+        token_program: ctx.accounts.token_program.to_account_info(),
+        system_program: ctx.accounts.system_program.to_account_info(),
+        rent: ctx.accounts.rent.to_account_info(),
+    };
+    
+    let cpi_context = CpiContext::new(
+        ctx.accounts.program.to_account_info(),
+        cpi_accounts,
+    );
+    
+    crate::instructions::simple_amm::initialize_pool(cpi_context, fee_rate, pool_bump)?;
+    
+    // 4. Add single-sided liquidity to the pool
+    let cpi_accounts = crate::instructions::simple_amm::AddSingleSidedLiquidity {
+        user: ctx.accounts.creator.to_account_info(),
+        pool: ctx.accounts.pool_account.to_account_info(),
+        user_token: ctx.accounts.recipient_ata.to_account_info(),
+        token_a_vault: ctx.accounts.pool_vault.to_account_info(),
+        token_b_vault: ctx.accounts.token_vault_b.to_account_info(),
+        lp_mint: ctx.accounts.lp_mint.to_account_info(),
+        user_lp_token: ctx.accounts.user_lp_token.to_account_info(),
+        pool_authority: ctx.accounts.pool_authority.to_account_info(),
+        token_program: ctx.accounts.token_program.to_account_info(),
+    };
+    
+    let cpi_context = CpiContext::new(
+        ctx.accounts.program.to_account_info(),
+        cpi_accounts,
+    );
+    
+    crate::instructions::simple_amm::add_single_sided_liquidity(cpi_context, token_amount)?;
+    
+    msg!("Single-sided liquidity added to SimpleAMM pool successfully");
+    
+    Ok(pool_pda)
 }
 
 #[derive(Accounts)]
@@ -297,7 +290,7 @@ pub struct CreateMemeToken<'info> {
     #[account(mut)]
     pub pool_vault: AccountInfo<'info>,
 
-    /// The Orca pool account to be created via CPI.
+    /// The SimpleAMM pool account to be created.
     #[account(mut)]
     pub pool_account: AccountInfo<'info>,
 
@@ -316,8 +309,16 @@ pub struct CreateMemeToken<'info> {
     /// The wSOL mint.
     #[account(mut)]
     pub wsol_mint: AccountInfo<'info>,
+    
+    /// LP token mint account
+    #[account(mut)]
+    pub lp_mint: AccountInfo<'info>,
+    
+    /// User's LP token account
+    #[account(mut)]
+    pub user_lp_token: AccountInfo<'info>,
 
-    /// The evolution data account (created via PDA using seed "evolution_data" and the mint’s key).
+    /// The evolution data account (created via PDA using seed "evolution_data" and the mint's key).
     #[account(
         init,
         payer = creator,
@@ -335,7 +336,10 @@ pub struct CreateMemeToken<'info> {
     #[account(address = system_program::ID)]
     pub system_program: Program<'info, System>,
 
-    /// The Orca Whirlpools program (for CPI calls).
-    #[account(address = orca_whirlpools_client::ID)]
-    pub orca_whirlpools_program: AccountInfo<'info>,
+    /// Our own program (for CPI to SimpleAMM)
+    pub program: Program<'info, crate::protocol::Protocol>,
+    
+    /// Accounts for non-pool recipient token accounts.
+    /// These must be provided dynamically based on the distribution instructions.
+    pub remaining_atas: Vec<AccountInfo<'info>>,
 }

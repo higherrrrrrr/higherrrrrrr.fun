@@ -952,12 +952,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
 
 [[package]]
-name = "ethnum"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b90ca2580b73ab6a1f724b76ca11ab632df820fd6040c336200d2c1df7b3c82c"
-
-[[package]]
 name = "feature-probe"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1170,12 +1164,6 @@ name = "libc"
 version = "0.2.169"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5aba8db14291edd000dfcc4d620c7ebfb122c613afb886ca8803fa4e128a20a"
-
-[[package]]
-name = "libm"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8355be11b20d696c8f18f6cc018c4e372165b1fa8126cef092399c9951984ffa"
 
 [[package]]
 name = "libsecp256k1"
@@ -1465,42 +1453,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 
 [[package]]
-name = "orca_whirlpools_client"
-version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d4d21e06fd04a5a80009c41538646f35a49420074533054c20131d11bc8106c"
-dependencies = [
- "borsh 0.10.4",
- "num-derive 0.4.2",
- "num-traits",
- "orca_whirlpools_core",
- "solana-program",
- "thiserror",
-]
-
-[[package]]
-name = "orca_whirlpools_core"
-version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17bdb018feb16e07f34a3867d892f0e5e73efe7bd874b35fea071b7f305470a4"
-dependencies = [
- "ethnum",
- "libm",
- "orca_whirlpools_macros",
-]
-
-[[package]]
-name = "orca_whirlpools_macros"
-version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df82a28be4b43aac9ea61236cca0784cc2f3f7953509a0bd89e718222af335d1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.98",
-]
-
-[[package]]
 name = "parking_lot"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1618,8 +1570,6 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "mpl-token-metadata",
- "orca_whirlpools_client",
- "orca_whirlpools_core",
 ]
 
 [[package]]

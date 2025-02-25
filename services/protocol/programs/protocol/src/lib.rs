@@ -74,26 +74,68 @@ pub mod protocol {
         instructions::evolutions::handle_update_meme_metadata(ctx, current_price)
     }
 
-    // -------------------- Step 4: Trading & Single-Sided Liquidity --------------------
-    pub fn trade_via_orca(
-        ctx: Context<TradeViaOrca>,
-        amount_in: u64,
-        min_out: u64,
-        current_price: u64,
+    // -------------------- Step 4: SimpleAMM Pool Functions --------------------
+    pub fn initialize_pool(
+        ctx: Context<InitializePool>,
+        fee_rate: u64,
+        bump: u8,
     ) -> Result<()> {
-        instructions::trade_orca::handle_trade_via_orca(
+        instructions::simple_amm::initialize_pool(ctx, fee_rate, bump)
+    }
+
+    pub fn add_liquidity(
+        ctx: Context<AddLiquidity>,
+        amount_a_desired: u64,
+        amount_b_desired: u64,
+        amount_a_min: u64,
+        amount_b_min: u64,
+    ) -> Result<()> {
+        instructions::simple_amm::add_liquidity(
             ctx,
-            amount_in,
-            min_out,
-            current_price,
+            amount_a_desired,
+            amount_b_desired,
+            amount_a_min,
+            amount_b_min,
         )
     }
 
-    pub fn create_single_sided_liquidity(
-        ctx: Context<CreateSingleSidedLiquidity>,
-        amount: u64,
+    pub fn remove_liquidity(
+        ctx: Context<RemoveLiquidity>,
+        liquidity: u64,
+        amount_a_min: u64,
+        amount_b_min: u64,
     ) -> Result<()> {
-        instructions::trade_orca::handle_create_single_sided_liquidity(ctx, amount)
+        instructions::simple_amm::remove_liquidity(
+            ctx,
+            liquidity,
+            amount_a_min,
+            amount_b_min,
+        )
+    }
+
+    pub fn swap(
+        ctx: Context<Swap>,
+        amount_in: u64,
+        min_amount_out: u64,
+    ) -> Result<()> {
+        instructions::simple_amm::swap(
+            ctx,
+            amount_in,
+            min_amount_out,
+        )
+    }
+
+    pub fn add_single_sided_liquidity(
+        ctx: Context<AddSingleSidedLiquidity>,
+        amount_in: u64,
+    ) -> Result<()> {
+        instructions::simple_amm::add_single_sided_liquidity(ctx, amount_in)
+    }
+
+    pub fn collect_fees(
+        ctx: Context<CollectFees>,
+    ) -> Result<()> {
+        instructions::simple_amm::collect_fees(ctx)
     }
 
     // -------------------- Step 5: Conviction NFTs --------------------
@@ -123,12 +165,29 @@ pub mod protocol {
     ) -> Result<()> {
         instructions::fee_distribution::handle_withdraw_creator_tokens(ctx, amount)
     }
-    /// Distributes aggregated LP fees from the Orca pool fee account evenly.
+    
     pub fn distribute_lp_fees(ctx: Context<DistributeLPFees>) -> Result<()> {
         instructions::fee_distribution::handle_distribute_lp_fees(ctx)
     }
+
+    // Add the distribute_fees instruction
+    pub fn distribute_fees(
+        ctx: Context<DistributeFees>,
+        token_a_protocol_amount: u64,
+        token_a_creator_amount: u64,
+        token_b_protocol_amount: u64,
+        token_b_creator_amount: u64,
+    ) -> Result<()> {
+        instructions::simple_amm::distribute_fees(
+            ctx,
+            token_a_protocol_amount,
+            token_a_creator_amount,
+            token_b_protocol_amount,
+            token_b_creator_amount,
+        )
+    }
 }
 
-// An optional trivial struct for a minimal “initialize” instruction
+// An optional trivial struct for a minimal "initialize" instruction
 #[derive(Accounts)]
 pub struct Initialize {}

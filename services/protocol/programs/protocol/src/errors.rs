@@ -22,4 +22,28 @@ pub enum ErrorCode {
 
     #[msg("LP fee account provided does not match the expected account.")]
     InvalidLPFeeAccount,
+    
+    #[msg("Slippage tolerance exceeded")]
+    SlippageExceeded,
+    
+    #[msg("Insufficient liquidity")]
+    InsufficientLiquidity,
+    
+    #[msg("Invalid pool configuration")]
+    InvalidPoolConfig,
+
+    #[msg("Invalid input parameters")]
+    InvalidInput,
+
+    #[msg("Fee rate too high")]
+    FeeTooHigh,
+
+    #[msg("Reentrancy detected")]
+    ReentrancyDetected,
+
+    #[msg("Math error")]
+    MathError,
+
+    #[msg("Invalid fee configuration")]
+    InvalidFeeConfig,
 }
