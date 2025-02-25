@@ -65,9 +65,7 @@
     "react-dom": "^19.0.0",
     "@aptos-labs/aptos-client/got": "^14.4.6",
     "got": "^14.4.6",
-    "@dynamic-labs/sdk-react-core": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
-    }
+    "@dynamic-labs/sdk-react-core/react": "^19.0.0",
+    "@dynamic-labs/sdk-react-core/react-dom": "^19.0.0"
   }
 }
