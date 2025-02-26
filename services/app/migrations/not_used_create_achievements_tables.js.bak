@@ -1,0 +1,76 @@
+import pool from '../models/db.js';
+
+export async function up() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Achievements table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS achievements (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        icon VARCHAR(255),
+        target_value INTEGER NOT NULL,
+        target_type VARCHAR(50) NOT NULL,
+        trigger_action VARCHAR(50) NOT NULL,
+        reward_type VARCHAR(50),
+        reward_amount DECIMAL(18,8),
+        active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    
+    // User completed achievements
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS user_achievements (
+        id SERIAL PRIMARY KEY,
+        wallet_address VARCHAR(255) NOT NULL,
+        achievement_id INTEGER REFERENCES achievements(id),
+        completed BOOLEAN DEFAULT TRUE,
+        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(wallet_address, achievement_id)
+      );
+    `);
+    
+    // User achievement progress
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS user_achievement_progress (
+        id SERIAL PRIMARY KEY,
+        wallet_address VARCHAR(255) NOT NULL,
+        achievement_id INTEGER REFERENCES achievements(id),
+        current_value DECIMAL(18,8) DEFAULT 0,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(wallet_address, achievement_id)
+      );
+    `);
+    
+    await client.query('COMMIT');
+    console.log('✅ Achievement tables created successfully');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ Error creating achievement tables:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function down() {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('DROP TABLE IF EXISTS user_achievement_progress;');
+    await client.query('DROP TABLE IF EXISTS user_achievements;');
+    await client.query('DROP TABLE IF EXISTS achievements;');
+    await client.query('COMMIT');
+    console.log('✅ Achievement tables dropped successfully');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('❌ Error dropping achievement tables:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}

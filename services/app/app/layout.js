@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation';
 import { Connection } from '@solana/web3.js';
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
+import { setupGlobalJupiterListener } from '@/lib/jupiterIntegration';
 
 // PostHog initialization
 if (typeof window !== 'undefined') {
@@ -65,6 +66,14 @@ export default function RootLayout({ children }) {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Inside the RootLayout component, add this effect:
+  useEffect(() => {
+    // Initialize Jupiter listener
+    if (typeof window !== 'undefined') {
+      setupGlobalJupiterListener();
+    }
   }, []);
 
   return (

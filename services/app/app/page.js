@@ -17,6 +17,7 @@ import { useTokenFilter } from '../hooks/useTokenFilter';
 import { TokenFilters } from '../components/TokenFilters';
 import { TokenDisplay } from '../components/TokenDisplay';
 import { processTokens } from '../utils/tokenProcessing';
+import { recordJupiterSwap } from '@/lib/jupiterIntegration';
 
 export default function Home() {
   const { majorTokens, memeTokens, vcTokens, loading: tokensLoading } = useHomepage();

@@ -1,17 +1,16 @@
-import { useAccount, useNetwork, useBalance } from 'wagmi';
+'use client';
+
+import { useDynamicContext } from '@dynamic-labs/sdk-react-core';
 
 export function useWallet() {
-  const { address, isConnecting, isDisconnected } = useAccount();
-  const { chain } = useNetwork();
-  const { data: balance } = useBalance({
-    address: address,
-  });
-
+  const { primaryWallet, isLoading } = useDynamicContext();
+  
   return {
-    address,
-    isConnecting,
-    isDisconnected,
-    chain,
-    balance,
+    address: primaryWallet?.address,
+    isConnecting: isLoading,
+    isDisconnected: !primaryWallet,
+    // Return consistent properties that maintain API compatibility with existing code
+    chain: primaryWallet?.chain || null,
+    balance: null, // Dynamic doesn't provide balance directly like wagmi
   };
 } 

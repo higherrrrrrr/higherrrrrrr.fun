@@ -23,12 +23,15 @@ const nextConfig = {
       net: false,
       tls: false
     };
+    // Add aliases to help with dependencies
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'got$': false  // Let webpack ignore got module conflicts
+    };
     return config;
   },
-  // Add this to ensure path aliases work
-  experimental: {
-    esmExternals: 'loose'
-  }
+  // Use transpilePackages for ESM compatibility
+  transpilePackages: ['pg', 'react-confetti', 'react-use', '@dynamic-labs/sdk-react-core'],
 };
 
 export default nextConfig;
