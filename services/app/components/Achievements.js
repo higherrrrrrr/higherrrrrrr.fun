@@ -10,6 +10,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/effect-cards';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import { recordJupiterSwap } from '@/lib/jupiterIntegration';
 
 export default function Achievements({ walletAddress }) {
   const [achievements, setAchievements] = useState([]);
@@ -34,30 +35,39 @@ export default function Achievements({ walletAddress }) {
   useEffect(() => {
     if (!walletAddress) return;
     
-    async function fetchAchievements() {
-      try {
-        const response = await fetch(`/api/users/${walletAddress}/achievements`);
-        const data = await response.json();
-        
-        const completedIds = new Set(data.achievements?.map(a => a.achievement_type));
-        const filteredProgress = data.progress?.filter(p => !completedIds.has(p.achievement_id)) || [];
-        
-        setAchievements(data.achievements || []);
-        setProgress(filteredProgress);
-        
-        if (data.achievements && data.achievements.length > 0) {
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 5000);
-        }
-      } catch (error) {
-        console.error('Failed to fetch achievements:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
     fetchAchievements();
   }, [walletAddress]);
+  
+  const fetchAchievements = async () => {
+    if (!walletAddress) return;
+    
+    try {
+      console.log('Fetching achievements for wallet:', walletAddress);
+      const response = await fetch(`/api/users/${walletAddress}/achievements`);
+      const data = await response.json();
+      
+      console.log('Raw API response:', data);
+      
+      const completedIds = new Set(data.achievements?.map(a => a.achievement_type));
+      const filteredProgress = data.progress?.filter(p => !completedIds.has(p.achievement_id)) || [];
+      
+      console.log('Achievement API response:', data);
+      
+      setAchievements(data.achievements || []);
+      setProgress(filteredProgress);
+      
+      console.log('Progress after filtering:', filteredProgress);
+      
+      if (data.achievements && data.achievements.length > 0) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+      }
+    } catch (error) {
+      console.error('Failed to fetch achievements:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
   if (loading) {
     return (
@@ -306,7 +316,7 @@ export default function Achievements({ walletAddress }) {
                         <div className="flex items-start justify-between">
                           <div className="text-4xl mb-3">{item.icon}</div>
                           <motion.div className="percent-complete">
-                            {Math.min(100, Math.round((item.progress / item.target_value) * 100))}% complete
+                            {Math.min(100, Math.round((item.current_value / item.target_value) * 100))}% complete
                           </motion.div>
                         </div>
                         
@@ -318,7 +328,7 @@ export default function Achievements({ walletAddress }) {
                             className="progress-bar-fill h-3 rounded-full"
                             initial={{ width: 0 }}
                             animate={{ 
-                              width: `${Math.min(100, (item.progress / item.target_value) * 100)}%` 
+                              width: `${Math.min(100, (item.current_value / item.target_value) * 100)}%` 
                             }}
                             transition={{ duration: 1, delay: 0.2 }}
                           />
@@ -326,7 +336,7 @@ export default function Achievements({ walletAddress }) {
                         
                         <div className="mt-2">
                           <p className="text-xs font-mono text-blue-300/80">
-                            {item.progress} / {item.target_value} {item.target_type?.toLowerCase()}
+                            {item.current_value} / {item.target_value} {item.target_type?.toLowerCase()}
                           </p>
                         </div>
                       </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { SolanaTokenCard } from './SolanaTokenCard';
+import { recordJupiterSwap } from '@/lib/jupiterIntegration';
 
 export const TokenDisplay = ({ 
   tokens, 
@@ -10,6 +11,7 @@ export const TokenDisplay = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const tokensPerPage = 12;
+  const [lastSwap, setLastSwap] = useState(null);
 
   // Deduplicate tokens
   const uniqueTokens = useMemo(() => {
@@ -47,6 +49,18 @@ export const TokenDisplay = ({
   const currentTokens = uniqueTokens.slice(indexOfFirstToken, indexOfLastToken);
   const totalPages = Math.ceil(uniqueTokens.length / tokensPerPage);
 
+  const handleTokenClick = (token) => {
+    setLastSwap({
+      symbol: token.symbol,
+      address: token.token_address
+    });
+    onTokenClick({
+      address: token.token_address || token.address,
+      symbol: token.symbol,
+      name: token.name
+    });
+  };
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -55,11 +69,7 @@ export const TokenDisplay = ({
           return (
             <div 
               key={tokenKey}
-              onClick={() => onTokenClick({
-                address: tokenKey,
-                symbol: token.symbol,
-                name: token.name
-              })}
+              onClick={() => handleTokenClick(token)}
               className="cursor-pointer transition-transform hover:scale-[1.02]"
             >
               <SolanaTokenCard

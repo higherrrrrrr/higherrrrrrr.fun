@@ -17,6 +17,9 @@ export async function GET(request, { params }) {
     const achievements = await getUserAchievements(wallet);
     const progress = await getAchievementProgress(wallet);
     
+    console.log('Achievement data for wallet', wallet, 'achievements:', achievements.length, 'progress:', progress);
+    console.log('Progress data:', progress);
+    
     return NextResponse.json({
       achievements,
       progress
