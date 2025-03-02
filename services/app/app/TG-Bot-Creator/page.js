@@ -610,149 +610,157 @@ export default function TGBotCreatorPage() {
                   ))}
                 </div>
                 
-                {/* Image generation toggle */}
-                <div className="flex items-center mb-4">
-                  <input
-                    type="checkbox"
-                    id={`generateImage-${index}`}
-                    checked={cmd.generateImage || false}
-                    onChange={(e) => updateCommand(index, 'generateImage', e.target.checked)}
-                    className="w-4 h-4 text-green-500 bg-black border-green-500 rounded focus:ring-green-500"
-                  />
-                  <label htmlFor={`generateImage-${index}`} className="ml-2 text-green-500">
-                    Generate image for this command
-                  </label>
-                </div>
-                
-                {/* Base Images for Image Generation */}
-                {cmd.generateImage && (
-                  <div className="mb-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-green-500">Base Image Prompts (Randomly Selected)</label>
-                      <button
-                        type="button"
-                        onClick={() => addBaseImage(index)}
-                        className="text-sm px-2 py-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded text-green-500 transition-colors"
-                        disabled={cmd.baseImages && cmd.baseImages.length >= 3}
-                      >
-                        Add Base Image
-                      </button>
-                    </div>
-                    
-                    {cmd.baseImages && cmd.baseImages.map((baseImage, imageIndex) => (
-                      <div key={imageIndex} className="flex gap-2 mb-2">
-                        <input
-                          type="text"
-                          value={baseImage}
-                          onChange={(e) => updateBaseImage(index, imageIndex, e.target.value)}
-                          className="flex-grow p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
-                          placeholder="Base image prompt..."
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeBaseImage(index, imageIndex)}
-                          className="w-8 h-8 self-center rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 flex items-center justify-center text-red-500 transition-colors"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                    
-                    {(!cmd.baseImages || cmd.baseImages.length === 0) && (
-                      <p className="text-green-500/50 text-sm">
-                        Add up to 3 base image prompts. One will be randomly selected when generating an image.
-                      </p>
-                    )}
-                    
-                    {cmd.baseImages && cmd.baseImages.length > 0 && (
-                      <p className="text-green-500/50 text-sm mt-2">
-                        Users can also specify a style by adding it after the command: /{cmd.command.replace('/', '')} cyberpunk
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Pre-Uploaded Images Section */}
+                {/* Simplified Image Options with fixed toggle */}
                 <div className="mb-4">
-                  <div className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id={`use-pre-uploaded-${index}`}
-                      checked={cmd.usePreUploadedImages || false}
-                      onChange={() => togglePreUploadedImages(index)}
-                      className="mr-2 h-5 w-5 accent-green-500"
-                    />
-                    <label htmlFor={`use-pre-uploaded-${index}`} className="text-green-500">
-                      Include Pre-Uploaded Images
+                  <div className="flex items-center justify-between">
+                    <label className="block text-green-500">Include Images</label>
+                    <label className="relative inline-block w-12 h-6 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={cmd.includeImages || false}
+                        onChange={() => {
+                          const updatedCommands = [...commands];
+                          updatedCommands[index].includeImages = !updatedCommands[index].includeImages;
+                          
+                          // Reset image option when toggling off
+                          if (!updatedCommands[index].includeImages) {
+                            updatedCommands[index].imageOption = null;
+                          } else if (!updatedCommands[index].imageOption) {
+                            // Default to generate if turning on
+                            updatedCommands[index].imageOption = 'generate';
+                          }
+                          setCommands(updatedCommands);
+                        }}
+                        className="opacity-0 w-0 h-0 absolute"
+                      />
+                      <span className={`absolute top-0 left-0 right-0 bottom-0 rounded-full transition-colors duration-300 ${cmd.includeImages ? 'bg-green-500' : 'bg-green-500/30'}`}>
+                        <span className={`absolute h-4 w-4 left-1 bottom-1 bg-black rounded-full transition-transform duration-300 ${cmd.includeImages ? 'transform translate-x-6' : ''}`}></span>
+                      </span>
                     </label>
                   </div>
                   
-                  {cmd.usePreUploadedImages && (
-                    <>
-                      <div className="flex justify-between items-center mb-2">
-                        <label className="text-green-500">Pre-Uploaded Images (Randomly Selected)</label>
-                        <button
-                          type="button"
-                          onClick={() => document.getElementById(`image-upload-${index}`).click()}
-                          className="text-sm px-2 py-1 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded text-green-500 transition-colors"
-                          disabled={cmd.preUploadedImages && cmd.preUploadedImages.length >= 3}
+                  {/* Expanded image options when includeImages is true */}
+                  {cmd.includeImages && (
+                    <div className="mt-4 ml-4 border-l-2 border-green-500/20 pl-4">
+                      <div className="space-y-3 mb-4">
+                        <div 
+                          className="flex items-center cursor-pointer"
+                          onClick={() => updateCommand(index, 'imageOption', 'generate')}
                         >
-                          Upload Image
-                        </button>
-                        <input
-                          id={`image-upload-${index}`}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files[0]) {
-                              const file = e.target.files[0];
-                              console.log(`Selected file: ${file.name}, type: ${file.type}, size: ${file.size} bytes`);
-                              
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
-                                console.log(`File read complete, result length: ${reader.result.length}`);
-                                addPreUploadedImage(index, reader.result);
-                              };
-                              reader.onerror = (error) => {
-                                console.error('Error reading file:', error);
-                                alert('Error reading file. Please try again.');
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-2">
-                        {cmd.preUploadedImages && cmd.preUploadedImages.map((imageUrl, imageIndex) => (
-                          <div key={imageIndex} className="relative">
-                            <img 
-                              src={imageUrl} 
-                              alt={`Pre-uploaded image ${imageIndex + 1}`} 
-                              className="w-full h-32 object-cover rounded-lg border border-green-500/30"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removePreUploadedImage(index, imageIndex)}
-                              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-500/80 flex items-center justify-center text-white"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
+                          <div className={`w-5 h-5 rounded-full border ${cmd.imageOption === 'generate' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 flex items-center justify-center`}>
+                            {cmd.imageOption === 'generate' && (
+                              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            )}
                           </div>
-                        ))}
+                          <span className="text-green-500">Generate image with AI</span>
+                        </div>
+                        
+                        <div 
+                          className="flex items-center cursor-pointer"
+                          onClick={() => updateCommand(index, 'imageOption', 'upload')}
+                        >
+                          <div className={`w-5 h-5 rounded-full border ${cmd.imageOption === 'upload' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 flex items-center justify-center`}>
+                            {cmd.imageOption === 'upload' && (
+                              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            )}
+                          </div>
+                          <span className="text-green-500">Use pre-uploaded images</span>
+                        </div>
                       </div>
                       
-                      {(!cmd.preUploadedImages || cmd.preUploadedImages.length === 0) && (
-                        <p className="text-green-500/50 text-sm">
-                          Upload up to 3 images. One will be randomly selected when the command is used.
-                        </p>
+                      {/* AI Image generation options */}
+                      {cmd.imageOption === 'generate' && (
+                        <div className="mb-4 ml-4">
+                          <label className="block text-green-500 mb-2">Image Prompts (Random Selection)</label>
+                          {cmd.baseImages && cmd.baseImages.length > 0 ? (
+                            cmd.baseImages.map((image, imageIndex) => (
+                              <div key={imageIndex} className="flex mb-2">
+                                <input
+                                  type="text"
+                                  value={image}
+                                  onChange={(e) => updateBaseImage(index, imageIndex, e.target.value)}
+                                  className="flex-1 p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                                  placeholder="Describe the image you want to generate..."
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeBaseImage(index, imageIndex)}
+                                  className="ml-2 text-red-500 hover:text-red-400"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-green-500/70 text-sm mb-2">
+                              No image prompts added yet. Add one to generate images with this command.
+                            </p>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => addBaseImage(index)}
+                            className="px-4 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded-lg text-green-500 text-sm flex items-center"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Add Image Prompt
+                          </button>
+                        </div>
                       )}
-                    </>
+                      
+                      {/* Pre-uploaded images options */}
+                      {cmd.imageOption === 'upload' && (
+                        <div className="mb-4 ml-4">
+                          <label className="block text-green-500 mb-2">Upload Images</label>
+                          <div className="border-2 border-dashed border-green-500/30 rounded-lg p-4 text-center">
+                            <input
+                              type="file"
+                              id={`uploadImages-${index}`}
+                              accept="image/*"
+                              multiple
+                              onChange={(e) => handleCommandImageUpload(index, e)}
+                              className="hidden"
+                            />
+                            <label htmlFor={`uploadImages-${index}`} className="cursor-pointer">
+                              <div className="flex flex-col items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500/50 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <p className="text-green-500">Click to upload images</p>
+                                <p className="text-green-500/50 text-sm mt-1">or drag and drop</p>
+                              </div>
+                            </label>
+                          </div>
+                          
+                          {/* Display uploaded images */}
+                          {cmd.uploadedImages && cmd.uploadedImages.length > 0 && (
+                            <div className="mt-4 grid grid-cols-3 gap-2">
+                              {cmd.uploadedImages.map((img, imgIndex) => (
+                                <div key={imgIndex} className="relative group">
+                                  <img 
+                                    src={URL.createObjectURL(img)} 
+                                    alt={`Uploaded ${imgIndex}`} 
+                                    className="w-full h-24 object-cover rounded-lg"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeUploadedImage(index, imgIndex)}
+                                    className="absolute top-1 right-1 bg-red-500/80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
