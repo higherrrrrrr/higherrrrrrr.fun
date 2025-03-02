@@ -305,7 +305,7 @@ export default function TGBotCreatorPage() {
               onClick={() => toggleSection('apiConfig')}
               className="w-full bg-black p-4 flex justify-between items-center text-left"
             >
-              <h2 className="text-xl font-semibold">Image Generation API (Req. for Image Functionality)</h2>
+              <h2 className="text-xl font-semibold">Image Generation API (Req. for Image Generation)</h2>
               <div className="flex items-center">
                 {isComplete.apiConfig && (
                   <span className="text-green-500 mr-2">
