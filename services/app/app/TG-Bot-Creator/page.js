@@ -26,7 +26,8 @@ export default function TGBotCreatorPage() {
     tracking: true,
     buyBotResources: false,
     antiSpamResources: false,
-    dexListingResources: false
+    dexListingResources: false,
+    memeGenerator: false
   });
   const [isComplete, setIsComplete] = useState({ apiConfig: false });
   const [apiProvider, setApiProvider] = useState('cloudflare');
@@ -55,6 +56,15 @@ export default function TGBotCreatorPage() {
       newTweets: false,
       viralTweets: false
     }
+  });
+  const [memeGenOptions, setMemeGenOptions] = useState({
+    enabled: false,
+    provider: '',
+    apiKey: '',
+    command: 'meme',
+    dailyLimit: 5,
+    characterImage: null,
+    characterDescription: ''
   });
 
   // Add a new command
@@ -975,6 +985,184 @@ export default function TGBotCreatorPage() {
                 >
                   Add Command
                 </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Meme Generator Section */}
+          <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
+            <button 
+              type="button"
+              onClick={() => toggleSection('memeGenerator')}
+              className="w-full bg-black p-4 flex justify-between items-center text-left"
+            >
+              <h2 className="text-xl font-semibold">Meme Generator</h2>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-5 w-5 transition-transform ${expanded.memeGenerator ? 'rotate-180' : ''}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {expanded.memeGenerator && (
+              <div className="p-6">
+                <p className="text-green-500/80 mb-4">
+                  Let your community create custom memes featuring your project's mascot or character. 
+                  This focused approach maintains brand consistency while allowing for creative variations.
+                </p>
+                
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-green-500 font-semibold">Enable Meme Generator</h3>
+                  <label className="relative inline-block w-12 h-6 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={memeGenOptions.enabled || false}
+                      onChange={() => {
+                        setMemeGenOptions({
+                          ...memeGenOptions,
+                          enabled: !memeGenOptions.enabled
+                        });
+                      }}
+                      className="opacity-0 w-0 h-0 absolute"
+                    />
+                    <span className={`absolute top-0 left-0 right-0 bottom-0 rounded-full transition-colors duration-300 ${memeGenOptions.enabled ? 'bg-green-500' : 'bg-green-500/30'}`}>
+                      <span className={`absolute h-4 w-4 left-1 bottom-1 bg-black rounded-full transition-transform duration-300 ${memeGenOptions.enabled ? 'transform translate-x-6' : ''}`}></span>
+                    </span>
+                  </label>
+                </div>
+                
+                {memeGenOptions.enabled && (
+                  <div className="ml-4 border-l-2 border-green-500/20 pl-4 space-y-4">
+                    <div>
+                      <label className="block text-green-500 mb-2">API Provider</label>
+                      <select
+                        value={memeGenOptions.provider || ''}
+                        onChange={(e) => setMemeGenOptions({
+                          ...memeGenOptions,
+                          provider: e.target.value
+                        })}
+                        className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                      >
+                        <option value="">Select Provider</option>
+                        <option value="airtok">Airtok AI</option>
+                        <option value="openai">OpenAI DALL-E</option>
+                        <option value="stability">Stability AI</option>
+                        <option value="custom">Custom API</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-green-500 mb-2">API Key</label>
+                      <input
+                        type="password"
+                        value={memeGenOptions.apiKey || ''}
+                        onChange={(e) => setMemeGenOptions({
+                          ...memeGenOptions,
+                          apiKey: e.target.value
+                        })}
+                        className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                        placeholder="Enter your API key"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-green-500 mb-2">Command Name</label>
+                      <div className="flex">
+                        <span className="text-green-500 px-3 py-3 bg-green-500/10 border border-r-0 border-green-500/30 rounded-l-lg">/</span>
+                        <input
+                          type="text"
+                          value={memeGenOptions.command || 'meme'}
+                          onChange={(e) => setMemeGenOptions({
+                            ...memeGenOptions,
+                            command: e.target.value
+                          })}
+                          className="flex-1 p-3 bg-black border border-green-500/30 rounded-r-lg text-green-500 focus:outline-none focus:border-green-500"
+                          placeholder="meme"
+                        />
+                      </div>
+                      <p className="text-green-500/60 text-sm mt-1">
+                        Users will generate memes using /{memeGenOptions.command || 'meme'} followed by their prompt
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-green-500 mb-2">Usage Limits</label>
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="number"
+                          value={memeGenOptions.dailyLimit || 5}
+                          onChange={(e) => setMemeGenOptions({
+                            ...memeGenOptions,
+                            dailyLimit: parseInt(e.target.value)
+                          })}
+                          className="w-24 p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                          min="1"
+                          max="100"
+                        />
+                        <span className="text-green-500">memes per user daily</span>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <h3 className="text-green-500 font-medium mb-3">Character Configuration</h3>
+                      <p className="text-green-500/80 mb-3">
+                        Upload your project's mascot or character to create branded memes that maintain visual identity.
+                      </p>
+                      
+                      <div className="border-2 border-dashed border-green-500/30 rounded-lg p-4 text-center mb-4">
+                        <div className="py-4">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-green-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="text-green-500/70 mt-2">Upload your character's reference image</p>
+                          <button
+                            className="mt-3 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg transition-colors"
+                          >
+                            Select Image
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-green-500 mb-2">Character Description</label>
+                        <textarea
+                          value={memeGenOptions.characterDescription || ''}
+                          onChange={(e) => setMemeGenOptions({
+                            ...memeGenOptions,
+                            characterDescription: e.target.value
+                          })}
+                          className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500 min-h-[100px]"
+                          placeholder="Describe your character in detail (color, features, style, personality, etc.)"
+                        ></textarea>
+                        <p className="text-green-500/60 text-sm mt-1">
+                          This description helps the AI understand your character's key features and maintain consistency.
+                        </p>
+                      </div>
+                      
+                      <div className="mt-4 p-4 bg-green-500/5 border border-green-500/20 rounded-lg">
+                        <h4 className="text-green-500 font-medium mb-2">Example Usage:</h4>
+                        <ul className="space-y-1 text-green-500/80">
+                          <li>• /{memeGenOptions.command || 'meme'} character riding a rocket to the moon</li>
+                          <li>• /{memeGenOptions.command || 'meme'} character celebrating with champagne</li>
+                          <li>• /{memeGenOptions.command || 'meme'} character as a wojak crying at chart</li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div className="text-amber-500/80 text-sm p-3 bg-amber-500/10 rounded-lg">
+                      <p className="flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        Image generation costs will be charged to your API account. Setting reasonable usage limits helps control costs.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
