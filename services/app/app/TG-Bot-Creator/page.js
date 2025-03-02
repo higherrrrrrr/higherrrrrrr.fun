@@ -22,11 +22,37 @@ export default function TGBotCreatorPage() {
     botInfo: true,
     apiConfig: true,
     styleImages: true,
-    commands: true
+    commands: true,
+    tracking: true
   });
   const [isComplete, setIsComplete] = useState({ apiConfig: false });
   const [apiProvider, setApiProvider] = useState('cloudflare');
   const [apiKey, setApiKey] = useState('');
+  const [trackingOptions, setTrackingOptions] = useState({
+    tokenPrice: false,
+    tokenAddress: '',
+    blockchain: 'ethereum',
+    priceMilestones: [],
+    technicalAnalysis: {
+      priceAlerts: false,
+      volumeAlerts: false,
+      dailySummary: false
+    },
+    telegramGroup: false,
+    telegramGroupUsername: '',
+    memberMilestones: [],
+    growthReports: {
+      daily: false,
+      weekly: false
+    },
+    twitter: false,
+    twitterUsername: '',
+    followerMilestones: [],
+    tweetAlerts: {
+      newTweets: false,
+      viralTweets: false
+    }
+  });
 
   // Add a new command
   const addCommand = () => {
@@ -914,6 +940,461 @@ export default function TGBotCreatorPage() {
             >
               Add Command
             </button>
+          </div>
+          
+          {/* Tracking & Analytics Section */}
+          <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
+            <button 
+              type="button"
+              onClick={() => toggleSection('tracking')}
+              className="w-full bg-black p-4 flex justify-between items-center text-left"
+            >
+              <h2 className="text-xl font-semibold">Tracking & Analytics</h2>
+              <div className="flex items-center">
+                {isComplete.tracking && (
+                  <span className="text-green-500 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                )}
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className={`h-5 w-5 transition-transform ${expanded.tracking ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+            
+            {expanded.tracking && (
+              <div className="p-6">
+                <div className="mb-6">
+                  <p className="text-green-500/80 mb-4">
+                    Enable tracking features for your Solana token and community. Your bot can monitor prices, 
+                    member counts, and other metrics, sending alerts when important milestones are reached.
+                  </p>
+                  
+                  {/* Token Tracking */}
+                  <div className="mb-6 border-b border-green-500/20 pb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-green-500 font-semibold">Token Tracking</h3>
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={trackingOptions.tokenPrice || false}
+                          onChange={() => {
+                            setTrackingOptions({
+                              ...trackingOptions,
+                              tokenPrice: !trackingOptions.tokenPrice
+                            });
+                          }}
+                          className="opacity-0 w-0 h-0 absolute"
+                        />
+                        <span className={`absolute top-0 left-0 right-0 bottom-0 rounded-full transition-colors duration-300 ${trackingOptions.tokenPrice ? 'bg-green-500' : 'bg-green-500/30'}`}>
+                          <span className={`absolute h-4 w-4 left-1 bottom-1 bg-black rounded-full transition-transform duration-300 ${trackingOptions.tokenPrice ? 'transform translate-x-6' : ''}`}></span>
+                        </span>
+                      </label>
+                    </div>
+                    
+                    {trackingOptions.tokenPrice && (
+                      <div className="ml-4 border-l-2 border-green-500/20 pl-4 space-y-4">
+                        <div>
+                          <label className="block text-green-500 mb-2">Solana Token Address</label>
+                          <input
+                            type="text"
+                            value={trackingOptions.tokenAddress || ''}
+                            onChange={(e) => setTrackingOptions({
+                              ...trackingOptions,
+                              tokenAddress: e.target.value
+                            })}
+                            className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                            placeholder="Enter your Solana token address"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-green-500 mb-2">Marketcap Milestones</label>
+                          <div className="space-y-2">
+                            {(trackingOptions.marketcapMilestones || []).map((milestone, idx) => (
+                              <div key={idx} className="flex items-center space-x-2">
+                                <span className="text-green-500 px-2">$</span>
+                                <input
+                                  type="number"
+                                  value={milestone}
+                                  onChange={(e) => {
+                                    const newMilestones = [...(trackingOptions.marketcapMilestones || [])];
+                                    newMilestones[idx] = parseFloat(e.target.value);
+                                    setTrackingOptions({
+                                      ...trackingOptions,
+                                      marketcapMilestones: newMilestones
+                                    });
+                                  }}
+                                  className="flex-1 p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                                  placeholder="1000000"
+                                  step="10000"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newMilestones = [...(trackingOptions.marketcapMilestones || [])];
+                                    newMilestones.splice(idx, 1);
+                                    setTrackingOptions({
+                                      ...trackingOptions,
+                                      marketcapMilestones: newMilestones
+                                    });
+                                  }}
+                                  className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-500 rounded-lg"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTrackingOptions({
+                                  ...trackingOptions,
+                                  marketcapMilestones: [...(trackingOptions.marketcapMilestones || []), 1000000]
+                                });
+                              }}
+                              className="w-full p-2 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg flex items-center justify-center"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                              </svg>
+                              Add Marketcap Milestone
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-green-500 mb-2">Price Reports</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={trackingOptions.priceReports?.daily || false}
+                                onChange={() => setTrackingOptions({
+                                  ...trackingOptions,
+                                  priceReports: {
+                                    ...(trackingOptions.priceReports || {}),
+                                    daily: !(trackingOptions.priceReports?.daily || false)
+                                  }
+                                })}
+                                className="form-checkbox h-5 w-5 text-green-500 rounded border-green-500/50 bg-black focus:ring-0"
+                              />
+                              <span className="text-green-500">Daily price summary</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={trackingOptions.priceReports?.weekly || false}
+                                onChange={() => setTrackingOptions({
+                                  ...trackingOptions,
+                                  priceReports: {
+                                    ...(trackingOptions.priceReports || {}),
+                                    weekly: !(trackingOptions.priceReports?.weekly || false)
+                                  }
+                                })}
+                                className="form-checkbox h-5 w-5 text-green-500 rounded border-green-500/50 bg-black focus:ring-0"
+                              />
+                              <span className="text-green-500">Weekly price summary</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Telegram Group Tracking */}
+                  <div className="mb-6 border-b border-green-500/20 pb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-green-500 font-semibold">Telegram Group Tracking</h3>
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={trackingOptions.telegramGroup || false}
+                          onChange={() => {
+                            setTrackingOptions({
+                              ...trackingOptions,
+                              telegramGroup: !trackingOptions.telegramGroup
+                            });
+                          }}
+                          className="opacity-0 w-0 h-0 absolute"
+                        />
+                        <span className={`absolute top-0 left-0 right-0 bottom-0 rounded-full transition-colors duration-300 ${trackingOptions.telegramGroup ? 'bg-green-500' : 'bg-green-500/30'}`}>
+                          <span className={`absolute h-4 w-4 left-1 bottom-1 bg-black rounded-full transition-transform duration-300 ${trackingOptions.telegramGroup ? 'transform translate-x-6' : ''}`}></span>
+                        </span>
+                      </label>
+                    </div>
+                    
+                    {trackingOptions.telegramGroup && (
+                      <div className="ml-4 border-l-2 border-green-500/20 pl-4 space-y-4">
+                        <div>
+                          <label className="block text-green-500 mb-2">Telegram Group Username</label>
+                          <div className="flex">
+                            <span className="inline-flex items-center px-3 bg-green-500/10 border border-r-0 border-green-500/30 rounded-l-lg text-green-500">@</span>
+                            <input
+                              type="text"
+                              value={trackingOptions.telegramGroupUsername || ''}
+                              onChange={(e) => setTrackingOptions({
+                                ...trackingOptions,
+                                telegramGroupUsername: e.target.value
+                              })}
+                              className="flex-1 p-3 bg-black border border-green-500/30 rounded-r-lg text-green-500 focus:outline-none focus:border-green-500"
+                              placeholder="your_group_name"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-green-500 mb-2">Member Milestones</label>
+                          <div className="space-y-2">
+                            {(trackingOptions.memberMilestones || []).map((milestone, idx) => (
+                              <div key={idx} className="flex items-center space-x-2">
+                                <input
+                                  type="number"
+                                  value={milestone}
+                                  onChange={(e) => {
+                                    const newMilestones = [...(trackingOptions.memberMilestones || [])];
+                                    newMilestones[idx] = parseInt(e.target.value);
+                                    setTrackingOptions({
+                                      ...trackingOptions,
+                                      memberMilestones: newMilestones
+                                    });
+                                  }}
+                                  className="flex-1 p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                                  placeholder="1000"
+                                  step="100"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newMilestones = [...(trackingOptions.memberMilestones || [])];
+                                    newMilestones.splice(idx, 1);
+                                    setTrackingOptions({
+                                      ...trackingOptions,
+                                      memberMilestones: newMilestones
+                                    });
+                                  }}
+                                  className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-500 rounded-lg"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTrackingOptions({
+                                  ...trackingOptions,
+                                  memberMilestones: [...(trackingOptions.memberMilestones || []), 1000]
+                                });
+                              }}
+                              className="w-full p-2 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg flex items-center justify-center"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                              </svg>
+                              Add Member Milestone
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-green-500 mb-2">Growth Reports</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={trackingOptions.growthReports?.daily || false}
+                                onChange={() => setTrackingOptions({
+                                  ...trackingOptions,
+                                  growthReports: {
+                                    ...(trackingOptions.growthReports || {}),
+                                    daily: !(trackingOptions.growthReports?.daily || false)
+                                  }
+                                })}
+                                className="form-checkbox h-5 w-5 text-green-500 rounded border-green-500/50 bg-black focus:ring-0"
+                              />
+                              <span className="text-green-500">Daily growth report</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={trackingOptions.growthReports?.weekly || false}
+                                onChange={() => setTrackingOptions({
+                                  ...trackingOptions,
+                                  growthReports: {
+                                    ...(trackingOptions.growthReports || {}),
+                                    weekly: !(trackingOptions.growthReports?.weekly || false)
+                                  }
+                                })}
+                                className="form-checkbox h-5 w-5 text-green-500 rounded border-green-500/50 bg-black focus:ring-0"
+                              />
+                              <span className="text-green-500">Weekly growth summary</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Twitter Tracking - Simplified */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-green-500 font-semibold">Twitter Follower Tracking</h3>
+                      <label className="relative inline-block w-12 h-6 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={trackingOptions.twitter || false}
+                          onChange={() => {
+                            setTrackingOptions({
+                              ...trackingOptions,
+                              twitter: !trackingOptions.twitter
+                            });
+                          }}
+                          className="opacity-0 w-0 h-0 absolute"
+                        />
+                        <span className={`absolute top-0 left-0 right-0 bottom-0 rounded-full transition-colors duration-300 ${trackingOptions.twitter ? 'bg-green-500' : 'bg-green-500/30'}`}>
+                          <span className={`absolute h-4 w-4 left-1 bottom-1 bg-black rounded-full transition-transform duration-300 ${trackingOptions.twitter ? 'transform translate-x-6' : ''}`}></span>
+                        </span>
+                      </label>
+                    </div>
+                    
+                    {trackingOptions.twitter && (
+                      <div className="ml-4 border-l-2 border-green-500/20 pl-4 space-y-4">
+                        <div>
+                          <label className="block text-green-500 mb-2">Twitter Username</label>
+                          <div className="flex">
+                            <span className="inline-flex items-center px-3 bg-green-500/10 border border-r-0 border-green-500/30 rounded-l-lg text-green-500">@</span>
+                            <input
+                              type="text"
+                              value={trackingOptions.twitterUsername || ''}
+                              onChange={(e) => setTrackingOptions({
+                                ...trackingOptions,
+                                twitterUsername: e.target.value
+                              })}
+                              className="flex-1 p-3 bg-black border border-green-500/30 rounded-r-lg text-green-500 focus:outline-none focus:border-green-500"
+                              placeholder="your_twitter_handle"
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-green-500 mb-2">Follower Milestones</label>
+                          <div className="space-y-2">
+                            {(trackingOptions.followerMilestones || []).map((milestone, idx) => (
+                              <div key={idx} className="flex items-center space-x-2">
+                                <input
+                                  type="number"
+                                  value={milestone}
+                                  onChange={(e) => {
+                                    const newMilestones = [...(trackingOptions.followerMilestones || [])];
+                                    newMilestones[idx] = parseInt(e.target.value);
+                                    setTrackingOptions({
+                                      ...trackingOptions,
+                                      followerMilestones: newMilestones
+                                    });
+                                  }}
+                                  className="flex-1 p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                                  placeholder="1000"
+                                  step="100"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newMilestones = [...(trackingOptions.followerMilestones || [])];
+                                    newMilestones.splice(idx, 1);
+                                    setTrackingOptions({
+                                      ...trackingOptions,
+                                      followerMilestones: newMilestones
+                                    });
+                                  }}
+                                  className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-500 rounded-lg"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTrackingOptions({
+                                  ...trackingOptions,
+                                  followerMilestones: [...(trackingOptions.followerMilestones || []), 1000]
+                                });
+                              }}
+                              className="w-full p-2 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg flex items-center justify-center"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                              </svg>
+                              Add Follower Milestone
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-green-500 mb-2">Growth Reports</label>
+                          <div className="space-y-2">
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={trackingOptions.twitterReports?.daily || false}
+                                onChange={() => setTrackingOptions({
+                                  ...trackingOptions,
+                                  twitterReports: {
+                                    ...(trackingOptions.twitterReports || {}),
+                                    daily: !(trackingOptions.twitterReports?.daily || false)
+                                  }
+                                })}
+                                className="form-checkbox h-5 w-5 text-green-500 rounded border-green-500/50 bg-black focus:ring-0"
+                              />
+                              <span className="text-green-500">Daily follower report</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={trackingOptions.twitterReports?.weekly || false}
+                                onChange={() => setTrackingOptions({
+                                  ...trackingOptions,
+                                  twitterReports: {
+                                    ...(trackingOptions.twitterReports || {}),
+                                    weekly: !(trackingOptions.twitterReports?.weekly || false)
+                                  }
+                                })}
+                                className="form-checkbox h-5 w-5 text-green-500 rounded border-green-500/50 bg-black focus:ring-0"
+                              />
+                              <span className="text-green-500">Weekly follower summary</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-green-500/70 text-sm mt-4 p-3 bg-green-500/10 rounded-lg">
+                    <p className="flex items-start">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      These tracking features use the DEXScreener API for token data, Telegram Bot API for group metrics, and Twitter API for follower counts. Your bot will check for updates periodically and send notifications when milestones are reached.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Submit Button */}
