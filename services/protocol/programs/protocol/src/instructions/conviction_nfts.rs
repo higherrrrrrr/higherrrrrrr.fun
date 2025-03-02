@@ -55,9 +55,9 @@ pub fn handle_register_holder(ctx: Context<RegisterHolder>) -> Result<()> {
 
 /// Handler for distributing conviction NFTs. 
 /// For each holder registered in the registry, we expect three extra accounts:
-///   1. Holder’s memecoin token account (to re-check current balance)
+///   1. Holder's memecoin token account (to re-check current balance)
 ///   2. NFT Mint Account
-///   3. Holder’s NFT Token Account
+///   3. Holder's NFT Token Account
 pub fn handle_distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>) -> Result<()> {
     let registry = &mut ctx.accounts.conviction_registry;
     let token_state = &ctx.accounts.meme_token_state;
@@ -73,9 +73,9 @@ pub fn handle_distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>)
         .ok_or(ErrorCode::Overflow)? as u64;
 
     // Expect for each holder: 3 extra accounts:
-    // 1. Holder’s memecoin token account (for balance check)
+    // 1. Holder's memecoin token account (for balance check)
     // 2. NFT Mint Account
-    // 3. Holder’s NFT Token Account
+    // 3. Holder's NFT Token Account
     let expected_extra_accounts = registry.holders.len() * 3;
     require!(
         ctx.remaining_accounts.len() as usize == expected_extra_accounts,
@@ -85,11 +85,11 @@ pub fn handle_distribute_conviction_nfts(ctx: Context<DistributeConvictionNfts>)
     let mut new_list: Vec<Pubkey> = Vec::new();
     let mut extra_iter = ctx.remaining_accounts.iter();
     for holder_pubkey in &registry.holders {
-        // (1) Get the holder’s memecoin token account to verify current balance.
+        // (1) Get the holder's memecoin token account to verify current balance.
         let holder_token_account_info = extra_iter.next().unwrap();
         // (2) Get the NFT mint account.
         let nft_mint_account = extra_iter.next().unwrap();
-        // (3) Get the holder’s NFT token account.
+        // (3) Get the holder's NFT token account.
         let holder_nft_token_account = extra_iter.next().unwrap();
 
         // Deserialize the token account to read the balance.
@@ -188,3 +188,6 @@ pub struct DistributeConvictionNfts<'info> {
     #[account(address = mpl_token_metadata::id())]
     pub token_metadata_program: AccountInfo<'info>,
 }
+
+pub const CONVICTION_THRESHOLD_NUMERATOR: u64 = 42069;
+pub const CONVICTION_THRESHOLD_DENOMINATOR: u64 = 100000000;

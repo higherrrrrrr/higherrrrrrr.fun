@@ -30,8 +30,8 @@
 - **Threshold-Based Evolving Metadata**: Token names and artwork can "level up" as certain price or market milestones are crossed.  
 - **Deflationary Design**: A portion of tokens are burned on every swap, ensuring a continuously decreasing supply.  
 - **Big-Holder "Conviction" NFTs**: Addresses holding at least 0.042069% of a token's total supply automatically receive commemorative NFTs each time the token evolves.  
-- **Single-Sided Liquidity**: Projects can provide only their own tokens to a pool, letting the market bring in SOL, thus enabling fair price discovery.  
-- **Flexible Fee Splits & Innovative Fee Collection**: A default 1% swap fee is split between token burns and SOL‑based liquidity or revenue—but **all splits and destinations** (including protocol revenue vs. "floor" support) are fully configurable. Notably, fees are now collected directly from aggregated liquidity provider (LP) fees in our Meteora pool deposit rather than solely via a pass‑through front‑end.
+- **Simple AMM Pools**: Projects can create their own liquidity pools with single-sided liquidity support, allowing the market to bring in SOL for fair price discovery.  
+- **Flexible Fee Splits & Innovative Fee Collection**: A default 1% swap fee is split between token burns and SOL‑based liquidity or revenue—but **all splits and destinations** (including protocol revenue vs. "floor" support) are fully configurable.
 
 By aligning playful elements with cryptographic fundamentals—and keeping all parameters adjustable—**Higherrrrrrrr** aims to empower a new generation of meme tokens on Solana.
 
@@ -83,6 +83,16 @@ The Solana blockchain provides high throughput, low fees, and tooling like **Met
 
 5. **Pre‑Mine & Pool Distribution Lock‑In**  
    - The token distribution is strictly partitioned: a fixed **35%** is allocated for pre‑mine distributions to early participants, while the remaining **65%** is allocated for pool deposits. This ensures a balanced and secure initial allocation.
+
+### 3.2. SimpleAMM Pool Design
+
+The protocol implements a customized AMM with the following characteristics:
+
+- **Constant Product Formula (x*y=k)**: The classic AMM formula that works well for most token pairs.
+- **Configurable Fee Rate**: Set fees in basis points (e.g., 100 = 1%).
+- **Single-Sided Liquidity**: Allow token creators to provide only their token, facilitating fair price discovery.
+- **Fee Collection**: Distribute fees between protocol, creator, and liquidity reinforcement.
+- **Jupiter Integration**: Compatible with Jupiter's aggregator for enhanced user trading experience.
 
 ---
 

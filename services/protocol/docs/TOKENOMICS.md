@@ -1,49 +1,49 @@
 # Higherrrrrrr Community Brief
 
-Welcome, deviants, to the **Higherrrrrrr** community tokenomics overview. This doc is your biblical resource for the **Higherrrrrrr** protocol token on Solana—how *Base V1 Supporters*\* fit in, why we have “Conviction NFTs,” and how the “floor mechanism” works. We’ll mention the ticker **once**—*it’s called **CULT***—but after that, it’s just “the token.”
+Welcome, deviants, to the **Higherrrrrrr** community tokenomics overview. This doc is your biblical resource for the **Higherrrrrrr** protocol token on Solana—how *Base V1 Supporters*\* fit in, why we have "Conviction NFTs," and how the "floor mechanism" works. We'll mention the ticker **once**—*it's called **CULT***—but after that, it's just "the token."
 
 ---
 
-## Quick Degen Analogy: “On-Chain Arcade Machine”
+## Quick Degen Analogy: "On-Chain Arcade Machine"
 
 Imagine a giant arcade machine:
 
 - You toss in **tokens** when you want to play (trade).  
 - Half of your coin (0.5%) is **burned**—like the arcade ripping up your credits so no one else can use them.  
-- The other half (0.5%) in **SOL** is used to **refill the prize pool** (the liquidity floor), so there’s always more plushies in the claw machine if the market price dips.  
+- The other half (0.5%) in **SOL** is used to **refill the prize pool** (the liquidity floor), so there's always more plushies in the claw machine if the market price dips.  
 
 Over time:
 
 1. **Token Supply** shrinks (from constant burns).  
 2. **Floor Liquidity** grows, so big dumps get absorbed.  
 
-That’s how **Higherrrrrrr** keeps the game going for degens.
+That's how **Higherrrrrrr** keeps the game going for degens.
 
 ---
 
 ## 1. Summary (tl;dr)
 
-- **LP Fees:** 1% total fee on trades (via Meteora/Jupiter).  
+- **LP Fees:** 1% total fee on trades (via SimpleAMM pools with Jupiter integration).  
   - **0.5%** of the **token side** is burned (removed from supply).  
   - **0.5%** of the **SOL side** is added as single-sided liquidity to help stabilize the token price.  
-- **Conviction NFTs:** Holding **≥ 0.042069%** of the supply (420,690 tokens) grants you special NFTs (or “relics”) every time the token “evolves.”  
+- **Conviction NFTs:** Holding **≥ 0.042069%** of the supply (420,690 tokens) grants you special NFTs (or "relics") every time the token "evolves."  
 - **Distribution & Allocations:**  
   - **Team**: 15% total in a multisig (7.77% current team w/ vesting, 7.23% future expansions)  
   - **Migration LP Support\***: 5%  
   - **Base V1 Supporters\***: 15%  
   - **Single-Sided Launch Pool**: 65%  
 - **Evolutionary Mechanics:** Certain market cap (or price) thresholds trigger on-chain relics and name/art updates.  
-- **New Creator Tokens:** For other tokens launched on Higherrrrrrr, the 0.5% SOL fee may be **split** (e.g., 0.25% to protocol revenue, 0.25% to that token’s floor).
+- **New Creator Tokens:** For other tokens launched on Higherrrrrrr, the 0.5% SOL fee may be **split** (e.g., 0.25% to protocol revenue, 0.25% to that token's floor).
 
 ---
 
-## 2. What’s the Higherrrrrrr Cult About?
+## 2. What's the Higherrrrrrr Cult About?
 
-**Higherrrrrrr** (with seven “r”s) is about being based while building an ever-evolving “cult coins.” Key bullet points:
+**Higherrrrrrr** (with seven "r"s) is about being based while building an ever-evolving "cult coins." Key bullet points:
 
 - **Total Supply**: 1,000,000,000 tokens, 9 decimals, no future minting (burn authority = gone).  
-- **Evolutions**: Token’s on-chain name/art changes at certain thresholds—think “ritualistic transformations” but purely for hype.  
-- **Conviction NFTs**: Holding at least **0.042069%** of the supply (420,690 tokens) grants special relic NFTs each time the token “levels up.”  
+- **Evolutions**: Token's on-chain name/art changes at certain thresholds—think "ritualistic transformations" but purely for hype.  
+- **Conviction NFTs**: Holding at least **0.042069%** of the supply (420,690 tokens) grants special relic NFTs each time the token "levels up."  
 
 We aim to combine a dash of degenerate humor with robust on-chain engineering to keep the community engaged and entertained.
 
@@ -82,11 +82,11 @@ We aim to combine a dash of degenerate humor with robust on-chain engineering to
 
 ### 4.1 On-Chain Price/Cap Triggers
 
-When the token crosses certain thresholds (price or market cap), we update the token’s metadata via **Metaplex**—shifting its name, art, or references. Think of it as “leveling up” each time the cult hits a new milestone.
+When the token crosses certain thresholds (price or market cap), we update the token's metadata via **Metaplex**—shifting its name, art, or references. Think of it as "leveling up" each time the cult hits a new milestone.
 
 ### 4.2 The `images/evolution.svg` File
 
-We store a file named `images/evolution.svg` that morphs at each threshold—introducing new relics, colors, or inside jokes. It’s basically a “cult tapestry” that gets upgraded over time.
+We store a file named `images/evolution.svg` that morphs at each threshold—introducing new relics, colors, or inside jokes. It's basically a "cult tapestry" that gets upgraded over time.
 
 ### 4.3 Why Evolve?
 
@@ -99,14 +99,14 @@ We store a file named `images/evolution.svg` that morphs at each threshold—int
 
 ### 5.1 The Zealot Threshold
 
-Hold **0.042069%** of the supply (420,690 tokens) to become a “zealot.” This comedic figure ensures only big holders get the “cult relic” NFTs.
+Hold **0.042069%** of the supply (420,690 tokens) to become a "zealot." This comedic figure ensures only big holders get the "cult relic" NFTs.
 
 ### 5.2 Registry & Rewards
 
-An on-chain registry tracks addresses above 420,690 tokens. Whenever the token “levels up”:
+An on-chain registry tracks addresses above 420,690 tokens. Whenever the token "levels up":
 
-- Everyone still on the registry can claim an NFT commemorating the “old level.”  
-- If you dip below the threshold, you’re pruned.
+- Everyone still on the registry can claim an NFT commemorating the "old level."  
+- If you dip below the threshold, you're pruned.
 
 ---
 
@@ -114,7 +114,7 @@ An on-chain registry tracks addresses above 420,690 tokens. Whenever the token �
 
 ### 6.1 Trading Fees
 
-A **1%** fee applies to every swap. It’s split into:
+A **1%** fee applies to every swap. It's split into:
 
 1. **Token Side (0.5%)**  
    - Burned outright—supply deflates continuously.
@@ -148,7 +148,7 @@ A multi-sig (e.g., Squads) controls upgrade authority. If the community prefers,
 
 ## 8. Base V1 Supporters\* (15%)
 
-A total of **15%** is reserved for these loyal participants. We’ll provide instructions on airdrops or bridging soon. Keep an eye on socials for updates.
+A total of **15%** is reserved for these loyal participants. We'll provide instructions on airdrops or bridging soon. Keep an eye on socials for updates.
 
 ---
 
@@ -156,7 +156,7 @@ A total of **15%** is reserved for these loyal participants. We’ll provide ins
 
 ### 9.1 Single-Sided Liquidity
 
-We deposit **65%** of the supply into Meteora on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
+We deposit **65%** of the supply into SimpleAMM pools on day one as a single-sided token deposit. This ensures fair price discovery without big insider advantages.
 
 ### 9.2 Migration LP Support\* (5%)
 
@@ -171,7 +171,7 @@ A separate **migration-focused** liquidity pool will be seeded with 5% of the su
 ## 10. Next Steps
 
 1. **Check the Liquidity**: Once launched, you can buy/sell on Meteora or via Jupiter.  
-2. **Register if You’re a Zealot**: If you hit ≥ 420,690 tokens, call `register_holder`.  
+2. **Register if You're a Zealot**: If you hit ≥ 420,690 tokens, call `register_holder`.  
 3. **Watch the Art**: Keep an eye out for **`evolution.svg`** updates whenever thresholds are hit.  
 4. **HODL or Trade**: Up to you—just remember, relic NFTs reward big holders.  
 5. **Provide Feedback**: Suggest new slogans, relic ideas, or comedic thresholds.
@@ -193,7 +193,7 @@ A separate **migration-focused** liquidity pool will be seeded with 5% of the su
   - **For new tokens**: 0.5% SOL is partially protocol revenue, partially floor liquidity (ratio adjustable).  
 - **Upgrade**: Multi-sig, can be burned for immutability.
 
-We invite you to jump in and help push **Higherrrrrrr** to comedic extremes. Stay tuned on your favorite channels, and let’s see how far we can take this meme.
+We invite you to jump in and help push **Higherrrrrrr** to comedic extremes. Stay tuned on your favorite channels, and let's see how far we can take this meme.
 
 ---
 
@@ -205,7 +205,7 @@ We invite you to jump in and help push **Higherrrrrrr** to comedic extremes. Sta
 ## Appendix
 
 ### Base V1 Supporters\* (15%)
-This allocation is reserved for the token communities that supported the original Higherrrrrrr V1 launch on Base. We’ll finalize the airdrop or bridging mechanism for these tokens soon.
+This allocation is reserved for the token communities that supported the original Higherrrrrrr V1 launch on Base. We'll finalize the airdrop or bridging mechanism for these tokens soon.
 
 ### Migration LP Support\* (5%)
-Designated for the **Migrated Tokens/CULT** liquidity pools. The Migrated Tokens side is burned on each trade, while the CULT side directs 0.5% to the “floor” for price stability. This ensures robust cross-token liquidity pools for migrated tokens from Base.
+Designated for the **Migrated Tokens/CULT** liquidity pools. The Migrated Tokens side is burned on each trade, while the CULT side directs 0.5% to the "floor" for price stability. This ensures robust cross-token liquidity pools for migrated tokens from Base.

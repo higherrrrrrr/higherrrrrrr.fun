@@ -2,7 +2,7 @@
 
 > **Higherrrrrrr** – Where cults meet on-chain engineering!
 
-This project is a Solana program built with Anchor. It implements a meme token with evolving metadata, conviction NFT rewards, unique fee mechanics, and more. Follow these instructions to reset your environment, install all prerequisites, and get started with development.
+This project is a Solana program built with Anchor. It implements a meme token with evolving metadata, conviction NFT rewards, custom AMM pools, and unique fee mechanics. Follow these instructions to reset your environment, install all prerequisites, and get started with development.
 
 ---
 
@@ -19,7 +19,9 @@ This project is a Solana program built with Anchor. It implements a meme token w
 - [Building the Project](#building-the-project)
 - [Running Tests](#running-tests)
 - [Project Structure](#project-structure)
+- [Key Features](#key-features)
 - [Additional Information](#additional-information)
+- [Jupiter Integration](#jupiter-integration)
 
 ---
 
@@ -76,7 +78,7 @@ Rust is required for writing Solana programs. The recommended installation metho
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
    ```
 
-2. Reload your shell’s environment:
+2. Reload your shell's environment:
 
    ```bash
    . "$HOME/.cargo/env"
@@ -208,6 +210,20 @@ The project includes integration tests written in TypeScript.
 
 ---
 
+## Key Features
+
+- **Fixed Supply Token Creation**: Create tokens with immutable supply and pre-configured distribution splits.
+- **Evolving Metadata**: Tokens can change their name and art based on price thresholds.
+- **Conviction NFTs**: Reward large holders (≥0.042069% of supply) with special NFTs.
+- **SimpleAMM Pools**: Built-in AMM with constant product formula (x*y=k) supporting:
+  - Balanced liquidity provision
+  - Single-sided liquidity (for fair launches)
+  - Fee collection and distribution
+  - Jupiter integration compatibility
+- **Fee Management**: Configure fees for protocol revenue, creator rewards, and liquidity reinforcement.
+
+---
+
 ## Additional Information
 
 - **Local Cluster:** The project is configured to use a local Solana network (`localnet`). To run a local validator, use:
@@ -222,7 +238,7 @@ The project includes integration tests written in TypeScript.
   solana-keygen new
   ```
 
-- **Deploying the Program:** When you’re ready to deploy to your local cluster, run:
+- **Deploying the Program:** When you're ready to deploy to your local cluster, run:
 
   ```bash
   anchor deploy
@@ -249,6 +265,52 @@ The project includes integration tests written in TypeScript.
 
 ---
 
+## Jupiter Integration
+
+To integrate your SimpleAMM pools with Jupiter, follow these steps:
+
+1. **Register your pools with Jupiter**: Submit your pool information to Jupiter's DApp registry.
+
+2. **Implement the required interface**: Ensure your SimpleAMM has the following:
+   - Emit proper `SwapEvent` events with all required information
+   - Have proper slippage protection with `min_amount_out` parameter
+   - Make your pools discoverable with standard PDA derivation
+
+3. **Test with Jupiter SDK**: Use Jupiter's SDK to test swap routing through your pools.
+
+Example of integrating with Jupiter in your frontend:
+
+```typescript
+import { Jupiter } from '@jup-ag/core';
+import { Connection, PublicKey } from '@solana/web3.js';
+
+// Setup Jupiter
+const connection = new Connection('https://api.mainnet-beta.solana.com');
+const jupiter = await Jupiter.load({
+  connection,
+  cluster: 'mainnet-beta',
+  user: wallet.publicKey,
+});
+
+// Find routes for a swap
+const routes = await jupiter.computeRoutes({
+  inputMint: new PublicKey('...'),  // Token A mint
+  outputMint: new PublicKey('...'), // Token B mint
+  amount: 1000000000, // Amount in lamports/smallest unit
+  slippageBps: 50, // 0.5% slippage
+});
+
+// Execute the best route
+const { execute } = await jupiter.exchange({
+  routeInfo: routes.routesInfos[0],
+});
+const swapResult = await execute();
+```
+
+For more details, check the [Jupiter documentation](https://docs.jup.ag/).
+
+---
+
 Happy hacking with the Higherrrrrrr Protocol!
 ```
 
@@ -258,6 +320,6 @@ Happy hacking with the Higherrrrrrr Protocol!
 
 1. **Replace your current `README.md`** with the content above.
 2. **Adjust any sections as needed** (for example, tool versions or environment-specific instructions).
-3. **Follow the step‑by‑step instructions** to reset your environment and install all dependencies.
+3. **Follow the step-by-step instructions** to reset your environment and install all dependencies.
 
 This README provides a comprehensive guide modeled on the official Anchor documentation and covers everything from resetting your environment to building and testing the project. If you need further customization or run into issues, feel free to ask!

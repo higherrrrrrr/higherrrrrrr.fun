@@ -94,6 +94,58 @@ pub fn handle_update_meme_metadata(
     Ok(())
 }
 
+pub fn check_evolution_thresholds(
+    ctx: Context<CheckEvolutionThresholds>,
+    volume_threshold: u64,
+) -> Result<()> {
+    // Add maximum threshold check
+    require!(
+        volume_threshold <= 1_000_000_000_000_000, // Reasonable upper limit
+        ErrorCode::ThresholdTooHigh
+    );
+    
+    // Add intermediate checks in calculations
+    let evolution_data = &mut ctx.accounts.evolution_data;
+    let current_volume = evolution_data.current_volume;
+    
+    // Use checked add with overflow protection
+    let new_volume = current_volume
+        .checked_add(volume_threshold)
+        .ok_or(ErrorCode::Overflow)?;
+        
+    // Additional validation
+    require!(new_volume >= current_volume, ErrorCode::InvalidVolumeUpdate);
+    
+    // Rest of function...
+}
+
+// Add helper function to validate URIs
+fn is_valid_uri(uri: &str) -> bool {
+    // Basic validation - ensure it's not empty and has reasonable length
+    if uri.is_empty() || uri.len() > 200 {
+        return false;
+    }
+    
+    // Check if it starts with https:// or ipfs://
+    uri.starts_with("https://") || uri.starts_with("ipfs://")
+}
+
+// Use in evolution
+pub fn update_evolution_data(
+    ctx: Context<UpdateEvolutionData>,
+    evolution_items: Vec<EvolutionItem>,
+) -> Result<()> {
+    // Validate each URI
+    for item in &evolution_items {
+        require!(
+            is_valid_uri(&item.new_uri),
+            ErrorCode::InvalidUri
+        );
+    }
+    
+    // Rest of function...
+}
+
 // -------------------- Contexts --------------------
 
 #[derive(Accounts)]
@@ -121,7 +173,7 @@ pub struct UpdateMemeMetadata<'info> {
     #[account(mut)]
     pub evolution_data: Account<'info, EvolutionData>,
 
-    /// Added to fetch the token’s symbol.
+    /// Added to fetch the token's symbol.
     #[account(mut)]
     pub meme_token_state: Account<'info, MemeTokenState>,
 
