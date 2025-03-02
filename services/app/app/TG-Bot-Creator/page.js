@@ -242,11 +242,66 @@ export default function TGBotCreatorPage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Bot Information Section */}
           <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
-            <div className="bg-black/50 border border-green-500/30 rounded-lg p-6 space-y-4">
-              <h2 className="text-xl font-semibold mb-4">Bot Information</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+            <button 
+              type="button"
+              onClick={() => toggleSection('botInfo')}
+              className="w-full bg-black p-4 flex justify-between items-center text-left"
+            >
+              <h2 className="text-xl font-semibold">Bot Information</h2>
+              <div className="flex items-center">
+                {isComplete.botInfo && (
+                  <span className="text-green-500 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </span>
+                )}
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className={`h-5 w-5 transition-transform ${expanded.botInfo ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </button>
+            
+            {expanded.botInfo && (
+              <div className="p-6">
+                {/* BotFather Instructions */}
+                <div className="mb-6 bg-green-500/5 border border-green-500/20 rounded-lg p-4">
+                  <h3 className="text-green-500 font-semibold mb-2 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    How to Get Your Bot Token from BotFather
+                  </h3>
+                  <ol className="list-decimal list-inside text-green-500/80 space-y-1 ml-1">
+                    <li>Open Telegram and search for <span className="text-green-500 font-mono">@BotFather</span></li>
+                    <li>Start a chat and send <span className="text-green-500 font-mono">/newbot</span> command</li>
+                    <li>Follow prompts to name your bot and create a username</li>
+                    <li>BotFather will generate a token like <span className="text-green-500 font-mono">123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ</span></li>
+                    <li>Copy this token and paste it below</li>
+                  </ol>
+                  <div className="mt-3 text-center">
+                    <a 
+                      href="https://t.me/botfather" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-flex items-center text-green-500 hover:text-green-400 underline"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Open BotFather in Telegram
+                    </a>
+                  </div>
+                </div>
+                
+                {/* Existing Bot Information Fields */}
+                <div className="mb-4">
                   <label className="block text-green-500 mb-2">Bot Name</label>
                   <input
                     type="text"
@@ -254,48 +309,46 @@ export default function TGBotCreatorPage() {
                     onChange={(e) => setBotName(e.target.value)}
                     className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
                     placeholder="My Awesome Bot"
-                    required
                   />
                 </div>
                 
-                <div>
+                <div className="mb-4">
                   <label className="block text-green-500 mb-2">Bot Username</label>
-                  <input
-                    type="text"
-                    value={botUsername}
-                    onChange={(e) => setBotUsername(e.target.value)}
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 bg-green-500/10 border border-r-0 border-green-500/30 rounded-l-lg text-green-500">@</span>
+                    <input
+                      type="text"
+                      value={botUsername}
+                      onChange={(e) => setBotUsername(e.target.value)}
+                      className="flex-1 p-3 bg-black border border-green-500/30 rounded-r-lg text-green-500 focus:outline-none focus:border-green-500"
+                      placeholder="my_awesome_bot"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-green-500 mb-2">Bot Description</label>
+                  <textarea
+                    value={botDescription}
+                    onChange={(e) => setBotDescription(e.target.value)}
                     className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
-                    placeholder="my_awesome_bot"
-                    required
+                    placeholder="A brief description of what your bot does..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-green-500 mb-2">Bot Token</label>
+                  <input
+                    type="password"
+                    value={botToken}
+                    onChange={(e) => setBotToken(e.target.value)}
+                    className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                    placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
                   />
                 </div>
               </div>
-              
-              <div>
-                <label className="block text-green-500 mb-2">Bot Description</label>
-                <textarea
-                  value={botDescription}
-                  onChange={(e) => setBotDescription(e.target.value)}
-                  className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500 h-24"
-                  placeholder="A description of what your bot does..."
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-green-500 mb-2">Bot Token (from BotFather)</label>
-                <input
-                  type="text"
-                  value={botToken}
-                  onChange={(e) => setBotToken(e.target.value)}
-                  className={`w-full p-3 bg-black border ${tokenError ? 'border-red-500' : 'border-green-500/30'} rounded-lg text-green-500 focus:outline-none focus:border-green-500`}
-                  placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                  required
-                />
-                {tokenError && <p className="text-red-500 mt-1 text-sm">{tokenError}</p>}
-                <p className="text-green-500/70 text-sm mt-1">Get this from <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="underline">@BotFather</a> on Telegram</p>
-              </div>
-            </div>
+            )}
           </div>
           
           {/* Image Generation API Section - MOVED UP */}
