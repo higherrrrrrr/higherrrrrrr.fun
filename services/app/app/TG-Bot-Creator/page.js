@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { GlitchText } from '../../components/GlitchText';
 
 export default function TGBotCreatorPage() {
   const router = useRouter();
@@ -228,8 +229,10 @@ export default function TGBotCreatorPage() {
 
   return (
     <div className="min-h-screen bg-black text-green-500 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">Create Your Telegram Bot</h1>
+      <div className="max-w-4xl mx-auto p-6">
+        <h1 className="text-3xl font-bold text-center mb-8">
+          <GlitchText>Create Your Telegram Bot</GlitchText>
+        </h1>
         
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Bot Information Section */}
@@ -354,9 +357,9 @@ export default function TGBotCreatorPage() {
                       onClick={() => setApiProvider('cloudflare')}
                     >
                       <div className="flex items-start">
-                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'cloudflare' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'cloudflare' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1 flex items-center justify-center`}>
                           {apiProvider === 'cloudflare' && (
-                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                           )}
                         </div>
                         <div>
@@ -377,9 +380,9 @@ export default function TGBotCreatorPage() {
                       onClick={() => setApiProvider('stability')}
                     >
                       <div className="flex items-start">
-                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'stability' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'stability' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1 flex items-center justify-center`}>
                           {apiProvider === 'stability' && (
-                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                           )}
                         </div>
                         <div>
@@ -400,9 +403,9 @@ export default function TGBotCreatorPage() {
                       onClick={() => setApiProvider('openai')}
                     >
                       <div className="flex items-start">
-                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'openai' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'openai' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1 flex items-center justify-center`}>
                           {apiProvider === 'openai' && (
-                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                           )}
                         </div>
                         <div>
@@ -423,9 +426,9 @@ export default function TGBotCreatorPage() {
                       onClick={() => setApiProvider('replicate')}
                     >
                       <div className="flex items-start">
-                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'replicate' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'replicate' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1 flex items-center justify-center`}>
                           {apiProvider === 'replicate' && (
-                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                           )}
                         </div>
                         <div>
