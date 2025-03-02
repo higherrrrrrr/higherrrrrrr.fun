@@ -1,0 +1,43 @@
+{
+  "name": "SteepState",
+  "username": "Steep_State_Bot",
+  "description": "helps you learn about the higher crew",
+  "token": "7439273442:AAFEmw5JCc634LVMp6b43PikCtVeLNa3ueU",
+  "commands": [
+    {
+      "command": "/start",
+      "response": "Welcome to my bot!",
+      "responses": [],
+      "baseImages": [],
+      "isDefault": true
+    },
+    {
+      "command": "/help",
+      "response": "Here are the available commands...",
+      "responses": [],
+      "baseImages": [],
+      "isDefault": true
+    },
+    {
+      "command": "/zan",
+      "response": "deving and fighting demons (imbecils on twitter)",
+      "responses": [],
+      "baseImages": [],
+      "generateImage": false,
+      "isDefault": false
+    },
+    {
+      "command": "/peter",
+      "response": "wen launch",
+      "responses": [
+        "buy IDK plz"
+      ],
+      "baseImages": [],
+      "generateImage": false,
+      "isDefault": false
+    }
+  ],
+  "styleImageUrls": [],
+  "id": "bot_1740714194685",
+  "createdAt": "2025-02-28T03:43:14.685Z"
+}
