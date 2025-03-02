@@ -244,7 +244,12 @@ export default function TGBotCreatorPage() {
           <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
             <button 
               type="button"
-              onClick={() => toggleSection('botInfo')}
+              onClick={() => {
+                // Only allow toggling if required fields are filled
+                if (!expanded.botInfo || (botName && botUsername && botToken)) {
+                  toggleSection('botInfo');
+                }
+              }}
               className="w-full bg-black p-4 flex justify-between items-center text-left"
             >
               <h2 className="text-xl font-semibold">Bot Information</h2>
@@ -267,6 +272,28 @@ export default function TGBotCreatorPage() {
                 </svg>
               </div>
             </button>
+            
+            {!expanded.botInfo && botName && botUsername && botToken && (
+              <div className="px-4 py-3 bg-green-500/5 border-t border-green-500/20 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                <div>
+                  <span className="text-green-500/70 mr-2">Name:</span>
+                  <span className="text-green-500">{botName}</span>
+                </div>
+                <div>
+                  <span className="text-green-500/70 mr-2">Username:</span>
+                  <span className="text-green-500">@{botUsername}</span>
+                </div>
+                <div>
+                  <span className="text-green-500/70 mr-2">Token:</span>
+                  <span className="text-green-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="ml-1">Set</span>
+                  </span>
+                </div>
+              </div>
+            )}
             
             {expanded.botInfo && (
               <div className="p-6">
@@ -300,20 +327,21 @@ export default function TGBotCreatorPage() {
                   </div>
                 </div>
                 
-                {/* Existing Bot Information Fields */}
+                {/* Bot Information Fields */}
                 <div className="mb-4">
-                  <label className="block text-green-500 mb-2">Bot Name</label>
+                  <label className="block text-green-500 mb-2">Bot Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={botName}
                     onChange={(e) => setBotName(e.target.value)}
                     className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
                     placeholder="My Awesome Bot"
+                    required
                   />
                 </div>
                 
                 <div className="mb-4">
-                  <label className="block text-green-500 mb-2">Bot Username</label>
+                  <label className="block text-green-500 mb-2">Bot Username <span className="text-red-500">*</span></label>
                   <div className="flex">
                     <span className="inline-flex items-center px-3 bg-green-500/10 border border-r-0 border-green-500/30 rounded-l-lg text-green-500">@</span>
                     <input
@@ -322,6 +350,7 @@ export default function TGBotCreatorPage() {
                       onChange={(e) => setBotUsername(e.target.value)}
                       className="flex-1 p-3 bg-black border border-green-500/30 rounded-r-lg text-green-500 focus:outline-none focus:border-green-500"
                       placeholder="my_awesome_bot"
+                      required
                     />
                   </div>
                 </div>
@@ -338,14 +367,19 @@ export default function TGBotCreatorPage() {
                 </div>
                 
                 <div className="mb-4">
-                  <label className="block text-green-500 mb-2">Bot Token</label>
+                  <label className="block text-green-500 mb-2">Bot Token <span className="text-red-500">*</span></label>
                   <input
                     type="password"
                     value={botToken}
                     onChange={(e) => setBotToken(e.target.value)}
                     className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
                     placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                    required
                   />
+                </div>
+                
+                <div className="text-right text-sm text-green-500/70">
+                  <span className="text-red-500">*</span> Required fields
                 </div>
               </div>
             )}
