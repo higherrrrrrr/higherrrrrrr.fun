@@ -350,7 +350,7 @@ export default function TGBotCreatorPage() {
             {expanded.apiConfig && (
               <div className="p-6">
                 <p className="text-green-500/80 mb-4">
-                  Choose an image generation provider to create images for your bot commands. You can enable image generation for specific commands later.
+                  Choose your image generation provider to create images for your bot commands. You can enable image generation for specific commands later.
                 </p>
                 
                 <div className="mb-6">
