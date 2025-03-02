@@ -10,3 +10,4 @@ venv
 __pycache__
 
 !artifacts/services/app/bot-configs/*.json
+services/app/bot-configs/*.json
