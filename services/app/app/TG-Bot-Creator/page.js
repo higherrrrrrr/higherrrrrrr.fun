@@ -25,7 +25,8 @@ export default function TGBotCreatorPage() {
     commands: true,
     tracking: true,
     buyBotResources: false,
-    antiSpamResources: false
+    antiSpamResources: false,
+    dexListingResources: false
   });
   const [isComplete, setIsComplete] = useState({ apiConfig: false });
   const [apiProvider, setApiProvider] = useState('cloudflare');
@@ -1687,6 +1688,183 @@ export default function TGBotCreatorPage() {
                       <li>Have at least 2-3 active human moderators for groups over 1,000 members</li>
                       <li>Create clear community guidelines and pin them to your group</li>
                       <li>Regularly review and update your security settings as your group grows</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* DEX Listing Resources Section */}
+          <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
+            <button 
+              type="button"
+              onClick={() => toggleSection('dexListingResources')}
+              className="w-full bg-black p-4 flex justify-between items-center text-left"
+            >
+              <h2 className="text-xl font-semibold">DEX Listing Resources</h2>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-5 w-5 transition-transform ${expanded.dexListingResources ? 'rotate-180' : ''}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {expanded.dexListingResources && (
+              <div className="p-6">
+                <div className="mb-6">
+                  <p className="text-green-500/80 mb-4">
+                    DEXScreener and DEXTools listings help your token's visibility and credibility. 
+                    A well-optimized listing helps traders find your token, verify its legitimacy, and track its performance. 
+                    Here's how to get listed and maximize your presence on these critical platforms.
+                  </p>
+                  
+                  <div className="space-y-6">
+                    {/* DEXScreener Section */}
+                    <div className="border border-green-500/20 rounded-lg overflow-hidden">
+                      <div className="bg-green-500/10 p-4">
+                        <h3 className="font-semibold text-green-500">DEXScreener Listing</h3>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-green-500/80 mb-3">
+                          DEXScreener automatically lists tokens after they have liquidity and trading activity, but you can optimize your listing for better visibility.
+                        </p>
+                        
+                        <div className="mb-4">
+                          <h4 className="text-green-500 font-medium mb-2">Getting Listed:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-2">
+                            <li>Ensure your token has sufficient liquidity on a supported DEX</li>
+                            <li>Wait for natural indexing (usually happens within 24 hours of first trades)</li>
+                            <li>If not automatically listed after 24 hours with trading activity, you can request listing through their form</li>
+                          </ol>
+                        </div>
+                        
+                        <div className="mb-4">
+                          <h4 className="text-green-500 font-medium mb-2">Optimizing Your Listing:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-2">
+                            <li>Update token information:
+                              <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-green-500/70">
+                                <li>Visit <a href="https://dexscreener.com/claim" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-400">dexscreener.com/claim</a></li>
+                                <li>Connect your wallet (must be the deployer wallet)</li>
+                                <li>Add logo, website, social links, and description</li>
+                              </ul>
+                            </li>
+                            <li>Promote your DEXScreener link in your community</li>
+                            <li>Encourage bookmarking to increase popularity ranking</li>
+                          </ol>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-green-500 font-medium mb-2">Premium Features:</h4>
+                          <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                            <li>Promoted Pairs ($99/week): Featured placement on the homepage</li>
+                            <li>Trending Boost ($199/week): Increased visibility in trending sections</li>
+                            <li>Purchase at <a href="https://dexscreener.com/advertise" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-400">dexscreener.com/advertise</a></li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* DEXTools Section */}
+                    <div className="border border-green-500/20 rounded-lg overflow-hidden">
+                      <div className="bg-green-500/10 p-4">
+                        <h3 className="font-semibold text-green-500">DEXTools Listing</h3>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-green-500/80 mb-3">
+                          DEXTools is a premium platform with high visibility. Getting properly listed and verified can significantly boost your token's credibility.
+                        </p>
+                        
+                        <div className="mb-4">
+                          <h4 className="text-green-500 font-medium mb-2">Basic Listing:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-2">
+                            <li>Your token will be automatically indexed after trading begins</li>
+                            <li>For Solana tokens, ensure you're trading on supported DEXs (Raydium, Orca, etc.)</li>
+                            <li>If not appearing, submit a request through their support channel</li>
+                          </ol>
+                        </div>
+                        
+                        <div className="mb-4">
+                          <h4 className="text-green-500 font-medium mb-2">Social Info Update:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-2">
+                            <li>Visit <a href="https://www.dextools.io/app/en/social-update" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-400">dextools.io/app/en/social-update</a></li>
+                            <li>Connect wallet (must be deployer wallet or have significant holdings)</li>
+                            <li>Submit social links, website, description, and logo</li>
+                            <li>Wait for approval (typically 1-3 days)</li>
+                          </ol>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-green-500 font-medium mb-2">Premium Services:</h4>
+                          <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                            <li>Standard Ads ($1,500/week): Banner ads on the platform</li>
+                            <li>Trending Placement ($3,000/week): Featured in trending section</li>
+                            <li>Pair Explorer Ads ($5,000/week): Premium visibility on pair pages</li>
+                            <li>Contact their sales team via <a href="https://www.dextools.io/app/en/advertise" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-400">dextools.io/app/en/advertise</a></li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Best Practices */}
+                    <div className="border border-green-500/20 rounded-lg overflow-hidden">
+                      <div className="bg-green-500/10 p-4">
+                        <h3 className="font-semibold text-green-500">Maximizing DEX Listings</h3>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-green-500/80 mb-3">
+                          Beyond basic listings, here are strategies to maximize the impact of your DEX presence:
+                        </p>
+                        
+                        <div>
+                          <h4 className="text-green-500 font-medium mb-2">Optimization Strategies:</h4>
+                          <ul className="list-disc list-inside text-green-500/80 space-y-2">
+                            <li>Complete all profile information:
+                              <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-green-500/70">
+                                <li>High-quality logo (transparent background PNG)</li>
+                                <li>Comprehensive description with tokenomics</li>
+                                <li>All social links and community channels</li>
+                                <li>Updated contract information and audit links</li>
+                              </ul>
+                            </li>
+                            <li>Encourage community engagement:
+                              <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-green-500/70">
+                                <li>Ask community to bookmark your pair</li>
+                                <li>Drive traffic to your DEX listings</li>
+                                <li>Encourage positive votes on DEXTools</li>
+                              </ul>
+                            </li>
+                            <li>Maintain healthy metrics:
+                              <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-green-500/70">
+                                <li>Stable or growing liquidity</li>
+                                <li>Consistent trading volume</li>
+                                <li>Balanced buy/sell ratio</li>
+                                <li>Low concentration of tokens in top wallets</li>
+                              </ul>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <h4 className="text-green-500 font-medium mb-2 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      Pro Tips:
+                    </h4>
+                    <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                      <li>Invest in premium placements during important project milestones</li>
+                      <li>Create tutorial videos showing how to use DEXScreener/DEXTools to find your token</li>
+                      <li>Monitor competitor listings to stay competitive with your presentation</li>
+                      <li>Consider hiring a professional designer for your token logo and branding</li>
+                      <li>Always maintain accurate information across all platforms</li>
                     </ul>
                   </div>
                 </div>
