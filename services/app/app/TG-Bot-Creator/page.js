@@ -17,6 +17,10 @@ export default function TGBotCreatorPage() {
   const [styleImages, setStyleImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tokenError, setTokenError] = useState('');
+  const [expanded, setExpanded] = useState({ apiConfig: false });
+  const [isComplete, setIsComplete] = useState({ apiConfig: false });
+  const [apiProvider, setApiProvider] = useState('cloudflare');
+  const [apiKey, setApiKey] = useState('');
 
   // Add a new command
   const addCommand = () => {
@@ -137,6 +141,12 @@ export default function TGBotCreatorPage() {
     setCommands(updatedCommands);
   };
 
+  // Toggle section
+  const toggleSection = (section) => {
+    setExpanded({ ...expanded, [section]: !expanded[section] });
+    setIsComplete({ ...isComplete, [section]: true });
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -222,95 +232,294 @@ export default function TGBotCreatorPage() {
         <h1 className="text-3xl font-bold mb-8 text-center">Create Your Telegram Bot</h1>
         
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Bot Information */}
-          <div className="bg-black/50 border border-green-500/30 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold mb-4">Bot Information</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Bot Information Section */}
+          <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
+            <div className="bg-black/50 border border-green-500/30 rounded-lg p-6 space-y-4">
+              <h2 className="text-xl font-semibold mb-4">Bot Information</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-green-500 mb-2">Bot Name</label>
+                  <input
+                    type="text"
+                    value={botName}
+                    onChange={(e) => setBotName(e.target.value)}
+                    className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                    placeholder="My Awesome Bot"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-green-500 mb-2">Bot Username</label>
+                  <input
+                    type="text"
+                    value={botUsername}
+                    onChange={(e) => setBotUsername(e.target.value)}
+                    className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                    placeholder="my_awesome_bot"
+                    required
+                  />
+                </div>
+              </div>
+              
               <div>
-                <label className="block text-green-500 mb-2">Bot Name</label>
-                <input
-                  type="text"
-                  value={botName}
-                  onChange={(e) => setBotName(e.target.value)}
-                  className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
-                  placeholder="My Awesome Bot"
+                <label className="block text-green-500 mb-2">Bot Description</label>
+                <textarea
+                  value={botDescription}
+                  onChange={(e) => setBotDescription(e.target.value)}
+                  className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500 h-24"
+                  placeholder="A description of what your bot does..."
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-green-500 mb-2">Bot Username</label>
+                <label className="block text-green-500 mb-2">Bot Token (from BotFather)</label>
                 <input
                   type="text"
-                  value={botUsername}
-                  onChange={(e) => setBotUsername(e.target.value)}
-                  className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
-                  placeholder="my_awesome_bot"
+                  value={botToken}
+                  onChange={(e) => setBotToken(e.target.value)}
+                  className={`w-full p-3 bg-black border ${tokenError ? 'border-red-500' : 'border-green-500/30'} rounded-lg text-green-500 focus:outline-none focus:border-green-500`}
+                  placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
                   required
                 />
+                {tokenError && <p className="text-red-500 mt-1 text-sm">{tokenError}</p>}
+                <p className="text-green-500/70 text-sm mt-1">Get this from <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="underline">@BotFather</a> on Telegram</p>
               </div>
-            </div>
-            
-            <div>
-              <label className="block text-green-500 mb-2">Bot Description</label>
-              <textarea
-                value={botDescription}
-                onChange={(e) => setBotDescription(e.target.value)}
-                className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500 h-24"
-                placeholder="A description of what your bot does..."
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-green-500 mb-2">Bot Token (from BotFather)</label>
-              <input
-                type="text"
-                value={botToken}
-                onChange={(e) => setBotToken(e.target.value)}
-                className={`w-full p-3 bg-black border ${tokenError ? 'border-red-500' : 'border-green-500/30'} rounded-lg text-green-500 focus:outline-none focus:border-green-500`}
-                placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                required
-              />
-              {tokenError && <p className="text-red-500 mt-1 text-sm">{tokenError}</p>}
-              <p className="text-green-500/70 text-sm mt-1">Get this from <a href="https://t.me/BotFather" target="_blank" rel="noopener noreferrer" className="underline">@BotFather</a> on Telegram</p>
             </div>
           </div>
           
-          {/* Style Images */}
-          <div className="bg-black/50 border border-green-500/30 rounded-lg p-6 space-y-4">
-            <h2 className="text-xl font-semibold mb-4">Style Reference Images</h2>
-            <p className="text-green-500/70 mb-4">Upload images to influence the style of generated images</p>
-            
-            <div className="flex flex-wrap gap-4 mb-4">
-              {styleImages.map((img, index) => (
-                <div key={index} className="relative">
-                  <img src={img.preview} alt={`Style ${index + 1}`} className="w-24 h-24 object-cover rounded-lg border border-green-500/30" />
-                  <button
-                    type="button"
-                    onClick={() => removeStyleImage(index)}
-                    className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 flex items-center justify-center text-red-500"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          {/* Image Generation API Section - MOVED UP */}
+          <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
+            <button 
+              type="button"
+              onClick={() => toggleSection('apiConfig')}
+              className="w-full bg-black p-4 flex justify-between items-center text-left"
+            >
+              <h2 className="text-xl font-semibold">Image Generation API (Req. for Image Functionality)</h2>
+              <div className="flex items-center">
+                {isComplete.apiConfig && (
+                  <span className="text-green-500 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                  </button>
-                </div>
-              ))}
-              
-              <label className="w-24 h-24 border-2 border-dashed border-green-500/30 rounded-lg flex items-center justify-center cursor-pointer hover:border-green-500/50 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </span>
+                )}
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className={`h-5 w-5 transition-transform ${expanded.apiConfig ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </label>
+              </div>
+            </button>
+            
+            {!expanded.apiConfig && (
+              <div className="px-4 py-2 bg-green-500/5 border-t border-green-500/20 text-sm">
+                <div className="flex items-center">
+                  <span className="text-green-500/70 mr-2">Provider:</span> 
+                  <span className="text-green-500">
+                    {apiProvider === 'cloudflare' ? 'Cloudflare Workers AI (Free)' : 
+                     apiProvider === 'stability' ? 'Stability AI' : 
+                     apiProvider === 'openai' ? 'OpenAI DALL-E' : 'Replicate'}
+                  </span>
+                  {apiKey && (
+                    <span className="ml-4 text-green-500/70">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="ml-1">API Key Set</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {expanded.apiConfig && (
+              <div className="p-6">
+                <p className="text-green-500/80 mb-4">
+                  Choose an image generation provider to create images for your bot commands. You can enable image generation for specific commands later.
+                </p>
+                
+                <div className="mb-6">
+                  <label className="block text-green-500 mb-2">Select Provider</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Cloudflare Option */}
+                    <div 
+                      className={`border ${apiProvider === 'cloudflare' ? 'border-green-500 bg-green-500/5' : 'border-green-500/20'} rounded-lg p-4 cursor-pointer hover:bg-green-500/5`}
+                      onClick={() => setApiProvider('cloudflare')}
+                    >
+                      <div className="flex items-start">
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'cloudflare' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                          {apiProvider === 'cloudflare' && (
+                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-green-500">Cloudflare Workers AI</h3>
+                          <p className="text-green-500/70 text-sm mt-1">Free tier with 100K requests/day. No credit card required.</p>
+                          <div className="mt-2 text-xs text-green-500/60">
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Free</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Fast</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Simple Setup</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Stability AI Option */}
+                    <div 
+                      className={`border ${apiProvider === 'stability' ? 'border-green-500 bg-green-500/5' : 'border-green-500/20'} rounded-lg p-4 cursor-pointer hover:bg-green-500/5`}
+                      onClick={() => setApiProvider('stability')}
+                    >
+                      <div className="flex items-start">
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'stability' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                          {apiProvider === 'stability' && (
+                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-green-500">Stability AI</h3>
+                          <p className="text-green-500/70 text-sm mt-1">High-quality images with multiple model options.</p>
+                          <div className="mt-2 text-xs text-green-500/60">
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">25 Free Credits</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">High Quality</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Multiple Models</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* OpenAI Option */}
+                    <div 
+                      className={`border ${apiProvider === 'openai' ? 'border-green-500 bg-green-500/5' : 'border-green-500/20'} rounded-lg p-4 cursor-pointer hover:bg-green-500/5`}
+                      onClick={() => setApiProvider('openai')}
+                    >
+                      <div className="flex items-start">
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'openai' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                          {apiProvider === 'openai' && (
+                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-green-500">OpenAI DALL-E</h3>
+                          <p className="text-green-500/70 text-sm mt-1">Excellent quality with good prompt following.</p>
+                          <div className="mt-2 text-xs text-green-500/60">
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Premium</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Best Quality</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Complex Prompts</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Replicate Option */}
+                    <div 
+                      className={`border ${apiProvider === 'replicate' ? 'border-green-500 bg-green-500/5' : 'border-green-500/20'} rounded-lg p-4 cursor-pointer hover:bg-green-500/5`}
+                      onClick={() => setApiProvider('replicate')}
+                    >
+                      <div className="flex items-start">
+                        <div className={`w-5 h-5 rounded-full border ${apiProvider === 'replicate' ? 'border-green-500' : 'border-green-500/30'} flex-shrink-0 mr-3 mt-1`}>
+                          {apiProvider === 'replicate' && (
+                            <div className="w-3 h-3 bg-green-500 rounded-full m-auto"></div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-green-500">Replicate</h3>
+                          <p className="text-green-500/70 text-sm mt-1">Access to many different models for experimentation.</p>
+                          <div className="mt-2 text-xs text-green-500/60">
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">$1 Free Credit</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Many Models</span>
+                            <span className="inline-block px-2 py-1 bg-green-500/10 rounded mr-1 mb-1">Flexible</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-green-500">API Key</label>
+                    <span className="text-green-500/70 text-sm">
+                      {apiProvider === 'cloudflare' ? '(Optional for free tier)' : '(Required)'}
+                    </span>
+                  </div>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="w-full p-3 bg-black border border-green-500/30 rounded-lg text-green-500 focus:outline-none focus:border-green-500"
+                    placeholder={`Enter your ${
+                      apiProvider === 'cloudflare' ? 'Cloudflare' : 
+                      apiProvider === 'stability' ? 'Stability AI' : 
+                      apiProvider === 'openai' ? 'OpenAI' : 'Replicate'
+                    } API key`}
+                  />
+                </div>
+                
+                <div className="text-center mt-4">
+                  <a
+                    href={
+                      apiProvider === 'cloudflare' ? 'https://developers.cloudflare.com/workers-ai/' :
+                      apiProvider === 'stability' ? 'https://platform.stability.ai/' :
+                      apiProvider === 'openai' ? 'https://platform.openai.com/' :
+                      'https://replicate.com/'
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-500 hover:text-green-400 text-sm underline"
+                  >
+                    Get an API key from {
+                      apiProvider === 'cloudflare' ? 'Cloudflare Workers AI' :
+                      apiProvider === 'stability' ? 'Stability AI' : 
+                      apiProvider === 'openai' ? 'OpenAI' : 'Replicate'
+                    }
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Style Reference Images Section */}
+          <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
+            <div className="bg-black/50 border border-green-500/30 rounded-lg p-6 space-y-4">
+              <h2 className="text-xl font-semibold mb-4">Style Reference Images</h2>
+              <p className="text-green-500/70 mb-4">Upload images to influence the style of generated images</p>
+              
+              <div className="flex flex-wrap gap-4 mb-4">
+                {styleImages.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img src={img.preview} alt={`Style ${index + 1}`} className="w-24 h-24 object-cover rounded-lg border border-green-500/30" />
+                    <button
+                      type="button"
+                      onClick={() => removeStyleImage(index)}
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 flex items-center justify-center text-red-500"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                
+                <label className="w-24 h-24 border-2 border-dashed border-green-500/30 rounded-lg flex items-center justify-center cursor-pointer hover:border-green-500/50 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </div>
           </div>
           
@@ -554,9 +763,19 @@ export default function TGBotCreatorPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full p-4 bg-green-500 hover:bg-green-600 rounded-lg text-black font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full p-4 bg-green-500 hover:bg-green-600 text-black font-bold rounded-lg flex items-center justify-center ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isSubmitting ? 'Creating Bot...' : 'Create Bot'}
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Your Bot...
+              </>
+            ) : (
+              'Create Bot'
+            )}
           </button>
         </form>
       </div>
