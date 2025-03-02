@@ -24,7 +24,8 @@ export default function TGBotCreatorPage() {
     styleImages: true,
     commands: true,
     tracking: true,
-    buyBotResources: false
+    buyBotResources: false,
+    antiSpamResources: false
   });
   const [isComplete, setIsComplete] = useState({ apiConfig: false });
   const [apiProvider, setApiProvider] = useState('cloudflare');
@@ -1482,6 +1483,210 @@ export default function TGBotCreatorPage() {
                       <li>Set appropriate minimum buy amounts to avoid spam</li>
                       <li>Consider using only one buy bot to prevent duplicate notifications</li>
                       <li>Test the bot in a private group before adding to your main community</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Anti-Spam Bot Resources Section */}
+          <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
+            <button 
+              type="button"
+              onClick={() => toggleSection('antiSpamResources')}
+              className="w-full bg-black p-4 flex justify-between items-center text-left"
+            >
+              <h2 className="text-xl font-semibold">Anti-Spam Resources</h2>
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-5 w-5 transition-transform ${expanded.antiSpamResources ? 'rotate-180' : ''}`} 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            {expanded.antiSpamResources && (
+              <div className="p-6">
+                <div className="mb-6">
+                  <p className="text-green-500/80 mb-4">
+                    Protecting your community from spam, scams, and raids is essential for maintaining a healthy Telegram group. 
+                    Anti-spam bots can verify new members, filter malicious content, and prevent coordinated attacks. 
+                    A secure group builds trust and allows genuine discussions to flourish without interruption.
+                  </p>
+                  
+                  <div className="space-y-6">
+                    {/* Verification Setup Guide */}
+                    <div className="border border-green-500/20 rounded-lg overflow-hidden">
+                      <div className="bg-green-500/10 p-4">
+                        <h3 className="font-semibold text-green-500">Setting Up a Verification System</h3>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-green-500/80 mb-3">
+                          Create a two-step verification process to protect your group from bots and spam accounts.
+                        </p>
+                        <div>
+                          <h4 className="text-green-500 font-medium mb-2">Step-by-Step Guide:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-2">
+                            <li>Create two Telegram groups:
+                              <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-green-500/70">
+                                <li>A verification channel (e.g., "Project Name Verification")</li>
+                                <li>Your main community group (e.g., "Project Name Community")</li>
+                              </ul>
+                            </li>
+                            <li>Set up your main group:
+                              <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-green-500/70">
+                                <li>Go to Group Settings → Group Type → Private Group</li>
+                                <li>Go to Permissions → Add Members → Only admins can add members</li>
+                              </ul>
+                            </li>
+                            <li>Set up your verification channel:
+                              <ul className="list-disc list-inside ml-6 mt-1 space-y-1 text-green-500/70">
+                                <li>Add a captcha bot (like @CaptchaBot) to this group</li>
+                                <li>Configure the bot to grant access to your main group after verification</li>
+                                <li>Create an invite link for this verification channel</li>
+                              </ul>
+                            </li>
+                            <li>Share only the verification channel link publicly</li>
+                            <li>Add a welcome message explaining the verification process</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Anti-Spam Bot Option 1 */}
+                    <div className="border border-green-500/20 rounded-lg overflow-hidden">
+                      <div className="bg-green-500/10 p-4 flex justify-between items-center">
+                        <h3 className="font-semibold text-green-500">CaptchaBot</h3>
+                        <a 
+                          href="https://t.me/captchabot" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg text-sm transition-colors"
+                        >
+                          Open in Telegram
+                        </a>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-green-500/80 mb-3">
+                          The most popular captcha verification bot for Telegram groups. Requires new members to solve a captcha to gain access.
+                        </p>
+                        <div className="mb-3">
+                          <h4 className="text-green-500 font-medium mb-2">Features:</h4>
+                          <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                            <li>Image-based captcha verification</li>
+                            <li>Customizable welcome messages</li>
+                            <li>Automatic removal of unverified users</li>
+                            <li>Multi-group support</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="text-green-500 font-medium mb-2">Setup Instructions:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-1">
+                            <li>Add @CaptchaBot to your group</li>
+                            <li>Make the bot an admin with delete messages and ban users permissions</li>
+                            <li>Type /setup to configure settings</li>
+                            <li>Choose verification type and timeframe</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Anti-Spam Bot Option 2 */}
+                    <div className="border border-green-500/20 rounded-lg overflow-hidden">
+                      <div className="bg-green-500/10 p-4 flex justify-between items-center">
+                        <h3 className="font-semibold text-green-500">GroupHelpBot</h3>
+                        <a 
+                          href="https://t.me/GroupHelpBot" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg text-sm transition-colors"
+                        >
+                          Open in Telegram
+                        </a>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-green-500/80 mb-3">
+                          Comprehensive anti-spam and group management bot with advanced filtering capabilities.
+                        </p>
+                        <div className="mb-3">
+                          <h4 className="text-green-500 font-medium mb-2">Features:</h4>
+                          <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                            <li>Anti-spam filters for links, forwards, and media</li>
+                            <li>Raid protection with auto-mute</li>
+                            <li>Scam domain detection</li>
+                            <li>Customizable auto-responses</li>
+                            <li>Moderation tools and logs</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="text-green-500 font-medium mb-2">Setup Instructions:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-1">
+                            <li>Add @GroupHelpBot to your group</li>
+                            <li>Grant admin privileges with appropriate permissions</li>
+                            <li>Use /settings to configure protection levels</li>
+                            <li>Set up custom filters with /filter commands</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Anti-Spam Bot Option 3 */}
+                    <div className="border border-green-500/20 rounded-lg overflow-hidden">
+                      <div className="bg-green-500/10 p-4 flex justify-between items-center">
+                        <h3 className="font-semibold text-green-500">Combot</h3>
+                        <a 
+                          href="https://t.me/combot" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg text-sm transition-colors"
+                        >
+                          Open in Telegram
+                        </a>
+                      </div>
+                      <div className="p-4">
+                        <p className="text-green-500/80 mb-3">
+                          Feature-rich moderation bot with analytics and advanced anti-spam capabilities.
+                        </p>
+                        <div className="mb-3">
+                          <h4 className="text-green-500 font-medium mb-2">Features:</h4>
+                          <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                            <li>Group statistics and activity tracking</li>
+                            <li>Anti-flood protection</li>
+                            <li>Customizable auto-warnings</li>
+                            <li>Content filtering</li>
+                            <li>User reputation system</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="text-green-500 font-medium mb-2">Setup Instructions:</h4>
+                          <ol className="list-decimal list-inside text-green-500/80 space-y-1">
+                            <li>Add @combot to your group</li>
+                            <li>Make it an admin with appropriate permissions</li>
+                            <li>Visit the Combot dashboard to configure settings</li>
+                            <li>Set up anti-spam filters and verification requirements</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <h4 className="text-green-500 font-medium mb-2 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      Security Best Practices:
+                    </h4>
+                    <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                      <li>Use a combination of verification and anti-spam bots for maximum protection</li>
+                      <li>Restrict new members from posting links or media for the first 24 hours</li>
+                      <li>Have at least 2-3 active human moderators for groups over 1,000 members</li>
+                      <li>Create clear community guidelines and pin them to your group</li>
+                      <li>Regularly review and update your security settings as your group grows</li>
                     </ul>
                   </div>
                 </div>
