@@ -18,7 +18,12 @@ export default function TGBotCreatorPage() {
   const [styleImages, setStyleImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [tokenError, setTokenError] = useState('');
-  const [expanded, setExpanded] = useState({ apiConfig: false });
+  const [expanded, setExpanded] = useState({
+    botInfo: true,
+    apiConfig: true,
+    styleImages: true,
+    commands: true
+  });
   const [isComplete, setIsComplete] = useState({ apiConfig: false });
   const [apiProvider, setApiProvider] = useState('cloudflare');
   const [apiKey, setApiKey] = useState('');
