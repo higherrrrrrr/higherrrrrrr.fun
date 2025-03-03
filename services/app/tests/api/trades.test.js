@@ -15,6 +15,8 @@ const testTrades = [
     fees: '3500',
     price_in_usd: '1.2',
     price_out_usd: '2.4',
+    value_in_usd: '1.2',
+    value_out_usd: '1.2',
     block_timestamp: new Date().toISOString(),
     created_at: new Date()
   },
@@ -29,6 +31,8 @@ const testTrades = [
     fees: '7000',
     price_in_usd: '1.2',
     price_out_usd: '2.5',
+    value_in_usd: '1.2',
+    value_out_usd: '1.2',
     block_timestamp: new Date().toISOString(),
     created_at: new Date()
   }
@@ -160,19 +164,18 @@ describe('Trades API Endpoint', () => {
     expect(data.error).toBe('Database connection error');
   });
   
-  test('Should return trades with fee and price information', async () => {
+  test('Should return trades with price information', async () => {
     const req = new Request('http://localhost/api/trades');
     const res = await GET(req);
     const data = await res.json();
     
     expect(res.status).toBe(200);
     expect(data.success).toBe(true);
-    expect(data.data[0]).toHaveProperty('fees');
     expect(data.data[0]).toHaveProperty('price_in_usd');
     expect(data.data[0]).toHaveProperty('price_out_usd');
+    expect(data.data[0]).toHaveProperty('value_in_usd');
+    expect(data.data[0]).toHaveProperty('value_out_usd');
     
-    // Verify the first trade's fee and price data
-    expect(parseFloat(data.data[0].fees)).toBe(3500);
     expect(parseFloat(data.data[0].price_in_usd)).toBe(1.2);
     expect(parseFloat(data.data[0].price_out_usd)).toBe(2.4);
   });

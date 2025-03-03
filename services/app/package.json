@@ -9,10 +9,12 @@
     "build-knowledge": "node scripts/build-knowledge.js",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "node scripts/migrate.js",
-    "migrate:down": "node-pg-migrate down",
+    "migrate": "DATABASE_URL=$DATABASE_URL node-pg-migrate up",
+    "migrate:down": "DATABASE_URL=$DATABASE_URL node-pg-migrate down",
+    "migrate:custom": "node scripts/migrate.js",
     "test-schema": "node scripts/test-schema.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "jupiter-indexer": "node scripts/jupiter-indexer.js"
   },
   "dependencies": {
     "@duneanalytics/client-sdk": "^0.2.5",

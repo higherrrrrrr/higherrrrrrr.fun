@@ -81,6 +81,20 @@ export default function TradesDashboard() {
     fetchTrades(true);
   };
 
+  function formatUsdValue(value) {
+    if (!value || value === 'undefined' || value === 'null' || isNaN(parseFloat(value))) {
+      return '$0.00';
+    }
+    
+    const numValue = parseFloat(value);
+    return new Intl.NumberFormat('en-US', { 
+      style: 'currency', 
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2 
+    }).format(numValue);
+  }
+
   return (
     <div className={styles.container}>
       <h1 className={styles.heading}>Jupiter Trades</h1>
@@ -159,8 +173,7 @@ export default function TradesDashboard() {
                   {parseFloat(trade.fees).toLocaleString(undefined, { maximumFractionDigits: 4 })}
                 </div>
                 <div className={styles.usdValue}>
-                  ${parseFloat(trade.amount_in * trade.price_in_usd).toLocaleString(undefined, { maximumFractionDigits: 2 })} → 
-                  ${parseFloat(trade.amount_out * trade.price_out_usd).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  {formatUsdValue(trade.value_in_usd)} → {formatUsdValue(trade.value_out_usd)}
                 </div>
                 <div className={styles.time}>
                   {new Date(trade.created_at).toLocaleString()}

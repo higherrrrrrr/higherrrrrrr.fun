@@ -14,40 +14,42 @@ export function handleJupiterSuccess(result) {
       return;
     }
     
-    // Get wallet address from result
-    const walletAddress = result.wallet?.publicKey?.toString();
-    if (!walletAddress) {
-      console.warn('⚠️ No wallet address found in Jupiter result');
-      return;
+    // Try to get wallet address from multiple possible locations
+    let walletAddress = null;
+    
+    // Check if wallet address is directly in result
+    if (result.walletAddress || result.wallet?.publicKey) {
+      walletAddress = (result.walletAddress || result.wallet?.publicKey)?.toString();
+    }
+    // Check if it's in the swap result
+    else if (result.swapResult?.walletAddress) {
+      walletAddress = result.swapResult.walletAddress.toString();
+    }
+    // Try to get from window.solana if available
+    else if (typeof window !== 'undefined' && window.solana?.publicKey) {
+      walletAddress = window.solana.publicKey.toString();
+    }
+    // Last resort - use unknown for now
+    else {
+      console.warn('⚠️ Using fallback method to determine wallet address');
+      walletAddress = 'unknown-wallet';
     }
     
-    // First, let's examine the result structure more carefully
-    console.log('Jupiter result structure:', {
-      txid: result.txid,
-      walletAddress: result.walletAddress || result.wallet,
-      swapResult: result.swapResult || {},
-      quoteResponseMeta: result.quoteResponseMeta || {}
-    });
+    // Extract token addresses
+    let inputToken = null;
+    let outputToken = null;
     
-    // Extract token mints from deep within the response structure
-    const inputToken = 
-      // Look for mint in quoteResponseMeta paths
-      result.quoteResponseMeta?.quoteResponse?.inputMint ||
-      result.quoteResponseMeta?.original?.inputMint ||
-      // Or try to get it from SwapResult
-      result.swapResult?.inputMint ||
-      // Or from top level
-      result.inputMint;
-      
-    const outputToken = 
-      // Look for mint in quoteResponseMeta paths
-      result.quoteResponseMeta?.quoteResponse?.outputMint ||
-      result.quoteResponseMeta?.original?.outputMint || 
-      // Or try to get it from SwapResult
-      result.swapResult?.outputMint ||
-      // Or from top level
-      result.outputMint;
-      
+    // Try to get token addresses from several potential sources
+    if (result.quoteResponseMeta?.quoteResponse) {
+      inputToken = result.quoteResponseMeta.quoteResponse.inputMint;
+      outputToken = result.quoteResponseMeta.quoteResponse.outputMint;
+    }
+    else if (result.swapResult) {
+      inputToken = result.swapResult.inputMint || result.inputMint;
+      outputToken = result.swapResult.outputMint || result.outputMint;
+    }
+    
+    // Extract amounts
     const inputAmount = 
       result.quoteResponseMeta?.quoteResponse?.inputAmount ||
       result.quoteResponseMeta?.original?.inputAmount ||
@@ -62,62 +64,32 @@ export function handleJupiterSuccess(result) {
       result.outputAmount || 
       '0';
     
-    // Extract addresses from SwapResult
-    const finalInputToken = inputToken || result.swapResult?.inputAddress?.toString();
-    const finalOutputToken = outputToken || result.swapResult?.outputAddress?.toString();
-    
-    // Build trade details object with fallbacks
+    // Construct trade details
     const tradeDetails = {
       transaction_hash: signature,
       wallet_address: walletAddress,
-      token_in: finalInputToken,
-      token_out: finalOutputToken,
-      amount_in: inputAmount,
-      amount_out: outputAmount,
-      block_timestamp: new Date().toISOString()
+      token_in: inputToken,
+      token_out: outputToken,
+      amount_in: inputAmount.toString(),
+      amount_out: outputAmount.toString(),
+      block_timestamp: new Date().toISOString(),
+      price_in_usd: '0',
+      price_out_usd: '0'
+      // Removing the fees field since it doesn't exist in the database
     };
     
     console.log('📊 Sending trade details to API:', tradeDetails);
     
-    // Mock or calculate fee (can be replaced with actual calculation later)
-    const fee = inputAmount ? parseFloat(inputAmount) * 0.0035 : 0; // Assuming 0.35% fee
-    
-    // Mock USD prices (can be replaced with price API integration later)
-    const priceInUsd = 1.0; // Mock price of input token in USD
-    const priceOutUsd = 1.0; // Mock price of output token in USD
-    
     // Record the trade
-    fetch('/api/trades/record', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        transaction_hash: signature,
-        wallet_address: walletAddress,
-        token_in: inputToken,
-        token_out: outputToken,
-        amount_in: inputAmount,
-        amount_out: outputAmount,
-        block_timestamp: new Date().toISOString(),
-        fees: fee.toString(),
-        price_in_usd: priceInUsd.toString(),
-        price_out_usd: priceOutUsd.toString()
-      }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          console.log('✅ Trade recorded:', data.trade_id);
-        } else {
-          console.warn('⚠️ Trade recording response issue:', data);
+    recordJupiterTrade(tradeDetails)
+      .then(response => {
+        console.log('Trade recording response:', response);
+        if (!response.success) {
+          console.error('Failed to record trade:', response.error);
         }
       })
-      .catch(error => {
-        console.error('❌ Error recording trade:', error);
-      });
-      
+      .catch(err => console.error('Failed to record trade:', err));
   } catch (error) {
-    console.error('❌ Error processing Jupiter success:', error);
+    console.error('Error processing Jupiter result:', error);
   }
 } 
