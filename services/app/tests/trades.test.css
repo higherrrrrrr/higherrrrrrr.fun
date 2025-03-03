@@ -1,0 +1,146 @@
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .heading {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .filterSection {
+    margin-bottom: 1.5rem;
+  }
+  
+  .filterForm {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .filterInput {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .filterButton, .clearButton, .refreshButton, .loadMoreButton {
+    padding: 0.5rem 1rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .clearButton {
+    background-color: #6b7280;
+  }
+  
+  .refreshButton {
+    margin-bottom: 1rem;
+  }
+  
+  .loadMoreButton {
+    margin-top: 1rem;
+  }
+  
+  .filterButton:hover, .clearButton:hover, .refreshButton:hover, .loadMoreButton:hover {
+    opacity: 0.9;
+  }
+  
+  .filterButton:disabled, .clearButton:disabled, .refreshButton:disabled, .loadMoreButton:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+  }
+  
+  .error {
+    padding: 1rem;
+    background-color: #fee2e2;
+    color: #dc2626;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+  
+  .noTrades {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    background-color: #f9fafb;
+    border-radius: 4px;
+  }
+  
+  .tradesTable {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .tableHeader {
+    display: grid;
+    grid-template-columns: 0.5fr 1.5fr 2fr 1.5fr 1.5fr 1fr;
+    background-color: #f3f4f6;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+  }
+  
+  .tableRow {
+    display: grid;
+    grid-template-columns: 0.5fr 1.5fr 2fr 1.5fr 1.5fr 1fr;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .tableRow:hover {
+    background-color: #f9fafb;
+  }
+  
+  .wallet, .tokenAddress {
+    font-family: monospace;
+    background-color: #f3f4f6;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  
+  .tokens, .amounts {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .arrow {
+    color: #6b7280;
+  }
+  
+  .time {
+    color: #6b7280;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .actionLink {
+    padding: 0.25rem 0.5rem;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.875rem;
+  }
+  
+  .actionLink:hover {
+    background-color: #2563eb;
+  }
+  
+  .loadMoreContainer {
+    display: flex;
+    justify-content: center;
+    padding: 1rem 0;
+  }
