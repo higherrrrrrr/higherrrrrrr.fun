@@ -134,8 +134,7 @@ export default function CreatorDashboard() {
           <GlitchText>Creator Dashboard</GlitchText>
         </h1>
         <p className="text-xl text-green-500/80">
-          Your all-in-one memecoin launchpad — create, deploy, and grow
-          your token with our comprehensive tools and resources
+          Create and deploy tokens, grow your community
         </p>
       </div>
 
@@ -200,8 +199,8 @@ export default function CreatorDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Launch Your Token</h3>
-              <p className="text-center text-green-500/80">Create and deploy your token on Solana</p>
+              <h3 className="text-xl font-bold mb-2">Launch Token</h3>
+              <p className="text-center text-green-500/80">Create and deploy a new token on Solana</p>
             </div>
           </div>
         </div>
