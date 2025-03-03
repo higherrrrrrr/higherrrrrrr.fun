@@ -7,7 +7,7 @@ import { GlitchText } from '../../components/GlitchText';
 export default function CreatorDashboard() {
   const router = useRouter();
   
-  // Add state for current token index
+  // Add state for current token index with proper persistence
   const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
 
   // Expanded mock data for demonstration
@@ -43,6 +43,11 @@ export default function CreatorDashboard() {
       created: '2y ago'
     }
   ];
+
+  // Function to handle dot navigation with proper state update
+  const handleDotClick = useCallback((index) => {
+    setCurrentTokenIndex(index);
+  }, []);
 
   // Navigation handlers
   const handleCreateToken = () => router.push('/token/create');
@@ -85,6 +90,23 @@ export default function CreatorDashboard() {
     }
   };
 
+  // Load saved token index from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedIndex = localStorage.getItem('currentTokenIndex');
+      if (savedIndex !== null) {
+        setCurrentTokenIndex(parseInt(savedIndex, 10));
+      }
+    }
+  }, []);
+
+  // Save token index to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentTokenIndex', currentTokenIndex.toString());
+    }
+  }, [currentTokenIndex]);
+
   const [showWizard, setShowWizard] = useState(false);
 
   useEffect(() => {
@@ -105,11 +127,6 @@ export default function CreatorDashboard() {
     setShowWizard(false);
   };
 
-  // Function to handle dot navigation
-  const handleDotClick = (index) => {
-    setCurrentTokenIndex(index);
-  };
-
   return (
     <div className="min-h-screen bg-black text-green-500 p-8">
       <div id="dashboard-header" className="mb-12 text-center">
@@ -117,7 +134,8 @@ export default function CreatorDashboard() {
           <GlitchText>Creator Dashboard</GlitchText>
         </h1>
         <p className="text-xl text-green-500/80">
-          Create and deploy Cult Coins, grow your communities
+          Your all-in-one memecoin launchpad — create, deploy, and grow
+          your token with our comprehensive tools and resources
         </p>
       </div>
 
@@ -155,7 +173,7 @@ export default function CreatorDashboard() {
               </div>
             </div>
             
-            {/* Pagination dots */}
+            {/* Pagination dots with improved state handling */}
             <div className="flex justify-center mt-6 space-x-2">
               {myTokens.map((_, index) => (
                 <button
@@ -170,7 +188,7 @@ export default function CreatorDashboard() {
             </div>
           </div>
           
-          {/* Launch Your Token card (replacing Add New Token) */}
+          {/* Launch Your Token card */}
           <div 
             id="launch-section" 
             className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition cursor-pointer"
@@ -182,8 +200,8 @@ export default function CreatorDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Launch New Token</h3>
-              <p className="text-center text-green-500/80">Create and deploy a new token on Solana</p>
+              <h3 className="text-xl font-bold mb-2">Launch Your Token</h3>
+              <p className="text-center text-green-500/80">Create and deploy your token on Solana</p>
             </div>
           </div>
         </div>
@@ -243,7 +261,7 @@ export default function CreatorDashboard() {
         </div>
       </div>
 
-      {/* Community Essentials Checklist - keeping the existing one */}
+      {/* Community Essentials Checklist */}
       <div id="checklist-section" className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Community Essentials Checklist</h2>
         <div className="border border-green-500/30 rounded-lg p-6">
