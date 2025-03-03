@@ -246,37 +246,31 @@ export default function CreatorDashboard() {
     const [currentStep, setCurrentStep] = useState(0);
     const [dontShowAgain, setDontShowAgain] = useState(false);
     
-    // Define wizard steps with target element IDs
+    // Define wizard steps
     const steps = [
       {
         title: "Welcome to Your Creator Dashboard",
-        content: "This is your command center for launching and managing your memecoin. Let's take a quick tour of the essential features.",
-        targetId: null
+        content: "This is your command center for launching and managing your memecoin. Let's take a quick tour of the essential features."
       },
       {
         title: "Manage Your Tokens",
-        content: "Here you can view your existing tokens or create a new one. Each card shows key metrics to track your token's performance.",
-        targetId: "tokens-section"
+        content: "Here you can view your existing tokens or create a new one. Each card shows key metrics to track your token's performance."
       },
       {
         title: "Launch Your Token",
-        content: "Ready to go live? Use this section to deploy your token to the blockchain and make it available for trading.",
-        targetId: "launch-section"
+        content: "Ready to go live? Use this section to deploy your token to the blockchain and make it available for trading."
       },
       {
         title: "Essential Creator Tools",
-        content: "These tools help you build and manage your community. Set up a Telegram bot and create compelling lore for your token.",
-        targetId: "tools-section"
+        content: "These tools help you build and manage your community. Set up a Telegram bot and create compelling lore for your token."
       },
       {
         title: "Community Essentials Checklist",
-        content: "Follow this checklist to ensure you've covered all the basics for a successful community launch. We'll track your progress automatically.",
-        targetId: "checklist-section"
+        content: "Follow this checklist to ensure you've covered all the basics for a successful community launch. We'll track your progress automatically."
       },
       {
         title: "You're All Set!",
-        content: "You now have all the tools you need to create, launch, and grow your memecoin. Need help? Check out our resources section or contact support.",
-        targetId: null
+        content: "You now have all the tools you need to create, launch, and grow your memecoin. Need help? Check out our resources section or contact support."
       }
     ];
     
@@ -314,41 +308,26 @@ export default function CreatorDashboard() {
     const currentStepData = steps[currentStep];
     const isLastStep = currentStep === steps.length - 1;
     
-    // Scroll to target element
-    useEffect(() => {
-      const targetId = steps[currentStep]?.targetId;
-      if (targetId) {
-        const element = document.getElementById(targetId);
-        if (element) {
-          element.scrollIntoView({ behavior: 'auto', block: 'center' });
-        }
-      }
-    }, [currentStep]);
-    
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/50"></div>
-        
-        {/* Wizard dialog - completely standardized */}
+      <div className="fixed bottom-6 right-6 z-50 max-w-sm">
+        {/* Wizard dialog - fixed in bottom right */}
         <div 
-          className="relative w-11/12 max-w-md p-6 rounded-lg z-10"
+          className="p-6 rounded-lg bg-black border border-green-400"
           style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-            border: '2px solid #4ade80',
-            boxShadow: '0 0 30px #4ade80, 0 0 15px #4ade80',
+            width: '350px',
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            border: '1px solid #4ade80',
+            boxShadow: '0 0 10px rgba(74, 222, 128, 0.5)'
           }}
         >
           <h3 
-            className="text-xl font-bold mb-2"
-            style={{ color: '#4ade80' }}
+            className="text-xl font-bold mb-2 text-green-400"
           >
             {currentStepData.title}
           </h3>
           
           <p 
-            className="mb-6"
-            style={{ color: '#4ade80' }}
+            className="mb-6 text-green-400"
           >
             {currentStepData.content}
           </p>
@@ -358,12 +337,10 @@ export default function CreatorDashboard() {
             {steps.map((_, index) => (
               <div 
                 key={index}
+                className={`rounded-full ${index === currentStep ? 'bg-green-400' : 'bg-green-400/30'}`}
                 style={{
                   width: index === currentStep ? '8px' : '6px',
-                  height: index === currentStep ? '8px' : '6px',
-                  borderRadius: '50%',
-                  backgroundColor: index === currentStep ? '#4ade80' : 'rgba(74, 222, 128, 0.3)',
-                  boxShadow: index === currentStep ? '0 0 8px #4ade80' : 'none'
+                  height: index === currentStep ? '8px' : '6px'
                 }}
               ></div>
             ))}
@@ -381,18 +358,7 @@ export default function CreatorDashboard() {
                     onChange={() => setDontShowAgain(!dontShowAgain)}
                   />
                   <div 
-                    style={{
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '4px',
-                      marginRight: '8px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: dontShowAgain ? '#4ade80' : 'transparent',
-                      border: '1px solid #4ade80',
-                      boxShadow: dontShowAgain ? '0 0 8px #4ade80' : 'none'
-                    }}
+                    className={`w-4 h-4 rounded border border-green-400 mr-2 flex items-center justify-center ${dontShowAgain ? 'bg-green-400' : 'bg-transparent'}`}
                   >
                     {dontShowAgain && (
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-black" viewBox="0 0 20 20" fill="currentColor">
@@ -400,7 +366,7 @@ export default function CreatorDashboard() {
                       </svg>
                     )}
                   </div>
-                  <span style={{ fontSize: '0.875rem', color: '#4ade80' }}>
+                  <span className="text-sm text-green-400">
                     Don't show again
                   </span>
                 </label>
@@ -410,11 +376,7 @@ export default function CreatorDashboard() {
             <div className="flex space-x-4">
               {currentStep > 0 && (
                 <button 
-                  style={{ 
-                    padding: '0.5rem 1rem',
-                    color: '#4ade80',
-                    transition: 'all 0.2s'
-                  }}
+                  className="text-green-400"
                   onClick={handlePrevious}
                 >
                   Back
@@ -422,15 +384,7 @@ export default function CreatorDashboard() {
               )}
               
               <button 
-                style={{ 
-                  padding: '0.5rem 1.5rem',
-                  backgroundColor: 'rgba(74, 222, 128, 0.4)',
-                  border: '1px solid #4ade80',
-                  borderRadius: '0.5rem',
-                  color: '#4ade80',
-                  boxShadow: '0 0 12px #4ade80',
-                  transition: 'all 0.2s'
-                }}
+                className="px-4 py-2 bg-green-400/20 border border-green-400 rounded-md text-green-400"
                 onClick={handleNext}
               >
                 {isLastStep ? 'Get Started' : 'Next'}
@@ -438,11 +392,7 @@ export default function CreatorDashboard() {
               
               {!isLastStep && (
                 <button 
-                  style={{ 
-                    padding: '0.5rem 1rem',
-                    color: '#4ade80',
-                    transition: 'all 0.2s'
-                  }}
+                  className="text-green-400"
                   onClick={handleSkip}
                 >
                   Skip
