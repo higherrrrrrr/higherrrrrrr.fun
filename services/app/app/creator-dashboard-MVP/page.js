@@ -7,7 +7,10 @@ import { GlitchText } from '../../components/GlitchText';
 export default function CreatorDashboard() {
   const router = useRouter();
   
-  // Mock data for demonstration
+  // Add state for current token index
+  const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
+
+  // Expanded mock data for demonstration
   const myTokens = [
     {
       id: 'usdc',
@@ -19,7 +22,26 @@ export default function CreatorDashboard() {
       holders: '22,536,826',
       created: '4y ago'
     },
-    // Add more mock tokens as needed
+    {
+      id: 'sol',
+      name: 'Solana',
+      symbol: 'SOL',
+      volume24h: '$1.5B',
+      trustScore: '95%',
+      trades24h: '1,245,632',
+      holders: '15,789,421',
+      created: '3y ago'
+    },
+    {
+      id: 'doge',
+      name: 'Dogecoin',
+      symbol: 'DOGE',
+      volume24h: '$800M',
+      trustScore: '85%',
+      trades24h: '987,654',
+      holders: '8,765,432',
+      created: '2y ago'
+    }
   ];
 
   // Navigation handlers
@@ -83,6 +105,11 @@ export default function CreatorDashboard() {
     setShowWizard(false);
   };
 
+  // Function to handle dot navigation
+  const handleDotClick = (index) => {
+    setCurrentTokenIndex(index);
+  };
+
   return (
     <div className="min-h-screen bg-black text-green-500 p-8">
       <div id="dashboard-header" className="mb-12 text-center">
@@ -102,30 +129,44 @@ export default function CreatorDashboard() {
           <div className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition">
             <div className="flex justify-between mb-2">
               <div>
-                <h3 className="text-2xl font-bold">USD Coin</h3>
-                <p className="text-green-500/80">USDC | all</p>
+                <h3 className="text-2xl font-bold">{myTokens[currentTokenIndex].name}</h3>
+                <p className="text-green-500/80">{myTokens[currentTokenIndex].symbol} | all</p>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold flex items-center">
-                  $2.0B<span className="ml-1">🔥</span>
+                  {myTokens[currentTokenIndex].volume24h}<span className="ml-1">🔥</span>
                 </p>
                 <p className="text-green-500/80">24h Volume</p>
               </div>
             </div>
-            <p className="mb-4 text-green-500/80">Trust Score: <span className="text-green-500">100%</span></p>
+            <p className="mb-4 text-green-500/80">Trust Score: <span className="text-green-500">{myTokens[currentTokenIndex].trustScore}</span></p>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-green-500/80">Trades (24h)</p>
-                <p className="font-bold">1,862,974</p>
+                <p className="font-bold">{myTokens[currentTokenIndex].trades24h}</p>
               </div>
               <div>
                 <p className="text-sm text-green-500/80">Holders</p>
-                <p className="font-bold">22,536,826</p>
+                <p className="font-bold">{myTokens[currentTokenIndex].holders}</p>
               </div>
               <div>
                 <p className="text-sm text-green-500/80">Created</p>
-                <p className="font-bold">4y ago</p>
+                <p className="font-bold">{myTokens[currentTokenIndex].created}</p>
               </div>
+            </div>
+            
+            {/* Pagination dots */}
+            <div className="flex justify-center mt-6 space-x-2">
+              {myTokens.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDotClick(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    index === currentTokenIndex ? 'bg-green-500' : 'bg-green-500/30'
+                  }`}
+                  aria-label={`View token ${index + 1}`}
+                />
+              ))}
             </div>
           </div>
           
@@ -141,8 +182,8 @@ export default function CreatorDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Launch Your Token</h3>
-              <p className="text-center text-green-500/80">Create and deploy your token on Solana</p>
+              <h3 className="text-xl font-bold mb-2">Launch New Token</h3>
+              <p className="text-center text-green-500/80">Create and deploy a new token on Solana</p>
             </div>
           </div>
         </div>
