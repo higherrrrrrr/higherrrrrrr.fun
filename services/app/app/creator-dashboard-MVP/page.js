@@ -253,7 +253,7 @@ export default function CreatorDashboard() {
         content: "This is your command center for launching and managing your memecoin. Let's take a quick tour of the essential features."
       },
       {
-        title: "Manage Your Tokens",
+        title: "My Tokens",
         content: "Here you can view your existing tokens or create a new one. Each card shows key metrics to track your token's performance."
       },
       {
@@ -261,7 +261,7 @@ export default function CreatorDashboard() {
         content: "Ready to go live? Use this section to deploy your token to the blockchain and make it available for trading."
       },
       {
-        title: "Essential Creator Tools",
+        title: "Creator Tools",
         content: "These tools help you build and manage your community. Set up a Telegram bot and create compelling lore for your token."
       },
       {
@@ -309,8 +309,8 @@ export default function CreatorDashboard() {
     const isLastStep = currentStep === steps.length - 1;
     
     return (
-      <div className="fixed bottom-6 right-6 z-50 max-w-sm">
-        {/* Wizard dialog - fixed in bottom right */}
+      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 max-w-sm">
+        {/* Wizard dialog - fixed on right side, vertically centered */}
         <div 
           className="p-6 rounded-lg bg-black border border-green-400"
           style={{
