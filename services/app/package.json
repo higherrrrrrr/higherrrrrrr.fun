@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "migrate": "node scripts/migrate.js",
-    "migrate:down": "node-pg-migrate down"
+    "migrate:down": "node-pg-migrate down",
+    "test-schema": "node scripts/test-schema.js"
   },
   "dependencies": {
     "@duneanalytics/client-sdk": "^0.2.5",
