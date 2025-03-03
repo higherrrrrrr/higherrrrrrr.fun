@@ -90,7 +90,7 @@ export default function CreatorDashboard() {
           <GlitchText>Creator Dashboard</GlitchText>
         </h1>
         <p className="text-xl text-green-500/80">
-          Create, deploy, and grow your token
+          Create and deploy Cult Coins, grow your communities
         </p>
       </div>
 
