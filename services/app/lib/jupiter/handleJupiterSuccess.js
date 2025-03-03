@@ -8,6 +8,19 @@ export function handleJupiterSuccess(result) {
   console.log('🎉 Jupiter swap completed:', result);
   
   try {
+    const signature = result.txid || result.signature;
+    if (!signature) {
+      console.warn('⚠️ No transaction signature found in Jupiter result');
+      return;
+    }
+    
+    // Get wallet address from result
+    const walletAddress = result.wallet?.publicKey?.toString();
+    if (!walletAddress) {
+      console.warn('⚠️ No wallet address found in Jupiter result');
+      return;
+    }
+    
     // First, let's examine the result structure more carefully
     console.log('Jupiter result structure:', {
       txid: result.txid,
@@ -35,18 +48,6 @@ export function handleJupiterSuccess(result) {
       // Or from top level
       result.outputMint;
       
-    // Look for wallet address in various locations
-    const walletAddress = 
-      result.walletAddress || 
-      result.wallet ||
-      result.swapResult?.userPublicKey ||
-      result.swapResult?.user?.toString() ||
-      // Try to get from Jupiter global object
-      (typeof window !== 'undefined' && window.Jupiter?.user?.publicKey?.toString()) ||
-      // Try to get from Phantom wallet if connected
-      (typeof window !== 'undefined' && window.solana?.publicKey?.toString()) ||
-      'unknown';
-    
     const inputAmount = 
       result.quoteResponseMeta?.quoteResponse?.inputAmount ||
       result.quoteResponseMeta?.original?.inputAmount ||
@@ -67,7 +68,7 @@ export function handleJupiterSuccess(result) {
     
     // Build trade details object with fallbacks
     const tradeDetails = {
-      transaction_hash: result.txid,
+      transaction_hash: signature,
       wallet_address: walletAddress,
       token_in: finalInputToken,
       token_out: finalOutputToken,
@@ -78,11 +79,36 @@ export function handleJupiterSuccess(result) {
     
     console.log('📊 Sending trade details to API:', tradeDetails);
     
-    // Record the trade (don't wait for the result)
-    recordJupiterTrade(tradeDetails)
-      .then((data) => {
-        if (data?.success) {
-          console.log('✅ Trade recorded successfully:', data.trade_id);
+    // Mock or calculate fee (can be replaced with actual calculation later)
+    const fee = inputAmount ? parseFloat(inputAmount) * 0.0035 : 0; // Assuming 0.35% fee
+    
+    // Mock USD prices (can be replaced with price API integration later)
+    const priceInUsd = 1.0; // Mock price of input token in USD
+    const priceOutUsd = 1.0; // Mock price of output token in USD
+    
+    // Record the trade
+    fetch('/api/trades/record', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        transaction_hash: signature,
+        wallet_address: walletAddress,
+        token_in: inputToken,
+        token_out: outputToken,
+        amount_in: inputAmount,
+        amount_out: outputAmount,
+        block_timestamp: new Date().toISOString(),
+        fees: fee.toString(),
+        price_in_usd: priceInUsd.toString(),
+        price_out_usd: priceOutUsd.toString()
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('✅ Trade recorded:', data.trade_id);
         } else {
           console.warn('⚠️ Trade recording response issue:', data);
         }

@@ -45,7 +45,11 @@ export function attachTradeRecorder(jupiterInstance) {
         token_out: args[0]?.outputTokenAccount?.toString(),
         amount_in: args[0]?.inputAmount?.toString(),
         amount_out: args[0]?.minimumOutAmount?.toString(),
-        block_timestamp: new Date().toISOString()
+        block_timestamp: new Date().toISOString(),
+        // Mock values for now - to be replaced with actual calculations
+        fees: (parseFloat(args[0]?.inputAmount || 0) * 0.0035).toString(), // Assuming 0.35% fee
+        price_in_usd: 1.0, // Default mock value
+        price_out_usd: 1.0  // Default mock value
       };
       
       // Record the trade asynchronously (don't await)

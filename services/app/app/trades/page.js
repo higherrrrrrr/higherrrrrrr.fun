@@ -129,6 +129,8 @@ export default function TradesDashboard() {
               <div>Wallet</div>
               <div>Tokens</div>
               <div>Amounts</div>
+              <div>Fees</div>
+              <div>USD Value</div>
               <div>Time</div>
               <div>Actions</div>
             </div>
@@ -152,6 +154,13 @@ export default function TradesDashboard() {
                   <div>{parseFloat(trade.amount_in).toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
                   <div className={styles.arrow}>→</div>
                   <div>{parseFloat(trade.amount_out).toLocaleString(undefined, { maximumFractionDigits: 4 })}</div>
+                </div>
+                <div className={styles.fees}>
+                  {parseFloat(trade.fees).toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                </div>
+                <div className={styles.usdValue}>
+                  ${parseFloat(trade.amount_in * trade.price_in_usd).toLocaleString(undefined, { maximumFractionDigits: 2 })} → 
+                  ${parseFloat(trade.amount_out * trade.price_out_usd).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </div>
                 <div className={styles.time}>
                   {new Date(trade.created_at).toLocaleString()}
