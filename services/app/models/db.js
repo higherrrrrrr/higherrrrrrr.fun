@@ -1,8 +1,8 @@
 import { Pool } from 'pg';
-import config from '../config/config';
 
+// Use direct environment variables instead of config file
 const pool = new Pool({
-  connectionString: config.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
   } : false
@@ -16,5 +16,16 @@ pool.query('SELECT NOW()', (err) => {
     console.log('Database connected successfully');
   }
 });
+
+// Query helper function
+export async function query(text, params) {
+  try {
+    const result = await pool.query(text, params);
+    return result;
+  } catch (error) {
+    console.error('Database query error:', error);
+    throw error;
+  }
+}
 
 export default pool;

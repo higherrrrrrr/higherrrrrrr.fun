@@ -103,6 +103,26 @@ export default function RootLayout({ children }) {
           data-preload
           onLoad={() => {
             console.log('Jupiter Terminal script loaded');
+            // Store reference to wallet when Jupiter initializes
+            if (typeof window !== 'undefined') {
+              const originalInit = window.Jupiter?.init;
+              if (originalInit) {
+                window.Jupiter.init = function(config) {
+                  // Store reference to the wallet when connecting
+                  if (config.onSuccess) {
+                    const originalOnSuccess = config.onSuccess;
+                    config.onSuccess = function(result) {
+                      // Store wallet reference if available
+                      if (result.wallet) {
+                        window.jupiterWallet = result.wallet;
+                      }
+                      return originalOnSuccess(result);
+                    };
+                  }
+                  return originalInit.call(this, config);
+                };
+              }
+            }
           }}
           onError={(e) => {
             console.error('Error loading Jupiter Terminal:', e);

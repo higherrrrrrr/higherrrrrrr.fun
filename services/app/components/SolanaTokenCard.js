@@ -2,6 +2,7 @@ import { GlowBorder } from './GlowBorder';
 import Link from 'next/link';
 import React, { useState, useCallback } from 'react';
 import { Connection } from '@solana/web3.js';
+import { handleJupiterSuccess } from '@/lib/jupiter/handleJupiterSuccess';
 
 export function SolanaTokenList({ tokens, category }) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -134,6 +135,7 @@ export function SolanaTokenCard({ token, category }) {
           displayMode: "modal",
           defaultExplorer: "Solana Explorer",
           strictTokenList: false,
+          onSuccess: handleJupiterSuccess,
           formProps: {
             // Input token (what user pays with)
             initialInputMint: token.token_address, // The token they want to sell
