@@ -288,7 +288,7 @@ export default function LorePage() {
           <div className="self-end absolute top-8 right-8">
             <button
               onClick={toggleEditMode}
-              className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg border border-green-500/30 transition flex items-center"
+              className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg border border-green-500/30 transition flex items-center hover:shadow-[0_0_10px_rgba(34,197,94,0.3)]"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -297,16 +297,16 @@ export default function LorePage() {
             </button>
           </div>
           
-          {/* Project Title - Glitchy and prominent */}
+          {/* Project Title - Smaller and glitchy like Wen Lamboo */}
           <div className="text-center mb-6">
-            <h1 className="text-6xl md:text-7xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-green-500 to-pink-500">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-green-500 to-pink-500">
               <GlitchText>{formData.projectName}</GlitchText>
             </h1>
           </div>
           
           {/* Project Description */}
           <div className="text-center mb-10 max-w-2xl">
-            <p className="text-xl text-green-500">
+            <p className="text-lg text-green-500">
               {formData.description}
             </p>
           </div>
@@ -318,7 +318,7 @@ export default function LorePage() {
                 href={formData.websiteUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-green-500 hover:text-green-400 transition rounded-full border border-green-500/30 p-3"
+                className="text-green-500 hover:text-green-400 transition rounded-full border border-green-500/30 p-3 hover:shadow-[0_0_10px_rgba(34,197,94,0.3)]"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm6.918 6h-3.215a16.301 16.301 0 00-.852-3.204A8.005 8.005 0 0118.918 8zM12 4.25c.955 0 2.072 1.445 2.706 4.75H9.294C9.928 5.695 11.045 4.25 12 4.25zM4.25 12c0-.69.062-1.363.18-2h3.675a17.92 17.92 0 00-.1 2c0 .689.034 1.359.1 2H4.43c-.118-.637-.18-1.31-.18-2zm.832 4h3.215c.188 1.14.478 2.22.852 3.204A8.005 8.005 0 015.082 16zM5.082 8h3.215c.374-.984.664-2.064.852-3.204A8.005 8.005 0 015.082 8zM12 19.75c-.955 0-2.072-1.445-2.706-4.75h5.412c-.634 3.305-1.751 4.75-2.706 4.75zm3.328-6.75a16.043 16.043 0 00.1-2c0-.689-.034-1.359-.1-2h5.344c.118.637.18 1.31.18 2s-.062 1.363-.18 2h-5.344zm1.87 5.954a16.301 16.301 0 00-.852-3.204h3.215a8.005 8.005 0 01-2.363 3.204z"/>
@@ -331,7 +331,7 @@ export default function LorePage() {
                 href={formData.twitterUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-green-500 hover:text-green-400 transition rounded-full border border-green-500/30 p-3"
+                className="text-green-500 hover:text-green-400 transition rounded-full border border-green-500/30 p-3 hover:shadow-[0_0_10px_rgba(34,197,94,0.3)]"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/>
@@ -344,7 +344,7 @@ export default function LorePage() {
                 href={formData.telegramUrl} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-green-500 hover:text-green-400 transition rounded-full border border-green-500/30 p-3"
+                className="text-green-500 hover:text-green-400 transition rounded-full border border-green-500/30 p-3 hover:shadow-[0_0_10px_rgba(34,197,94,0.3)]"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm.14 19.018c-.237 0-.47-.033-.696-.08l-1.92 1.176v-1.613a6.558 6.558 0 01-2.483-1.532 6.559 6.559 0 01-1.931-4.658c0-1.627.59-3.202 1.658-4.427a6.558 6.558 0 014.572-2.092c1.738 0 3.37.675 4.6 1.9 1.23 1.226 1.91 2.856 1.91 4.6 0 1.737-.68 3.373-1.91 4.6-1.23 1.226-2.862 1.9-4.6 1.9h-.2z"/>
@@ -353,17 +353,19 @@ export default function LorePage() {
             )}
           </div>
           
-          {/* Project Image - In a bordered container like Wen Lamboo */}
+          {/* Project Image - Square with spacing and glow effect */}
           {imagePreview && (
-            <div className="mb-16 w-full max-w-2xl">
-              <div className="relative w-full h-[400px] border border-green-500/30 rounded-lg overflow-hidden">
-                <Image 
-                  src={imagePreview}
-                  alt={formData.projectName}
-                  fill
-                  style={{ objectFit: 'contain' }}
-                  className="rounded-lg"
-                />
+            <div className="mb-16 w-full max-w-md">
+              <div className="relative aspect-square border border-green-500/30 rounded-lg p-4 bg-black hover:shadow-[0_0_15px_rgba(34,197,94,0.4)] transition-shadow duration-300">
+                <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
+                  <Image 
+                    src={imagePreview}
+                    alt={formData.projectName}
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    className="rounded-lg"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -375,19 +377,19 @@ export default function LorePage() {
             </div>
           </div>
           
-          {/* Share Button - Floating in bottom left */}
-          <div className="fixed bottom-8 left-8">
+          {/* Share Button - Floating in bottom center */}
+          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2">
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 alert('Link copied to clipboard!');
               }}
-              className="p-3 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-full border border-green-500/30 transition shadow-lg"
-              title="Share Lore Page"
+              className="px-6 py-3 bg-green-500/20 hover:bg-green-500/30 text-green-500 rounded-lg border border-green-500/30 transition flex items-center hover:shadow-[0_0_10px_rgba(34,197,94,0.3)]"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
               </svg>
+              Share Lore Page
             </button>
           </div>
         </div>
