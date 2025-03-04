@@ -30,21 +30,50 @@ export default function LorePage() {
   
   // Load existing data
   useEffect(() => {
-    const storedData = localStorage.getItem(`lore_${id}`);
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
+    // Check if we have data in the global variable
+    if (window.__loreData) {
+      console.log("Found lore data in memory:", window.__loreData);
+      
       setFormData({
-        projectName: parsedData.projectName || '',
-        description: parsedData.description || '',
-        loreText: parsedData.loreText || '',
-        telegramUrl: parsedData.telegramUrl || '',
-        twitterUrl: parsedData.twitterUrl || '',
-        websiteUrl: parsedData.websiteUrl || '',
+        projectName: window.__loreData.projectName || '',
+        description: window.__loreData.description || '',
+        loreText: window.__loreData.loreText || '',
+        telegramUrl: window.__loreData.telegramUrl || '',
+        twitterUrl: window.__loreData.twitterUrl || '',
+        websiteUrl: window.__loreData.websiteUrl || '',
       });
-      setImagePreview(parsedData.imageUrl || null);
+      
+      setImagePreview(window.__loreData.imageUrl || null);
+      
+      // Optionally try to save to localStorage for persistence
+      try {
+        localStorage.setItem(`lore_${params.id}`, JSON.stringify(window.__loreData));
+      } catch (e) {
+        console.warn("Could not save to localStorage, but page will still display");
+      }
+    } else {
+      // Fallback to localStorage
+      try {
+        const storedData = localStorage.getItem(`lore_${params.id}`);
+        if (storedData) {
+          const parsedData = JSON.parse(storedData);
+          setFormData({
+            projectName: parsedData.projectName || '',
+            description: parsedData.description || '',
+            loreText: parsedData.loreText || '',
+            telegramUrl: parsedData.telegramUrl || '',
+            twitterUrl: parsedData.twitterUrl || '',
+            websiteUrl: parsedData.websiteUrl || '',
+          });
+          setImagePreview(parsedData.imageUrl || null);
+        }
+      } catch (e) {
+        console.error("Error loading data:", e);
+      }
     }
+    
     setLoading(false);
-  }, [id]);
+  }, [params.id]);
   
   // Handle form input changes
   const handleInputChange = (e) => {

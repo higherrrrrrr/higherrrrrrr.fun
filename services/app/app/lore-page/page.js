@@ -52,9 +52,9 @@ export default function CreateLorePage() {
   
   // Handle form submission
   const handleSubmit = () => {
-    // In a real app, you would save this to a database and get an ID
-    // For now, we'll use localStorage and a timestamp as the ID
-    const loreId = Date.now().toString();
+    // First, generate a unique ID if you don't already have one
+    const loreId = Math.random().toString(36).substring(2, 10);
+    console.log("Generated lore ID:", loreId); // Debug log
     
     // Save the lore data to localStorage
     const loreData = {
@@ -64,10 +64,28 @@ export default function CreateLorePage() {
       createdAt: new Date().toISOString()
     };
     
-    localStorage.setItem(`lore_${loreId}`, JSON.stringify(loreData));
-    
-    // Navigate to the created lore page
-    router.push(`/lore-page/${loreId}`);
+    const handleCreateLorePage = () => {
+      // Generate a simple ID
+      const loreId = Date.now().toString();
+      
+      // Create a global window variable to pass data between pages
+      // This avoids localStorage and URL parameter issues
+      window.__loreData = {
+        projectName: loreData.projectName || loreData.title || "My Token",
+        description: loreData.description || "",
+        loreText: loreData.loreText || loreData.content || "",
+        imageUrl: loreData.imageUrl || "",
+        createdAt: new Date().toISOString()
+      };
+      
+      console.log("Created lore data in memory:", window.__loreData);
+      
+      // Use Next.js router to navigate
+      router.push(`/lore-page/${loreId}`);
+    };
+
+    // Call this function when the create button is clicked
+    handleCreateLorePage();
   };
 
   return (
