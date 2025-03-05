@@ -11,3 +11,12 @@ __pycache__
 
 !artifacts/services/app/bot-configs/*.json
 services/app/bot-configs/*.json
+
+# Add these to your .gitignore for better privacy protection
+.DS_Store
+.vscode/
+*.log
+dist/
+build/
+coverage/
+.next/
