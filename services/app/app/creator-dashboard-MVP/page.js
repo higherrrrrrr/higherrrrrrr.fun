@@ -56,17 +56,27 @@ export default function CreatorDashboard() {
   const handleLorePageClick = () => router.push('/lore-page');
   const handleResourcesClick = () => router.push('/resources');
 
-  // Initial checklist items
+  // Updated checklist with switched order of "Set up BuyBot" and "Set up Captcha"
   const initialChecklist = [
-    { id: 'telegram-group', label: 'Set up Telegram group/channel', completed: false, link: '/resources/telegram-setup' },
-    { id: 'telegram-bot', label: 'Configure Telegram bot', completed: false, link: '/TG-Bot-Creator' },
+    { 
+      id: 'telegram-group', 
+      label: 'Set up Telegram group/channel', 
+      completed: false, 
+      link: '/resources/telegram-setup',
+      subItems: [
+        { id: 'captcha', label: 'Set up Captcha', completed: false, link: '/resources#antiSpam' },
+        { id: 'buy-bot', label: 'Set up BuyBot', completed: false, link: '/resources#buyBot' },
+        { id: 'moderators', label: 'Appoint Moderators', completed: false, link: '/resources#antiSpam' },
+        { id: 'pin-guidelines', label: 'Pin Community Guidelines', completed: false, link: '/resources/community-guidelines' }
+      ]
+    },
     { id: 'twitter', label: 'Create Twitter/X account', completed: false, link: '/resources/twitter-setup' },
     { id: 'dex-tools', label: 'Register on DEX Tools/Screener', completed: false, link: '/resources/dex-registration' },
-    { id: 'announcement', label: 'Create token announcement', completed: false, link: '/resources/announcement-template' },
-    { id: 'guidelines', label: 'Establish community guidelines', completed: false, link: '/resources/community-guidelines' },
+    { id: 'telegram-bot', label: 'Configure Telegram Bot/Meme Generator', completed: false, link: '/TG-Bot-Creator' },
+    { id: 'lore-page', label: 'Create Lore Page', completed: false, link: '/lore-page' },
   ];
-
-  // Load saved progress from localStorage
+  
+  // Load saved progress from localStorage with support for nested items
   const [checklist, setChecklist] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedChecklist = localStorage.getItem('communityChecklist');
@@ -75,18 +85,52 @@ export default function CreatorDashboard() {
     return initialChecklist;
   });
 
-  // Calculate completion percentage
-  const completedCount = checklist.filter(item => item.completed).length;
-  const completionPercentage = Math.round((completedCount / checklist.length) * 100);
+  // Calculate completion percentage including sub-items
+  const calculateCompletionPercentage = (list) => {
+    let totalItems = 0;
+    let completedItems = 0;
+    
+    list.forEach(item => {
+      totalItems++;
+      if (item.completed) completedItems++;
+      
+      if (item.subItems && item.subItems.length > 0) {
+        totalItems += item.subItems.length;
+        completedItems += item.subItems.filter(subItem => subItem.completed).length;
+      }
+    });
+    
+    return Math.round((completedItems / totalItems) * 100);
+  };
+  
+  const completionPercentage = calculateCompletionPercentage(checklist);
 
-  // Toggle item completion
-  const toggleItem = (id) => {
-    const updatedChecklist = checklist.map(item => 
-      item.id === id ? { ...item, completed: !item.completed } : item
-    );
-    setChecklist(updatedChecklist);
+  // Toggle item completion with support for sub-items
+  const toggleItem = (id, parentId = null) => {
+    if (parentId) {
+      // Toggle sub-item
+      const updatedChecklist = checklist.map(item => {
+        if (item.id === parentId && item.subItems) {
+          return {
+            ...item,
+            subItems: item.subItems.map(subItem => 
+              subItem.id === id ? { ...subItem, completed: !subItem.completed } : subItem
+            )
+          };
+        }
+        return item;
+      });
+      setChecklist(updatedChecklist);
+    } else {
+      // Toggle main item
+      const updatedChecklist = checklist.map(item => 
+        item.id === id ? { ...item, completed: !item.completed } : item
+      );
+      setChecklist(updatedChecklist);
+    }
+    
     if (typeof window !== 'undefined') {
-      localStorage.setItem('communityChecklist', JSON.stringify(updatedChecklist));
+      localStorage.setItem('communityChecklist', JSON.stringify(checklist));
     }
   };
 
@@ -244,13 +288,14 @@ export default function CreatorDashboard() {
           
           {/* Resources */}
           <div 
+            id="resources-section" 
             className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition cursor-pointer"
-            onClick={handleResourcesClick}
+            onClick={() => router.push('/resources')}
           >
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center h-full">
               <div className="w-16 h-16 rounded-full border border-green-500 flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-2">Resources</h3>
@@ -278,35 +323,72 @@ export default function CreatorDashboard() {
             </div>
           </div>
           
-          {/* Checklist items */}
+          {/* Checklist items with nested structure */}
           <div className="space-y-4">
             {checklist.map(item => (
-              <div key={item.id} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div 
-                    className="w-6 h-6 rounded border border-green-500/30 mr-3 flex items-center justify-center cursor-pointer"
-                    onClick={() => toggleItem(item.id)}
-                  >
-                    {item.completed && (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
+              <div key={item.id} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div 
+                      className="w-6 h-6 rounded border border-green-500/30 mr-3 flex items-center justify-center cursor-pointer"
+                      onClick={() => toggleItem(item.id)}
+                    >
+                      {item.completed && (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className={item.completed ? 'text-green-500/70' : 'text-green-500'}>
+                      {item.label}
+                    </span>
                   </div>
-                  <span className={item.completed ? 'text-green-500/70' : 'text-green-500'}>
-                    {item.label}
-                  </span>
+                  <a 
+                    href={item.link} 
+                    className="text-green-500 hover:text-green-400 text-sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push(item.link);
+                    }}
+                  >
+                    Learn more
+                  </a>
                 </div>
-                <a 
-                  href={item.link} 
-                  className="text-green-500 hover:text-green-400 text-sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    router.push(item.link);
-                  }}
-                >
-                  Learn more
-                </a>
+                
+                {/* Render sub-items if they exist */}
+                {item.subItems && item.subItems.length > 0 && (
+                  <div className="pl-10 space-y-2 mt-2">
+                    {item.subItems.map(subItem => (
+                      <div key={subItem.id} className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div 
+                            className="w-5 h-5 rounded border border-green-500/30 mr-3 flex items-center justify-center cursor-pointer"
+                            onClick={() => toggleItem(subItem.id, item.id)}
+                          >
+                            {subItem.completed && (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className={`text-sm ${subItem.completed ? 'text-green-500/70' : 'text-green-500'}`}>
+                            {subItem.label}
+                          </span>
+                        </div>
+                        <a 
+                          href={subItem.link} 
+                          className="text-green-500 hover:text-green-400 text-xs"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            router.push(subItem.link);
+                          }}
+                        >
+                          Learn more
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
