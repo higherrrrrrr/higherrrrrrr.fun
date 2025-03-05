@@ -56,7 +56,7 @@ export default function CreatorDashboard() {
   const handleLorePageClick = () => router.push('/lore-page');
   const handleResourcesClick = () => router.push('/resources');
 
-  // Updated checklist with switched order of "Set up BuyBot" and "Set up Captcha"
+  // Updated checklist with modified PFP Customizer label
   const initialChecklist = [
     { 
       id: 'telegram-group', 
@@ -74,6 +74,7 @@ export default function CreatorDashboard() {
     { id: 'dex-tools', label: 'Register on DEX Tools/Screener', completed: false, link: '/resources/dex-registration' },
     { id: 'telegram-bot', label: 'Configure Telegram Bot/Meme Generator', completed: false, link: '/TG-Bot-Creator' },
     { id: 'lore-page', label: 'Create Lore Page', completed: false, link: '/lore-page' },
+    { id: 'pfp-customizer', label: 'Use our PFP Customizer to rep your project', completed: false, link: '/pfp-customizer' }
   ];
   
   // Load saved progress from localStorage with support for nested items

@@ -47,33 +47,129 @@ export default function ResourcesPage() {
             <div className="p-6 border-t border-green-500/30">
               <div className="space-y-4">
                 <p className="text-green-500/80">
-                  Buy bots are essential for creating initial trading activity and maintaining liquidity for your token.
+                  Buy bots are essential for creating excitement and momentum in your community. 
+                  They automatically announce when someone purchases your token, creating social 
+                  proof and FOMO. Active buying notifications encourage more purchases, increase 
+                  group engagement, and build confidence in your project's momentum. Here are some 
+                  popular options you can add to your group:
                 </p>
                 
-                <div className="mb-4">
-                  <h3 className="text-green-500 font-medium mb-2">Setting Up a Buy Bot:</h3>
-                  <ol className="list-decimal list-inside text-green-500/80 space-y-2">
-                    <li>Choose a reliable bot provider or create your own using Jupiter API</li>
-                    <li>Configure parameters like buy frequency, amount per transaction, and price limits</li>
-                    <li>Ensure you have sufficient funds in the bot wallet for transactions</li>
-                    <li>Test thoroughly on testnet before deploying to mainnet</li>
-                  </ol>
-                </div>
-                
-                <div className="mb-4">
-                  <h3 className="text-green-500 font-medium mb-2">Best Practices:</h3>
-                  <ul className="list-disc list-inside text-green-500/80 space-y-2">
-                    <li>Use random time intervals between buys to appear more natural</li>
-                    <li>Vary transaction sizes to mimic organic trading patterns</li>
-                    <li>Set reasonable price ceilings to avoid overpaying during pumps</li>
-                    <li>Monitor bot performance and adjust parameters as needed</li>
-                  </ul>
-                </div>
-                
-                <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
-                  <p className="text-green-500/90 italic">
-                    Note: While buy bots can help maintain token liquidity, they should be used responsibly and transparently. Disclose bot usage to your community when appropriate.
+                {/* BuyBot */}
+                <div className="bg-green-900/20 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium text-green-500">BuyBot</h3>
+                    <a 
+                      href="https://t.me/buybotxyz" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="bg-green-700/50 hover:bg-green-700/70 text-green-100 px-4 py-2 rounded-md text-sm transition"
+                    >
+                      Open in Telegram
+                    </a>
+                  </div>
+                  <p className="text-green-500/80 mb-4">
+                    One of the most popular buy bots for Solana tokens. Free to use with premium features available.
                   </p>
+                  <div className="mb-4">
+                    <h4 className="text-green-500 font-medium mb-2">Features:</h4>
+                    <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                      <li>Real-time buy notifications</li>
+                      <li>Customizable messages</li>
+                      <li>Whale alerts</li>
+                      <li>Transaction links</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-green-500 font-medium mb-2">Setup Instructions:</h4>
+                    <ol className="list-decimal list-inside text-green-500/80 space-y-1">
+                      <li>Add @buybotxyz to your Telegram group</li>
+                      <li>Type /setup in your group</li>
+                      <li>Follow the prompts to enter your token address</li>
+                      <li>Configure notification settings</li>
+                    </ol>
+                  </div>
+                </div>
+                
+                {/* WhaleBotPro */}
+                <div className="bg-green-900/20 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium text-green-500">WhaleBotPro</h3>
+                    <a 
+                      href="https://t.me/whalebotpro" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="bg-green-700/50 hover:bg-green-700/70 text-green-100 px-4 py-2 rounded-md text-sm transition"
+                    >
+                      Open in Telegram
+                    </a>
+                  </div>
+                  <p className="text-green-500/80 mb-4">
+                    Advanced buy tracking with detailed analytics and whale alerts.
+                  </p>
+                  <div className="mb-4">
+                    <h4 className="text-green-500 font-medium mb-2">Features:</h4>
+                    <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                      <li>Buy and sell notifications</li>
+                      <li>Price impact calculations</li>
+                      <li>Wallet tracking</li>
+                      <li>Daily volume reports</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-green-500 font-medium mb-2">Setup Instructions:</h4>
+                    <ol className="list-decimal list-inside text-green-500/80 space-y-1">
+                      <li>Add @whalebotpro to your group</li>
+                      <li>Use /register command</li>
+                      <li>Enter your token contract address</li>
+                      <li>Set minimum transaction amounts</li>
+                    </ol>
+                  </div>
+                </div>
+                
+                {/* SolTracker */}
+                <div className="bg-green-900/20 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium text-green-500">SolTracker</h3>
+                    <a 
+                      href="https://t.me/soltracker_bot" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="bg-green-700/50 hover:bg-green-700/70 text-green-100 px-4 py-2 rounded-md text-sm transition"
+                    >
+                      Open in Telegram
+                    </a>
+                  </div>
+                  <p className="text-green-500/80 mb-4">
+                    Solana-specific tracking bot with customizable alerts and detailed transaction info.
+                  </p>
+                  <div className="mb-4">
+                    <h4 className="text-green-500 font-medium mb-2">Features:</h4>
+                    <ul className="list-disc list-inside text-green-500/80 space-y-1">
+                      <li>Solana-optimized tracking</li>
+                      <li>Multiple token support</li>
+                      <li>Customizable thresholds</li>
+                      <li>Graphical reports</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-green-500 font-medium mb-2">Setup Instructions:</h4>
+                    <ol className="list-decimal list-inside text-green-500/80 space-y-1">
+                      <li>Add @soltracker_bot to your group</li>
+                      <li>Use /track command</li>
+                      <li>Enter your Solana token address</li>
+                      <li>Configure notification preferences</li>
+                    </ol>
+                  </div>
+                </div>
+                
+                <div className="bg-green-900/30 rounded-lg p-4 mt-6">
+                  <h4 className="text-green-500 font-medium mb-2">Pro Tips:</h4>
+                  <ul className="list-disc list-inside text-green-500/80 space-y-2">
+                    <li>Make sure to give the buy bot admin privileges in your group</li>
+                    <li>Set appropriate minimum buy amounts to avoid spam</li>
+                    <li>Consider using only one buy bot to prevent duplicate notifications</li>
+                    <li>Test the bot in a private group before adding to your main community</li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -140,7 +236,7 @@ export default function ResourcesPage() {
             className="bg-green-500/10 p-4 flex justify-between items-center cursor-pointer"
             onClick={() => toggleSection('dexListing')}
           >
-            <h2 className="text-xl font-semibold text-green-500">DEX Listing Resources</h2>
+            <h2 className="text-xl font-semibold text-green-500">DEX Screener Resources</h2>
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               className={`h-6 w-6 transition-transform duration-300 ${openSection === 'dexListing' ? 'rotate-180' : ''}`} 
@@ -153,45 +249,52 @@ export default function ResourcesPage() {
           </div>
           {openSection === 'dexListing' && (
             <div className="p-6 border-t border-green-500/30">
-              <div className="space-y-4">
-                <p className="text-green-500/80">
-                  Getting properly listed on DEX platforms increases your token's visibility and credibility.
-                </p>
-                
-                <div className="mb-4">
-                  <h3 className="text-green-500 font-medium mb-2">DEXTools Listing:</h3>
-                  <ol className="list-decimal list-inside text-green-500/80 space-y-2">
-                    <li>Your token will be automatically indexed after trading begins</li>
-                    <li>For Solana tokens, ensure you're trading on supported DEXs (Raydium, Orca, etc.)</li>
-                    <li>If not appearing, submit a request through their support channel</li>
-                  </ol>
+              <div className="space-y-6">
+                {/* DEXScreener Info */}
+                <div>
+                  <h3 className="text-xl font-semibold text-green-500 mb-4">DEXScreener Info</h3>
+                  
+                  <div className="bg-green-900/20 rounded-lg p-4 mb-4">
+                    <h4 className="text-green-500 font-medium mb-2">Free Features (Basic Claiming)</h4>
+                    <ul className="list-disc list-inside text-green-500/80 space-y-2">
+                      <li>Claim your token page by verifying with your developer wallet</li>
+                      <li>Add basic information like website and social links</li>
+                      <li>Verify you're the legitimate developer</li>
+                      <li>Access to basic analytics and trading data</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-green-900/20 rounded-lg p-4">
+                    <h4 className="text-green-500 font-medium mb-2">Paid "Enhanced Token Info" ($299)</h4>
+                    <ul className="list-disc list-inside text-green-500/80 space-y-2">
+                      <li>Custom token logo</li>
+                      <li>Detailed token description</li>
+                      <li>Team information and credentials</li>
+                      <li>Customized appearance of your token page</li>
+                      <li>Enhanced visibility in search results</li>
+                      <li>Accurate market cap calculation</li>
+                      <li>Additional analytics features and data</li>
+                    </ul>
+                    <div className="mt-3">
+                      <a 
+                        href="https://marketplace.dexscreener.com/product/token-info" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-green-400 hover:text-green-300 underline"
+                      >
+                        https://marketplace.dexscreener.com/product/token-info
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-4 border border-green-500/30 rounded-lg">
+                    <p className="text-green-500/80">
+                      <span className="font-semibold text-green-500">Pro Tip:</span> Even with just the free tier, claiming your token on DEXScreener is essential for legitimacy. Traders often check if a token has been claimed by its developers as a basic verification step.
+                    </p>
+                  </div>
                 </div>
                 
-                <div className="mb-4">
-                  <h3 className="text-green-500 font-medium mb-2">Social Info Update:</h3>
-                  <ol className="list-decimal list-inside text-green-500/80 space-y-2">
-                    <li>Visit <a href="https://www.dextools.io/app/en/social-update" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-400">dextools.io/app/en/social-update</a></li>
-                    <li>Connect wallet (must be deployer wallet or have significant holdings)</li>
-                    <li>Submit social links, website, description, and logo</li>
-                    <li>Wait for approval (typically 1-3 days)</li>
-                  </ol>
-                </div>
-                
-                <div className="mb-4">
-                  <h3 className="text-green-500 font-medium mb-2">Jupiter Listing:</h3>
-                  <ul className="list-disc list-inside text-green-500/80 space-y-2">
-                    <li>Ensure your token has a Raydium or Orca liquidity pool</li>
-                    <li>Jupiter will automatically index tokens with sufficient liquidity</li>
-                    <li>For manual listing, submit details through their Discord community</li>
-                    <li>Provide token address, name, symbol, and logo URL</li>
-                  </ul>
-                </div>
-                
-                <div className="p-4 bg-green-500/5 rounded-lg border border-green-500/20">
-                  <p className="text-green-500/90 italic">
-                    Important: Maintaining sufficient liquidity is crucial for staying listed on most DEX aggregators. Monitor your liquidity pools regularly.
-                  </p>
-                </div>
+                {/* Additional DEX listing content would go here */}
               </div>
             </div>
           )}
