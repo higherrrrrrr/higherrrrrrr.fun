@@ -7,7 +7,10 @@ import { GlitchText } from '../../components/GlitchText';
 export default function CreatorDashboard() {
   const router = useRouter();
   
-  // Mock data for multiple tokens
+  // Add state for current token index with proper persistence
+  const [currentTokenIndex, setCurrentTokenIndex] = useState(0);
+
+  // Expanded mock data for demonstration
   const myTokens = [
     {
       id: 'usdc',
@@ -41,31 +44,19 @@ export default function CreatorDashboard() {
     }
   ];
 
-  // State for current token index with proper persistence
-  const [currentTokenIndex, setCurrentTokenIndex] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedIndex = localStorage.getItem('currentTokenIndex');
-      return savedIndex ? parseInt(savedIndex, 10) : 0;
-    }
-    return 0;
-  });
-
-  // Get current token
-  const currentToken = myTokens[currentTokenIndex];
-
-  // Save current token index to localStorage when it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('currentTokenIndex', currentTokenIndex.toString());
-    }
-  }, [currentTokenIndex]);
-
-  // Function to handle token selection
-  const handleTokenSelect = (index) => {
+  // Function to handle dot navigation with proper state update
+  const handleDotClick = useCallback((index) => {
     setCurrentTokenIndex(index);
-  };
+  }, []);
 
-  // Initial checklist template
+  // Navigation handlers
+  const handleCreateToken = () => router.push('/token/create');
+  const handleLaunchToken = () => router.push('/token/launch');
+  const handleTelegramBotClick = () => router.push('/TG-Bot-Creator');
+  const handleLorePageClick = () => router.push('/lore-page');
+  const handleResourcesClick = () => router.push('/resources');
+
+  // Updated checklist with modified PFP Customizer label
   const initialChecklist = [
     { 
       id: 'telegram-group', 
@@ -86,22 +77,14 @@ export default function CreatorDashboard() {
     { id: 'pfp-customizer', label: 'Use our PFP Customizer to rep your project', completed: false, link: '/pfp-customizer' }
   ];
   
-  // Load saved progress from localStorage for the current token
+  // Load saved progress from localStorage
   const [checklist, setChecklist] = useState(() => {
     if (typeof window !== 'undefined') {
-      const savedChecklist = localStorage.getItem(`communityChecklist_${currentToken.id}`);
+      const savedChecklist = localStorage.getItem('communityChecklist');
       return savedChecklist ? JSON.parse(savedChecklist) : initialChecklist;
     }
     return initialChecklist;
   });
-
-  // Update checklist when token changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedChecklist = localStorage.getItem(`communityChecklist_${currentToken.id}`);
-      setChecklist(savedChecklist ? JSON.parse(savedChecklist) : initialChecklist);
-    }
-  }, [currentToken.id]);
 
   // Calculate completion percentage
   const calculateCompletionPercentage = (list) => {
@@ -149,23 +132,47 @@ export default function CreatorDashboard() {
     
     setChecklist(updatedChecklist);
     
-    // Save to localStorage with token-specific key
+    // Save to localStorage AFTER state update
     if (typeof window !== 'undefined') {
-      localStorage.setItem(`communityChecklist_${currentToken.id}`, JSON.stringify(updatedChecklist));
+      localStorage.setItem('communityChecklist', JSON.stringify(updatedChecklist));
     }
   };
-  
-  // Navigation handlers
-  const handleCreateToken = () => router.push('/token/create');
-  const handleLaunchToken = () => router.push('/token/launch');
-  const handleTelegramBotClick = () => router.push('/TG-Bot-Creator');
-  const handleLorePageClick = () => router.push('/lore-page');
-  const handleResourcesClick = () => router.push('/resources');
 
-  // Wizard state
+  // Load saved token index from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedIndex = localStorage.getItem('currentTokenIndex');
+      if (savedIndex !== null) {
+        setCurrentTokenIndex(parseInt(savedIndex, 10));
+      }
+    }
+  }, []);
+
+  // Save token index to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentTokenIndex', currentTokenIndex.toString());
+    }
+  }, [currentTokenIndex]);
+
   const [showWizard, setShowWizard] = useState(false);
+
+  useEffect(() => {
+    // Check if user has seen the wizard before
+    if (typeof window !== 'undefined') {
+      const hasCompletedWizard = localStorage.getItem('wizardCompleted') === 'true';
+      if (!hasCompletedWizard) {
+        // Small delay to ensure the dashboard is rendered first
+        const timer = setTimeout(() => {
+          setShowWizard(true);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
+
   const handleWizardComplete = () => {
-    // Logic for wizard completion
+    setShowWizard(false);
   };
 
   return (
@@ -179,67 +186,76 @@ export default function CreatorDashboard() {
         </p>
       </div>
 
-      {/* Token Selector */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Your Tokens</h2>
-        <div className="flex space-x-4 overflow-x-auto pb-2">
-          {myTokens.map((token, index) => (
-            <div 
-              key={token.id}
-              className={`p-4 border rounded-lg cursor-pointer min-w-[220px] transition-all ${
-                index === currentTokenIndex 
-                  ? 'border-green-500 bg-green-900/20' 
-                  : 'border-green-500/30 hover:border-green-500/60'
-              }`}
-              onClick={() => handleTokenSelect(index)}
-            >
-              <div className="font-bold text-lg">{token.symbol}</div>
-              <div className="text-green-500/70 mb-2">{token.name}</div>
-              <div className="flex justify-between text-sm">
-                <div>
-                  <span className="text-green-500/50">VOL:</span> {token.volume24h}
-                </div>
-                <div>
-                  <span className="text-green-500/50">MC:</span> $4.2B
-                </div>
+      {/* First row: My Tokens */}
+      <div className="mb-12">
+        <h2 id="tokens-section" className="text-2xl font-semibold mb-4">My Tokens</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Token card */}
+          <div className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition">
+            <div className="flex justify-between mb-2">
+              <div>
+                <h3 className="text-2xl font-bold">{myTokens[currentTokenIndex].name}</h3>
+                <p className="text-green-500/80">{myTokens[currentTokenIndex].symbol} | all</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold flex items-center">
+                  {myTokens[currentTokenIndex].volume24h}<span className="ml-1">🔥</span>
+                </p>
+                <p className="text-green-500/80">24h Volume</p>
               </div>
             </div>
-          ))}
+            <p className="mb-4 text-green-500/80">Trust Score: <span className="text-green-500">{myTokens[currentTokenIndex].trustScore}</span></p>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-green-500/80">Trades (24h)</p>
+                <p className="font-bold">{myTokens[currentTokenIndex].trades24h}</p>
+              </div>
+              <div>
+                <p className="text-sm text-green-500/80">Holders</p>
+                <p className="font-bold">{myTokens[currentTokenIndex].holders}</p>
+              </div>
+              <div>
+                <p className="text-sm text-green-500/80">Created</p>
+                <p className="font-bold">{myTokens[currentTokenIndex].created}</p>
+              </div>
+            </div>
+            
+            {/* Pagination dots with improved state handling */}
+            <div className="flex justify-center mt-6 space-x-2">
+              {myTokens.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDotClick(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    index === currentTokenIndex ? 'bg-green-500' : 'bg-green-500/30'
+                  }`}
+                  aria-label={`View token ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+          
+          {/* Launch Your Token card */}
           <div 
-            className="p-4 border border-dashed border-green-500/30 rounded-lg cursor-pointer min-w-[220px] flex items-center justify-center hover:border-green-500/60 transition-all"
-            onClick={handleCreateToken}
+            id="launch-section" 
+            className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition cursor-pointer"
+            onClick={handleLaunchToken}
           >
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              <span>Create New Token</span>
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="w-16 h-16 rounded-full border border-green-500 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Launch Token</h3>
+              <p className="text-center text-green-500/80">Create and deploy a new token on Solana</p>
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Token Stats */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Token Stats: {currentToken.symbol}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-green-900/10 border border-green-500/30 rounded-lg p-4">
-            <div className="text-sm text-green-500/70">24h Volume</div>
-            <div className="text-2xl font-bold">{currentToken.volume24h}</div>
-          </div>
-          <div className="bg-green-900/10 border border-green-500/30 rounded-lg p-4">
-            <div className="text-sm text-green-500/70">Trust Score</div>
-            <div className="text-2xl font-bold">{currentToken.trustScore}</div>
-          </div>
-          <div className="bg-green-900/10 border border-green-500/30 rounded-lg p-4">
-            <div className="text-sm text-green-500/70">Holders</div>
-            <div className="text-2xl font-bold">{currentToken.holders}</div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Creator Tools */}
-      <div className="mb-8">
+
+      {/* Second row: Creator Tools */}
+      <div className="mb-12">
         <h2 id="tools-section" className="text-2xl font-semibold mb-4">Creator Tools</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Telegram Bot */}
@@ -278,12 +294,12 @@ export default function CreatorDashboard() {
           <div 
             id="resources-section" 
             className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition cursor-pointer"
-            onClick={handleResourcesClick}
+            onClick={() => router.push('/resources')}
           >
             <div className="flex flex-col items-center justify-center h-full">
               <div className="w-16 h-16 rounded-full border border-green-500 flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-2">Resources</h3>
@@ -295,7 +311,7 @@ export default function CreatorDashboard() {
 
       {/* Community Essentials Checklist */}
       <div id="checklist-section" className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Community Essentials Checklist for {currentToken.symbol}</h2>
+        <h2 className="text-2xl font-semibold mb-4">Community Essentials Checklist</h2>
         <div className="border border-green-500/30 rounded-lg p-6">
           {/* Progress bar */}
           <div className="mb-6">
@@ -382,23 +398,18 @@ export default function CreatorDashboard() {
           </div>
         </div>
       </div>
-      
-      {/* Launch Token Button */}
-      <div className="flex justify-center mb-12">
-        <button 
-          onClick={handleLaunchToken}
-          className="bg-green-500 hover:bg-green-600 text-black font-bold py-3 px-8 rounded-lg text-lg transition-colors"
-        >
-          Launch Token
-        </button>
-      </div>
-      
-      {/* Wizard component would go here */}
+
+      {/* Wizard component */}
       {showWizard && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          {/* Wizard content */}
-        </div>
+        <SpotlightWizard 
+          isOpen={showWizard} 
+          onClose={() => setShowWizard(false)} 
+          onComplete={handleWizardComplete} 
+        />
       )}
     </div>
   );
 }
+
+// SpotlightWizard component definition would go here
+// (I've omitted it for brevity since we're not changing it)

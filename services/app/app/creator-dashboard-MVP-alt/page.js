@@ -10,38 +10,32 @@ export default function CreatorDashboard() {
   // Mock data for multiple tokens
   const myTokens = [
     {
-      id: 'usdc',
-      name: 'USD Coin',
-      symbol: 'USDC',
-      volume24h: '$2.0B',
-      trustScore: '100%',
-      trades24h: '1,862,974',
-      holders: '22,536,826',
-      created: '4y ago'
-    },
-    {
-      id: 'sol',
-      name: 'Solana',
-      symbol: 'SOL',
-      volume24h: '$1.5B',
-      trustScore: '95%',
-      trades24h: '1,245,632',
-      holders: '15,789,421',
-      created: '3y ago'
-    },
-    {
-      id: 'doge',
-      name: 'Dogecoin',
-      symbol: 'DOGE',
-      volume24h: '$800M',
+      id: 'token1',
+      name: 'My First Token',
+      symbol: 'MFT',
+      volume24h: '$1.2M',
       trustScore: '85%',
-      trades24h: '987,654',
-      holders: '8,765,432',
-      created: '2y ago'
+      holders: '1,245'
+    },
+    {
+      id: 'token2',
+      name: 'Second Project',
+      symbol: 'SP2',
+      volume24h: '$800K',
+      trustScore: '92%',
+      holders: '876'
+    },
+    {
+      id: 'token3',
+      name: 'Third Token',
+      symbol: 'TT3',
+      volume24h: '$450K',
+      trustScore: '78%',
+      holders: '532'
     }
   ];
 
-  // State for current token index with proper persistence
+  // State for current token index
   const [currentTokenIndex, setCurrentTokenIndex] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedIndex = localStorage.getItem('currentTokenIndex');
@@ -186,7 +180,7 @@ export default function CreatorDashboard() {
           {myTokens.map((token, index) => (
             <div 
               key={token.id}
-              className={`p-4 border rounded-lg cursor-pointer min-w-[220px] transition-all ${
+              className={`p-4 border rounded-lg cursor-pointer min-w-[200px] transition-all ${
                 index === currentTokenIndex 
                   ? 'border-green-500 bg-green-900/20' 
                   : 'border-green-500/30 hover:border-green-500/60'
@@ -194,19 +188,11 @@ export default function CreatorDashboard() {
               onClick={() => handleTokenSelect(index)}
             >
               <div className="font-bold text-lg">{token.symbol}</div>
-              <div className="text-green-500/70 mb-2">{token.name}</div>
-              <div className="flex justify-between text-sm">
-                <div>
-                  <span className="text-green-500/50">VOL:</span> {token.volume24h}
-                </div>
-                <div>
-                  <span className="text-green-500/50">MC:</span> $4.2B
-                </div>
-              </div>
+              <div className="text-green-500/70">{token.name}</div>
             </div>
           ))}
           <div 
-            className="p-4 border border-dashed border-green-500/30 rounded-lg cursor-pointer min-w-[220px] flex items-center justify-center hover:border-green-500/60 transition-all"
+            className="p-4 border border-dashed border-green-500/30 rounded-lg cursor-pointer min-w-[200px] flex items-center justify-center hover:border-green-500/60 transition-all"
             onClick={handleCreateToken}
           >
             <div className="flex items-center">
@@ -238,61 +224,46 @@ export default function CreatorDashboard() {
         </div>
       </div>
       
-      {/* Creator Tools */}
+      {/* Creator Tools (previously Quick Actions) */}
       <div className="mb-8">
-        <h2 id="tools-section" className="text-2xl font-semibold mb-4">Creator Tools</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Telegram Bot */}
-          <div 
-            className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition cursor-pointer"
+        <h2 className="text-2xl font-semibold mb-4">Creator Tools</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button 
             onClick={handleTelegramBotClick}
+            className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg hover:bg-green-900/30 transition-colors"
           >
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-16 h-16 rounded-full border border-green-500 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Telegram Bot</h3>
-              <p className="text-center text-green-500/80">Create and configure your community bot</p>
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+              <span>Create Telegram Bot</span>
             </div>
-          </div>
-          
-          {/* Lore Page */}
-          <div 
-            className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition cursor-pointer"
+          </button>
+          <button 
             onClick={handleLorePageClick}
+            className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg hover:bg-green-900/30 transition-colors"
           >
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-16 h-16 rounded-full border border-green-500 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Lore Page</h3>
-              <p className="text-center text-green-500/80">Develop your token's backstory and narrative</p>
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <span>Create Lore Page</span>
             </div>
-          </div>
-          
-          {/* Resources */}
-          <div 
-            id="resources-section" 
-            className="border border-green-500/30 rounded-lg p-6 hover:bg-green-900/10 transition cursor-pointer"
+          </button>
+          <button 
             onClick={handleResourcesClick}
+            className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg hover:bg-green-900/30 transition-colors"
           >
-            <div className="flex flex-col items-center justify-center h-full">
-              <div className="w-16 h-16 rounded-full border border-green-500 flex items-center justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-2">Resources</h3>
-              <p className="text-center text-green-500/80">Guides, templates, and best practices</p>
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              <span>Resources</span>
             </div>
-          </div>
+          </button>
         </div>
       </div>
-
+      
       {/* Community Essentials Checklist */}
       <div id="checklist-section" className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Community Essentials Checklist for {currentToken.symbol}</h2>
@@ -402,3 +373,6 @@ export default function CreatorDashboard() {
     </div>
   );
 }
+
+// SpotlightWizard component definition would go here
+// (I've omitted it for brevity since we're not changing it)
