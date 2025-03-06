@@ -299,6 +299,58 @@ export default function ResourcesPage() {
             </div>
           )}
         </div>
+
+        {/* Higher^7 Hub */}
+        <div className="border border-green-500/30 rounded-lg overflow-hidden">
+          <div 
+            className="bg-green-500/10 p-4 flex justify-between items-center cursor-pointer"
+            onClick={() => toggleSection('higherHub')}
+          >
+            <h2 className="text-xl font-semibold text-green-500">Higher⁷ Hub</h2>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className={`h-6 w-6 transition-transform duration-300 ${openSection === 'higherHub' ? 'rotate-180' : ''}`} 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          {openSection === 'higherHub' && (
+            <div className="p-6 border-t border-green-500/30">
+              <div className="space-y-6">
+                <p className="text-green-500/80">
+                  Your go-to Telegram space for everything going Higherrrrrrr in 2025 and beyond.
+                </p>
+                <p className="text-green-500/80">
+                  Join the Hub to help shape the future of Social Trading and be among the first to learn about dev updates, community announcements, and dope new launches.
+                </p>
+                
+                <div className="flex justify-center my-6">
+                  <a 
+                    href="https://t.me/higherrrrrrrhub" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="bg-green-700/50 hover:bg-green-700/70 text-green-100 px-6 py-3 rounded-md text-lg transition"
+                  >
+                    Join Higher⁷ Hub
+                  </a>
+                </div>
+                
+                {/* Higher^7 Community Directory */}
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold text-green-500 mb-4">Higher⁷ Community Directory</h3>
+                  <div className="bg-green-900/20 rounded-lg p-4">
+                    <p className="text-green-500/80">
+                      The Higher⁷ community directory is a list of Higher⁷ community members and their friends who are vouched for as honest people who provide quality work. Join the Hub and contact an admin to get access.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Back to Dashboard Button */}
