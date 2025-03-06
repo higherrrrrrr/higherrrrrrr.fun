@@ -66,7 +66,7 @@ export default function TGBotCreatorPage() {
     characterImage: null,
     characterDescription: ''
   });
-  const [openAccordions, setOpenAccordions] = useState(['memeGenerator']);
+  const [openAccordion, setOpenAccordion] = useState('botInfo');
 
   // Add a new command
   const addCommand = () => {
@@ -309,10 +309,10 @@ export default function TGBotCreatorPage() {
   }, [botName, botDescription]);
 
   const toggleAccordion = (id) => {
-    if (openAccordions.includes(id)) {
-      setOpenAccordions(openAccordions.filter(item => item !== id));
+    if (openAccordion === id) {
+      setOpenAccordion(null);
     } else {
-      setOpenAccordions([...openAccordions, id]);
+      setOpenAccordion(id);
     }
   };
 
@@ -473,52 +473,22 @@ export default function TGBotCreatorPage() {
           <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
             <button 
               type="button"
-              onClick={() => toggleSection('apiConfig')}
-              className="w-full bg-black p-4 flex justify-between items-center text-left"
+              onClick={() => toggleAccordion('imageGenerationApi')}
+              className="w-full flex justify-between items-center p-6 border border-green-500/30 rounded-lg text-2xl font-semibold hover:bg-green-900/10 transition"
             >
-              <h2 className="text-xl font-semibold">Image Generation API (Req. for Image Generation)</h2>
-              <div className="flex items-center">
-                {isComplete.apiConfig && (
-                  <span className="text-green-500 mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                )}
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-5 w-5 transition-transform ${expanded.apiConfig ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+              Image Generation API (Req. for Image Generation)
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-6 w-6 transition-transform ${openAccordion === 'imageGenerationApi' ? 'rotate-180' : ''}`}
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
             
-            {!expanded.apiConfig && (
-              <div className="px-4 py-2 bg-green-500/5 border-t border-green-500/20 text-sm">
-                <div className="flex items-center">
-                  <span className="text-green-500/70 mr-2">Provider:</span> 
-                  <span className="text-green-500">
-                    {apiProvider === 'cloudflare' ? 'Cloudflare Workers AI (Free)' : 
-                     apiProvider === 'stability' ? 'Stability AI' : 
-                     apiProvider === 'openai' ? 'OpenAI DALL-E' : 'Replicate'}
-                  </span>
-                  {apiKey && (
-                    <span className="ml-4 text-green-500/70">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                      </svg>
-                      <span className="ml-1">API Key Set</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            {expanded.apiConfig && (
+            {openAccordion === 'imageGenerationApi' && (
               <div className="p-6">
                 <p className="text-green-500/80 mb-4">
                   Choose your image generation provider to create images for your bot commands. You can enable image generation for specific commands later.
@@ -706,31 +676,22 @@ export default function TGBotCreatorPage() {
           <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
             <button 
               type="button"
-              onClick={() => toggleSection('commands')}
-              className="w-full bg-black p-4 flex justify-between items-center text-left"
+              onClick={() => toggleAccordion('commands')}
+              className="w-full flex justify-between items-center p-6 border border-green-500/30 rounded-lg text-2xl font-semibold hover:bg-green-900/10 transition"
             >
-              <h2 className="text-xl font-semibold">Bot Commands</h2>
-              <div className="flex items-center">
-                {isComplete.commands && (
-                  <span className="text-green-500 mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                )}
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-5 w-5 transition-transform ${expanded.commands ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+              Bot Commands
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-6 w-6 transition-transform ${openAccordion === 'commands' ? 'rotate-180' : ''}`}
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
             
-            {expanded.commands && (
+            {openAccordion === 'commands' && (
               <div className="p-6">
                 <p className="text-green-500/80 mb-4">
                   Create custom commands to build your community's unique culture. Commands help establish inside jokes, 
@@ -1003,12 +964,12 @@ export default function TGBotCreatorPage() {
             <button 
               type="button"
               onClick={() => toggleAccordion('memeGenerator')}
-              className="w-full bg-black p-4 flex justify-between items-center text-left"
+              className="w-full flex justify-between items-center p-6 border border-green-500/30 rounded-lg text-2xl font-semibold hover:bg-green-900/10 transition"
             >
-              <h2 className="text-xl font-semibold">Meme Generator</h2>
+              Meme Generator
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
-                className={`h-5 w-5 transition-transform ${expanded.memeGenerator ? 'rotate-180' : ''}`} 
+                className={`h-6 w-6 transition-transform ${openAccordion === 'memeGenerator' ? 'rotate-180' : ''}`}
                 fill="none" 
                 viewBox="0 0 24 24" 
                 stroke="currentColor"
@@ -1017,7 +978,7 @@ export default function TGBotCreatorPage() {
               </svg>
             </button>
             
-            {openAccordions.includes('memeGenerator') && (
+            {openAccordion === 'memeGenerator' && (
               <div className="p-6">
                 <p className="text-green-500/80 mb-4">
                   Let your community create custom memes featuring your project's mascot or character. 
@@ -1180,31 +1141,22 @@ export default function TGBotCreatorPage() {
           <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
             <button 
               type="button"
-              onClick={() => toggleSection('tracking')}
-              className="w-full bg-black p-4 flex justify-between items-center text-left"
+              onClick={() => toggleAccordion('tracking')}
+              className="w-full flex justify-between items-center p-6 border border-green-500/30 rounded-lg text-2xl font-semibold hover:bg-green-900/10 transition"
             >
-              <h2 className="text-xl font-semibold">Tracking & Analytics</h2>
-              <div className="flex items-center">
-                {isComplete.tracking && (
-                  <span className="text-green-500 mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </span>
-                )}
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className={`h-5 w-5 transition-transform ${expanded.tracking ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+              Tracking & Analytics
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className={`h-6 w-6 transition-transform ${openAccordion === 'tracking' ? 'rotate-180' : ''}`}
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
             
-            {expanded.tracking && (
+            {openAccordion === 'tracking' && (
               <div className="p-6">
                 <div className="mb-6">
                   <p className="text-green-500/80 mb-4">
