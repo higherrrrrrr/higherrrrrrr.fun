@@ -22,6 +22,7 @@ export default function LorePage() {
     telegramUrl: '',
     twitterUrl: '',
     websiteUrl: '',
+    contractAddress: '',
   });
   
   // State for image preview
@@ -41,6 +42,7 @@ export default function LorePage() {
         telegramUrl: window.__loreData.telegramUrl || '',
         twitterUrl: window.__loreData.twitterUrl || '',
         websiteUrl: window.__loreData.websiteUrl || '',
+        contractAddress: window.__loreData.contractAddress || '',
       });
       
       setImagePreview(window.__loreData.imageUrl || null);
@@ -64,6 +66,7 @@ export default function LorePage() {
             telegramUrl: parsedData.telegramUrl || '',
             twitterUrl: parsedData.twitterUrl || '',
             websiteUrl: parsedData.websiteUrl || '',
+            contractAddress: parsedData.contractAddress || '',
           });
           setImagePreview(parsedData.imageUrl || null);
         }
@@ -231,6 +234,19 @@ export default function LorePage() {
               </div>
             </div>
             
+            {/* Contract Address */}
+            <div>
+              <label className="block text-green-500 mb-2">Contract Address</label>
+              <input
+                type="text"
+                name="contractAddress"
+                value={formData.contractAddress}
+                onChange={handleInputChange}
+                placeholder="Your token's contract address"
+                className="w-full bg-black border border-green-500/30 rounded-lg p-4 text-green-500 focus:border-green-500 focus:outline-none font-mono"
+              />
+            </div>
+            
             {/* Image Upload */}
             <div>
               <label className="block text-green-500 mb-2">Token Image</label>
@@ -381,6 +397,34 @@ export default function LorePage() {
               </a>
             )}
           </div>
+          
+          {/* Contract Address - Add this section */}
+          {formData.contractAddress && (
+            <div className="flex justify-center mb-8">
+              <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 max-w-2xl w-full">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-green-500/70">Contract Address:</div>
+                  <div className="flex items-center">
+                    <span className="text-green-500 font-mono text-sm truncate max-w-md">
+                      {formData.contractAddress}
+                    </span>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(formData.contractAddress);
+                        alert('Contract address copied to clipboard!');
+                      }}
+                      className="ml-2 text-green-500 hover:text-green-400"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Project Image - Square with spacing and glow effect */}
           {imagePreview && (

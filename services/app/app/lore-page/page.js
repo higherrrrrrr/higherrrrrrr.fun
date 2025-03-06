@@ -17,6 +17,7 @@ export default function CreateLorePage() {
     telegramUrl: '',
     twitterUrl: '',
     websiteUrl: '',
+    contractAddress: '',
   });
   
   // State for image preview
@@ -75,6 +76,7 @@ export default function CreateLorePage() {
         description: loreData.description || "",
         loreText: loreData.loreText || loreData.content || "",
         imageUrl: loreData.imageUrl || "",
+        contractAddress: loreData.contractAddress || "",
         createdAt: new Date().toISOString()
       };
       
@@ -175,6 +177,19 @@ export default function CreateLorePage() {
                 className="w-full bg-black border border-green-500/30 rounded-lg p-4 text-green-500 focus:border-green-500 focus:outline-none"
               />
             </div>
+          </div>
+          
+          {/* Contract Address */}
+          <div>
+            <label className="block text-green-500 mb-2">Contract Address</label>
+            <input
+              type="text"
+              name="contractAddress"
+              value={formData.contractAddress}
+              onChange={handleInputChange}
+              placeholder="Your token's contract address"
+              className="w-full bg-black border border-green-500/30 rounded-lg p-4 text-green-500 focus:border-green-500 focus:outline-none font-mono"
+            />
           </div>
           
           {/* Image Upload */}
