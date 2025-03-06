@@ -66,6 +66,7 @@ export default function TGBotCreatorPage() {
     characterImage: null,
     characterDescription: ''
   });
+  const [openAccordions, setOpenAccordions] = useState(['memeGenerator']);
 
   // Add a new command
   const addCommand = () => {
@@ -306,6 +307,14 @@ export default function TGBotCreatorPage() {
       }
     }
   }, [botName, botDescription]);
+
+  const toggleAccordion = (id) => {
+    if (openAccordions.includes(id)) {
+      setOpenAccordions(openAccordions.filter(item => item !== id));
+    } else {
+      setOpenAccordions([...openAccordions, id]);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-green-500 p-8">
@@ -993,7 +1002,7 @@ export default function TGBotCreatorPage() {
           <div className="border border-green-500/30 rounded-lg overflow-hidden mb-6">
             <button 
               type="button"
-              onClick={() => toggleSection('memeGenerator')}
+              onClick={() => toggleAccordion('memeGenerator')}
               className="w-full bg-black p-4 flex justify-between items-center text-left"
             >
               <h2 className="text-xl font-semibold">Meme Generator</h2>
@@ -1008,7 +1017,7 @@ export default function TGBotCreatorPage() {
               </svg>
             </button>
             
-            {expanded.memeGenerator && (
+            {openAccordions.includes('memeGenerator') && (
               <div className="p-6">
                 <p className="text-green-500/80 mb-4">
                   Let your community create custom memes featuring your project's mascot or character. 
