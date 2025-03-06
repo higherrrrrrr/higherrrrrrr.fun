@@ -77,7 +77,7 @@ export default function CreatorDashboard() {
     { id: 'pfp-customizer', label: 'Use our PFP Customizer to rep your project', completed: false, link: '/pfp-customizer' }
   ];
   
-  // Load saved progress from localStorage with support for nested items
+  // Load saved progress from localStorage
   const [checklist, setChecklist] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedChecklist = localStorage.getItem('communityChecklist');
@@ -86,7 +86,7 @@ export default function CreatorDashboard() {
     return initialChecklist;
   });
 
-  // Calculate completion percentage including sub-items
+  // Calculate completion percentage
   const calculateCompletionPercentage = (list) => {
     let totalItems = 0;
     let completedItems = 0;
@@ -101,16 +101,18 @@ export default function CreatorDashboard() {
       }
     });
     
-    return Math.round((completedItems / totalItems) * 100);
+    return totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
   };
   
   const completionPercentage = calculateCompletionPercentage(checklist);
 
-  // Toggle item completion with support for sub-items
+  // Toggle item completion with proper localStorage update
   const toggleItem = (id, parentId = null) => {
+    let updatedChecklist;
+    
     if (parentId) {
       // Toggle sub-item
-      const updatedChecklist = checklist.map(item => {
+      updatedChecklist = checklist.map(item => {
         if (item.id === parentId && item.subItems) {
           return {
             ...item,
@@ -121,17 +123,18 @@ export default function CreatorDashboard() {
         }
         return item;
       });
-      setChecklist(updatedChecklist);
     } else {
       // Toggle main item
-      const updatedChecklist = checklist.map(item => 
+      updatedChecklist = checklist.map(item => 
         item.id === id ? { ...item, completed: !item.completed } : item
       );
-      setChecklist(updatedChecklist);
     }
     
+    setChecklist(updatedChecklist);
+    
+    // Save to localStorage AFTER state update
     if (typeof window !== 'undefined') {
-      localStorage.setItem('communityChecklist', JSON.stringify(checklist));
+      localStorage.setItem('communityChecklist', JSON.stringify(updatedChecklist));
     }
   };
 
