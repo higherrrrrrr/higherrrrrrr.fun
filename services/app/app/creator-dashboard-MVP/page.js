@@ -270,7 +270,7 @@ export default function CreatorDashboard() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-2">Lore Page</h3>
-              <p className="text-center text-green-500/80">Develop your token's narratives, provide verified links</p>
+              <p className="text-center text-green-500/80">Develop your token's narrative, provide verified links</p>
             </div>
           </div>
           
