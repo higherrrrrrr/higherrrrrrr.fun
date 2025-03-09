@@ -17,6 +17,7 @@ import { useTokenFilter } from '../hooks/useTokenFilter';
 import { TokenFilters } from '../components/TokenFilters';
 import { TokenDisplay } from '../components/TokenDisplay';
 import { processTokens } from '../utils/tokenProcessing';
+import { handleJupiterSuccess } from '@/lib/jupiter/handleJupiterSuccess';
 
 export default function Home() {
   const { majorTokens, memeTokens, vcTokens, loading: tokensLoading } = useHomepage();
@@ -136,6 +137,7 @@ export default function Home() {
           displayMode: "modal",
           defaultExplorer: "Solana Explorer",
           strictTokenList: false,
+          onSuccess: handleJupiterSuccess,
           formProps: {
             // Set default input as SOL but allow changing
             initialInputMint: "So11111111111111111111111111111111111111112", // SOL
